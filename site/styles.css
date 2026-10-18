@@ -120,3 +120,15 @@ footer{border-top:1px solid var(--line)}.footer-inner{min-height:84px;display:fl
   .lookup-explainer article:last-child{border-bottom:0}
   .result-actions{flex-direction:column}
 }
+
+.field-textarea{display:block;width:100%;min-height:150px;margin-top:9px;border:1px solid var(--line-dark);border-radius:9px;background:#fbfbf8;padding:14px;outline:none;resize:vertical;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+.field-textarea:focus{border-color:#8d9084;box-shadow:0 0 0 3px rgba(35,38,31,.06)}
+.challenge-target{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;border:1px solid var(--line);background:#f7f7f2;border-radius:10px;padding:18px;margin-bottom:26px}
+.challenge-target>div{display:grid;gap:6px}
+.challenge-target strong{font-size:18px;letter-spacing:-.03em}
+.challenge-target p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.challenge-target>a{font-size:11px;font-weight:650;white-space:nowrap}
+.challenge-claim{max-width:620px}
+.challenge-principle{border:1px solid #e5d6b6;background:var(--amber-soft);border-radius:10px;padding:16px 18px;margin:4px 0 24px}
+.challenge-principle strong{font-size:12px}
+.challenge-principle p{font-size:11px;line-height:1.55;color:#6d5734;margin:5px 0 0}
