@@ -83,7 +83,7 @@ jobs:
                   start=1,
               ):
                   stripped = line.strip()
-                  if "uses:" not in stripped:
+                  if not re.match(r"^(?:-\s*)?uses:\s+", stripped):
                       continue
                   target = stripped.split("uses:", 1)[1].strip().split("#", 1)[0].strip()
                   if target.startswith("./"):
@@ -100,6 +100,12 @@ jobs:
           dockerfile = Path("Dockerfile.service").read_text(encoding="utf-8")
           if "--forwarded-allow-ips='*'" in dockerfile:
               failures.append("Dockerfile.service trusts arbitrary forwarded proxy headers")
+          first_line = dockerfile.splitlines()[0]
+          if "@sha256:" not in first_line:
+              failures.append("Dockerfile.service base image is not digest-pinned")
+          constraints = Path("constraints-service.txt")
+          if not constraints.is_file() or "fastapi==" not in constraints.read_text(encoding="utf-8"):
+              failures.append("hosted service dependency constraints are missing")
 
           if failures:
               raise SystemExit("\n".join(failures))
