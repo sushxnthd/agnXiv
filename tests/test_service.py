@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from dataclasses import replace
 
 from fastapi.testclient import TestClient
 
@@ -255,3 +256,141 @@ def test_issuer_endpoint_exposes_public_key(tmp_path) -> None:
         assert issuer["algorithm"] == "Ed25519"
         assert issuer["key_id"] == key_id
         assert issuer["public_key_pem"].encode("ascii") == public_key
+
+
+def test_hosted_callback_rejects_wrong_pinned_commit(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: None,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "d" * 40,
+    )
+    monkeypatch.setattr(
+        "agnxiv.service.app.verify_github_actions_token",
+        lambda token, policy: {"repository": policy.repository},
+    )
+    app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={
+                "mode": "auto_plan",
+                "repository": "phanein/deepwalk",
+                "arxiv_id": "1403.6652",
+            },
+        )
+        assert response.status_code == 202
+        job_id = response.json()["id"]
+
+        callback = client.post(
+            f"/internal/jobs/{job_id}/complete",
+            headers={"Authorization": "Bearer trusted"},
+            json={
+                "status": "needs_review",
+                "result": {
+                    "kind": "auto_plan",
+                    "repository_commit": "e" * 40,
+                    "plan": {
+                        "automation_score": 0.75,
+                        "safe_to_execute": False,
+                    },
+                },
+            },
+        )
+        assert callback.status_code == 422
+
+        fetched = client.get(
+            f"/v1/jobs/{job_id}",
+            headers={"X-API-Key": "test-key"},
+        )
+        assert fetched.status_code == 200
+        assert fetched.json()["status"] == "failed"
+
+
+def test_hourly_quota_counts_finished_jobs(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: None,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "f" * 40,
+    )
+    monkeypatch.setattr(
+        "agnxiv.service.app.verify_github_actions_token",
+        lambda token, policy: {"repository": policy.repository},
+    )
+    config = replace(
+        _config(f"sqlite:///{tmp_path / 'service.db'}"),
+        max_active_jobs_per_key=5,
+        max_jobs_per_hour=1,
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        first = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={
+                "mode": "auto_plan",
+                "repository": "phanein/deepwalk",
+                "arxiv_id": "1403.6652",
+            },
+        )
+        assert first.status_code == 202
+
+        completed = client.post(
+            f"/internal/jobs/{first.json()['id']}/complete",
+            headers={"Authorization": "Bearer trusted"},
+            json={
+                "status": "failed",
+                "error": "controlled benchmark failure",
+            },
+        )
+        assert completed.status_code == 200
+
+        second = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={
+                "mode": "auto_plan",
+                "repository": "phanein/deepwalk",
+                "arxiv_id": "1403.6652",
+            },
+        )
+        assert second.status_code == 429
+        assert second.json()["detail"] == "hourly job quota exceeded"
+
+
+def test_hosted_api_rejects_invalid_arxiv_id(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: None,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "a" * 40,
+    )
+    app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={
+                "mode": "auto_plan",
+                "repository": "phanein/deepwalk",
+                "arxiv_id": "not-an-arxiv-paper",
+            },
+        )
+        assert response.status_code == 422
