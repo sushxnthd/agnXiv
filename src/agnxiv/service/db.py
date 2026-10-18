@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import DateTime, String, Text, create_engine, func, select
+from sqlalchemy import DateTime, String, Text, create_engine, func, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
@@ -42,6 +42,7 @@ class JobStore:
             if database_url.startswith("postgresql://")
             else database_url
         )
+        self.database_url = normalized_url
         connect_args = (
             {"check_same_thread": False}
             if normalized_url.startswith("sqlite")
@@ -58,7 +59,16 @@ class JobStore:
         )
 
     def initialize(self) -> None:
-        Base.metadata.create_all(self.engine)
+        if self.database_url.startswith("sqlite"):
+            Base.metadata.create_all(self.engine)
+
+    def ping(self) -> bool:
+        try:
+            with self.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return True
+        except Exception:
+            return False
 
     def create_job(
         self,
@@ -96,6 +106,15 @@ class JobStore:
             statement = select(func.count()).select_from(Job).where(
                 Job.api_key_hash == api_key_hash,
                 Job.status.in_(("queued", "running")),
+            )
+            return int(session.scalar(statement) or 0)
+
+    def count_recent(self, api_key_hash: str, *, minutes: int = 60) -> int:
+        cutoff = datetime.now(UTC) - timedelta(minutes=minutes)
+        with self.session_factory() as session:
+            statement = select(func.count()).select_from(Job).where(
+                Job.api_key_hash == api_key_hash,
+                Job.created_at >= cutoff,
             )
             return int(session.scalar(statement) or 0)
 
