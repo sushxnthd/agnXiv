@@ -11,7 +11,7 @@ _NUMBER = (
 )
 _UNIT = (
     r"%(?!\w)|percent\b|ms\b|s\b|seconds?\b|minutes?\b|hours?\b|"
-    r"GB\b|MB\b|KB\b|x\b|×|times?\b|fold\b"
+    r"GB\b|MB\b|KB\b|x\b|×(?!\d)|times?\b|fold\b"
 )
 _QUANT_RE = re.compile(
     rf"(?P<prefix>.{{0,110}}?)"
