@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import re
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -45,6 +47,71 @@ def _metric_tokens(metric: str | None) -> set[str]:
     for token in raw_tokens:
         expanded.update(_METRIC_ALIASES.get(token, set()))
     return expanded
+
+
+def _parse_json_payload(output: str) -> Any | None:
+    stripped = output.strip()
+    if not stripped:
+        return None
+
+    try:
+        return json.loads(stripped)
+    except json.JSONDecodeError:
+        pass
+
+    lines = [line.strip() for line in output.splitlines() if line.strip()]
+    if not lines:
+        return None
+
+    try:
+        return json.loads(lines[-1])
+    except json.JSONDecodeError:
+        return None
+
+
+def extract_json_observation(
+    output: str,
+    path: str,
+    *,
+    scale: float = 1.0,
+) -> Observation | None:
+    """Read a numeric observation from an explicit JSON path.
+
+    The path uses dot-separated keys and integer list indices, such as
+    metrics.accuracy or runs.0.f1. The locator is declared before comparison,
+    so the paper's reported value cannot influence selection.
+    """
+    payload = _parse_json_payload(output)
+    if payload is None:
+        return None
+
+    current: Any = payload
+    normalized_path = path.removeprefix("$.").removeprefix("$")
+
+    if not normalized_path:
+        value = current
+    else:
+        for part in normalized_path.split("."):
+            if isinstance(current, dict):
+                if part not in current:
+                    return None
+                current = current[part]
+            elif isinstance(current, list):
+                try:
+                    index = int(part)
+                except ValueError:
+                    return None
+                if not 0 <= index < len(current):
+                    return None
+                current = current[index]
+            else:
+                return None
+        value = current
+
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+
+    return Observation(value=float(value) * scale)
 
 
 def extract_observation_candidates(
