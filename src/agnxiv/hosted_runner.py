@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import shutil
 import subprocess
 import tempfile
 import urllib.error
@@ -109,7 +108,7 @@ def download_arxiv_pdf(arxiv_id: str, destination: Path) -> None:
     reference = parse_arxiv_reference(arxiv_id)
     request = urllib.request.Request(
         reference.pdf_url,
-        headers={"User-Agent": "AgnXiv-Housed-Runner/1.0"},
+        headers={"User-Agent": "AgnXiv-Hosted-Runner/1.0"},
     )
 
     try:
@@ -222,7 +221,7 @@ def main() -> None:
         )
     except HostedRunnerError as exc:
         error = str(exc)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - top-level worker crash boundary
         error = f"unexpected runner failure: {type(exc).__name__}: {exc}"
 
     output = Path(args.output)
