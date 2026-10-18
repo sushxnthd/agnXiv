@@ -31,3 +31,29 @@ def test_metric_name_digits_are_not_numeric_observations() -> None:
 
     assert selected is not None
     assert abs(selected.value - 0.71) < 1e-9
+
+
+def test_explicit_json_locator_selects_exact_field() -> None:
+    from agnxiv.outputs import extract_json_observation
+
+    output = '{"debug": 0.914, "metrics": {"accuracy": 0.824}}'
+    observation = extract_json_observation(output, "metrics.accuracy")
+
+    assert observation is not None
+    assert abs(observation.value - 0.824) < 1e-9
+
+
+def test_explicit_json_locator_supports_list_indices_and_scale() -> None:
+    from agnxiv.outputs import extract_json_observation
+
+    output = 'log line\n{"runs": [{"f1": 71.0}]}'
+    observation = extract_json_observation(output, "runs.0.f1", scale=0.01)
+
+    assert observation is not None
+    assert abs(observation.value - 0.71) < 1e-9
+
+
+def test_explicit_json_locator_rejects_boolean() -> None:
+    from agnxiv.outputs import extract_json_observation
+
+    assert extract_json_observation('{"passed": true}', "passed") is None
