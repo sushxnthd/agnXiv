@@ -69,3 +69,18 @@ Ambiguous explicit matches abstain.
 ## Reporting
 
 Do not publish exploit payloads or sensitive unpublished manuscripts in public issues. Use a private security channel when one is established.
+
+
+## Hosted evidence integrity
+
+Terminal hosted job state and its result/error payload digest are committed atomically with a PostgreSQL transparency receipt. Receipts form a sequence-numbered SHA-256 chain and are available independently of GitHub issue rendering. The public head check is part of readiness; authenticated operators can verify the complete chain.
+
+The chain is tamper-evident, not a substitute for an external witness: a database administrator able to rewrite the complete database could rewrite an unanchored chain. A future external transparency witness remains a production-hardening requirement. Signed DSSE verification statements are separately protected by the issuer key.
+
+## Supply-chain gates
+
+The hosted service uses immutable GitHub Action SHAs, a digest-pinned Python base image, frozen service dependency constraints, daily Python vulnerability auditing, CycloneDX SBOM generation, and a Trivy production-image scan. Fixed HIGH or CRITICAL OS/library vulnerabilities block the security workflow. Build-only packages that are not needed by the running service are removed from the final image.
+
+## Signing-key lifecycle
+
+Only the current Ed25519 private key may sign new evidence. Previous public keys can be retained through `AGNXIV_ISSUER_PREVIOUS_PUBLIC_KEYS_B64` and are published by `/v1/issuer` so historical DSSE statements remain verifiable after rotation. See `docs/KEY_ROTATION.md`.
