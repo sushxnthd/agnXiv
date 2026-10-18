@@ -253,7 +253,7 @@ def _option_paths(
         else:
             continue
 
-        value = value.strip("'\\"")
+        value = value.strip("'").strip('"')
         if not value.lower().endswith(_FILE_SUFFIXES):
             continue
 
