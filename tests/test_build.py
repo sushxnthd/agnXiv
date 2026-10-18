@@ -7,6 +7,7 @@ from agnxiv.build import (
     EnvironmentBuildError,
     audit_requirements,
     build_python_environment,
+    classify_dependency_precision,
     plan_python_environment,
 )
 
@@ -21,7 +22,29 @@ def test_manifest_only_build_plan(tmp_path: Path) -> None:
     assert plan.safe_manifest_only is True
     assert plan.network_required is True
     assert plan.dependency_sha256 is not None
+    assert plan.dependency_precision == "version-pinned"
     assert "COPY requirements.txt" in plan.dockerfile
+
+
+def test_floating_requirements_are_identified(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text(
+        "numpy>=1.24\nscipy>=1.10\n",
+        encoding="utf-8",
+    )
+
+    assert classify_dependency_precision(requirements) == "floating"
+    assert plan_python_environment(tmp_path).dependency_precision == "floating"
+
+
+def test_hash_pinned_requirements_are_identified(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text(
+        "numpy==2.1.0 --hash=sha256:abcdef\n",
+        encoding="utf-8",
+    )
+
+    assert classify_dependency_precision(requirements) == "hash-pinned"
 
 
 def test_rejects_vcs_and_editable_requirements(tmp_path: Path) -> None:
