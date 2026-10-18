@@ -65,7 +65,11 @@ def _resolve_workspace_path(base: Path, value: str, *, label: str) -> Path:
     return resolved
 
 
-def execute_verification_spec(path: str | Path) -> VerificationBundle:
+def execute_verification_spec(
+    path: str | Path,
+    *,
+    image_override: str | None = None,
+) -> VerificationBundle:
     """Resolve a manifest inside its own workspace and execute it."""
     spec_path = Path(path).resolve()
     spec = load_verification_spec(spec_path)
@@ -96,7 +100,7 @@ def execute_verification_spec(path: str | Path) -> VerificationBundle:
     bundle = verify_with_command(
         spec.claim,
         repository,
-        image=spec.runtime.image,
+        image=image_override or spec.runtime.image,
         command=spec.runtime.command,
         policy=spec.policy,
         manuscript_path=manuscript,
