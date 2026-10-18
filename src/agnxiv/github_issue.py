@@ -158,6 +158,24 @@ def _summary(payload: dict) -> str:
                 f"**Zero manifest:** {'yes' if result.get('zero_manifest') else 'no'}",
             ]
         )
+        extra = result.get("additional_verifications") or []
+        if extra:
+            lines.extend(["", "### Additional zero-manifest claims"])
+            for item in extra:
+                other = item.get("bundle") or {}
+                other_claim = other.get("claim") or {}
+                other_record = other.get("record") or {}
+                lines.append(
+                    "- "
+                    + str(other_claim.get("metric") or other_claim.get("id") or "claim")
+                    + ": "
+                    + str(other_record.get("verdict", "UNKNOWN"))
+                    + " (expected "
+                    + str(other_record.get("expected"))
+                    + ", observed "
+                    + str(other_record.get("observed_mean"))
+                    + ")"
+                )
         return "\n".join(lines) + "\n"
 
     lines.extend(["", "Unknown worker result kind."])
