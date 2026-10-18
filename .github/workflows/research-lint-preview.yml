@@ -1,0 +1,28 @@
+name: research-lint-preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/research-lint-preview.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "ruff>=0.6,<1"
+      - name: Show Ruff's exact import fix
+        run: |
+          cp research/scripts/run_diagnostic_case.py /tmp/before.py
+          ruff check --fix research/scripts/run_diagnostic_case.py
+          diff -u /tmp/before.py research/scripts/run_diagnostic_case.py || true
+          sed -n '1,24p' research/scripts/run_diagnostic_case.py
