@@ -47,23 +47,36 @@ jobs:
           plan = payload["result"]["plan"]
 
           assert plan["safe_to_execute"] is False
-          assert plan["automation_score"] >= 0.625
-          assert len(plan["claims"]) > 0
-          assert len(plan["commands"]) >= 2
+          assert plan["automation_score"] >= 0.75
+          assert 0 < len(plan["claims"]) <= 20
+          assert len(plan["commands"]) == 2
 
           commands = [" ".join(item["command"]) for item in plan["commands"]]
           assert any(command.startswith("deepwalk ") for command in commands)
           assert any("example_graphs/scoring.py" in command for command in commands)
+          assert not any(command.startswith("Evaluation ") for command in commands)
+          assert not any(command.startswith("This ") for command in commands)
 
           blockers = " ".join(plan["blockers"]).lower()
           assert "historical dependency" in blockers
-          assert "multiple high-confidence research commands" in blockers
+          assert "execution order could not be inferred" not in blockers
+
+          warnings = " ".join(plan["warnings"]).lower()
+          assert "2-stage research workflow" in warnings
+
+          draft = plan["draft_spec"]
+          assert draft is not None
+          assert len(draft["runtime"]["commands"]) == 2
+          assert draft["runtime"]["commands"][0][0] == "deepwalk"
+          assert "example_graphs/scoring.py" in draft["runtime"]["commands"][1]
 
           stages = {item["name"]: item for item in plan["stages"]}
           assert stages["paper_ingest"]["complete"] is True
           assert stages["claim_compilation"]["complete"] is True
           assert stages["environment_inference"]["complete"] is True
           assert stages["command_discovery"]["complete"] is True
+          assert stages["workflow_ordering"]["complete"] is True
+          assert stages["artifact_resolution"]["complete"] is True
           assert stages["verification_spec"]["complete"] is True
           assert stages["observation_locator"]["complete"] is False
           PY
