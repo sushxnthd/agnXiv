@@ -105,3 +105,17 @@ def test_unsafe_manifest_is_rejected_before_build(tmp_path: Path) -> None:
 
     with pytest.raises(EnvironmentBuildError):
         build_python_environment(tmp_path)
+
+
+def test_symlinked_requirements_are_rejected(tmp_path: Path) -> None:
+    target = tmp_path / "outside-requirements.txt"
+    target.write_text("numpy==2.1.0\n", encoding="utf-8")
+    link = tmp_path / "requirements.txt"
+
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("symlinks are not available on this platform")
+
+    with pytest.raises(ValueError, match="symlinks are not allowed"):
+        plan_python_environment(tmp_path)
