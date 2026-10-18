@@ -120,6 +120,10 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
         score += 0.05
     if claim.source.page is not None:
         score += 0.05
+        if claim.source.page == 1:
+            score += 0.18
+        elif claim.source.page == 2:
+            score += 0.07
 
     lower = claim.text.lower()
     if any(
@@ -134,6 +138,10 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
             "significant",
             "result",
             "score",
+            "accelerat",
+            "saving",
+            "save",
+            "fewer",
         )
     ):
         score += 0.10
