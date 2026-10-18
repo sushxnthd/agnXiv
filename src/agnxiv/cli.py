@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Annotated, Literal, cast
 
@@ -14,6 +15,14 @@ from .claims import extract_claims_from_pdf, extract_quantitative_claims
 from .models import Claim, Observation, VerificationPolicy
 from .pipeline import inspect_project, verify_with_command
 from .preprint import parse_arxiv_reference
+from .statement import (
+    AttestationSignatureError,
+    DSSEEnvelope,
+    build_verification_statement,
+    generate_ed25519_keypair,
+    sign_statement_ed25519,
+    verify_statement_ed25519,
+)
 from .verify import verify_numeric_claim
 
 app = typer.Typer(
@@ -68,6 +77,57 @@ def arxiv_id_command(
 ) -> None:
     """Normalize an arXiv identifier while preserving its exact version."""
     typer.echo(parse_arxiv_reference(value).model_dump_json(indent=2))
+
+
+@app.command("keygen")
+def keygen_command(
+    private_out: Annotated[Path, typer.Option()],
+    public_out: Annotated[Path, typer.Option()],
+) -> None:
+    """Generate an Ed25519 issuer keypair for AgnXiv DSSE attestations."""
+    if private_out.exists() or public_out.exists():
+        raise typer.BadParameter("refusing to overwrite an existing key file")
+
+    private_key, public_key, key_id = generate_ed25519_keypair()
+    private_out.parent.mkdir(parents=True, exist_ok=True)
+    public_out.parent.mkdir(parents=True, exist_ok=True)
+    private_out.write_bytes(private_key)
+    public_out.write_bytes(public_key)
+    os.chmod(private_out, 0o600)
+    typer.echo(
+        json.dumps(
+            {
+                "key_id": key_id,
+                "private_key": str(private_out),
+                "public_key": str(public_out),
+            },
+            indent=2,
+        )
+    )
+
+
+@app.command("verify-envelope")
+def verify_envelope_command(
+    envelope_path: Annotated[
+        Path,
+        typer.Argument(exists=True, dir_okay=False, readable=True),
+    ],
+    public_key: Annotated[
+        Path,
+        typer.Option(exists=True, dir_okay=False, readable=True),
+    ],
+) -> None:
+    """Verify a DSSE signature and emit the authenticated in-toto statement."""
+    try:
+        envelope = DSSEEnvelope.model_validate_json(
+            envelope_path.read_text(encoding="utf-8")
+        )
+        statement = verify_statement_ed25519(envelope, public_key.read_bytes())
+    except (AttestationSignatureError, OSError, ValueError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=2) from exc
+
+    typer.echo(json.dumps(statement, indent=2))
 
 
 @app.command("inspect")
@@ -170,6 +230,10 @@ def verify_command(
         Path | None,
         typer.Option(exists=True, dir_okay=False, readable=True),
     ] = None,
+    sign_key: Annotated[
+        Path | None,
+        typer.Option(exists=True, dir_okay=False, readable=True),
+    ] = None,
     artifact: Annotated[
         list[Path] | None,
         typer.Option(
@@ -207,16 +271,17 @@ def verify_command(
         observation_scale=observation_scale,
     )
     attestation = attest_bundle(bundle)
-    typer.echo(
-        json.dumps(
-            {
-                "bundle": bundle.model_dump(mode="json"),
-                "attestation": attestation.model_dump(mode="json"),
-            },
-            indent=2,
-            default=str,
-        )
-    )
+    statement = build_verification_statement(bundle)
+    response = {
+        "bundle": bundle.model_dump(mode="json"),
+        "attestation": attestation.model_dump(mode="json"),
+        "statement": statement,
+    }
+    if sign_key is not None:
+        envelope = sign_statement_ed25519(statement, sign_key.read_bytes())
+        response["dsseEnvelope"] = envelope.model_dump(mode="json")
+
+    typer.echo(json.dumps(response, indent=2, default=str))
 
 
 @app.command("robustness")
