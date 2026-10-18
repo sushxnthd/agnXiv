@@ -154,11 +154,17 @@ def run_zero_manifest(
     repository: str | Path,
     *,
     image: str,
+    claims_override: list[Claim] | None = None,
+    plan_override: AutoPlan | None = None,
 ) -> ZeroManifestOutcome:
     """Execute one documented workflow only when every prerequisite is safe."""
     paper = Path(manuscript).resolve()
     repo = Path(repository).resolve()
-    plan = build_auto_plan(paper, repo)
+    plan = plan_override or build_auto_plan(
+        paper,
+        repo,
+        claims_override=claims_override,
+    )
     stages = {stage.name: stage.complete for stage in plan.stages}
     prerequisites = (
         "paper_ingest",
@@ -212,7 +218,9 @@ def run_zero_manifest(
             plan=plan,
         )
 
-    paper_claims = _claims(paper)
+    paper_claims = (
+        list(claims_override) if claims_override is not None else _claims(paper)
+    )
     locators = discover_frozen_locators(discovery.stdout, paper_claims)
     if not locators:
         from collections import Counter
