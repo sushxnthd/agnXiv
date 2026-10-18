@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import DateTime, String, Text, create_engine, func, select, text, update
+from sqlalchemy import DateTime, String, Text, UniqueConstraint, create_engine, func, select, text, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
@@ -14,6 +14,13 @@ class Base(DeclarativeBase):
 
 class Job(Base):
     __tablename__ = "agnxiv_jobs"
+    __table_args__ = (
+        UniqueConstraint(
+            "api_key_hash",
+            "idempotency_key_hash",
+            name="uq_agnxiv_jobs_api_idempotency",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     api_key_hash: Mapped[str] = mapped_column(String(64), index=True)
@@ -23,6 +30,12 @@ class Job(Base):
     repository_ref: Mapped[str] = mapped_column(String(255))
     arxiv_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     spec_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    idempotency_key_hash: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        index=True,
+    )
+    request_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
     result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -81,6 +94,8 @@ class JobStore:
         repository_ref: str,
         arxiv_id: str | None,
         spec_path: str | None,
+        idempotency_key_hash: str | None = None,
+        request_fingerprint: str | None = None,
     ) -> Job:
         job = Job(
             id=job_id,
@@ -91,6 +106,8 @@ class JobStore:
             repository_ref=repository_ref,
             arxiv_id=arxiv_id,
             spec_path=spec_path,
+            idempotency_key_hash=idempotency_key_hash,
+            request_fingerprint=request_fingerprint,
         )
         with self.session_factory() as session:
             session.add(job)
@@ -101,6 +118,19 @@ class JobStore:
     def get_job(self, job_id: str) -> Job | None:
         with self.session_factory() as session:
             return session.get(Job, job_id)
+
+    def get_by_idempotency(
+        self,
+        *,
+        api_key_hash: str,
+        idempotency_key_hash: str,
+    ) -> Job | None:
+        with self.session_factory() as session:
+            statement = select(Job).where(
+                Job.api_key_hash == api_key_hash,
+                Job.idempotency_key_hash == idempotency_key_hash,
+            )
+            return session.scalar(statement)
 
     def count_active(self, api_key_hash: str) -> int:
         with self.session_factory() as session:
