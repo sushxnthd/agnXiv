@@ -199,7 +199,12 @@ def extract_quantitative_claims(
         )
         # Resolve the metric nearest *before* this number, so a sentence
         # reporting multiple statistics cannot label them all by the last one.
-        preceding = normalized[max(0, match.start("value") - 100) : match.start("value")]
+        left = match.start("value")
+        for position in range(left - 1, -1, -1):
+            if normalized[position] in ".!?" and _is_sentence_boundary(normalized, position):
+                left = position + 1
+                break
+        preceding = normalized[max(left, match.start("value") - 100) : match.start("value")]
         metric = _metric_from_context(preceding) or _metric_from_context(local_context)
 
         if not unit and not uncertainty_raw and value.is_integer() and 1900 <= value <= 2100:
