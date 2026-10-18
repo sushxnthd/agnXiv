@@ -28,6 +28,14 @@ def verify_github_actions_token(
     policy: GitHubOIDCPolicy,
 ) -> dict:
     """Verify a GitHub-hosted workflow identity against a strict trust policy."""
+    if len(token) > 16_384 or token.count(".") != 2:
+        raise OIDCVerificationError("invalid GitHub OIDC token shape")
+    try:
+        header = jwt.get_unverified_header(token)
+    except Exception as exc:
+        raise OIDCVerificationError("invalid GitHub OIDC token header") from exc
+    if header.get("alg") != "RS256" or not isinstance(header.get("kid"), str):
+        raise OIDCVerificationError("unsupported GitHub OIDC signing header")
     try:
         signing_key = _JWK_CLIENT.get_signing_key_from_jwt(token)
         claims = jwt.decode(
