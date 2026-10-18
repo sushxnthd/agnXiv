@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -15,7 +15,7 @@ class VerificationAttestation(BaseModel):
     repository_tree_sha256: str
     claim_id: str
     verdict: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 def canonical_json_sha256(value: Any) -> str:
