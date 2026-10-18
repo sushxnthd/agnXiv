@@ -397,6 +397,11 @@ def build_auto_plan(
         blockers.append(
             "The software environment could not be inferred with adequate confidence."
         )
+    elif environment.dependency_source == "import_scan":
+        blockers.append(
+            "Dependencies were inferred from source imports, but package versions "
+            "and historical fidelity remain unresolved."
+        )
 
     if warnings:
         blockers.append(
@@ -481,7 +486,12 @@ def build_auto_plan(
         AutomationStage(
             name="environment_inference",
             complete=environment.confidence >= 0.55,
-            detail=f"environment confidence {environment.confidence:.2f}",
+            detail=(
+                f"environment confidence {environment.confidence:.2f}; "
+                f"source={environment.dependency_source}; "
+                f"precision={environment.dependency_precision}; "
+                f"historical={environment.historical_fidelity}"
+            ),
         ),
         AutomationStage(
             name="command_discovery",
