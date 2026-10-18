@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import re
 from hashlib import sha256
 from hmac import compare_digest
+from urllib.parse import urlparse
 
 _GITHUB_HTTPS_PREFIX = "https://github.com/"
+_REF_RE = re.compile(r"^[A-Za-z0-9._/-]+$")
 
 
 def hash_secret(value: str) -> str:
@@ -28,9 +31,12 @@ def validate_github_slug(value: str) -> str:
         raise ValueError("only HTTPS GitHub repositories are supported")
 
     if candidate.startswith("https://"):
-        if not candidate.startswith(_GITHUB_HTTPS_PREFIX):
+        parsed = urlparse(candidate)
+        if parsed.scheme != "https" or parsed.netloc.lower() != "github.com":
             raise ValueError("only HTTPS GitHub repositories are supported")
-        candidate = candidate.removeprefix(_GITHUB_HTTPS_PREFIX)
+        if parsed.query or parsed.fragment or parsed.params:
+            raise ValueError("repository URL may not contain query or fragment data")
+        candidate = parsed.path.strip("/")
 
     candidate = candidate.strip("/").removesuffix(".git")
     parts = candidate.split("/")
@@ -44,6 +50,10 @@ def validate_git_ref(value: str) -> str:
     ref = value.strip()
     if not ref or len(ref) > 200:
         raise ValueError("invalid Git ref")
-    if any(token in ref for token in ("..", "~", "^", ":", "\\", "\n", "\r")):
+    if ref.startswith("-") or not _REF_RE.fullmatch(ref):
+        raise ValueError("unsafe Git ref")
+    if any(token in ref for token in ("..", "//", "@{")):
+        raise ValueError("unsafe Git ref")
+    if ref.endswith(("/", ".", ".lock")):
         raise ValueError("unsafe Git ref")
     return ref
