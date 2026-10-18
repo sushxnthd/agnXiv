@@ -27,15 +27,19 @@ from .verify import verify_numeric_claim
 
 class ExecutionSummary(BaseModel):
     command: list[str]
+    image_id: str
     returncode: int
     stdout_sha256: str
     stderr_sha256: str
     stdout_excerpt: str
     stderr_excerpt: str
+    pre_execution_tree_sha256: str
+    post_execution_tree_sha256: str
+    source_unchanged: bool
 
 
 class VerificationBundle(BaseModel):
-    schema_version: str = "agnxiv.bundle/0.1"
+    schema_version: str = "agnxiv.bundle/0.2"
     claim: Claim
     provenance: ProvenanceManifest
     environment: EnvironmentSpec
@@ -118,14 +122,34 @@ def verify_with_command(
             ),
         )
 
+    post_provenance = fingerprint_tree(repository)
     execution = ExecutionSummary(
         command=list(result.command),
+        image_id=result.image_id,
         returncode=result.returncode,
         stdout_sha256=sha256(result.stdout.encode("utf-8")).hexdigest(),
         stderr_sha256=sha256(result.stderr.encode("utf-8")).hexdigest(),
         stdout_excerpt=result.stdout[-4000:],
         stderr_excerpt=result.stderr[-4000:],
+        pre_execution_tree_sha256=provenance.tree_digest,
+        post_execution_tree_sha256=post_provenance.tree_digest,
+        source_unchanged=provenance.tree_digest == post_provenance.tree_digest,
     )
+
+    if not execution.source_unchanged:
+        return VerificationBundle(
+            claim=claim,
+            provenance=provenance,
+            environment=environment,
+            evidence_candidates=evidence,
+            command_candidates=commands,
+            execution=execution,
+            record=_unable_record(
+                claim,
+                policy,
+                rationale="Source repository changed during verification; verdict suppressed.",
+            ),
+        )
 
     if result.returncode != 0:
         return VerificationBundle(
