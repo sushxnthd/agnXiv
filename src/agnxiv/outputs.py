@@ -6,7 +6,10 @@ from pydantic import BaseModel, Field
 
 from .models import Claim, Observation
 
-_NUMBER_RE = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][-+]?\d+)?")
+_NUMBER_RE = re.compile(
+    r"(?<![A-Za-z0-9_])[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
+    r"(?:[eE][-+]?\d+)?(?![A-Za-z0-9_])"
+)
 
 _METRIC_ALIASES: dict[str, set[str]] = {
     "accuracy": {"accuracy", "acc", "top1", "top-1"},
@@ -52,9 +55,8 @@ def extract_observation_candidates(
 ) -> list[ObservationCandidate]:
     """Rank numeric outputs by structural/semantic evidence only.
 
-    The paper's reported numeric value is deliberately *not* used to choose an
-    observation. That prevents the parser from preferring a convenient number
-    simply because it would make the claim pass.
+    The paper's reported numeric value is deliberately not used to choose an
+    observation. This prevents answer-guided selection.
     """
     metric_tokens = _metric_tokens(claim.metric)
     candidates: list[ObservationCandidate] = []
