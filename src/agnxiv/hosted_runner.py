@@ -177,9 +177,27 @@ def execute_job(
                 raise HostedRunnerError("verification spec is not a regular file")
 
             spec = load_verification_spec(manifest)
+            spec_base = manifest.parent.resolve()
+            candidate_repo = Path(spec.repository)
+            if candidate_repo.is_absolute():
+                raise HostedRunnerError(
+                    "verification spec repository must be workspace-relative"
+                )
+            build_repository = (spec_base / candidate_repo).resolve()
+            try:
+                build_repository.relative_to(spec_base)
+            except ValueError as exc:
+                raise HostedRunnerError(
+                    "verification spec repository escapes its workspace"
+                ) from exc
+            if not build_repository.is_dir() or build_repository.is_symlink():
+                raise HostedRunnerError(
+                    "verification spec repository is not a regular directory"
+                )
+
             _pull_image(spec.runtime.image)
             build = build_python_environment(
-                (manifest.parent / spec.repository).resolve(),
+                build_repository,
                 base_image=spec.runtime.image,
             )
             bundle = execute_verification_spec(
