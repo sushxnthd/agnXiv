@@ -29,3 +29,42 @@ def test_minimum_repetitions_abstains() -> None:
         VerificationPolicy(kind="relative", tolerance=0.01, minimum_repetitions=3),
     )
     assert record.verdict == Verdict.UNABLE_TO_VERIFY
+
+
+def test_at_least_policy_verifies_lower_bound() -> None:
+    record = verify_numeric_claim(
+        Claim(id="C1", text="Accuracy is at least 90%.", reported_value=0.90),
+        [Observation(value=0.914)],
+        VerificationPolicy(
+            kind="absolute",
+            operator="at_least",
+            tolerance=0.0,
+        ),
+    )
+    assert record.verdict == Verdict.VERIFIED
+
+
+def test_at_most_policy_contradicts_exceeded_limit() -> None:
+    record = verify_numeric_claim(
+        Claim(id="C1", text="Latency is at most 100 ms.", reported_value=100.0),
+        [Observation(value=108.0)],
+        VerificationPolicy(
+            kind="absolute",
+            operator="at_most",
+            tolerance=2.0,
+        ),
+    )
+    assert record.verdict == Verdict.CONTRADICTED
+
+
+def test_relative_threshold_allows_declared_slack() -> None:
+    record = verify_numeric_claim(
+        Claim(id="C1", text="Metric is at least 100.", reported_value=100.0),
+        [Observation(value=99.5)],
+        VerificationPolicy(
+            kind="relative",
+            operator="at_least",
+            tolerance=0.01,
+        ),
+    )
+    assert record.verdict == Verdict.VERIFIED
