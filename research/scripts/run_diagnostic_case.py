@@ -4,12 +4,12 @@ import argparse
 import hashlib
 import html.parser
 import json
+import pathlib
 import re
 import subprocess
 import tempfile
 import urllib.parse
 import urllib.request
-from pathlib import Path
 
 from agnxiv.auto import build_auto_plan
 from agnxiv.research import load_research_cases
@@ -71,8 +71,8 @@ class _ArticleTextParser(html.parser.HTMLParser):
 
 def _materialize_manuscript(
     url: str,
-    root: Path,
-) -> tuple[Path, str, str, str]:
+    root: pathlib.Path,
+) -> tuple[pathlib.Path, str, str, str]:
     data, final_url = _fetch_bytes(url)
     if data.startswith(b"%PDF"):
         destination = root / "paper.pdf"
@@ -117,7 +117,7 @@ def _materialize_manuscript(
     )
 
 
-def _clone_pinned(repository: str, commit: str, destination: Path) -> None:
+def _clone_pinned(repository: str, commit: str, destination: pathlib.Path) -> None:
     subprocess.run(["git", "init", str(destination)], check=True, capture_output=True)
     subprocess.run(
         [
@@ -153,7 +153,7 @@ def _clone_pinned(repository: str, commit: str, destination: Path) -> None:
     )
 
 
-def run_case(manifest: Path, case_id: str, output_dir: Path) -> dict:
+def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> dict:
     cases = {case.case_id: case for case in load_research_cases(manifest)}
     case = cases.get(case_id)
     if case is None:
@@ -166,7 +166,7 @@ def run_case(manifest: Path, case_id: str, output_dir: Path) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     with tempfile.TemporaryDirectory(prefix="agnxiv-research-") as temp:
-        root = Path(temp)
+        root = pathlib.Path(temp)
         repository = root / "repository"
 
         manuscript = None
@@ -238,9 +238,9 @@ def main() -> None:
     args = parser.parse_args()
 
     summary = run_case(
-        Path(args.manifest),
+        pathlib.Path(args.manifest),
         args.case_id,
-        Path(args.output_dir),
+        pathlib.Path(args.output_dir),
     )
     print(json.dumps(summary, indent=2, sort_keys=True))
 
