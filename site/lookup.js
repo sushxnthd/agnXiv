@@ -83,7 +83,7 @@ function renderNoRecord(arxiv) {
     '<a class="button primary" href="./verify.html?arxiv=' + encodeURIComponent(arxiv) + '">Verify this paper</a></div>';
 }
 
-function renderRecord(arxiv, attempts) {
+function renderRecord(arxiv, attempts, challenges) {
   const counts = attempts.reduce((acc, attempt) => {
     acc[attempt.state] = (acc[attempt.state] || 0) + 1;
     return acc;
@@ -103,6 +103,7 @@ function renderRecord(arxiv, attempts) {
       '<div><strong>' + (counts.REPRODUCED || 0) + '</strong><span>reproduced</span></div>' +
       '<div><strong>' + (counts.RESULT_DIVERGENCE || 0) + '</strong><span>divergence</span></div>' +
       '<div><strong>' + ((counts.EVIDENCE_INCOMPLETE || 0) + (counts.INCONCLUSIVE || 0) + (counts.EXECUTION_BLOCKED || 0)) + '</strong><span>unresolved</span></div>' +
+      '<div><strong>' + challenges.length + '</strong><span>challenges</span></div>' +
     '</div>' +
     '<div class="attempt-list">' + attempts.map((attempt) =>
       '<a class="attempt-row" href="./result.html?issue=' + attempt.number + '">' +
@@ -134,10 +135,14 @@ async function search(query) {
   try {
     const response = await fetch("https://api.github.com/repos/sushxnthd/agnXiv/issues?state=all&per_page=100");
     if (!response.ok) throw new Error("registry unavailable");
-    const issues = (await response.json()).filter((item) =>
-      !item.pull_request &&
+    const allIssues = (await response.json()).filter((item) => !item.pull_request);
+    const issues = allIssues.filter((item) =>
       item.title.startsWith("[AgnXiv Verify]") &&
       normalizeArxiv(section(item.body, "arXiv ID")) === arxiv
+    );
+    const challenges = allIssues.filter((item) =>
+      item.title.startsWith("[AgnXiv Challenge]") &&
+      normalizeArxiv(section(item.body, "Paper")) === arxiv
     );
     if (!issues.length) {
       renderNoRecord(arxiv);
@@ -145,7 +150,7 @@ async function search(query) {
     }
     const attempts = await Promise.all(issues.map(loadIssueAttempt));
     attempts.sort((a, b) => new Date(b.created) - new Date(a.created));
-    renderRecord(arxiv, attempts);
+    renderRecord(arxiv, attempts, challenges);
   } catch (error) {
     result.innerHTML = '<div class="lookup-empty"><h2>Registry temporarily unavailable.</h2><p>The public evidence index could not be loaded right now.</p></div>';
   }
