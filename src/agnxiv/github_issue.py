@@ -84,10 +84,10 @@ def read_issue_event(path: str | Path) -> GitHubVerificationRequest:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     issue = payload.get("issue")
     if not isinstance(issue, dict):
-        raise ValueError("GitHub event does not contain an issue.")
+        raise TypeError("GitHub event does not contain an issue.")
     body = issue.get("body")
     if not isinstance(body, str):
-        raise ValueError("Verification issue has no body.")
+        raise TypeError("Verification issue has no body.")
     return parse_issue_body(body)
 
 
