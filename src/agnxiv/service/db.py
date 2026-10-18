@@ -266,7 +266,9 @@ class JobStore:
             return session.scalar(statement)
 
     def metrics(self) -> dict[str, object]:
-        """Return secret-free operator counters for the hosted control plane."""
+        """Return secret-free operator counters for SLO and incident monitoring."""
+        now = datetime.now(UTC)
+        recent_cutoff = now - timedelta(hours=1)
         with self.session_factory() as session:
             status_rows = session.execute(
                 select(Job.status, func.count()).group_by(Job.status)
@@ -275,7 +277,6 @@ class JobStore:
                 select(Job.mode, func.count()).group_by(Job.mode)
             ).all()
             total = int(session.scalar(select(func.count()).select_from(Job)) or 0)
-            recent_cutoff = datetime.now(UTC) - timedelta(hours=1)
             recent = int(
                 session.scalar(
                     select(func.count())
@@ -284,14 +285,64 @@ class JobStore:
                 )
                 or 0
             )
+            recent_terminal_rows = session.execute(
+                select(Job.status, func.count())
+                .where(
+                    Job.updated_at >= recent_cutoff,
+                    Job.status.in_(("succeeded", "needs_review", "failed")),
+                )
+                .group_by(Job.status)
+            ).all()
+            stale_failures = int(
+                session.scalar(
+                    select(func.count())
+                    .select_from(Job)
+                    .where(
+                        Job.updated_at >= recent_cutoff,
+                        Job.status == "failed",
+                        Job.error == "hosted verification exceeded its callback deadline",
+                    )
+                )
+                or 0
+            )
+            oldest_active = session.scalar(
+                select(func.min(Job.updated_at)).where(
+                    Job.status.in_(("queued", "running"))
+                )
+            )
+            transparency_count = int(
+                session.scalar(
+                    select(func.count()).select_from(TransparencyEntry)
+                )
+                or 0
+            )
+
         statuses = {str(key): int(value) for key, value in status_rows}
         modes = {str(key): int(value) for key, value in mode_rows}
+        terminal = {str(key): int(value) for key, value in recent_terminal_rows}
+        terminal_total = sum(terminal.values())
+        oldest_active_age = None
+        if oldest_active is not None:
+            if oldest_active.tzinfo is None:
+                oldest_active = oldest_active.replace(tzinfo=UTC)
+            oldest_active_age = max(
+                0.0,
+                (now - oldest_active.astimezone(UTC)).total_seconds(),
+            )
         return {
             "jobs_total": total,
             "jobs_last_hour": recent,
             "jobs_by_status": statuses,
             "jobs_by_mode": modes,
             "jobs_active": statuses.get("queued", 0) + statuses.get("running", 0),
+            "terminal_jobs_last_hour": terminal_total,
+            "terminal_by_status_last_hour": terminal,
+            "stale_callback_failures_last_hour": stale_failures,
+            "stale_callback_fraction_last_hour": (
+                stale_failures / terminal_total if terminal_total else 0.0
+            ),
+            "oldest_active_age_seconds": oldest_active_age,
+            "transparency_entries": transparency_count,
         }
 
     def count_active(self, api_key_hash: str) -> int:
