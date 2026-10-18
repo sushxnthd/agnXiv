@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import base64
+from datetime import UTC, datetime, timedelta
 
 import pytest
-from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
