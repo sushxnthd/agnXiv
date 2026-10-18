@@ -9,11 +9,12 @@ from pydantic import BaseModel, Field
 
 
 class VerificationAttestation(BaseModel):
-    schema_version: str = "agnxiv.attestation/0.2"
+    schema_version: str = "agnxiv.attestation/0.3"
     verifier: str = "AgnXiv"
     bundle_sha256: str
     manuscript_sha256: str | None = None
     repository_tree_sha256: str
+    artifact_sha256: list[str] = Field(default_factory=list)
     claim_id: str
     verdict: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -41,6 +42,7 @@ def attest_bundle(bundle: Any) -> VerificationAttestation:
         bundle_sha256=bundle_digest,
         manuscript_sha256=manuscript_sha256,
         repository_tree_sha256=bundle.provenance.tree_digest,
+        artifact_sha256=[artifact.sha256 for artifact in bundle.artifacts],
         claim_id=bundle.claim.id,
         verdict=bundle.record.verdict.value,
     )
