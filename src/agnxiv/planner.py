@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import shlex
 from pathlib import Path
 
 from pydantic import BaseModel, Field
@@ -25,8 +26,48 @@ _COMMON_SCRIPTS = (
     ("reproduction.py", 0.98),
 )
 
+_RESEARCH_TERMS = (
+    "eval",
+    "repro",
+    "result",
+    "experiment",
+    "score",
+    "benchmark",
+    "paper",
+)
 
-def discover_commands(repository: str | Path, *, limit: int = 10) -> list[CommandCandidate]:
+
+def _readme_commands(text: str) -> list[tuple[list[str], str]]:
+    """Extract plausible documented shell commands without executing them."""
+    commands: list[tuple[list[str], str]] = []
+
+    for raw in text.splitlines():
+        line = raw.strip()
+        line = line.removeprefix("$").strip()
+        line = line.strip(chr(96)).strip()
+        if not line:
+            continue
+
+        if not re.match(r"^[A-Za-z0-9_.-]+(?:\s|$)", line):
+            continue
+        if line.lower().startswith(("pip ", "python -m pip ", "git ", "cd ")):
+            continue
+        if not any(term in line.lower() for term in _RESEARCH_TERMS):
+            continue
+
+        try:
+            tokens = shlex.split(line)
+        except ValueError:
+            continue
+        if not tokens:
+            continue
+
+        commands.append((tokens, line))
+
+    return commands
+
+
+def discover_commands(repository: str | Path, *, limit: int = 15) -> list[CommandCandidate]:
     """Discover likely reproduction/evaluation entrypoints without executing them."""
     root = Path(repository)
     if not root.is_dir():
@@ -79,20 +120,20 @@ def discover_commands(repository: str | Path, *, limit: int = 10) -> list[Comman
         except OSError:
             continue
 
-        for match in re.finditer(
-            r"(?m)^\s*(python(?:3)?\s+[^\n\x60]+|make\s+[A-Za-z0-9_.-]+)\s*$",
-            text,
-        ):
-            raw = match.group(1).strip()
-            if any(token in raw.lower() for token in ("eval", "repro", "result", "experiment")):
-                candidates.append(
-                    CommandCandidate(
-                        command=raw.split(),
-                        source=readme_name,
-                        score=0.82,
-                        rationale="documented research command",
-                    )
+        for tokens, raw in _readme_commands(text):
+            score = 0.84
+            if "repro" in raw.lower():
+                score = 0.94
+            elif "eval" in raw.lower() or "score" in raw.lower():
+                score = 0.90
+            candidates.append(
+                CommandCandidate(
+                    command=tokens,
+                    source=readme_name,
+                    score=score,
+                    rationale="documented research command",
                 )
+            )
 
     dedup: dict[tuple[str, ...], CommandCandidate] = {}
     for candidate in candidates:
