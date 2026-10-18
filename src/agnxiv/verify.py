@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from statistics import fmean
 
-from .models import Claim, Observation, VerificationPolicy, VerificationRecord, Verdict
+from .models import Claim, Observation, Verdict, VerificationPolicy, VerificationRecord
 
 
 def verify_numeric_claim(
@@ -53,18 +53,17 @@ def verify_numeric_claim(
     if policy.kind == "absolute":
         passed = absolute_error <= policy.tolerance
         comparison = f"absolute error {absolute_error:.6g} <= {policy.tolerance:.6g}"
+    elif expected == 0:
+        passed = absolute_error <= policy.tolerance
+        comparison = (
+            "reported value is zero; relative error is undefined, so the "
+            f"tolerance is applied as an absolute bound: {absolute_error:.6g} "
+            f"<= {policy.tolerance:.6g}"
+        )
     else:
-        if expected == 0:
-            passed = absolute_error <= policy.tolerance
-            comparison = (
-                "reported value is zero; relative error is undefined, so the "
-                f"tolerance is applied as an absolute bound: {absolute_error:.6g} "
-                f"<= {policy.tolerance:.6g}"
-            )
-        else:
-            assert relative_error is not None
-            passed = relative_error <= policy.tolerance
-            comparison = f"relative error {relative_error:.4%} <= {policy.tolerance:.4%}"
+        assert relative_error is not None
+        passed = relative_error <= policy.tolerance
+        comparison = f"relative error {relative_error:.4%} <= {policy.tolerance:.4%}"
 
     verdict = Verdict.VERIFIED if passed else Verdict.CONTRADICTED
 
