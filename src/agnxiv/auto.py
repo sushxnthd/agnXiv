@@ -142,7 +142,7 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
         score += min(0.20, 0.08 + evidence[0].score * 0.12)
 
     numeric_tokens = re.findall(
-        r"(?<![A-Za-z0-9_.])[-+]?\\d+(?:\\.\\d+)?%?",
+        r"(?<![A-Za-z0-9_.])[-+]?\d+(?:\.\d+)?%?",
         claim.text,
     )
     word_tokens = re.findall(r"[A-Za-z]{2,}", claim.text)
