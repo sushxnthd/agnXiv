@@ -4,7 +4,7 @@ from statistics import fmean, pstdev
 
 from pydantic import BaseModel, Field
 
-from .models import Claim, Observation, VerificationPolicy, Verdict
+from .models import Claim, Observation, Verdict, VerificationPolicy
 from .verify import verify_numeric_claim
 
 
@@ -40,7 +40,11 @@ def assess_repeated_observations(
             pass_count=0,
             pass_fraction=0.0,
             mean=fmean(o.value for o in observations) if observations else None,
-            standard_deviation=pstdev(o.value for o in observations) if len(observations) > 1 else None,
+            standard_deviation=(
+                pstdev(o.value for o in observations)
+                if len(observations) > 1
+                else None
+            ),
             minimum=min((o.value for o in observations), default=None),
             maximum=max((o.value for o in observations), default=None),
             status="INCONCLUSIVE",
