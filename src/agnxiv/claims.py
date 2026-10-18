@@ -5,7 +5,10 @@ from pathlib import Path
 
 from .models import Claim, ClaimSource
 
-_NUMBER = r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
+_NUMBER = (
+    r"(?<![A-Za-z0-9_])[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
+    r"(?:[eE][-+]?\d+)?(?![A-Za-z0-9_])"
+)
 _QUANT_RE = re.compile(
     rf"(?P<prefix>.{{0,110}}?)"
     rf"(?P<value>{_NUMBER})"
