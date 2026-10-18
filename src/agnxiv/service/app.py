@@ -4,7 +4,6 @@ import base64
 import binascii
 import hashlib
 import hmac
-import json
 import secrets
 import uuid
 from contextlib import asynccontextmanager
@@ -68,7 +67,7 @@ def _job_view(job: Job) -> JobView:
 
 def _callback_token(secret: str, job_id: str) -> str:
     nonce = secrets.token_urlsafe(24)
-    message = f"{job_id}.{nonce}".encode("utf-8")
+    message = f"{job_id}.{nonce}".encode()
     signature = hmac.new(
         secret.encode("utf-8"),
         message,
