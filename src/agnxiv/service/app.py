@@ -83,6 +83,57 @@ def _job_view(job: Job) -> JobView:
     )
 
 
+def _is_sha256_hex(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(char in "0123456789abcdef" for char in value.lower())
+    )
+
+
+def _validate_zero_manifest_binding(
+    locator: object,
+    bundle: VerificationBundle,
+) -> None:
+    """Bind worker-discovered locator metadata to the exact executable bundle."""
+    if not isinstance(locator, dict):
+        raise TypeError("zero-manifest locator must be an object")
+    if locator.get("claim_id") != bundle.claim.id:
+        raise ValueError("zero-manifest locator claim does not match bundle")
+    if locator.get("metric") != (bundle.claim.metric or ""):
+        raise ValueError("zero-manifest locator metric does not match bundle")
+    regex = locator.get("regex")
+    if not isinstance(regex, str) or not regex:
+        raise ValueError("zero-manifest locator regex is missing")
+    if bundle.observation_method != "explicit_regex":
+        raise ValueError("zero-manifest verification must use an explicit regex")
+    if bundle.observation_locator != regex:
+        raise ValueError("zero-manifest locator regex does not match bundle")
+    if not _is_sha256_hex(locator.get("discovery_stdout_sha256")):
+        raise ValueError("zero-manifest discovery digest is invalid")
+    scale = locator.get("scale")
+    if not isinstance(scale, (int, float)) or isinstance(scale, bool) or scale <= 0:
+        raise ValueError("zero-manifest observation scale is invalid")
+
+    execution = bundle.execution
+    if execution is None or execution.returncode != 0:
+        raise ValueError("zero-manifest decision lacks successful execution")
+    if not execution.source_unchanged or not execution.artifacts_unchanged:
+        raise ValueError("zero-manifest evidence mutated during execution")
+    if not execution.image_id.startswith("sha256:"):
+        raise ValueError("zero-manifest runtime is not content-addressed")
+    if bundle.manuscript is None:
+        raise ValueError("zero-manifest bundle is missing manuscript fingerprint")
+    if bundle.record.expected != bundle.claim.reported_value:
+        raise ValueError("zero-manifest expected value does not match paper claim")
+
+    if bundle.record.verdict.value in {"VERIFIED", "CONTRADICTED"}:
+        if len(bundle.record.observations) != 1:
+            raise ValueError("zero-manifest decision must contain one observation")
+        if bundle.record.observations[0].output_digest != execution.stdout_sha256:
+            raise ValueError("zero-manifest observation is not bound to execution output")
+
+
 def _validate_worker_result(
     job: Job,
     status: str,
@@ -118,24 +169,27 @@ def _validate_worker_result(
         raise ValueError("VERIFY_SPEC cannot present a zero-manifest result")
 
     raw_bundles = [result.get("bundle")]
+    locators: list[object] = []
     if job.mode == "auto_verify":
         additional = result.get("additional_verifications", [])
         if not isinstance(additional, list) or len(additional) > 3:
             raise ValueError("invalid additional verification records")
-        if not isinstance(result.get("discovery"), dict):
-            raise ValueError("AUTO_VERIFY is missing frozen locator provenance")
+        locators.append(result.get("discovery"))
         for item in additional:
-            if not isinstance(item, dict) or not isinstance(item.get("discovery"), dict):
-                raise TypeError("additional verification lacks locator provenance")
+            if not isinstance(item, dict):
+                raise TypeError("additional verification must be an object")
+            locators.append(item.get("discovery"))
             raw_bundles.append(item.get("bundle"))
 
     bundles = [VerificationBundle.model_validate(raw) for raw in raw_bundles]
-    for bundle in bundles:
+    for index, bundle in enumerate(bundles):
         git = bundle.provenance.git
         if git is None or git.commit != job.repository_ref:
             raise ValueError("verification Git commit does not match pinned job")
         if git.dirty:
             raise ValueError("verification repository is dirty")
+        if job.mode == "auto_verify":
+            _validate_zero_manifest_binding(locators[index], bundle)
 
     expected = (
         "succeeded"
