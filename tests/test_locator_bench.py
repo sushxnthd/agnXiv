@@ -7,7 +7,7 @@ def test_locator_benchmark_masks_reported_answers() -> None:
     cases = load_locator_cases(Path("research/benchmarks/locator-v0.jsonl"))
     assert len(cases) == 30
     result = run_locator_benchmark(cases)
-    assert result.cases == 12
+    assert result.cases == 30
     assert all("\\n" not in case.output for case in cases)
     assert result.abstain_cases >= 3
     assert result.selection_cases >= 6
