@@ -1,4 +1,4 @@
-from agnxiv.github_issue import parse_issue_body
+from agnxiv.github_issue import _summary, parse_issue_body
 
 
 def _body(
@@ -91,3 +91,43 @@ def test_parse_zero_manifest_auto_verify_request() -> None:
     assert request.mode == "auto_verify"
     assert request.arxiv_id == "1403.6652"
     assert request.spec_path is None
+
+
+
+def test_summary_marks_floating_environment_divergence_as_conditional() -> None:
+    payload = {
+        "request": {
+            "repository": "owner/repo",
+            "repository_ref": "deadbeef",
+            "arxiv_id": "2601.00001",
+        },
+        "status": "succeeded",
+        "result": {
+            "kind": "verification",
+            "zero_manifest": True,
+            "build": {"plan": {"dependency_precision": "floating"}},
+            "bundle": {
+                "claim": {"id": "C1", "text": "Reported accuracy is 0.9."},
+                "record": {
+                    "verdict": "CONTRADICTED",
+                    "expected": 0.9,
+                    "observed_mean": 0.88,
+                },
+                "provenance": {"git": {"commit": "deadbeef"}},
+                "observation_method": "explicit_regex",
+                "execution": {
+                    "returncode": 0,
+                    "source_unchanged": True,
+                    "artifacts_unchanged": True,
+                },
+                "artifacts": [],
+            },
+        },
+        "error": None,
+    }
+
+    text = _summary(payload)
+
+    assert "**Raw numeric verdict:** **CONTRADICTED**" in text
+    assert "**Evidence grade:** **CONDITIONAL**" in text
+    assert "not a strong paper-level reproduction/divergence claim" in text

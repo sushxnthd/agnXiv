@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
+from statistics import NormalDist
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -36,11 +38,60 @@ class SelectiveMetrics(BaseModel):
     cases: int
     decided: int
     coverage: float
+    support_predictions: int
+    divergence_predictions: int
     false_passes: int
     false_divergences: int
     false_pass_rate: float
     false_divergence_rate: float
+    false_pass_upper_95: float
+    false_divergence_upper_95: float
     selective_error_rate: float
+
+
+def binomial_upper_bound_95(events: int, trials: int) -> float:
+    """One-sided 95% upper bound for a Bernoulli error rate.
+
+    The zero-event case uses the exact Clopper-Pearson bound. Non-zero cases
+    use a one-sided Wilson score upper bound. With no trials, return 1.0:
+    absence of decisions is not evidence of safety.
+    """
+    if trials < 0 or events < 0 or events > trials:
+        raise ValueError("events/trials must satisfy 0 <= events <= trials")
+    if trials == 0:
+        return 1.0
+    alpha = 0.05
+    if events == 0:
+        return 1.0 - alpha ** (1.0 / trials)
+
+    p_hat = events / trials
+    z = NormalDist().inv_cdf(1.0 - alpha)
+    z2 = z * z
+    denominator = 1.0 + z2 / trials
+    center = (p_hat + z2 / (2.0 * trials)) / denominator
+    spread = (
+        z
+        / denominator
+        * math.sqrt(
+            p_hat * (1.0 - p_hat) / trials
+            + z2 / (4.0 * trials * trials)
+        )
+    )
+    return min(1.0, center + spread)
+
+
+def minimum_zero_event_sample_size(
+    *,
+    target_rate: float,
+    confidence: float = 0.95,
+) -> int:
+    """Independent zero-error decisions needed to bound rate below target."""
+    if not (0.0 < target_rate < 1.0):
+        raise ValueError("target_rate must be between 0 and 1")
+    if not (0.0 < confidence < 1.0):
+        raise ValueError("confidence must be between 0 and 1")
+    alpha = 1.0 - confidence
+    return math.ceil(math.log(alpha) / math.log(1.0 - target_rate))
 
 
 def score_selective_verification(outcomes: list[SelectiveOutcome]) -> SelectiveMetrics:
@@ -64,6 +115,8 @@ def score_selective_verification(outcomes: list[SelectiveOutcome]) -> SelectiveM
         cases=cases,
         decided=decided,
         coverage=(decided / cases) if cases else 0.0,
+        support_predictions=support_predictions,
+        divergence_predictions=divergence_predictions,
         false_passes=false_passes,
         false_divergences=false_divergences,
         false_pass_rate=(false_passes / support_predictions)
@@ -72,6 +125,14 @@ def score_selective_verification(outcomes: list[SelectiveOutcome]) -> SelectiveM
         false_divergence_rate=(false_divergences / divergence_predictions)
         if divergence_predictions
         else 0.0,
+        false_pass_upper_95=binomial_upper_bound_95(
+            false_passes,
+            support_predictions,
+        ),
+        false_divergence_upper_95=binomial_upper_bound_95(
+            false_divergences,
+            divergence_predictions,
+        ),
         selective_error_rate=(errors / decided) if decided else 0.0,
     )
 

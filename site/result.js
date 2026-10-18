@@ -45,7 +45,10 @@ function additionalClaims(text) {
     .map((line) => line.slice(2));
 }
 
-function evidenceState(verdict, status, issueState) {
+function evidenceState(verdict, grade, status, issueState) {
+  const rawGrade = String(grade || "").toUpperCase();
+  if (rawGrade === "CONDITIONAL") return "CONDITIONAL_EVIDENCE";
+  if (rawGrade === "INCONCLUSIVE") return "INCONCLUSIVE";
   const rawVerdict = String(verdict || "").toUpperCase();
   if (rawVerdict === "VERIFIED") return "REPRODUCED";
   if (rawVerdict === "PARTIALLY_VERIFIED") return "PARTIALLY_REPRODUCED";
@@ -93,14 +96,15 @@ function render(issue, comment) {
   const paperId = section(issue.body, "arXiv ID");
   const commit = extract(raw, "Pinned commit");
   const automation = extract(raw, "Automation");
-  const verdict = extract(raw, "Verdict");
+  const verdict = extract(raw, "Raw numeric verdict") || extract(raw, "Verdict");
+  const evidenceGrade = extract(raw, "Evidence grade");
   const claim = extract(raw, "Claim");
   const expected = extract(raw, "Expected");
   const observed = extract(raw, "Observed");
   const stopped = blockers(raw);
   const otherClaims = additionalClaims(raw);
   const title = issue.title.replace("[AgnXiv Verify]", "").trim() || "Verification request";
-  const state = evidenceState(verdict, status, issue.state);
+  const state = evidenceState(verdict, evidenceGrade, status, issue.state);
   const stateClass = badgeClass(state);
 
   let primary = "";
@@ -120,7 +124,8 @@ function render(issue, comment) {
       '<div class="eyebrow">Evidence state</div>' +
       '<div class="big-metric compact-metric">' + esc(state) + '</div>' +
       (claim ? '<p>' + esc(claim) + '</p>' : '') +
-      '<p class="verifier-note">Underlying verifier verdict: <code>' + esc(verdict) + '</code></p>' +
+      '<p class="verifier-note">Underlying numeric verdict: <code>' + esc(verdict) + '</code>' +
+      (evidenceGrade ? ' · evidence grade: <code>' + esc(evidenceGrade) + '</code>' : '') + '</p>' +
       '</section>';
   } else {
     primary =

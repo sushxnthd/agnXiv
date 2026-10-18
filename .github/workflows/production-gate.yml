@@ -1,0 +1,124 @@
+name: production-gate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safety-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: python -m pip install -e ".[dev,pdf]"
+
+      - name: Production-critical unit contracts
+        run: |
+          ruff check src tests research/scripts
+          pytest \
+            tests/test_service_hardening.py \
+            tests/test_zero_manifest.py \
+            tests/test_sandbox.py \
+            tests/test_oidc.py \
+            tests/test_network.py
+
+      - name: Run frozen safety benchmarks
+        run: |
+          python - <<'PY' > /tmp/redbench.json
+          import json
+          from agnxiv.benchmark import load_jsonl_cases, run_recorded_benchmark
+          report = run_recorded_benchmark(
+              load_jsonl_cases("research/benchmarks/redbench-v0.jsonl")
+          )
+          print(json.dumps(report.model_dump(mode="json"), indent=2))
+          PY
+          python research/scripts/run_locator_benchmark.py \
+            --output /tmp/locator.json
+          python research/scripts/run_aggregation_benchmark.py \
+            --output /tmp/aggregation.json
+
+      - name: Enforce scientific safety thresholds
+        run: |
+          python - <<'PY'
+          import json
+          with open("/tmp/redbench.json", encoding="utf-8") as handle:
+              red = json.load(handle)
+          with open("/tmp/locator.json", encoding="utf-8") as handle:
+              locator = json.load(handle)
+          with open("/tmp/aggregation.json", encoding="utf-8") as handle:
+              aggregation = json.load(handle)
+
+          assert red["false_passes"] == 0
+          assert red["false_contradictions"] == 0
+          assert red["matched"] == red["total"]
+          assert locator["false_selections"] == 0
+          assert locator["missed_selections"] == 0
+          assert locator["correct"] == locator["cases"]
+          assert aggregation["matched"] == aggregation["cases"]
+          PY
+
+      - name: Enforce trusted workflow immutability
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          failures = []
+          sha = re.compile(r"^[0-9a-f]{40}$")
+          for path in sorted(Path(".github/workflows").glob("*.yml")):
+              for number, line in enumerate(
+                  path.read_text(encoding="utf-8").splitlines(),
+                  start=1,
+              ):
+                  stripped = line.strip()
+                  if not re.match(r"^(?:-\s*)?uses:\s+", stripped):
+                      continue
+                  target = stripped.split("uses:", 1)[1].strip().split("#", 1)[0].strip()
+                  if target.startswith("./"):
+                      continue
+                  if "@" not in target:
+                      failures.append(f"{path}:{number}: action is not versioned")
+                      continue
+                  ref = target.rsplit("@", 1)[1]
+                  if not sha.fullmatch(ref):
+                      failures.append(
+                          f"{path}:{number}: action ref is not an immutable 40-char SHA: {ref}"
+                      )
+
+          dockerfile = Path("Dockerfile.service").read_text(encoding="utf-8")
+          if "--forwarded-allow-ips='*'" in dockerfile:
+              failures.append("Dockerfile.service trusts arbitrary forwarded proxy headers")
+          first_line = dockerfile.splitlines()[0]
+          if "@sha256:" not in first_line:
+              failures.append("Dockerfile.service base image is not digest-pinned")
+          constraints = Path("constraints-service.txt")
+          if not constraints.is_file() or "fastapi==" not in constraints.read_text(encoding="utf-8"):
+              failures.append("hosted service dependency constraints are missing")
+
+          if failures:
+              raise SystemExit("\n".join(failures))
+          print("trusted workflow actions are immutable and proxy trust is restricted")
+          PY
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: production-gate-evidence
+          path: |
+            /tmp/redbench.json
+            /tmp/locator.json
+            /tmp/aggregation.json
+          retention-days: 90
+          if-no-files-found: warn

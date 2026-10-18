@@ -3,8 +3,18 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import DateTime, String, Text, create_engine, func, select, text
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import (
+    DateTime,
+    String,
+    Text,
+    UniqueConstraint,
+    create_engine,
+    func,
+    select,
+    text,
+    update,
+)
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
@@ -14,6 +24,13 @@ class Base(DeclarativeBase):
 
 class Job(Base):
     __tablename__ = "agnxiv_jobs"
+    __table_args__ = (
+        UniqueConstraint(
+            "api_key_hash",
+            "idempotency_key_hash",
+            name="uq_agnxiv_jobs_api_idempotency",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     api_key_hash: Mapped[str] = mapped_column(String(64), index=True)
@@ -23,6 +40,12 @@ class Job(Base):
     repository_ref: Mapped[str] = mapped_column(String(255))
     arxiv_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     spec_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    idempotency_key_hash: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        index=True,
+    )
+    request_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
     result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -81,6 +104,8 @@ class JobStore:
         repository_ref: str,
         arxiv_id: str | None,
         spec_path: str | None,
+        idempotency_key_hash: str | None = None,
+        request_fingerprint: str | None = None,
     ) -> Job:
         job = Job(
             id=job_id,
@@ -91,6 +116,8 @@ class JobStore:
             repository_ref=repository_ref,
             arxiv_id=arxiv_id,
             spec_path=spec_path,
+            idempotency_key_hash=idempotency_key_hash,
+            request_fingerprint=request_fingerprint,
         )
         with self.session_factory() as session:
             session.add(job)
@@ -98,9 +125,94 @@ class JobStore:
             session.refresh(job)
         return job
 
+    def create_job_idempotent(
+        self,
+        *,
+        job_id: str,
+        api_key_hash: str,
+        mode: str,
+        repository: str,
+        repository_ref: str,
+        arxiv_id: str | None,
+        spec_path: str | None,
+        idempotency_key_hash: str,
+        request_fingerprint: str,
+    ) -> tuple[Job, bool]:
+        """Create exactly one job for an API-key/idempotency-key pair."""
+        job = Job(
+            id=job_id,
+            api_key_hash=api_key_hash,
+            status="queued",
+            mode=mode,
+            repository=repository,
+            repository_ref=repository_ref,
+            arxiv_id=arxiv_id,
+            spec_path=spec_path,
+            idempotency_key_hash=idempotency_key_hash,
+            request_fingerprint=request_fingerprint,
+        )
+        with self.session_factory() as session:
+            session.add(job)
+            try:
+                session.commit()
+                session.refresh(job)
+                return job, True
+            except IntegrityError:
+                session.rollback()
+                statement = select(Job).where(
+                    Job.api_key_hash == api_key_hash,
+                    Job.idempotency_key_hash == idempotency_key_hash,
+                )
+                existing = session.scalar(statement)
+                if existing is None:
+                    raise
+                return existing, False
+
     def get_job(self, job_id: str) -> Job | None:
         with self.session_factory() as session:
             return session.get(Job, job_id)
+
+    def get_by_idempotency(
+        self,
+        *,
+        api_key_hash: str,
+        idempotency_key_hash: str,
+    ) -> Job | None:
+        with self.session_factory() as session:
+            statement = select(Job).where(
+                Job.api_key_hash == api_key_hash,
+                Job.idempotency_key_hash == idempotency_key_hash,
+            )
+            return session.scalar(statement)
+
+    def metrics(self) -> dict[str, object]:
+        """Return secret-free operator counters for the hosted control plane."""
+        with self.session_factory() as session:
+            status_rows = session.execute(
+                select(Job.status, func.count()).group_by(Job.status)
+            ).all()
+            mode_rows = session.execute(
+                select(Job.mode, func.count()).group_by(Job.mode)
+            ).all()
+            total = int(session.scalar(select(func.count()).select_from(Job)) or 0)
+            recent_cutoff = datetime.now(UTC) - timedelta(hours=1)
+            recent = int(
+                session.scalar(
+                    select(func.count())
+                    .select_from(Job)
+                    .where(Job.created_at >= recent_cutoff)
+                )
+                or 0
+            )
+        statuses = {str(key): int(value) for key, value in status_rows}
+        modes = {str(key): int(value) for key, value in mode_rows}
+        return {
+            "jobs_total": total,
+            "jobs_last_hour": recent,
+            "jobs_by_status": statuses,
+            "jobs_by_mode": modes,
+            "jobs_active": statuses.get("queued", 0) + statuses.get("running", 0),
+        }
 
     def count_active(self, api_key_hash: str) -> int:
         with self.session_factory() as session:
@@ -121,6 +233,27 @@ class JobStore:
 
     def mark_running(self, job_id: str) -> None:
         self._update(job_id, status="running", error=None)
+
+    def reap_stale(self, *, minutes: int) -> int:
+        """Fail queued/running jobs whose callback never arrived."""
+        cutoff = datetime.now(UTC) - timedelta(minutes=max(1, minutes))
+        now = datetime.now(UTC)
+        with self.session_factory() as session:
+            statement = (
+                update(Job)
+                .where(
+                    Job.status.in_(("queued", "running")),
+                    Job.updated_at < cutoff,
+                )
+                .values(
+                    status="failed",
+                    error="hosted verification exceeded its callback deadline",
+                    updated_at=now,
+                )
+            )
+            result = session.execute(statement)
+            session.commit()
+            return int(result.rowcount or 0)
 
     def complete(
         self,

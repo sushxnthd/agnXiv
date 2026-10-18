@@ -22,7 +22,7 @@
       "id": "selective",
       "name": "Selective verification and abstention",
       "priority": "S+",
-      "status": "v0_regression_complete",
+      "status": "v1_evidence_strength_gate_implemented_risk_curve_pending",
       "primary_metric": "risk_coverage_curve",
       "target": "maximize verification coverage subject to a <=1% empirical false-pass target on labeled cases"
     },
@@ -54,7 +54,7 @@
       "id": "locator",
       "name": "Leakage-free observation discovery",
       "priority": "S",
-      "status": "v0_synthetic_complete_real_integration_pending",
+      "status": "v1_real_paper_integration_complete_scale_pending",
       "primary_metric": "locator_accuracy_blinded",
       "target": "select the correct output without access to the reported numeric answer"
     },
@@ -86,7 +86,7 @@
       "id": "aggregation",
       "name": "Conflicting evidence aggregation",
       "priority": "A+",
-      "status": "protocol_ready_experiment_pending",
+      "status": "v1_independence_benchmark_implemented_real_cohort_pending",
       "primary_metric": "calibrated_record_state_accuracy",
       "target": "represent correlated and independent replications without a universal truth score"
     },
@@ -132,8 +132,13 @@
       "name": "AutoReproduce",
       "use": "paper-lineage and executability ablations",
       "size": "external comparative baseline"
+    },
+    {
+      "name": "ReproRepo",
+      "use": "large-scale real GitHub reproduction blockers and held-out paper/repository auditing",
+      "size": "1,149 recent machine-learning papers"
     }
   ],
-  "phase": "v0_complete",
+  "phase": "v1_hardening_active",
   "v0_freeze": "2026-10-18"
 }

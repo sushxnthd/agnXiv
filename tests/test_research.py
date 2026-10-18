@@ -3,7 +3,9 @@ from pathlib import Path
 from agnxiv.research import (
     CentralityGold,
     SelectiveOutcome,
+    binomial_upper_bound_95,
     load_research_cases,
+    minimum_zero_event_sample_size,
     score_centrality_ranking,
     score_selective_verification,
 )
@@ -80,3 +82,31 @@ def test_centrality_ranking_reports_first_gold_rank() -> None:
     assert result.first_gold_rank == 2
     assert result.recall_at_1 is False
     assert result.recall_at_3 is True
+
+
+
+def test_zero_false_passes_report_uncertainty_not_zero_risk() -> None:
+    upper = binomial_upper_bound_95(0, 12)
+    assert 0.22 < upper < 0.23
+
+
+def test_no_support_predictions_provide_no_false_pass_safety_evidence() -> None:
+    metrics = score_selective_verification(
+        [
+            SelectiveOutcome(
+                case_id="a",
+                gold_supports_claim=False,
+                predicted="ABSTAIN",
+            )
+        ]
+    )
+    assert metrics.support_predictions == 0
+    assert metrics.false_pass_rate == 0.0
+    assert metrics.false_pass_upper_95 == 1.0
+
+
+def test_sample_size_for_one_percent_zero_false_pass_claim() -> None:
+    assert minimum_zero_event_sample_size(
+        target_rate=0.01,
+        confidence=0.95,
+    ) == 299

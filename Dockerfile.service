@@ -1,4 +1,4 @@
-FROM python:3.11.17-slim-bookworm
+FROM python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -9,15 +9,16 @@ RUN groupadd --system agnxiv && useradd --system --gid agnxiv --create-home agnx
 
 WORKDIR /app
 
-COPY pyproject.toml README.md LICENSE alembic.ini ./
+COPY pyproject.toml README.md LICENSE alembic.ini constraints-service.txt ./
 COPY src ./src
 COPY migrations ./migrations
 
-RUN python -m pip install --upgrade pip && \
-    python -m pip install ".[service,sign,pdf]"
+RUN python -m pip install "pip==26.2.1" && \
+    python -m pip install -c constraints-service.txt ".[service,sign,pdf]" && \
+    python -m pip check
 
 USER agnxiv
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --forwarded-allow-ips=''"]

@@ -8,7 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from .hosted_runner import HostedRunnerError, execute_job
-from .network import attempt_from_github_payload
+from .network import EvidenceGrade, attempt_from_github_payload, attempts_from_github_payload
 from .preprint import parse_arxiv_reference
 from .service.security import validate_git_ref, validate_github_slug
 
@@ -148,32 +148,48 @@ def _summary(payload: dict) -> str:
         record = bundle.get("record") or {}
         claim = bundle.get("claim") or {}
         git = (bundle.get("provenance") or {}).get("git") or {}
+        attempts = attempts_from_github_payload(
+            payload,
+            attempt_id="AX-SUMMARY",
+        )
+        primary = attempts[0]
         lines.extend(
             [
                 f"**Pinned commit:** `{git.get('commit', 'unknown')}`",
-                f"**Verdict:** **{record.get('verdict', 'UNKNOWN')}**",
+                f"**Raw numeric verdict:** **{record.get('verdict', 'UNKNOWN')}**",
+                f"**Evidence grade:** **{primary.evidence_grade.value}**",
                 f"**Claim:** {claim.get('text', 'Unknown claim')}",
                 f"**Expected:** {record.get('expected')}",
                 f"**Observed:** {record.get('observed_mean')}",
                 f"**Zero manifest:** {'yes' if result.get('zero_manifest') else 'no'}",
             ]
         )
-        extra = result.get("additional_verifications") or []
-        if extra:
+        if primary.evidence_grade == EvidenceGrade.CONDITIONAL:
+            precision = primary.dependency_precision or "unknown"
+            lines.extend(
+                [
+                    "",
+                    (
+                        "This numeric outcome is **conditional evidence**, not a strong "
+                        "paper-level reproduction/divergence claim, because the reconstructed "
+                        f"dependency environment is `{precision}`."
+                    ),
+                ]
+            )
+        if len(attempts) > 1:
             lines.extend(["", "### Additional zero-manifest claims"])
-            for item in extra:
-                other = item.get("bundle") or {}
-                other_claim = other.get("claim") or {}
-                other_record = other.get("record") or {}
+            for other in attempts[1:]:
                 lines.append(
                     "- "
-                    + str(other_claim.get("metric") or other_claim.get("id") or "claim")
+                    + str(other.claim_id or "claim")
                     + ": "
-                    + str(other_record.get("verdict", "UNKNOWN"))
+                    + str(other.verdict.value if other.verdict else "UNKNOWN")
+                    + " / "
+                    + other.evidence_grade.value
                     + " (expected "
-                    + str(other_record.get("expected"))
+                    + str(other.expected)
                     + ", observed "
-                    + str(other_record.get("observed_mean"))
+                    + str(other.observed)
                     + ")"
                 )
         return "\n".join(lines) + "\n"

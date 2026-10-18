@@ -84,6 +84,12 @@ AgnXiv currently supports:
 
 Abstention is a normal safety outcome. AgnXiv is designed to prefer missed coverage over false passes.
 
+## Production and evaluation contract
+
+AgnXiv separates the **raw numeric verifier verdict** from the strength of the evidence supporting it. Clean explicit executions in a sufficiently pinned environment are graded **STRONG**; executions with floating or historically uncertain dependencies are **CONDITIONAL**; ambiguous or incomplete evidence is **INCONCLUSIVE**. Repeated runs of the same code/data lineage are grouped into one evidence cluster rather than counted as independent votes.
+
+Production launch criteria are tracked in `docs/PRODUCTION_READINESS.md`. Competitive claims and measurable win conditions against capsule, audit, and replication systems are tracked in `docs/COMPETITIVE_POSITION.md`. AgnXiv does not claim category leadership until held-out false-pass, coverage, environment-recovery, centrality, and DAG metrics satisfy those gates.
+
 ## Trust model
 
 Models or heuristics may suggest claims, files, commands, or tests. They do not award a verdict.

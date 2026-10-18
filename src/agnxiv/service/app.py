@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import base64
 import binascii
+import json
+import logging
+import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
@@ -23,7 +26,16 @@ from .config import ServiceConfig
 from .db import Job, JobStore, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
 from .oidc import GitHubOIDCPolicy, OIDCVerificationError, verify_github_actions_token
-from .security import constant_time_equal, hash_secret, validate_git_ref, validate_github_slug
+from .security import (
+    constant_time_equal,
+    fingerprint_job_request,
+    hash_secret,
+    validate_git_ref,
+    validate_github_slug,
+    validate_idempotency_key,
+)
+
+_LOGGER = logging.getLogger("agnxiv.service")
 
 
 class JobCreate(BaseModel):
@@ -211,6 +223,19 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         allowed_hosts=allowed_hosts,
     )
 
+    def issuer_key_valid() -> bool:
+        if not active_config.issuer_private_key_b64:
+            return False
+        try:
+            private_key = base64.b64decode(
+                active_config.issuer_private_key_b64,
+                validate=True,
+            )
+            public_key_pem_from_private(private_key)
+        except (ValueError, binascii.Error):
+            return False
+        return True
+
     def authenticate(api_key: str | None) -> tuple[str, str]:
         if not active_config.api_keys:
             if api_key not in {None, "", "development"}:
@@ -228,6 +253,20 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
 
     @app.middleware("http")
     async def security_headers(request, call_next):
+        supplied_request_id = request.headers.get("x-request-id", "")
+        request_id = (
+            supplied_request_id
+            if (
+                1 <= len(supplied_request_id) <= 64
+                and supplied_request_id.isascii()
+                and all(
+                    char.isalnum() or char in "._-"
+                    for char in supplied_request_id
+                )
+            )
+            else uuid.uuid4().hex
+        )
+        started = time.perf_counter()
         content_length = request.headers.get("content-length")
         if content_length:
             try:
@@ -264,6 +303,23 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         )
         if request.url.path == "/" or request.url.path.startswith(("/v1/", "/internal/")):
             response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Request-ID"] = request_id
+        _LOGGER.info(
+            json.dumps(
+                {
+                    "event": "http_request",
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status": response.status_code,
+                    "duration_ms": round(
+                        (time.perf_counter() - started) * 1000,
+                        3,
+                    ),
+                },
+                separators=(",", ":"),
+            )
+        )
         return response
 
     @app.get("/healthz")
@@ -273,21 +329,43 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
     @app.get("/readyz")
     def readyz() -> dict:
         database_connected = store.ping()
-        if not active_config.production_ready or not database_connected:
+        issues = list(active_config.production_issues)
+        if active_config.issuer_private_key_b64 and not issuer_key_valid():
+            issues.append("issuer_key_invalid")
+        if not database_connected:
+            issues.append("database_unreachable")
+        if issues:
             raise HTTPException(
                 status_code=503,
                 detail={
                     "status": "not-ready",
+                    "issues": sorted(set(issues)),
                     "database": active_config.database_url.split(":", 1)[0],
-                    "database_connected": database_connected,
-                    "github_dispatch": bool(active_config.github_token),
-                    "api_keys": bool(active_config.api_keys),
-                    "issuer_key": bool(active_config.issuer_private_key_b64),
-                    "https_public_url": active_config.public_base_url.startswith("https://"),
-                    "oidc_audience": active_config.oidc_audience.startswith("https://"),
                 },
             )
         return {"status": "ready", "database_connected": True}
+
+    @app.get("/v1/meta")
+    def meta() -> dict:
+        return {
+            "service": "agnxiv",
+            "api_version": "v1",
+            "verification_modes": ["auto_verify", "auto_plan", "verify_spec"],
+            "scientific_contract": "claim-level execution evidence; no paper truth score",
+            "zero_manifest": True,
+            "signed_statements": bool(active_config.issuer_private_key_b64),
+        }
+
+    @app.get("/v1/metrics")
+    def metrics(
+        x_api_key: Annotated[str | None, Header()] = None,
+    ) -> dict:
+        authenticate(x_api_key)
+        store.reap_stale(minutes=active_config.job_stale_minutes)
+        return {
+            "schema_version": "agnxiv.metrics/1",
+            **store.metrics(),
+        }
 
     @app.get("/v1/issuer")
     def issuer() -> dict:
@@ -317,8 +395,13 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
     def create_job(
         body: JobCreate,
         x_api_key: Annotated[str | None, Header()] = None,
+        idempotency_key: Annotated[
+            str | None,
+            Header(alias="Idempotency-Key"),
+        ] = None,
     ) -> JobView:
         _, api_hash = authenticate(x_api_key)
+        store.reap_stale(minutes=active_config.job_stale_minutes)
 
         if dispatcher is None:
             raise HTTPException(
@@ -354,6 +437,33 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         ):
             raise HTTPException(status_code=422, detail="unsafe spec_path")
 
+        idempotency_key_hash: str | None = None
+        request_fingerprint: str | None = None
+        if idempotency_key is not None:
+            try:
+                normalized_idempotency = validate_idempotency_key(idempotency_key)
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            idempotency_key_hash = hash_secret(normalized_idempotency)
+            request_fingerprint = fingerprint_job_request(
+                mode=body.mode,
+                repository=repository,
+                repository_ref=repository_ref,
+                arxiv_id=arxiv_id,
+                spec_path=body.spec_path,
+            )
+            existing = store.get_by_idempotency(
+                api_key_hash=api_hash,
+                idempotency_key_hash=idempotency_key_hash,
+            )
+            if existing is not None:
+                if existing.request_fingerprint != request_fingerprint:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Idempotency-Key was already used for a different request",
+                    )
+                return _job_view(existing)
+
         if store.count_active(api_hash) >= active_config.max_active_jobs_per_key:
             raise HTTPException(
                 status_code=429,
@@ -374,15 +484,36 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             ) from exc
 
         job_id = str(uuid.uuid4())
-        job = store.create_job(
-            job_id=job_id,
-            api_key_hash=api_hash,
-            mode=body.mode,
-            repository=repository,
-            repository_ref=pinned_ref,
-            arxiv_id=arxiv_id,
-            spec_path=body.spec_path,
-        )
+        created = True
+        if idempotency_key_hash is not None and request_fingerprint is not None:
+            job, created = store.create_job_idempotent(
+                job_id=job_id,
+                api_key_hash=api_hash,
+                mode=body.mode,
+                repository=repository,
+                repository_ref=pinned_ref,
+                arxiv_id=arxiv_id,
+                spec_path=body.spec_path,
+                idempotency_key_hash=idempotency_key_hash,
+                request_fingerprint=request_fingerprint,
+            )
+            if not created:
+                if job.request_fingerprint != request_fingerprint:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Idempotency-Key was already used for a different request",
+                    )
+                return _job_view(job)
+        else:
+            job = store.create_job(
+                job_id=job_id,
+                api_key_hash=api_hash,
+                mode=body.mode,
+                repository=repository,
+                repository_ref=pinned_ref,
+                arxiv_id=arxiv_id,
+                spec_path=body.spec_path,
+            )
 
         request = DispatchRequest(
             job_id=job.id,
@@ -419,6 +550,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         x_api_key: Annotated[str | None, Header()] = None,
     ) -> JobView:
         _, api_hash = authenticate(x_api_key)
+        store.reap_stale(minutes=active_config.job_stale_minutes)
         job = store.get_job(job_id)
         if job is None or job.api_key_hash != api_hash:
             raise HTTPException(status_code=404, detail="job not found")
@@ -430,6 +562,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         body: WorkerCallback,
         authorization: Annotated[str | None, Header()] = None,
     ) -> dict:
+        store.reap_stale(minutes=active_config.job_stale_minutes)
         job = store.get_job(job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="job not found")
