@@ -14,7 +14,6 @@ from sqlalchemy import (
     func,
     select,
     text,
-    update,
 )
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
