@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import DateTime, String, Text, create_engine, func, select, text
+from sqlalchemy import DateTime, String, Text, create_engine, func, select, text, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
@@ -121,6 +121,27 @@ class JobStore:
 
     def mark_running(self, job_id: str) -> None:
         self._update(job_id, status="running", error=None)
+
+    def reap_stale(self, *, minutes: int) -> int:
+        """Fail queued/running jobs whose callback never arrived."""
+        cutoff = datetime.now(UTC) - timedelta(minutes=max(1, minutes))
+        now = datetime.now(UTC)
+        with self.session_factory() as session:
+            statement = (
+                update(Job)
+                .where(
+                    Job.status.in_(("queued", "running")),
+                    Job.updated_at < cutoff,
+                )
+                .values(
+                    status="failed",
+                    error="hosted verification exceeded its callback deadline",
+                    updated_at=now,
+                )
+            )
+            result = session.execute(statement)
+            session.commit()
+            return int(result.rowcount or 0)
 
     def complete(
         self,
