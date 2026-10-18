@@ -60,6 +60,7 @@ def assess_repeated_observations(
             [observation],
             VerificationPolicy(
                 kind=policy.kind,
+                operator=policy.operator,
                 tolerance=policy.tolerance,
                 minimum_repetitions=1,
             ),
