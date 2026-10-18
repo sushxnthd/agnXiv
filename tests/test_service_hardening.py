@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
-from agnxiv.service.db import Job, JobStore
+from agnxiv.service.db import Job, JobStore, TransparencyEntry
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
 
 
@@ -299,3 +299,99 @@ def test_request_id_is_echoed_and_untrusted_values_are_replaced(tmp_path) -> Non
     assert valid.headers["X-Request-ID"] == "trace-123"
     assert invalid.headers["X-Request-ID"] != "bad request id with spaces"
     assert len(invalid.headers["X-Request-ID"]) == 32
+
+
+def test_transparency_receipt_is_atomic_hash_chained_and_secret_free(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'transparency.db'}")
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000101",
+        api_key_hash="api-secret-hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="a" * 40,
+        arxiv_id="2601.00001",
+        spec_path=None,
+    )
+    store.mark_running(job.id)
+    store.complete(
+        job.id,
+        status="succeeded",
+        result={"kind": "verification", "private_marker": "must-not-leak"},
+        error=None,
+    )
+
+    receipt = store.transparency_for_job(job.id)
+    assert receipt is not None
+    assert receipt["sequence"] == 1
+    assert receipt["previous_hash"] == "0" * 64
+    assert len(str(receipt["entry_hash"])) == 64
+    assert len(str(receipt["payload_sha256"])) == 64
+    assert "must-not-leak" not in str(receipt)
+    assert store.transparency_head()["entry_hash"] == receipt["entry_hash"]
+    assert store.verify_transparency_chain()["valid"] is True
+
+
+def test_transparency_chain_detects_database_tampering(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'tamper.db'}")
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000102",
+        api_key_hash="hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="b" * 40,
+        arxiv_id="2601.00002",
+        spec_path=None,
+    )
+    store.complete(job.id, status="failed", result=None, error="controlled failure")
+    assert store.verify_transparency_chain()["valid"] is True
+
+    with store.session_factory() as session:
+        entry = session.get(TransparencyEntry, 1)
+        assert entry is not None
+        entry.payload_sha256 = "f" * 64
+        session.commit()
+
+    verification = store.verify_transparency_chain()
+    assert verification["valid"] is False
+    assert verification["reason"] == "entry_hash_mismatch"
+
+
+def test_transparency_api_publishes_receipts_but_full_verification_requires_auth(
+    tmp_path,
+) -> None:
+    database = f"sqlite:///{tmp_path / 'api-transparency.db'}"
+    store = JobStore(database)
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000103",
+        api_key_hash="hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="c" * 40,
+        arxiv_id="2601.00003",
+        spec_path=None,
+    )
+    store.complete(job.id, status="failed", result=None, error="test")
+
+    app = create_app(_productionish_config(database, issuer=None))
+    with TestClient(app) as client:
+        head = client.get("/v1/transparency/head")
+        page = client.get("/v1/transparency?after=0&limit=10")
+        receipt = client.get(f"/v1/transparency/jobs/{job.id}")
+        denied = client.get("/v1/transparency/verify")
+        verified = client.get(
+            "/v1/transparency/verify",
+            headers={"X-API-Key": "k" * 48},
+        )
+
+    assert head.status_code == 200
+    assert head.json()["sequence"] == 1
+    assert page.status_code == 200
+    assert len(page.json()["entries"]) == 1
+    assert receipt.status_code == 200
+    assert receipt.json()["job_id"] == job.id
+    assert denied.status_code == 401
+    assert verified.status_code == 200
+    assert verified.json()["valid"] is True
