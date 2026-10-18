@@ -14,6 +14,10 @@ def test_docker_command_is_locked_down(tmp_path: Path) -> None:
     joined = " ".join(command)
     assert "--network none" in joined
     assert "--read-only" in command
+    assert "--user" in command
+    assert "65534:65534" in command
+    assert "HOME=/tmp" in command
+    assert "nodev" in joined
     assert "--cap-drop ALL" in joined
     assert "--security-opt no-new-privileges" in joined
     assert "--pids-limit 64" in joined
