@@ -1,0 +1,110 @@
+name: external-benchmark
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  perturbation-measurements:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout AgnXiv
+        uses: actions/checkout@v4
+
+      - name: Checkout third-party research artifact
+        uses: actions/checkout@v4
+        with:
+          repository: Pranavsingh431/Perturbation-Based-Measurements
+          ref: d7fa58215bf6966df70d05f5433f1238c05d2ea0
+          path: external/perturbation-measurements
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev,pdf]"
+
+      - name: Prepare pinned base runtime
+        run: docker pull python:3.11-slim
+
+      - name: Build third-party environment from manifest only
+        run: |
+          agnxiv build-env external/perturbation-measurements             --base-image python:3.11-slim             > /tmp/external-build.json
+          cat /tmp/external-build.json
+          python - <<'PY'
+          import json
+
+          with open("/tmp/external-build.json", encoding="utf-8") as handle:
+              build = json.load(handle)
+
+          assert build["image_id"].startswith("sha256:")
+          assert build["base_image_id"].startswith("sha256:")
+          assert build["plan"]["safe_manifest_only"] is True
+
+          with open("/tmp/external-image-ref.txt", "w", encoding="utf-8") as handle:
+              handle.write(build["image_ref"])
+          PY
+
+      - name: Generate ephemeral benchmark issuer
+        run: |
+          agnxiv keygen             --private-out /tmp/external-private.pem             --public-out /tmp/external-public.pem             > /tmp/external-key.json
+
+      - name: Verify a central reported result
+        shell: bash
+        run: |
+          IMAGE_REF="$(cat /tmp/external-image-ref.txt)"
+          agnxiv verify-command external/perturbation-measurements             --image "$IMAGE_REF"             --cmd python             --cmd evaluation/reproduce.py             --expected 26.6             --metric gap-G             --claim-text "Pool A gap G (15-85) is 26.6."             --kind absolute             --tolerance 0.2             --artifact external/perturbation-measurements/results/paper_numbers.json             --output-regex 'Pool A gap G \(15-85\).*got\s+(?P<value>[-+]?\d+(?:\.\d+)?)'             --sign-key /tmp/external-private.pem             > /tmp/external-verification.json
+
+      - name: Assert third-party verification
+        run: |
+          python - <<'PY'
+          import json
+
+          with open("/tmp/external-verification.json", encoding="utf-8") as handle:
+              payload = json.load(handle)
+
+          bundle = payload["bundle"]
+          statement = payload["statement"]
+          envelope = payload["dsseEnvelope"]
+
+          assert bundle["record"]["verdict"] == "VERIFIED"
+          assert bundle["observation_method"] == "explicit_regex"
+          assert bundle["record"]["observed_mean"] is not None
+          assert abs(bundle["record"]["observed_mean"] - 26.6) <= 0.2 + 1e-12
+          assert bundle["execution"]["returncode"] == 0
+          assert bundle["execution"]["source_unchanged"] is True
+          assert bundle["execution"]["artifacts_unchanged"] is True
+          assert len(bundle["artifacts"]) == 1
+          assert statement["_type"] == "https://in-toto.io/Statement/v1"
+          assert statement["predicate"]["result"]["verdict"] == "VERIFIED"
+          assert envelope["payloadType"] == "application/vnd.in-toto+json"
+
+          with open("/tmp/external-envelope.json", "w", encoding="utf-8") as handle:
+              json.dump(envelope, handle)
+          PY
+
+      - name: Verify third-party DSSE envelope offline
+        run: |
+          agnxiv verify-envelope /tmp/external-envelope.json             --public-key /tmp/external-public.pem             > /tmp/external-authenticated-statement.json
+
+      - name: Assert authenticated external statement
+        run: |
+          python - <<'PY'
+          import json
+
+          with open(
+              "/tmp/external-authenticated-statement.json",
+              encoding="utf-8",
+          ) as handle:
+              statement = json.load(handle)
+
+          assert statement["predicate"]["result"]["verdict"] == "VERIFIED"
+          assert statement["predicate"]["observation"]["method"] == "explicit_regex"
+          assert len(statement["subject"]) == 2
+          PY
