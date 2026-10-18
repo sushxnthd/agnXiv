@@ -81,7 +81,7 @@ def test_oidc_policy_rejects_wrong_claim(
     )
 
     with pytest.raises(OIDCVerificationError, match=field):
-        verify_github_actions_token("token", _policy())
+        verify_github_actions_token(_TOKEN, _policy())
 
 
 def test_oidc_rejects_malformed_token_before_jwks_lookup(monkeypatch) -> None:
