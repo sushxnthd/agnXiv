@@ -4,7 +4,7 @@ import json
 from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, String, Text, create_engine, func, select
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
 class Base(DeclarativeBase):
@@ -38,9 +38,18 @@ class Job(Base):
 
 class JobStore:
     def __init__(self, database_url: str) -> None:
-        connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
+        normalized_url = (
+            "postgresql+psycopg://" + database_url.removeprefix("postgresql://")
+            if database_url.startswith("postgresql://")
+            else database_url
+        )
+        connect_args = (
+            {"check_same_thread": False}
+            if normalized_url.startswith("sqlite")
+            else {}
+        )
         self.engine = create_engine(
-            database_url,
+            normalized_url,
             pool_pre_ping=True,
             connect_args=connect_args,
         )
