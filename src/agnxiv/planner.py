@@ -195,8 +195,25 @@ def discover_commands(repository: str | Path, *, limit: int = 15) -> list[Comman
                 )
             )
 
+    # A documented invocation with flags is more specific than the bare
+    # entrypoint inferred from its filename. Retaining both fabricates a
+    # competing evaluation target and hides an otherwise explicit workflow.
+    documented_entrypoints = {
+        tuple(candidate.command[:2])
+        for candidate in candidates
+        if candidate.source in {"README.md", "README.rst", "README.txt"}
+        and len(candidate.command) > 2
+        and candidate.command[0] in {"python", "python3"}
+        and candidate.command[1].endswith(".py")
+    }
+
     dedup: dict[tuple[str, ...], CommandCandidate] = {}
     for candidate in candidates:
+        if (
+            candidate.rationale.startswith("common research entrypoint:")
+            and tuple(candidate.command) in documented_entrypoints
+        ):
+            continue
         key = tuple(candidate.command)
         existing = dedup.get(key)
         if existing is None or candidate.score > existing.score:

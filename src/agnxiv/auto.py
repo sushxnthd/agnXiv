@@ -76,6 +76,13 @@ _OUTPUT_FLAGS = {
     "--output",
     "--out",
     "-o",
+    "--output-path",
+    "--output_path",
+    "--output-file",
+    "--output_file",
+    "--outfile",
+    "--save-path",
+    "--save_path",
 }
 
 _INPUT_FLAGS = {
@@ -89,6 +96,10 @@ _INPUT_FLAGS = {
     "--labels",
     "--checkpoint",
     "--model",
+    "--input-path",
+    "--input_path",
+    "--input-file",
+    "--input_file",
 }
 
 
@@ -222,18 +233,38 @@ def _option_paths(
     command: CommandCandidate,
     flags: set[str],
 ) -> set[str]:
+    """Extract explicit CLI file inputs/outputs, including --flag=path syntax.
+
+    Only recognized flags and relative file-like values count as dataflow.
+    Do not infer a dependency from arbitrary positional arguments, or from
+    absolute/traversing paths outside the evidence workspace.
+    """
     values: set[str] = set()
     tokens = command.command
 
-    for index, token in enumerate(tokens[:-1]):
-        if token not in flags:
+    for index, token in enumerate(tokens):
+        flag, separator, inline_value = token.partition("=")
+        if flag not in flags:
             continue
-        value = tokens[index + 1].strip("'\"")
-        if value.lower().endswith(_FILE_SUFFIXES):
-            values.add(value)
+        if separator:
+            value = inline_value
+        elif index + 1 < len(tokens):
+            value = tokens[index + 1]
+        else:
+            continue
+
+        value = value.strip("'").strip('"')
+        if not value.lower().endswith(_FILE_SUFFIXES):
+            continue
+
+        path = Path(value)
+        if path.is_absolute() or ".." in path.parts:
+            continue
+        normalized = path.as_posix().removeprefix("./")
+        if normalized:
+            values.add(normalized)
 
     return values
-
 
 def _command_role(candidate: CommandCandidate) -> str:
     joined = " ".join(candidate.command).lower()
@@ -250,18 +281,22 @@ def _command_role(candidate: CommandCandidate) -> str:
 def _workflow_commands(
     commands: list[CommandCandidate],
     repository: Path,
-) -> tuple[list[CommandCandidate], list[str], bool]:
-    """Select a minimal documented verification workflow and order explicit dependencies."""
+) -> tuple[list[CommandCandidate], list[str], bool, list[str]]:
+    """Select a documented workflow and conservatively order explicit dataflow.
+
+    Multiple producers for one required artifact are *not* silently resolved
+    by command-list order. They remain an execution blocker.
+    """
     high_confidence = [candidate for candidate in commands if candidate.score >= 0.84]
     if not high_confidence:
-        return [], [], False
+        return [], [], False, []
 
-    produced_by: dict[str, int] = {}
+    produced_by: dict[str, set[int]] = {}
     inputs_by_index: dict[int, set[str]] = {}
 
     for index, candidate in enumerate(high_confidence):
         for output in _option_paths(candidate, _OUTPUT_FLAGS):
-            produced_by[output] = index
+            produced_by.setdefault(output, set()).add(index)
         inputs_by_index[index] = _option_paths(candidate, _INPUT_FLAGS)
 
     dependencies: dict[int, set[int]] = {
@@ -270,14 +305,19 @@ def _workflow_commands(
     missing_by_index: dict[int, set[str]] = {
         index: set() for index in range(len(high_confidence))
     }
+    ambiguous_by_index: dict[int, set[str]] = {
+        index: set() for index in range(len(high_confidence))
+    }
 
     for index, inputs in inputs_by_index.items():
         for value in inputs:
-            producer = produced_by.get(value)
-            if producer is not None and producer != index:
-                dependencies[index].add(producer)
-                continue
-            if not (repository / value).exists():
+            producers = produced_by.get(value, set()) - {index}
+            if len(producers) == 1:
+                dependencies[index].update(producers)
+            elif len(producers) > 1:
+                ambiguous_by_index[index].add(value)
+                dependencies[index].update(producers)
+            elif not (repository / value).is_file():
                 missing_by_index[index].add(value)
 
     evaluation_indices = [
@@ -298,33 +338,35 @@ def _workflow_commands(
         selected_indices = needed
         target_is_unambiguous = True
     elif len(evaluation_indices) > 1:
+        # Do not choose among distinct paper metrics, datasets, or seeds
+        # using the paper's reported answer.
         selected_indices = set(evaluation_indices)
         target_is_unambiguous = False
     else:
         selected_indices = set(range(len(high_confidence)))
         target_is_unambiguous = len(selected_indices) == 1
 
-    selected = [high_confidence[index] for index in sorted(selected_indices)]
-    remap = {old: new for new, old in enumerate(sorted(selected_indices))}
+    ordered_indices = sorted(selected_indices)
+    selected = [high_confidence[index] for index in ordered_indices]
+    remap = {old: new for new, old in enumerate(ordered_indices)}
     selected_dependencies: dict[int, set[int]] = {}
-    for old_index in sorted(selected_indices):
+    for old_index in ordered_indices:
         selected_dependencies[remap[old_index]] = {
             remap[parent]
             for parent in dependencies[old_index]
             if parent in selected_indices
         }
 
-    missing = sorted(
-        {
-            value
-            for old_index in selected_indices
-            for value in missing_by_index[old_index]
-            if not any(
-                value in _option_paths(high_confidence[parent], _OUTPUT_FLAGS)
-                for parent in selected_indices
-            )
-        }
-    )
+    missing = sorted({
+        value
+        for old_index in selected_indices
+        for value in missing_by_index[old_index]
+    })
+    ambiguous = sorted({
+        value
+        for old_index in selected_indices
+        for value in ambiguous_by_index[old_index]
+    })
 
     ordered: list[CommandCandidate] = []
     remaining = set(range(len(selected)))
@@ -336,7 +378,7 @@ def _workflow_commands(
             if not (selected_dependencies[index] & remaining)
         ]
         if not ready:
-            return selected, sorted(set(missing)), False
+            return selected, missing, False, ambiguous
 
         for index in ready:
             ordered.append(selected[index])
@@ -345,10 +387,10 @@ def _workflow_commands(
     has_explicit_dependency = any(selected_dependencies.values())
     order_confident = (
         target_is_unambiguous
+        and not ambiguous
         and (len(selected) == 1 or has_explicit_dependency)
     )
-    return ordered, sorted(set(missing)), order_confident
-
+    return ordered, missing, order_confident, ambiguous
 
 def _default_policy(claim: Claim) -> VerificationPolicy:
     if claim.unit == "fraction":
@@ -419,15 +461,19 @@ def build_auto_plan(
             "exact reproduction requires environment archaeology."
         )
 
-    workflow, missing_inputs, workflow_order_confident = _workflow_commands(
-        commands,
-        repo,
+    workflow, missing_inputs, workflow_order_confident, ambiguous_inputs = (
+        _workflow_commands(commands, repo)
     )
 
     if missing_inputs:
         blockers.append(
             "Documented command references missing local inputs: "
             + ", ".join(missing_inputs)
+        )
+    if ambiguous_inputs:
+        blockers.append(
+            "Multiple documented commands produce the same required artifact: "
+            + ", ".join(ambiguous_inputs)
         )
 
     if len(workflow) > 1 and not workflow_order_confident:

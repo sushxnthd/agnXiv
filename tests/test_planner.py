@@ -103,3 +103,23 @@ def test_discovers_notebook_style_python_command(tmp_path: Path) -> None:
         ]
         for candidate in commands
     )
+
+
+def test_explicit_documented_eval_does_not_duplicate_bare_entrypoint(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "evaluate.py").write_text("print('accuracy: 91%')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "python evaluate.py --dataset test.json\n",
+        encoding="utf-8",
+    )
+
+    commands = discover_commands(tmp_path)
+
+    assert any(
+        candidate.command == ["python", "evaluate.py", "--dataset", "test.json"]
+        for candidate in commands
+    )
+    assert not any(
+        candidate.command == ["python", "evaluate.py"] for candidate in commands
+    )
