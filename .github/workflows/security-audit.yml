@@ -13,6 +13,8 @@ on:
       - "Dockerfile.service"
       - "pyproject.toml"
       - ".github/workflows/security-audit.yml"
+  schedule:
+    - cron: "17 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -52,5 +54,38 @@ jobs:
           path: |
             /tmp/pip-audit.json
             /tmp/agnxiv-service-sbom.json
+          retention-days: 90
+          if-no-files-found: warn
+
+
+  container-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Build production service image
+        run: docker build --file Dockerfile.service --tag agnxiv-service:security-audit .
+
+      - name: Block fixed HIGH/CRITICAL OS and library vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: agnxiv-service:security-audit
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: json
+          output: trivy-container.json
+          exit-code: "1"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: hosted-service-container-security-audit
+          path: trivy-container.json
           retention-days: 90
           if-no-files-found: warn
