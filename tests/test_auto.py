@@ -96,3 +96,56 @@ def test_auto_plan_prefers_explicit_contribution_over_reference_metric(
 
     assert plan.claims
     assert "proposed method" in plan.claims[0].claim.text.lower()
+
+
+def test_auto_plan_selects_single_evaluation_target_over_lifecycle_commands(
+    tmp_path: Path,
+) -> None:
+    paper = tmp_path / "paper.txt"
+    paper.write_text(
+        "Our proposed method achieves MAE of 3.2.",
+        encoding="utf-8",
+    )
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+    (repo / "README.md").write_text(
+        "python process.py --config data.yaml\n"
+        "python train.py --config model.yaml\n"
+        "python test.py --config eval.yaml\n",
+        encoding="utf-8",
+    )
+    for name in ("process.py", "train.py", "test.py"):
+        (repo / name).write_text("print('mae: 3.2')\n", encoding="utf-8")
+
+    plan = build_auto_plan(paper, repo)
+
+    workflow_stage = next(
+        stage for stage in plan.stages if stage.name == "workflow_ordering"
+    )
+    assert workflow_stage.complete is True
+    assert plan.draft_spec is not None
+    assert plan.draft_spec.runtime.command == ["python", "test.py", "--config", "eval.yaml"]
+
+
+def test_auto_plan_abstains_when_multiple_evaluation_targets_are_documented(
+    tmp_path: Path,
+) -> None:
+    paper = tmp_path / "paper.txt"
+    paper.write_text("Our method achieves accuracy of 90%.", encoding="utf-8")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+    (repo / "README.md").write_text(
+        "python test.py --config dataset_a.yaml\n"
+        "python test.py --config dataset_b.yaml\n",
+        encoding="utf-8",
+    )
+    (repo / "test.py").write_text("print('accuracy: 90%')\n", encoding="utf-8")
+
+    plan = build_auto_plan(paper, repo)
+
+    assert any(
+        "execution order could not be inferred safely" in blocker
+        for blocker in plan.blockers
+    )
