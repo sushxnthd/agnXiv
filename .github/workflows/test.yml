@@ -25,6 +25,8 @@ jobs:
       - name: Run end-to-end AgnXiv verification
         run: |
           agnxiv verify-command examples/fixture-paper             --image python:3.11-slim             --cmd python             --cmd reproduce.py             --expected 0.914             --metric accuracy             --unit fraction             --manuscript examples/fixture-paper/paper.txt             > /tmp/agnxiv-integration.json
+      - name: Show integration verification record
+        run: cat /tmp/agnxiv-integration.json
       - name: Assert verification evidence
         run: |
           python - <<'PY'
