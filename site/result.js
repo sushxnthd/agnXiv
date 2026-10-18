@@ -11,8 +11,16 @@ function esc(value) {
 function extract(text, label) {
   const safe = label.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
   const pattern = new RegExp("\\*\\*" + safe + ":\\*\\*\\s*([^\\n]+)", "i");
-  const match = text.match(pattern);
+  const match = String(text || "").match(pattern);
   return match ? match[1].replace(/`/g, "").trim() : null;
+}
+
+function section(text, heading) {
+  const safe = heading.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+  const match = String(text || "").match(
+    new RegExp("^###\\s+" + safe + "\\s*$\\n+([^#]+?)(?=^###\\s+|$)", "im")
+  );
+  return match ? match[1].trim().replace(/^_No response_$/i, "") : "";
 }
 
 function blockers(text) {
@@ -26,10 +34,22 @@ function blockers(text) {
     .map((line) => line.slice(2));
 }
 
+function evidenceState(verdict, status, issueState) {
+  const rawVerdict = String(verdict || "").toUpperCase();
+  if (rawVerdict === "VERIFIED") return "REPRODUCED";
+  if (rawVerdict === "PARTIALLY_VERIFIED") return "PARTIALLY_REPRODUCED";
+  if (rawVerdict === "CONTRADICTED") return "RESULT_DIVERGENCE";
+  if (rawVerdict === "UNABLE_TO_VERIFY") return "INCONCLUSIVE";
+  const rawStatus = String(status || "").toLowerCase();
+  if (rawStatus === "needs_review") return "EVIDENCE_INCOMPLETE";
+  if (rawStatus === "failed") return "EXECUTION_BLOCKED";
+  return issueState === "open" ? "RUNNING" : "INCONCLUSIVE";
+}
+
 function badgeClass(status) {
   const upper = String(status || "").toUpperCase();
-  if (upper.includes("VERIFIED") && !upper.includes("UNABLE")) return "verified";
-  if (upper.includes("CONTRADICTED") || upper.includes("FAILED")) return "failed";
+  if (upper === "REPRODUCED") return "verified";
+  if (upper === "RESULT_DIVERGENCE") return "failed";
   return "review";
 }
 
@@ -50,15 +70,16 @@ async function load() {
     );
     render(issue, resultComment);
   } catch (error) {
-    renderError("Verification record unavailable.", "The GitHub-backed public record could not be loaded right now.");
+    renderError("Verification record unavailable.", "The public AgnXiv record could not be loaded right now.");
   }
 }
 
 function render(issue, comment) {
   const raw = comment ? comment.body : "";
-  const status = extract(raw, "Status") || (issue.state === "open" ? "RUNNING / REVIEW" : "COMPLETED");
-  const repository = extract(raw, "Repository") || "Unknown repository";
-  const gitRef = extract(raw, "Git ref") || "Unknown";
+  const status = extract(raw, "Status") || (issue.state === "open" ? "RUNNING" : "COMPLETED");
+  const repository = extract(raw, "Repository") || section(issue.body, "Public GitHub repository") || "Unknown repository";
+  const gitRef = extract(raw, "Git ref") || section(issue.body, "Git ref") || "Unknown";
+  const paperId = section(issue.body, "arXiv ID");
   const commit = extract(raw, "Pinned commit");
   const automation = extract(raw, "Automation");
   const verdict = extract(raw, "Verdict");
@@ -67,7 +88,8 @@ function render(issue, comment) {
   const observed = extract(raw, "Observed");
   const stopped = blockers(raw);
   const title = issue.title.replace("[AgnXiv Verify]", "").trim() || "Verification request";
-  const stateClass = badgeClass(verdict || status);
+  const state = evidenceState(verdict, status, issue.state);
+  const stateClass = badgeClass(state);
 
   let primary = "";
   if (automation) {
@@ -75,24 +97,25 @@ function render(issue, comment) {
     const percent = match ? match[0] : automation;
     primary =
       '<section class="result-panel">' +
-      '<div class="eyebrow">Automation coverage</div>' +
-      '<div class="big-metric">' + esc(percent) + '</div>' +
-      '<p class="subtle">' + esc(automation) + '</p>' +
+      '<div class="eyebrow">Evidence state</div>' +
+      '<div class="big-metric compact-metric">' + esc(state) + '</div>' +
+      '<p class="subtle">Automation coverage: ' + esc(automation) + '</p>' +
       '<div class="progress"><span style="width:' + esc(percent) + '"></span></div>' +
       '</section>';
   } else if (verdict) {
     primary =
       '<section class="result-panel">' +
-      '<div class="eyebrow">Claim verdict</div>' +
-      '<div class="big-metric">' + esc(verdict) + '</div>' +
+      '<div class="eyebrow">Evidence state</div>' +
+      '<div class="big-metric compact-metric">' + esc(state) + '</div>' +
       (claim ? '<p>' + esc(claim) + '</p>' : '') +
+      '<p class="verifier-note">Underlying verifier verdict: <code>' + esc(verdict) + '</code></p>' +
       '</section>';
   } else {
     primary =
       '<section class="result-panel">' +
       '<div class="eyebrow">Execution</div>' +
       '<h2>Verification is still running.</h2>' +
-      '<p class="subtle">This page will show the scientific record as soon as the GitHub-hosted worker publishes it.</p>' +
+      '<p class="subtle">This page will show the scientific record as soon as the verification worker publishes it.</p>' +
       '</section>';
   }
 
@@ -102,31 +125,40 @@ function render(issue, comment) {
       '</ul></section>'
     : '';
 
+  const paperFact = paperId
+    ? '<div><dt>Paper</dt><dd>arXiv:' + esc(paperId) + '</dd></div>'
+    : '';
+  const paperAction = paperId
+    ? '<a class="button ghost" href="./lookup.html?q=' + encodeURIComponent(paperId) + '">View paper evidence</a>'
+    : '';
+
   root.innerHTML =
     '<section class="result-header">' +
-      '<div><div class="eyebrow">AgnXiv verification #' + issue.number + '</div>' +
+      '<div><div class="eyebrow">AgnXiv attempt · AX-GH-' + issue.number + '</div>' +
       '<h1>' + esc(title) + '</h1>' +
       '<p>Submitted ' + new Date(issue.created_at).toLocaleString() + '</p></div>' +
-      '<span class="badge ' + stateClass + '">' + esc(verdict || status) + '</span>' +
+      '<span class="badge ' + stateClass + '">' + esc(state) + '</span>' +
     '</section>' +
     '<div class="result-grid"><div>' + primary + blockersHtml + '</div>' +
       '<aside class="result-panel"><h2>Provenance</h2><dl class="fact-list">' +
+        paperFact +
         '<div><dt>Repository</dt><dd>' + esc(repository) + '</dd></div>' +
         '<div><dt>Submitted ref</dt><dd>' + esc(gitRef) + '</dd></div>' +
         '<div><dt>Pinned commit</dt><dd>' + esc(commit || "resolving") + '</dd></div>' +
         (expected ? '<div><dt>Expected</dt><dd>' + esc(expected) + '</dd></div>' : '') +
         (observed ? '<div><dt>Observed</dt><dd>' + esc(observed) + '</dd></div>' : '') +
-        '<div><dt>Public record</dt><dd>GitHub issue #' + issue.number + '</dd></div>' +
-      '</dl><a class="raw-link" href="' + issue.html_url + '">Inspect raw GitHub record →</a></aside>' +
+        '<div><dt>Attempt ID</dt><dd>AX-GH-' + issue.number + '</dd></div>' +
+      '</dl><a class="raw-link" href="' + issue.html_url + '">Inspect execution provenance →</a></aside>' +
     '</div>' +
-    '<div style="margin-top:28px"><a class="button primary" href="./verify.html">Start another verification</a></div>';
+    '<div class="result-actions">' + paperAction +
+      '<a class="button primary" href="./verify.html' + (paperId ? '?arxiv=' + encodeURIComponent(paperId) : '') + '">Add an independent attempt</a></div>';
 }
 
 function renderError(title, message) {
   root.innerHTML =
     '<div class="error-state"><div class="eyebrow">AgnXiv</div>' +
     '<h1>' + esc(title) + '</h1><p>' + esc(message) + '</p>' +
-    '<a class="button primary" href="./verify.html">Start a verification</a></div>';
+    '<a class="button primary" href="./lookup.html">Search evidence</a></div>';
 }
 
 load();
