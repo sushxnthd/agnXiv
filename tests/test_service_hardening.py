@@ -8,7 +8,13 @@ from fastapi.testclient import TestClient
 
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
-from agnxiv.service.db import Job, JobQuotaExceeded, JobStore, TransparencyEntry
+from agnxiv.service.db import (
+    Job,
+    JobAlreadyFinalized,
+    JobQuotaExceeded,
+    JobStore,
+    TransparencyEntry,
+)
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
 from agnxiv.statement import generate_ed25519_keypair
 
@@ -510,3 +516,54 @@ def test_database_guarded_quota_preserves_idempotent_retry(tmp_path) -> None:
             max_active=1,
             max_recent=20,
         )
+
+
+def test_job_store_rejects_second_finalization_under_database_lock(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'single-finalizer.db'}")
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000301",
+        api_key_hash="hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="f" * 40,
+        arxiv_id="2601.00301",
+        spec_path=None,
+    )
+    store.complete(job.id, status="failed", result=None, error="first")
+    with pytest.raises(JobAlreadyFinalized):
+        store.complete(job.id, status="succeeded", result={"late": True}, error=None)
+
+    final = store.get_job(job.id)
+    assert final is not None
+    assert final.status == "failed"
+    assert final.error == "first"
+    assert store.transparency_head()["sequence"] == 1
+    assert store.verify_transparency_chain()["valid"] is True
+
+
+def test_stale_reaper_wins_over_late_callback_without_rewriting_receipt(
+    tmp_path,
+) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'stale-vs-callback.db'}")
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000302",
+        api_key_hash="hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="e" * 40,
+        arxiv_id="2601.00302",
+        spec_path=None,
+    )
+    store.mark_running(job.id)
+    with store.session_factory() as session:
+        stored = session.get(Job, job.id)
+        assert stored is not None
+        stored.updated_at = datetime.now(UTC) - timedelta(minutes=20)
+        session.commit()
+
+    assert store.reap_stale(minutes=5) == 1
+    with pytest.raises(JobAlreadyFinalized):
+        store.complete(job.id, status="succeeded", result={"late": True}, error=None)
+    assert store.transparency_head()["sequence"] == 1
