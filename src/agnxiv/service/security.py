@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import re
-from urllib.parse import urlparse
+import urllib.parse
 
 
 _GITHUB_SLUG_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
@@ -20,7 +20,7 @@ def constant_time_equal(left: str, right: str) -> bool:
 def validate_github_slug(value: str) -> str:
     candidate = value.strip().removesuffix(".git")
     if candidate.startswith(("http://", "https://")):
-        parsed = urlparse(candidate)
+        parsed = urllib.parse.urlparse(candidate)
         if parsed.scheme != "https" or parsed.netloc.lower() != "github.com":
             raise ValueError("only HTTPS GitHub repositories are supported")
         candidate = parsed.path.strip("/").removesuffix(".git")
