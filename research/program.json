@@ -1,0 +1,137 @@
+{
+  "schema_version": "agnxiv.research-program/1",
+  "started_on": "2026-10-18",
+  "objective": "Make automated scientific verification measurably trustworthy, execution-grounded, and useful across real computational research.",
+  "invariants": [
+    "Optimize selective correctness, not completion rate.",
+    "Reported numeric values may not influence output-locator selection.",
+    "Known public benchmark cases are diagnostic unless explicitly held out.",
+    "False passes are treated as more costly than abstentions.",
+    "Model judgments may guide discovery but never directly award a scientific verdict."
+  ],
+  "tracks": [
+    {
+      "id": "bench100",
+      "name": "AgnXiv Bench 100",
+      "priority": "S+",
+      "status": "active",
+      "primary_metric": "false_pass_rate",
+      "target": "100 independently selected papers with stratified difficulty and full failure taxonomy"
+    },
+    {
+      "id": "selective",
+      "name": "Selective verification and abstention",
+      "priority": "S+",
+      "status": "active",
+      "primary_metric": "risk_coverage_curve",
+      "target": "maximize verification coverage subject to a <=1% empirical false-pass target on labeled cases"
+    },
+    {
+      "id": "scicoqa",
+      "name": "Execution-grounded paper-code discrepancy detection",
+      "priority": "S+",
+      "status": "active",
+      "primary_metric": "real_discrepancy_recall_at_precision",
+      "target": "outperform static paper+code baselines using evidence graphs and executable probes"
+    },
+    {
+      "id": "env",
+      "name": "Environment archaeology",
+      "priority": "S+",
+      "status": "active",
+      "primary_metric": "historical_environment_recovery_rate",
+      "target": "recover minimal publication-era environments for broken historical repositories"
+    },
+    {
+      "id": "centrality",
+      "name": "Central-claim identification",
+      "priority": "S",
+      "status": "active",
+      "primary_metric": "central_claim_recall_at_k",
+      "target": "verify scientifically central claims before incidental metrics"
+    },
+    {
+      "id": "locator",
+      "name": "Leakage-free observation discovery",
+      "priority": "S",
+      "status": "active",
+      "primary_metric": "locator_accuracy_blinded",
+      "target": "select the correct output without access to the reported numeric answer"
+    },
+    {
+      "id": "dag",
+      "name": "Claim-Evidence DAG extraction",
+      "priority": "S",
+      "status": "active",
+      "primary_metric": "critical_path_recall",
+      "target": "recover claim-to-paper-to-code-to-data-to-environment execution paths"
+    },
+    {
+      "id": "lineage",
+      "name": "Paper lineage reconstruction",
+      "priority": "A+",
+      "status": "active",
+      "primary_metric": "execution_gain_from_lineage",
+      "target": "recover implementation details inherited from cited work"
+    },
+    {
+      "id": "reimplementation",
+      "name": "Independent reimplementation",
+      "priority": "A+",
+      "status": "active",
+      "primary_metric": "v4_success_rate",
+      "target": "separate author-code reproduction from independently implemented evidence"
+    },
+    {
+      "id": "aggregation",
+      "name": "Conflicting evidence aggregation",
+      "priority": "A+",
+      "status": "active",
+      "primary_metric": "calibrated_record_state_accuracy",
+      "target": "represent correlated and independent replications without a universal truth score"
+    },
+    {
+      "id": "redbench",
+      "name": "Adversarial scientific verification",
+      "priority": "A",
+      "status": "active",
+      "primary_metric": "adversarial_false_pass_rate",
+      "target": "stress-test hardcoded metrics, prompt injection, path attacks, seed gaming, leakage and sandbox-aware behavior"
+    },
+    {
+      "id": "crossdomain",
+      "name": "Cross-domain generalization",
+      "priority": "A",
+      "status": "active",
+      "primary_metric": "coverage_by_domain",
+      "target": "extend beyond ML into physics, quantitative biology and other computational sciences"
+    }
+  ],
+  "external_anchors": [
+    {
+      "name": "PaperBench",
+      "use": "author-vetted process rubrics and from-scratch reimplementation tasks",
+      "size": "20 ICML 2024 main papers / 8,316 rubric leaves"
+    },
+    {
+      "name": "RECLAIM",
+      "use": "Run/Retrain/Reimplement difficulty tiers and target-result reproduction",
+      "size": "100 NeurIPS 2025 papers"
+    },
+    {
+      "name": "SciCoQA v1.1",
+      "use": "real paper-code discrepancy diagnostics with pinned repositories",
+      "size": "92 real + 543 synthetic discrepancies"
+    },
+    {
+      "name": "AgentActionBench",
+      "use": "process-oriented action evaluation and ML/AI4Science coverage",
+      "size": "150 papers / >10,000 rubric items"
+    },
+    {
+      "name": "AutoReproduce",
+      "use": "paper-lineage and executability ablations",
+      "size": "external comparative baseline"
+    }
+  ]
+}

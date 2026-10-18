@@ -1,0 +1,92 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+class ResearchCase(BaseModel):
+    schema_version: Literal["agnxiv.research-case/1"] = "agnxiv.research-case/1"
+    case_id: str
+    source_suite: str
+    source_task_id: str | None = None
+    paper_url: str
+    paper_url_versioned: str | None = None
+    repository: str | None = None
+    commit: str | None = None
+    origin_url: str | None = None
+    known_public_ground_truth: bool = False
+    evaluation_role: Literal[
+        "diagnostic_nonblind", "development", "heldout_blind", "external"
+    ] = "development"
+    tracks: list[str] = Field(default_factory=list)
+    status: Literal["queued", "running", "complete", "blocked"] = "queued"
+
+
+class SelectiveOutcome(BaseModel):
+    case_id: str
+    gold_supports_claim: bool
+    predicted: Literal["SUPPORTS", "DIVERGES", "ABSTAIN"]
+
+
+class SelectiveMetrics(BaseModel):
+    cases: int
+    decided: int
+    coverage: float
+    false_passes: int
+    false_divergences: int
+    false_pass_rate: float
+    false_divergence_rate: float
+    selective_error_rate: float
+
+
+def score_selective_verification(outcomes: list[SelectiveOutcome]) -> SelectiveMetrics:
+    cases = len(outcomes)
+    decided_rows = [row for row in outcomes if row.predicted != "ABSTAIN"]
+    decided = len(decided_rows)
+    false_passes = sum(
+        row.predicted == "SUPPORTS" and not row.gold_supports_claim
+        for row in decided_rows
+    )
+    false_divergences = sum(
+        row.predicted == "DIVERGES" and row.gold_supports_claim
+        for row in decided_rows
+    )
+    errors = false_passes + false_divergences
+
+    support_predictions = sum(row.predicted == "SUPPORTS" for row in decided_rows)
+    divergence_predictions = sum(row.predicted == "DIVERGES" for row in decided_rows)
+
+    return SelectiveMetrics(
+        cases=cases,
+        decided=decided,
+        coverage=(decided / cases) if cases else 0.0,
+        false_passes=false_passes,
+        false_divergences=false_divergences,
+        false_pass_rate=(false_passes / support_predictions)
+        if support_predictions
+        else 0.0,
+        false_divergence_rate=(false_divergences / divergence_predictions)
+        if divergence_predictions
+        else 0.0,
+        selective_error_rate=(errors / decided) if decided else 0.0,
+    )
+
+
+def load_research_cases(path: str | Path) -> list[ResearchCase]:
+    rows: list[ResearchCase] = []
+    for line_number, raw in enumerate(
+        Path(path).read_text(encoding="utf-8").splitlines(),
+        start=1,
+    ):
+        if not raw.strip():
+            continue
+        try:
+            rows.append(ResearchCase.model_validate(json.loads(raw)))
+        except (json.JSONDecodeError, ValueError) as exc:
+            raise ValueError(
+                f"invalid research case on line {line_number}: {exc}"
+            ) from exc
+    return rows
