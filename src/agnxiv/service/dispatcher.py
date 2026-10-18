@@ -19,7 +19,7 @@ class DispatchRequest:
     arxiv_id: str | None
     spec_path: str | None
     callback_url: str
-    callback_token: str
+    oidc_audience: str
 
 
 class GitHubActionsDispatcher:
@@ -52,7 +52,7 @@ class GitHubActionsDispatcher:
                     "arxiv_id": request.arxiv_id or "",
                     "spec_path": request.spec_path or "",
                     "callback_url": request.callback_url,
-                    "callback_token": request.callback_token,
+                    "oidc_audience": request.oidc_audience,
                 },
             }
         ).encode("utf-8")
