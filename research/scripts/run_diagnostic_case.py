@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
-import subprocess
 import re
+import subprocess
 import tempfile
 import urllib.parse
 import urllib.request
+from html.parser import HTMLParser
 from pathlib import Path
 
 from agnxiv.auto import build_auto_plan
@@ -39,23 +41,79 @@ def _fetch_bytes(url: str) -> tuple[bytes, str]:
     return data, final_url
 
 
-def _download(url: str, destination: Path) -> str:
+class _ArticleTextParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts: list[str] = []
+        self._ignored_depth = 0
+
+    def handle_starttag(
+        self,
+        tag: str,
+        attrs: list[tuple[str, str | None]],
+    ) -> None:
+        if tag.lower() in {"script", "style", "noscript", "svg"}:
+            self._ignored_depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() in {"script", "style", "noscript", "svg"} and self._ignored_depth:
+            self._ignored_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if not self._ignored_depth:
+            value = " ".join(data.split())
+            if value:
+                self.parts.append(value)
+
+    def text(self) -> str:
+        return "\n".join(self.parts)
+
+
+def _materialize_manuscript(
+    url: str,
+    root: Path,
+) -> tuple[Path, str, str, str]:
     data, final_url = _fetch_bytes(url)
     if data.startswith(b"%PDF"):
+        destination = root / "paper.pdf"
         destination.write_bytes(data)
-        return final_url
+        return destination, final_url, "pdf", hashlib.sha256(data).hexdigest()
 
-    html = data[:2_000_000].decode("utf-8", errors="ignore")
+    html = data[:5_000_000].decode("utf-8", errors="ignore")
     match = _PDF_META_RE.search(html) or _PDF_META_RE_REVERSED.search(html)
     if match:
         pdf_url = urllib.parse.urljoin(final_url, match.group(1))
         pdf_data, resolved_pdf_url = _fetch_bytes(pdf_url)
         if pdf_data.startswith(b"%PDF"):
+            destination = root / "paper.pdf"
             destination.write_bytes(pdf_data)
-            return resolved_pdf_url
+            return (
+                destination,
+                resolved_pdf_url,
+                "pdf",
+                hashlib.sha256(pdf_data).hexdigest(),
+            )
+
+    parser = _ArticleTextParser()
+    parser.feed(html)
+    article_text = parser.text()
+    lower = article_text.lower()
+    blocked_markers = (
+        "checking your browser",
+        "access denied",
+        "enable javascript and cookies",
+        "captcha",
+    )
+    if len(article_text) >= 4000 and not any(
+        marker in lower[:5000] for marker in blocked_markers
+    ):
+        destination = root / "paper.txt"
+        destination.write_text(article_text, encoding="utf-8")
+        digest = hashlib.sha256(article_text.encode("utf-8")).hexdigest()
+        return destination, final_url, "html_text", digest
 
     raise ValueError(
-        "paper URL did not resolve to a PDF and no valid citation_pdf_url was found"
+        "paper URL resolved to neither PDF nor usable article HTML"
     )
 
 
@@ -109,10 +167,11 @@ def run_case(manifest: Path, case_id: str, output_dir: Path) -> dict:
 
     with tempfile.TemporaryDirectory(prefix="agnxiv-research-") as temp:
         root = Path(temp)
-        manuscript = root / "paper.pdf"
         repository = root / "repository"
 
-        resolved_paper_url = _download(case.paper_url_versioned, manuscript)
+        manuscript, resolved_paper_url, manuscript_kind, manuscript_sha256 = (
+            _materialize_manuscript(case.paper_url_versioned, root)
+        )
         _clone_pinned(case.repository, case.commit, repository)
 
         plan = build_auto_plan(manuscript, repository)
@@ -126,6 +185,8 @@ def run_case(manifest: Path, case_id: str, output_dir: Path) -> dict:
         "repository": case.repository,
         "commit": case.commit,
         "resolved_paper_url": resolved_paper_url,
+        "manuscript_kind": manuscript_kind,
+        "manuscript_sha256": manuscript_sha256,
         "automation_score": plan.automation_score,
         "safe_to_execute": plan.safe_to_execute,
         "candidate_claims": len(plan.claims),
