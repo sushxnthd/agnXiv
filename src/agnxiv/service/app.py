@@ -24,7 +24,7 @@ from ..statement import (
     sign_statement_ed25519,
 )
 from .config import ServiceConfig
-from .db import Job, JobQuotaExceeded, JobStore, job_result
+from .db import Job, JobAlreadyFinalized, JobQuotaExceeded, JobStore, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
 from .oidc import GitHubOIDCPolicy, OIDCVerificationError, verify_github_actions_token
 from .security import (
@@ -672,20 +672,35 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             _validate_worker_result(job, body.status, body.result)
             result = _enrich_signed_result(active_config, body.result)
         except (ValueError, TypeError, binascii.Error) as exc:
-            store.complete(
-                job_id,
-                status="failed",
-                result=None,
-                error=f"result signing/validation failed: {type(exc).__name__}: {exc}",
-            )
+            try:
+                store.complete(
+                    job_id,
+                    status="failed",
+                    result=None,
+                    error=(
+                        "result signing/validation failed: "
+                        f"{type(exc).__name__}: {exc}"
+                    ),
+                )
+            except JobAlreadyFinalized as finalized:
+                raise HTTPException(
+                    status_code=409,
+                    detail="job is already finalized",
+                ) from finalized
             raise HTTPException(status_code=422, detail="invalid worker result") from exc
 
-        store.complete(
-            job_id,
-            status=body.status,
-            result=result,
-            error=body.error,
-        )
+        try:
+            store.complete(
+                job_id,
+                status=body.status,
+                result=result,
+                error=body.error,
+            )
+        except JobAlreadyFinalized as exc:
+            raise HTTPException(
+                status_code=409,
+                detail="job is already finalized",
+            ) from exc
         return {"ok": True}
 
     @app.get("/", response_class=HTMLResponse)
