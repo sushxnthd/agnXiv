@@ -6,6 +6,7 @@ on:
     paths:
       - "research/**"
       - "src/agnxiv/research.py"
+      - "src/agnxiv/alignment.py"
       - "src/agnxiv/auto.py"
       - "src/agnxiv/claims.py"
       - "src/agnxiv/planner.py"
