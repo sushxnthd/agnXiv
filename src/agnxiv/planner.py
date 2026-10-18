@@ -54,13 +54,18 @@ def _looks_like_command_start(line: str) -> bool:
         return False
 
     lower = line.lower()
+    first = line.split(maxsplit=1)[0].lower()
     option_heavy = line.count("--") >= 2
     python_command = lower.startswith(("python ", "python3 "))
-    return (
-        option_heavy
-        or python_command
-        or any(term in lower for term in _RESEARCH_TERMS)
-    )
+    explicit_research_cli = first in {
+        "make",
+        "reproduce",
+        "reproduction",
+        "evaluate",
+        "eval",
+        "benchmark",
+    }
+    return option_heavy or python_command or explicit_research_cli
 
 
 def _readme_commands(text: str) -> list[tuple[list[str], str]]:
