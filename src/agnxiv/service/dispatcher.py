@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 
@@ -35,6 +36,40 @@ class GitHubActionsDispatcher:
         self.repository = repository
         self.ref = ref
         self.workflow = workflow
+
+
+    def resolve_commit(self, repository: str, ref: str) -> str:
+        encoded_ref = urllib.parse.quote(ref, safe="")
+        url = (
+            "https://api.github.com/repos/"
+            + repository
+            + "/commits/"
+            + encoded_ref
+        )
+        request = urllib.request.Request(
+            url,
+            headers={
+                "Accept": "application/vnd.github+json",
+                "Authorization": f"Bearer {self.token}",
+                "X-GitHub-Api-Version": "2022-11-28",
+                "User-Agent": "AgnXiv-Service",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=20) as response:
+                payload = json.load(response)
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")[-2000:]
+            raise DispatchError(
+                f"could not resolve GitHub ref with HTTP {exc.code}: {body}"
+            ) from exc
+        except urllib.error.URLError as exc:
+            raise DispatchError(f"could not resolve GitHub ref: {exc}") from exc
+
+        sha = payload.get("sha")
+        if not isinstance(sha, str) or len(sha) != 40:
+            raise DispatchError("GitHub did not return a full commit SHA")
+        return sha
 
     def dispatch(self, request: DispatchRequest) -> None:
         url = (
