@@ -1,0 +1,22 @@
+name: ruff-diagnostic
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install ruff==0.17.1
+      - name: Show Ruff import fix
+        run: |
+          ruff check --fix src/agnxiv/service/security.py || true
+          git diff -- src/agnxiv/service/security.py
