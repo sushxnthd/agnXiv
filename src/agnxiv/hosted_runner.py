@@ -219,9 +219,10 @@ def execute_job(
                     "plan": outcome.plan.model_dump(mode="json"),
                     "reason": outcome.reason,
                 }
-            verdict = outcome.bundle.record.verdict.value
+            verdicts = [item.record.verdict.value for item in outcome.bundles]
             status = (
-                "succeeded" if verdict in {"VERIFIED", "CONTRADICTED"}
+                "succeeded"
+                if any(item in {"VERIFIED", "CONTRADICTED"} for item in verdicts)
                 else "needs_review"
             )
             return status, {
@@ -230,6 +231,15 @@ def execute_job(
                 "build": build.model_dump(mode="json"),
                 "discovery": outcome.frozen_locator.model_dump(mode="json"),
                 "bundle": outcome.bundle.model_dump(mode="json"),
+                "additional_verifications": [
+                    {
+                        "discovery": locator.model_dump(mode="json"),
+                        "bundle": item.model_dump(mode="json"),
+                    }
+                    for locator, item in zip(
+                        outcome.frozen_locators[1:], outcome.bundles[1:]
+                    )
+                ],
             }
 
         if mode == "verify_spec":
