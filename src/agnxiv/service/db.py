@@ -22,7 +22,6 @@ class Job(Base):
     repository_ref: Mapped[str] = mapped_column(String(255))
     arxiv_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     spec_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    callback_token_hash: Mapped[str] = mapped_column(String(64))
     result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -71,7 +70,6 @@ class JobStore:
         repository_ref: str,
         arxiv_id: str | None,
         spec_path: str | None,
-        callback_token_hash: str,
     ) -> Job:
         job = Job(
             id=job_id,
@@ -82,7 +80,6 @@ class JobStore:
             repository_ref=repository_ref,
             arxiv_id=arxiv_id,
             spec_path=spec_path,
-            callback_token_hash=callback_token_hash,
         )
         with self.session_factory() as session:
             session.add(job)
