@@ -67,6 +67,10 @@ class JobView(BaseModel):
     updated_at: str
 
 
+def _job_oidc_audience(base_audience: str, job_id: str) -> str:
+    return f"{base_audience.rstrip('/')}/jobs/{job_id}"
+
+
 def _job_view(job: Job) -> JobView:
     return JobView(
         id=job.id,
@@ -660,7 +664,10 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             callback_url=(
                 f"{active_config.public_base_url}/internal/jobs/{job.id}/complete"
             ),
-            oidc_audience=active_config.oidc_audience,
+            oidc_audience=_job_oidc_audience(
+                active_config.oidc_audience,
+                job.id,
+            ),
         )
 
         store.mark_running(job.id)
@@ -697,6 +704,25 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         body: WorkerCallback,
         authorization: Annotated[str | None, Header()] = None,
     ) -> dict:
+        if not authorization or not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="missing GitHub OIDC token")
+        token = authorization.removeprefix("Bearer ").strip()
+        try:
+            verify_github_actions_token(
+                token,
+                GitHubOIDCPolicy(
+                    audience=_job_oidc_audience(
+                        active_config.oidc_audience,
+                        job_id,
+                    ),
+                    repository=active_config.github_repository,
+                    ref=active_config.github_ref,
+                    workflow=active_config.github_workflow,
+                ),
+            )
+        except OIDCVerificationError as exc:
+            raise HTTPException(status_code=401, detail="untrusted workflow identity") from exc
+
         store.reap_stale(minutes=active_config.job_stale_minutes)
         job = store.get_job(job_id)
         if job is None:
@@ -706,21 +732,6 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 status_code=409,
                 detail="job is already finalized",
             )
-        if not authorization or not authorization.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="missing GitHub OIDC token")
-        token = authorization.removeprefix("Bearer ").strip()
-        try:
-            verify_github_actions_token(
-                token,
-                GitHubOIDCPolicy(
-                    audience=active_config.oidc_audience,
-                    repository=active_config.github_repository,
-                    ref=active_config.github_ref,
-                    workflow=active_config.github_workflow,
-                ),
-            )
-        except OIDCVerificationError as exc:
-            raise HTTPException(status_code=401, detail="untrusted workflow identity") from exc
 
         try:
             _validate_worker_result(job, body.status, body.result)
