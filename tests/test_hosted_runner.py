@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from agnxiv.hosted_runner import HostedRunnerError, execute_job
+from agnxiv.hosted_runner import HostedRunnerError, _validate_hosted_image, execute_job
 
 
 def test_hosted_verify_spec_rejects_repository_escape(
@@ -51,3 +51,17 @@ def test_hosted_verify_spec_rejects_repository_escape(
             arxiv_id=None,
             spec_path="agnxiv.json",
         )
+
+
+def test_hosted_runtime_allowlist() -> None:
+    assert _validate_hosted_image("python:3.11-slim") == "python:3.11-slim"
+    assert (
+        _validate_hosted_image("python:3.11.17-slim-bookworm")
+        == "python:3.11.17-slim-bookworm"
+    )
+
+    with pytest.raises(HostedRunnerError, match="approved official Python"):
+        _validate_hosted_image("ubuntu:latest")
+
+    with pytest.raises(HostedRunnerError, match="approved official Python"):
+        _validate_hosted_image("attacker/research-runtime:latest")
