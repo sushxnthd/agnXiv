@@ -8,6 +8,7 @@ def test_locator_benchmark_masks_reported_answers() -> None:
     assert len(cases) == 12
     result = run_locator_benchmark(cases)
     assert result.cases == 12
+    assert all("\\n" not in case.output for case in cases)
     assert result.abstain_cases >= 3
     assert result.selection_cases >= 6
     assert all("observed_value" in row for row in result.per_case)
