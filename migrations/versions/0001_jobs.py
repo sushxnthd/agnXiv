@@ -20,7 +20,6 @@ def upgrade() -> None:
         sa.Column("repository_ref", sa.String(length=255), nullable=False),
         sa.Column("arxiv_id", sa.String(length=64), nullable=True),
         sa.Column("spec_path", sa.String(length=255), nullable=True),
-        sa.Column("callback_token_hash", sa.String(length=64), nullable=False),
         sa.Column("result_json", sa.Text(), nullable=True),
         sa.Column("error", sa.Text(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
