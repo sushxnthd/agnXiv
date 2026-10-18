@@ -114,6 +114,45 @@ def extract_json_observation(
     return Observation(value=float(value) * scale)
 
 
+def extract_regex_observation(
+    output: str,
+    pattern: str,
+    *,
+    scale: float = 1.0,
+) -> Observation | None:
+    """Read one numeric observation from one explicit regex match.
+
+    The regex must either contain exactly one capture group or a named capture
+    group called value. Multiple matches are rejected as ambiguous.
+    """
+    try:
+        compiled = re.compile(pattern, flags=re.MULTILINE)
+    except re.error:
+        return None
+
+    matches = list(compiled.finditer(output))
+    if len(matches) != 1:
+        return None
+
+    match = matches[0]
+    if "value" in compiled.groupindex:
+        raw = match.group("value")
+    elif compiled.groups == 1:
+        raw = match.group(1)
+    else:
+        return None
+
+    if raw is None:
+        return None
+
+    try:
+        value = float(raw.replace(",", "").strip())
+    except ValueError:
+        return None
+
+    return Observation(value=value * scale)
+
+
 def extract_observation_candidates(
     output: str,
     claim: Claim,
