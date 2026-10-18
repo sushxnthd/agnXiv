@@ -116,7 +116,7 @@ function openPreparedRequest() {
   githubSubmit.href = url.toString();
 
   const values = [
-    ["Mode", mode === "auto" ? "AUTO_PLAN" : "VERIFY_SPEC"],
+    ["Mode", mode === "auto" ? "AUTO_VERIFY" : "VERIFY_SPEC"],
     ["Repository", repo],
     ["Git ref", ref],
     [mode === "auto" ? "Paper" : "Manifest", mode === "auto" ? arxiv : spec]
