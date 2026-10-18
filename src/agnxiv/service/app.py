@@ -85,9 +85,9 @@ def _verify_callback_token(secret: str, job_id: str, token: str) -> bool:
         nonce, supplied = token.rsplit(".", 1)
     except ValueError:
         return False
-    message = f"{job_id}.{nonce}".encode("utf-8")
+    message = f"{job_id}.{nonce}".encode()
     expected = hmac.new(
-        secret.encode("utf-8"),
+        secret.encode(),
         message,
         hashlib.sha256,
     ).hexdigest()
