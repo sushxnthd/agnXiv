@@ -50,7 +50,8 @@ class ExecutionSummary(BaseModel):
 
 
 class VerificationBundle(BaseModel):
-    schema_version: str = "agnxiv.bundle/0.5"
+    schema_version: str = "agnxiv.bundle/0.6"
+    verification_spec_sha256: str | None = None
     claim: Claim
     manuscript: DocumentFingerprint | None = None
     provenance: ProvenanceManifest
