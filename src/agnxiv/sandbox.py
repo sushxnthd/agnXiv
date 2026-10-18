@@ -170,7 +170,8 @@ def docker_command(
         ]
 
     shell_command = (
-        "cp -R /source/. /workspace/ && "
+        "find /source -mindepth 1 -maxdepth 1 ! -name .git "
+        "-exec cp -R {} /workspace/ \\; && "
         "cd /workspace && "
         "exec " + shlex.join(command)
     )
