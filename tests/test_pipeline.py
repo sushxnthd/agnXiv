@@ -18,6 +18,7 @@ def test_pipeline_contradicts_mismatched_executed_result(
         return ExecutionResult(
             command=("docker", "run", "sha256:test", "python", "evaluate.py"),
             image_id="sha256:test",
+            artifact_mounts=(),
             returncode=0,
             stdout="accuracy: 82.4%\n",
             stderr="",
@@ -43,6 +44,7 @@ def test_pipeline_contradicts_mismatched_executed_result(
     assert bundle.record.verdict == Verdict.CONTRADICTED
     assert bundle.execution is not None
     assert bundle.execution.source_unchanged is True
+    assert bundle.execution.artifacts_unchanged is True
     assert bundle.execution.image_id == "sha256:test"
 
 
@@ -53,6 +55,7 @@ def test_pipeline_abstains_on_ambiguous_output(tmp_path: Path, monkeypatch) -> N
         return ExecutionResult(
             command=("docker", "run"),
             image_id="sha256:test",
+            artifact_mounts=(),
             returncode=0,
             stdout="0.9\n1.0\n",
             stderr="",
@@ -70,3 +73,38 @@ def test_pipeline_abstains_on_ambiguous_output(tmp_path: Path, monkeypatch) -> N
     )
 
     assert bundle.record.verdict == Verdict.UNABLE_TO_VERIFY
+
+
+def test_pipeline_uses_explicit_json_locator(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / "run.py").write_text("print('{}')\n", encoding="utf-8")
+
+    def fake_execute_in_docker(**kwargs):
+        return ExecutionResult(
+            command=("docker", "run"),
+            image_id="sha256:test",
+            artifact_mounts=(),
+            returncode=0,
+            stdout='{"debug": 0.914, "metrics": {"accuracy": 0.824}}\n',
+            stderr="",
+        )
+
+    monkeypatch.setattr("agnxiv.pipeline.execute_in_docker", fake_execute_in_docker)
+
+    claim = Claim(
+        id="C1",
+        text="Accuracy is 82.4%.",
+        metric="accuracy",
+        reported_value=0.824,
+    )
+    bundle = verify_with_command(
+        claim,
+        tmp_path,
+        image="local:test",
+        command=["python", "run.py"],
+        json_path="metrics.accuracy",
+        policy=VerificationPolicy(kind="relative", tolerance=0.01),
+    )
+
+    assert bundle.record.verdict == Verdict.VERIFIED
+    assert bundle.observation_method == "explicit_json_path"
+    assert bundle.observation_locator == "metrics.accuracy"
