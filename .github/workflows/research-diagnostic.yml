@@ -29,10 +29,14 @@ jobs:
       fail-fast: false
       matrix:
         case_id:
-          - SCICOQA-63197a77
           - SCICOQA-3f098eb0
-          - SCICOQA-7c8468c8
+          - SCICOQA-25ee1fd2
           - SCICOQA-183bd763
+          - SCICOQA-9a6bc557
+          - SCICOQA-63197a77
+          - SCICOQA-61926641
+          - SCICOQA-7cd4b3d7
+          - SCICOQA-7c8468c8
     if: github.event_name != 'workflow_dispatch' || inputs.case_id == ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -80,6 +84,35 @@ jobs:
         with:
           name: research-diagnostic-${{ matrix.case_id }}
           path: /tmp/${{ matrix.case_id }}
+          retention-days: 90
+          if-no-files-found: error
+
+  aggregate:
+    needs: diagnostic
+    if: always() && github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Download diagnostic artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: research-diagnostic-*
+          path: /tmp/agnxiv-diagnostics
+
+      - name: Aggregate research metrics
+        run: |
+          python research/scripts/aggregate_diagnostics.py \
+            --input-root /tmp/agnxiv-diagnostics \
+            --output /tmp/agnxiv-diagnostic-summary.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-diagnostic-summary
+          path: /tmp/agnxiv-diagnostic-summary.json
           retention-days: 90
           if-no-files-found: error
 

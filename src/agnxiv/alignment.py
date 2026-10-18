@@ -8,7 +8,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from .research import ResearchCase
 
@@ -41,9 +41,21 @@ class DetectorCase(BaseModel):
 
 class LocalizationGold(BaseModel):
     case_id: str
-    target_path: str
+    target_paths: list[str] = Field(default_factory=list)
+    target_path: str | None = None
     target_line_terms: list[str] = Field(default_factory=list)
     detector_visible: Literal[False] = False
+
+    @model_validator(mode="after")
+    def normalize_target_paths(self):
+        paths = list(dict.fromkeys(self.target_paths))
+        if self.target_path and self.target_path not in paths:
+            paths.insert(0, self.target_path)
+        if not paths:
+            raise ValueError("localization gold requires at least one target path")
+        self.target_paths = paths
+        self.target_path = paths[0]
+        return self
 
 
 class AlignmentCandidate(BaseModel):
@@ -58,6 +70,7 @@ class AlignmentCandidate(BaseModel):
 class LocalizationResult(BaseModel):
     case_id: str
     target_path: str
+    target_paths: list[str]
     first_target_path_rank: int | None
     recall_at_5: bool
     recall_at_10: bool
@@ -324,10 +337,16 @@ def score_localization(
         raise ValueError("localization gold case does not match evaluated case")
 
     paths = ranked_paths(candidates)
-    rank = paths.index(gold.target_path) + 1 if gold.target_path in paths else None
+    ranks = [
+        paths.index(target_path) + 1
+        for target_path in gold.target_paths
+        if target_path in paths
+    ]
+    rank = min(ranks) if ranks else None
     return LocalizationResult(
         case_id=case_id,
-        target_path=gold.target_path,
+        target_path=gold.target_paths[0],
+        target_paths=gold.target_paths,
         first_target_path_rank=rank,
         recall_at_5=rank is not None and rank <= 5,
         recall_at_10=rank is not None and rank <= 10,
