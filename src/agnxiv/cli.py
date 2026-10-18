@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Annotated, Literal, cast
 
 import typer
 
@@ -21,8 +22,9 @@ app = typer.Typer(
 def _policy(kind: str, tolerance: float, minimum_repetitions: int = 1) -> VerificationPolicy:
     if kind not in {"relative", "absolute"}:
         raise typer.BadParameter("kind must be 'relative' or 'absolute'")
+    validated_kind = cast(Literal["relative", "absolute"], kind)
     return VerificationPolicy(
-        kind=kind,  # type: ignore[arg-type]
+        kind=validated_kind,
         tolerance=tolerance,
         minimum_repetitions=minimum_repetitions,
     )
@@ -30,7 +32,7 @@ def _policy(kind: str, tolerance: float, minimum_repetitions: int = 1) -> Verifi
 
 @app.command("claims")
 def claims_command(
-    path: Path = typer.Argument(..., exists=True, readable=True),
+    path: Annotated[Path, typer.Argument(exists=True, readable=True)],
 ) -> None:
     """Extract candidate quantitative claims from a PDF or text file."""
     if path.suffix.lower() == ".pdf":
@@ -45,11 +47,14 @@ def claims_command(
 
 @app.command("inspect")
 def inspect_command(
-    repository: Path = typer.Argument(..., exists=True, file_okay=False, readable=True),
-    expected: float = typer.Option(...),
-    metric: str = typer.Option(...),
-    unit: str | None = typer.Option(None),
-    claim_text: str = typer.Option("CLI inspection claim"),
+    repository: Annotated[
+        Path,
+        typer.Argument(exists=True, file_okay=False, readable=True),
+    ],
+    expected: Annotated[float, typer.Option()],
+    metric: Annotated[str, typer.Option()],
+    unit: Annotated[str | None, typer.Option()] = None,
+    claim_text: Annotated[str, typer.Option()] = "CLI inspection claim",
 ) -> None:
     """Fingerprint a project and show candidate evidence and execution commands."""
     claim = Claim(
@@ -72,15 +77,17 @@ def inspect_command(
 
 @app.command("verify-number")
 def verify_number_command(
-    expected: float = typer.Option(..., help="Value reported by the paper."),
-    observed: list[float] = typer.Option(
-        ..., "--observed", help="Observed value; repeat for multiple runs."
-    ),
-    tolerance: float = typer.Option(
-        0.01, help="Relative fraction by default (0.01 = 1%)."
-    ),
-    kind: str = typer.Option("relative", help="'relative' or 'absolute'."),
-    minimum_repetitions: int = typer.Option(1, min=1),
+    expected: Annotated[float, typer.Option(help="Value reported by the paper.")],
+    observed: Annotated[
+        list[float],
+        typer.Option("--observed", help="Observed value; repeat for multiple runs."),
+    ],
+    tolerance: Annotated[
+        float,
+        typer.Option(help="Relative fraction by default (0.01 = 1%)."),
+    ] = 0.01,
+    kind: Annotated[str, typer.Option(help="'relative' or 'absolute'.")] = "relative",
+    minimum_repetitions: Annotated[int, typer.Option(min=1)] = 1,
 ) -> None:
     """Apply AgnXiv's deterministic verifier to a numeric claim."""
     claim = Claim(
@@ -99,15 +106,24 @@ def verify_number_command(
 
 @app.command("verify-command")
 def verify_command(
-    repository: Path = typer.Argument(..., exists=True, file_okay=False, readable=True),
-    image: str = typer.Option(..., help="Locally available pinned container image."),
-    command: list[str] = typer.Option(..., "--cmd", help="Command token; repeat for each token."),
-    expected: float = typer.Option(...),
-    metric: str = typer.Option(...),
-    unit: str | None = typer.Option(None),
-    claim_text: str = typer.Option("CLI execution claim"),
-    tolerance: float = typer.Option(0.01),
-    kind: str = typer.Option("relative"),
+    repository: Annotated[
+        Path,
+        typer.Argument(exists=True, file_okay=False, readable=True),
+    ],
+    image: Annotated[
+        str,
+        typer.Option(help="Locally available container image."),
+    ],
+    command: Annotated[
+        list[str],
+        typer.Option("--cmd", help="Command token; repeat for each token."),
+    ],
+    expected: Annotated[float, typer.Option()],
+    metric: Annotated[str, typer.Option()],
+    unit: Annotated[str | None, typer.Option()] = None,
+    claim_text: Annotated[str, typer.Option()] = "CLI execution claim",
+    tolerance: Annotated[float, typer.Option()] = 0.01,
+    kind: Annotated[str, typer.Option()] = "relative",
 ) -> None:
     """Run one explicit command and emit an auditable verification bundle."""
     claim = Claim(
@@ -139,12 +155,12 @@ def verify_command(
 
 @app.command("robustness")
 def robustness_command(
-    expected: float = typer.Option(...),
-    observed: list[float] = typer.Option(..., "--observed"),
-    tolerance: float = typer.Option(0.01),
-    kind: str = typer.Option("relative"),
-    minimum_pass_fraction: float = typer.Option(0.8),
-    minimum_repetitions: int = typer.Option(5, min=1),
+    expected: Annotated[float, typer.Option()],
+    observed: Annotated[list[float], typer.Option("--observed")],
+    tolerance: Annotated[float, typer.Option()] = 0.01,
+    kind: Annotated[str, typer.Option()] = "relative",
+    minimum_pass_fraction: Annotated[float, typer.Option()] = 0.8,
+    minimum_repetitions: Annotated[int, typer.Option(min=1)] = 5,
 ) -> None:
     """Assess repeated observations without conflating robustness with reproduction."""
     claim = Claim(id="CLI-ROBUST", text="CLI robustness claim", reported_value=expected)
