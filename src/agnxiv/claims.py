@@ -7,7 +7,7 @@ from .models import Claim, ClaimSource
 
 _NUMBER = (
     r"(?<![A-Za-z0-9_.])[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
-    r"(?:[eE][-+]?\d+)?(?![A-WYZa-wyz0-9_.])"
+    r"(?:[eE][-+]?\d+)?(?![A-WYZa-wyz0-9_]|\.\d)"
 )
 _UNIT = (
     r"%(?!\w)|percent\b|ms\b|s\b|seconds?\b|minutes?\b|hours?\b|"
