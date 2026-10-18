@@ -68,6 +68,10 @@ Basic reproduction and robustness are separate records. A single successful exec
 
 The benchmark suite includes adversarial recorded-output cases and a pinned third-party research artifact workflow. External audits are allowed to discover contradictions or incomplete reproduction; benchmark code must not be changed simply to force a passing badge.
 
+## Zero-manifest real-paper integration
+
+A pinned arXiv PDF plus a public research GitHub repository can now trigger guarded automatic planning, a blinded first execution, precomparison freezing of explicit observed-metric selectors, and an independent sandboxed verification rerun. Explicit selectors are not inferred from reported numeric values; multiple distinct paper claims for the same metric remain ambiguous. All selected claim verdicts, including small out-of-tolerance differences, are preserved separately. The integration suite also requires conservative abstention where real-paper dependencies or workflow semantics are unresolved. This is limited to narrow, uniquely matched numeric outputs, not general paper certification.
+
 ## Remaining frontier
 
 The core verifier is not the entire scientific-review problem. Important future extensions include:
