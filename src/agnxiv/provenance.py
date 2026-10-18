@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -28,6 +29,14 @@ class DocumentFingerprint(BaseModel):
     name: str
     sha256: str
     size_bytes: int = Field(ge=0)
+
+
+class ArtifactFingerprint(BaseModel):
+    name: str
+    kind: Literal["file", "directory"]
+    sha256: str
+    size_bytes: int = Field(ge=0)
+    file_count: int = Field(ge=1)
 
 
 class ProvenanceManifest(BaseModel):
@@ -108,3 +117,31 @@ def fingerprint_tree(
         file_count=len(files),
         total_bytes=sum(file.size_bytes for file in files),
     )
+
+
+def fingerprint_artifact(path: str | Path) -> ArtifactFingerprint:
+    """Fingerprint a declared external dataset, checkpoint, or artifact."""
+    artifact_path = Path(path)
+
+    if artifact_path.is_file():
+        return ArtifactFingerprint(
+            name=artifact_path.name,
+            kind="file",
+            sha256=sha256_file(artifact_path),
+            size_bytes=artifact_path.stat().st_size,
+            file_count=1,
+        )
+
+    if artifact_path.is_dir():
+        tree = fingerprint_tree(artifact_path, excludes=set())
+        if tree.file_count == 0:
+            raise ValueError(f"artifact directory is empty: {artifact_path}")
+        return ArtifactFingerprint(
+            name=artifact_path.name,
+            kind="directory",
+            sha256=tree.tree_digest,
+            size_bytes=tree.total_bytes,
+            file_count=tree.file_count,
+        )
+
+    raise ValueError(f"artifact path does not exist: {artifact_path}")
