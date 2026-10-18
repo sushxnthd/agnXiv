@@ -1,20 +1,25 @@
 from __future__ import annotations
 
-import hashlib
-import hmac
-import re
+from hashlib import sha256
+from hmac import compare_digest
 
 
-_GITHUB_SLUG_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _GITHUB_HTTPS_PREFIX = "https://github.com/"
 
 
 def hash_secret(value: str) -> str:
-    return hashlib.sha256(value.encode()).hexdigest()
+    return sha256(value.encode()).hexdigest()
 
 
 def constant_time_equal(left: str, right: str) -> bool:
-    return hmac.compare_digest(left.encode(), right.encode())
+    return compare_digest(left.encode(), right.encode())
+
+
+def _valid_slug_part(value: str) -> bool:
+    return bool(value) and value.isascii() and all(
+        character.isalnum() or character in "_.-"
+        for character in value
+    )
 
 
 def validate_github_slug(value: str) -> str:
@@ -29,8 +34,9 @@ def validate_github_slug(value: str) -> str:
         candidate = candidate.removeprefix(_GITHUB_HTTPS_PREFIX)
 
     candidate = candidate.strip("/").removesuffix(".git")
+    parts = candidate.split("/")
 
-    if not _GITHUB_SLUG_RE.fullmatch(candidate):
+    if len(parts) != 2 or not all(_valid_slug_part(part) for part in parts):
         raise ValueError("repository must be a GitHub owner/repository slug")
     return candidate
 
