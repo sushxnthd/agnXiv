@@ -16,7 +16,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Floating/unreconstructed dependency environments are labeled **CONDITIONAL** evidence rather than silently treated as publication-era equivalence.
 - [x] Multiple claim bundles from one run are preserved.
 - [x] Repeated attempts sharing the same evidence cluster are not counted as independent votes.
-- [ ] Held-out benchmark is large enough to estimate false-pass risk with a defensible confidence interval.
+- [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.
 - [ ] Central-claim selection is validated beyond the small v0 diagnostic set.
 - [ ] Historical environment recovery benchmark reaches a predeclared production threshold.
 
