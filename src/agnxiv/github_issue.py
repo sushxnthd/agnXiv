@@ -11,7 +11,6 @@ from .hosted_runner import HostedRunnerError, execute_job
 from .preprint import parse_arxiv_reference
 from .service.security import validate_git_ref, validate_github_slug
 
-
 _SECTION_RE = re.compile(
     r"^###\s+(.+?)\s*$\n+(.*?)(?=^###\s+|\Z)",
     flags=re.MULTILINE | re.DOTALL,
@@ -159,11 +158,11 @@ def _summary(payload: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def run_issue(event_path: str | Path, output_dir: str | Path) -> dict[str, Any]:
+def run_issue(event_path: str | Path, output_dir: str | Path) -> dict:
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
 
-    payload: dict[str, Any]
+    payload: dict
     try:
         request = read_issue_event(event_path)
         status, result = execute_job(
