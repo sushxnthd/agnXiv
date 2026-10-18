@@ -8,6 +8,7 @@ from typing import Annotated, Literal, cast
 import typer
 
 from .attestation import attest_bundle
+from .auto import build_auto_plan
 from .benchmark import load_jsonl_cases, run_recorded_benchmark
 from .build import EnvironmentBuildError, build_python_environment
 from .challenge import assess_repeated_observations
@@ -70,6 +71,22 @@ def claims_command(
             manuscript=path.name,
         )
     typer.echo(json.dumps([claim.model_dump(mode="json") for claim in claims], indent=2))
+
+
+@app.command("auto-plan")
+def auto_plan_command(
+    manuscript: Annotated[
+        Path,
+        typer.Argument(exists=True, dir_okay=False, readable=True),
+    ],
+    repository: Annotated[
+        Path,
+        typer.Argument(exists=True, file_okay=False, readable=True),
+    ],
+) -> None:
+    """Generate a conservative verification plan without a hand-written manifest."""
+    plan = build_auto_plan(manuscript, repository)
+    typer.echo(plan.model_dump_json(indent=2))
 
 
 @app.command("arxiv-id")
