@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import subprocess
 from pathlib import Path
 from typing import Literal
@@ -22,8 +23,10 @@ _DEFAULT_EXCLUDES = {
 
 class FileFingerprint(BaseModel):
     path: str
+    kind: Literal["file", "symlink"] = "file"
     sha256: str
     size_bytes: int = Field(ge=0)
+    link_target: str | None = None
 
 
 class DocumentFingerprint(BaseModel):
@@ -106,6 +109,8 @@ def detect_git_identity(root: str | Path) -> GitIdentity | None:
 def fingerprint_document(path: str | Path) -> DocumentFingerprint:
     """Fingerprint an exact manuscript or supplementary document."""
     file_path = Path(path)
+    if file_path.is_symlink():
+        raise ValueError(f"document symlinks are not allowed: {file_path}")
     if not file_path.is_file():
         raise ValueError(f"document path is not a file: {file_path}")
     return DocumentFingerprint(
@@ -115,12 +120,24 @@ def fingerprint_document(path: str | Path) -> DocumentFingerprint:
     )
 
 
+def _fingerprint_symlink(path: Path, rel: Path) -> FileFingerprint:
+    target = os.readlink(path)
+    encoded = target.encode("utf-8", errors="surrogateescape")
+    return FileFingerprint(
+        path=rel.as_posix(),
+        kind="symlink",
+        sha256=sha256_bytes(encoded),
+        size_bytes=len(encoded),
+        link_target=target,
+    )
+
+
 def fingerprint_tree(
     root: str | Path,
     *,
     excludes: set[str] | None = None,
 ) -> ProvenanceManifest:
-    """Create a stable content fingerprint for a research repository."""
+    """Create a stable content fingerprint without following repository symlinks."""
     base = Path(root)
     if not base.is_dir():
         raise ValueError(f"repository path is not a directory: {base}")
@@ -128,18 +145,31 @@ def fingerprint_tree(
     excluded = _DEFAULT_EXCLUDES if excludes is None else excludes
     files: list[FileFingerprint] = []
 
-    for path in sorted(p for p in base.rglob("*") if p.is_file()):
+    for path in sorted(base.rglob("*")):
         rel = path.relative_to(base)
         if any(part in excluded for part in rel.parts):
             continue
+
+        if path.is_symlink():
+            try:
+                files.append(_fingerprint_symlink(path, rel))
+            except OSError:
+                continue
+            continue
+
+        if not path.is_file():
+            continue
+
         try:
             size = path.stat().st_size
             digest = sha256_file(path)
         except OSError:
             continue
+
         files.append(
             FileFingerprint(
                 path=rel.as_posix(),
+                kind="file",
                 sha256=digest,
                 size_bytes=size,
             )
@@ -148,6 +178,8 @@ def fingerprint_tree(
     tree_hasher = hashlib.sha256()
     for file in files:
         tree_hasher.update(file.path.encode("utf-8"))
+        tree_hasher.update(b"\0")
+        tree_hasher.update(file.kind.encode("ascii"))
         tree_hasher.update(b"\0")
         tree_hasher.update(file.sha256.encode("ascii"))
         tree_hasher.update(b"\0")
@@ -166,6 +198,9 @@ def fingerprint_tree(
 def fingerprint_artifact(path: str | Path) -> ArtifactFingerprint:
     """Fingerprint a declared external dataset, checkpoint, or artifact."""
     artifact_path = Path(path)
+
+    if artifact_path.is_symlink():
+        raise ValueError(f"artifact symlinks are not allowed: {artifact_path}")
 
     if artifact_path.is_file():
         return ArtifactFingerprint(
