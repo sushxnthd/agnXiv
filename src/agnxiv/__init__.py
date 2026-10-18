@@ -1,13 +1,13 @@
 """AgnXiv: executable verification for computational research."""
 
-from .models import Claim, VerificationPolicy, VerificationRecord, Verdict
+from .models import Claim, Verdict, VerificationPolicy, VerificationRecord
 from .verify import verify_numeric_claim
 
 __all__ = [
     "Claim",
+    "Verdict",
     "VerificationPolicy",
     "VerificationRecord",
-    "Verdict",
     "verify_numeric_claim",
 ]
 
