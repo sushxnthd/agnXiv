@@ -44,6 +44,24 @@ def aggregate(root: Path) -> dict:
         for blocker in item.get("blockers", [])
     )
 
+    environments = [item.get("environment") or {} for item in summaries]
+    reproduction_ready = sum(
+        bool(environment.get("reproduction_ready"))
+        for environment in environments
+    )
+    dependency_sources = Counter(
+        str(environment.get("dependency_source") or "unknown")
+        for environment in environments
+    )
+    dependency_precision = Counter(
+        str(environment.get("dependency_precision") or "unknown")
+        for environment in environments
+    )
+    historical_fidelity = Counter(
+        str(environment.get("historical_fidelity") or "unknown")
+        for environment in environments
+    )
+
     return {
         "schema_version": "agnxiv.research-diagnostic-summary/1",
         "evaluation_role": "diagnostic_nonblind",
@@ -56,6 +74,13 @@ def aggregate(root: Path) -> dict:
             "max": max(automation),
         },
         "stage_success_rate": stage_success,
+        "environment": {
+            "inference_rate": stage_success.get("environment_inference", 0.0),
+            "reproduction_ready_rate": reproduction_ready / len(summaries),
+            "dependency_source_counts": dict(dependency_sources),
+            "dependency_precision_counts": dict(dependency_precision),
+            "historical_fidelity_counts": dict(historical_fidelity),
+        },
         "centrality": {
             "annotated_cases": len(centrality_rows),
             "recall_at_1": (
