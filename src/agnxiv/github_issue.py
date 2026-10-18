@@ -42,7 +42,9 @@ def parse_issue_body(body: str) -> GitHubVerificationRequest:
     }
 
     mode_text = sections.get("mode") or ""
-    if mode_text.lower().startswith("auto"):
+    if mode_text.lower().startswith("auto-verify"):
+        mode = "auto_verify"
+    elif mode_text.lower().startswith("auto"):
         mode = "auto_plan"
     elif mode_text.lower().startswith("verify"):
         mode = "verify_spec"
@@ -57,7 +59,7 @@ def parse_issue_body(body: str) -> GitHubVerificationRequest:
     repository_ref = validate_git_ref(sections.get("git ref") or "main")
 
     arxiv_id = sections.get("arxiv id")
-    if mode == "auto_plan":
+    if mode in {"auto_plan", "auto_verify"}:
         if not arxiv_id:
             raise ValueError("Auto-plan requires an arXiv ID.")
         arxiv_id = parse_arxiv_reference(arxiv_id).versioned_id
@@ -125,7 +127,9 @@ def _summary(payload: dict) -> str:
                 "",
             ]
         )
-        blockers = plan.get("blockers") or []
+        blockers = [*(plan.get("blockers") or [])]
+        if result.get("reason"):
+            blockers.append(result["reason"])
         if blockers:
             lines.append("### Why AgnXiv stopped")
             lines.extend(f"- {item}" for item in blockers)
@@ -151,6 +155,7 @@ def _summary(payload: dict) -> str:
                 f"**Claim:** {claim.get('text', 'Unknown claim')}",
                 f"**Expected:** {record.get('expected')}",
                 f"**Observed:** {record.get('observed_mean')}",
+                f"**Zero manifest:** {'yes' if result.get('zero_manifest') else 'no'}",
             ]
         )
         return "\n".join(lines) + "\n"
