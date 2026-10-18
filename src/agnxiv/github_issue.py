@@ -155,7 +155,7 @@ def _summary(payload: dict) -> str:
         primary = attempts[0]
         lines.extend(
             [
-                f"**Pinned commit:** \`{git.get('commit', 'unknown')}\`",
+                f"**Pinned commit:** `{git.get('commit', 'unknown')}`",
                 f"**Raw numeric verdict:** **{record.get('verdict', 'UNKNOWN')}**",
                 f"**Evidence grade:** **{primary.evidence_grade.value}**",
                 f"**Claim:** {claim.get('text', 'Unknown claim')}",
@@ -172,7 +172,7 @@ def _summary(payload: dict) -> str:
                     (
                         "This numeric outcome is **conditional evidence**, not a strong "
                         "paper-level reproduction/divergence claim, because the reconstructed "
-                        f"dependency environment is \`{precision}\`."
+                        f"dependency environment is `{precision}`."
                     ),
                 ]
             )
