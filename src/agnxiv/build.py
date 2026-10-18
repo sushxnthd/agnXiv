@@ -9,7 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from .provenance import sha256_file
-from .sandbox import resolve_local_image_id
+from .sandbox import SandboxError, resolve_local_image_id
 
 
 class EnvironmentBuildError(RuntimeError):
@@ -160,7 +160,7 @@ def build_python_environment(
 
     try:
         base_image_id_before = resolve_local_image_id(base_image)
-    except Exception as exc:
+    except (SandboxError, ValueError) as exc:
         raise EnvironmentBuildError(
             "base image must already exist locally before environment construction"
         ) from exc
