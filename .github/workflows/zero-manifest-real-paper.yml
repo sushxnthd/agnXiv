@@ -113,3 +113,51 @@ jobs:
           path: /tmp/zero-manifest-real.json
           retention-days: 30
           if-no-files-found: warn
+
+
+  deepwalk-safe-abstention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -e ".[pdf,dev]"
+
+      - name: Attempt zero-manifest DeepWalk scientific verification
+        run: |
+          python -m agnxiv.hosted_runner \
+            --mode auto_verify \
+            --repository phanein/deepwalk \
+            --repository-ref 6e6dff245e4692e9bea47e9017c1034e51afbf29 \
+            --arxiv-id 1403.6652 \
+            --output /tmp/zero-manifest-deepwalk.json
+
+      - name: Require evidence-bound abstention on unresolved workflow
+        run: |
+          python - <<'PY'
+          import json
+          with open("/tmp/zero-manifest-deepwalk.json", encoding="utf-8") as handle:
+              payload = json.load(handle)
+          assert payload["status"] == "needs_review", payload.get("error")
+          result = payload["result"]
+          assert result["kind"] == "auto_plan", result
+          assert result["repository_commit"] == "6e6dff245e4692e9bea47e9017c1034e51afbf29"
+          assert result["plan"]["safe_to_execute"] is False
+          assert result["plan"]["blockers"]
+          assert "bundle" not in result
+          print("PASS: a second pinned arXiv paper safely abstains instead of claiming unsupported reproduction.")
+          PY
+
+      - name: Upload DeepWalk abstention evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zero-manifest-deepwalk-evidence
+          path: /tmp/zero-manifest-deepwalk.json
+          retention-days: 30
+          if-no-files-found: warn
