@@ -11,11 +11,13 @@ from pathlib import Path
 from .auto import build_auto_plan
 from .build import build_python_environment
 from .preprint import parse_arxiv_reference
+from .provenance import detect_git_identity
 from .service.security import validate_git_ref, validate_github_slug
 from .spec import execute_verification_spec, load_verification_spec
 
 _MAX_PAPER_BYTES = 50 * 1024 * 1024
 _MAX_REPOSITORY_BYTES = 2 * 1024 * 1024 * 1024
+_MAX_REPOSITORY_FILES = 20_000
 
 
 class HostedRunnerError(RuntimeError):
@@ -42,18 +44,20 @@ def _run(command: list[str], *, timeout: int = 300) -> subprocess.CompletedProce
     return completed
 
 
-def _repository_size(root: Path) -> int:
+def _repository_stats(root: Path) -> tuple[int, int]:
     total = 0
+    files = 0
     for path in root.rglob("*"):
         if path.is_symlink() or not path.is_file():
             continue
+        files += 1
         try:
             total += path.stat().st_size
         except OSError:
             continue
-        if total > _MAX_REPOSITORY_BYTES:
+        if total > _MAX_REPOSITORY_BYTES or files > _MAX_REPOSITORY_FILES:
             break
-    return total
+    return total, files
 
 
 def checkout_repository(slug: str, ref: str, destination: Path) -> None:
@@ -97,10 +101,14 @@ def checkout_repository(slug: str, ref: str, destination: Path) -> None:
         timeout=60,
     )
 
-    size = _repository_size(destination)
+    size, files = _repository_stats(destination)
     if size > _MAX_REPOSITORY_BYTES:
         raise HostedRunnerError(
             f"repository exceeds hosted size limit of {_MAX_REPOSITORY_BYTES} bytes"
+        )
+    if files > _MAX_REPOSITORY_FILES:
+        raise HostedRunnerError(
+            f"repository exceeds hosted file limit of {_MAX_REPOSITORY_FILES}"
         )
 
 
@@ -156,9 +164,13 @@ def execute_job(
             paper = workspace / "paper.pdf"
             download_arxiv_pdf(arxiv_id, paper)
             plan = build_auto_plan(paper, repo)
+            identity = detect_git_identity(repo)
+            if identity is None:
+                raise HostedRunnerError("checked-out repository has no Git identity")
             status = "succeeded" if plan.safe_to_execute else "needs_review"
             return status, {
                 "kind": "auto_plan",
+                "repository_commit": identity.commit,
                 "plan": plan.model_dump(mode="json"),
             }
 
