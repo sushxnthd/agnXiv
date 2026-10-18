@@ -49,15 +49,42 @@ def load_verification_spec(path: str | Path) -> VerificationSpec:
     )
 
 
+def _resolve_workspace_path(base: Path, value: str, *, label: str) -> Path:
+    """Resolve an untrusted manifest path without allowing workspace escape."""
+    candidate = Path(value)
+    if candidate.is_absolute():
+        raise ValueError(f"{label} path must be relative to the verification workspace")
+
+    resolved = (base / candidate).resolve()
+    try:
+        resolved.relative_to(base)
+    except ValueError as exc:
+        raise ValueError(
+            f"{label} path escapes the verification workspace: {value}"
+        ) from exc
+    return resolved
+
+
 def execute_verification_spec(path: str | Path) -> VerificationBundle:
-    """Resolve a manifest relative to its own location and execute it."""
+    """Resolve a manifest inside its own workspace and execute it."""
     spec_path = Path(path).resolve()
     spec = load_verification_spec(spec_path)
     base = spec_path.parent
 
-    repository = (base / spec.repository).resolve()
-    manuscript = (base / spec.manuscript).resolve() if spec.manuscript else None
-    artifacts = [(base / artifact).resolve() for artifact in spec.artifacts]
+    repository = _resolve_workspace_path(
+        base,
+        spec.repository,
+        label="repository",
+    )
+    manuscript = (
+        _resolve_workspace_path(base, spec.manuscript, label="manuscript")
+        if spec.manuscript
+        else None
+    )
+    artifacts = [
+        _resolve_workspace_path(base, artifact, label="artifact")
+        for artifact in spec.artifacts
+    ]
 
     json_path = (
         spec.observation.value if spec.observation.kind == "json_path" else None
