@@ -154,6 +154,9 @@ def plan_python_environment(
 
     requirements = root / "requirements.txt"
 
+    if requirements.is_symlink():
+        raise ValueError("requirements.txt symlinks are not allowed")
+
     if not requirements.exists():
         return BuildPlan(
             base_image=base_image,
