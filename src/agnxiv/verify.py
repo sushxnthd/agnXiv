@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import math
 from statistics import fmean
 
 from .models import Claim, Observation, Verdict, VerificationPolicy, VerificationRecord
+
+_FLOAT_REL_TOL = 1e-12
+_FLOAT_ABS_TOL = 1e-12
 
 
 def _allowed_slack(expected: float, policy: VerificationPolicy) -> float:
@@ -11,6 +15,24 @@ def _allowed_slack(expected: float, policy: VerificationPolicy) -> float:
     if expected == 0:
         return policy.tolerance
     return abs(expected) * policy.tolerance
+
+
+def _less_or_close(left: float, right: float) -> bool:
+    return left <= right or math.isclose(
+        left,
+        right,
+        rel_tol=_FLOAT_REL_TOL,
+        abs_tol=_FLOAT_ABS_TOL,
+    )
+
+
+def _greater_or_close(left: float, right: float) -> bool:
+    return left >= right or math.isclose(
+        left,
+        right,
+        rel_tol=_FLOAT_REL_TOL,
+        abs_tol=_FLOAT_ABS_TOL,
+    )
 
 
 def verify_numeric_claim(
@@ -62,18 +84,18 @@ def verify_numeric_claim(
     slack = _allowed_slack(expected, policy)
 
     if policy.operator == "approx":
-        passed = absolute_error <= slack
+        passed = _less_or_close(absolute_error, slack)
         comparison = (
             f"|observed - reported| = {absolute_error:.6g} "
             f"<= allowed slack {slack:.6g}"
         )
     elif policy.operator == "at_least":
         boundary = expected - slack
-        passed = observed >= boundary
+        passed = _greater_or_close(observed, boundary)
         comparison = f"observed {observed:.6g} >= lower bound {boundary:.6g}"
     else:
         boundary = expected + slack
-        passed = observed <= boundary
+        passed = _less_or_close(observed, boundary)
         comparison = f"observed {observed:.6g} <= upper bound {boundary:.6g}"
 
     verdict = Verdict.VERIFIED if passed else Verdict.CONTRADICTED
