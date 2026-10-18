@@ -205,7 +205,10 @@ def run_zero_manifest(
     if discovery.returncode != 0:
         return ZeroManifestOutcome(
             status="UNABLE_TO_VERIFY",
-            reason=f"Discovery execution exited with {discovery.returncode}.",
+            reason=(
+                f"Discovery execution exited with {discovery.returncode}. "
+                f"stderr={discovery.stderr[-1500:]!r}; stdout={discovery.stdout[-500:]!r}"
+            ),
             plan=plan,
         )
 
