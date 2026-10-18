@@ -6,14 +6,14 @@ body:
     attributes:
       value: |
         Submit a public computational research artifact for automated AgnXiv analysis.
-        AUTO_PLAN never certifies when the evidence chain remains ambiguous.
+        Auto-verify executes only when the evidence chain is sufficiently explicit; otherwise it abstains.
 
   - type: dropdown
     id: mode
     attributes:
       label: Mode
       options:
-        - Auto-plan from arXiv + repository
+        - Auto-verify from arXiv + repository
         - Verify an agnxiv.json manifest
     validations:
       required: true
@@ -40,7 +40,7 @@ body:
     id: arxiv
     attributes:
       label: arXiv ID
-      description: Required for Auto-plan. Leave blank for Verify manifest.
+      description: Required for Auto-verify. Leave blank for Verify manifest.
       placeholder: 1403.6652
 
   - type: input

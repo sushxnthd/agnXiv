@@ -83,3 +83,11 @@ def test_reject_non_github_repository() -> None:
         assert "GitHub" in str(exc)
     else:
         raise AssertionError("non-GitHub repository was accepted")
+
+def test_parse_zero_manifest_auto_verify_request() -> None:
+    request = parse_issue_body(
+        _body(mode="Auto-verify from arXiv + repository")
+    )
+    assert request.mode == "auto_verify"
+    assert request.arxiv_id == "1403.6652"
+    assert request.spec_path is None

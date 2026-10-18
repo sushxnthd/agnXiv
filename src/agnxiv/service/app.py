@@ -27,7 +27,7 @@ from .security import constant_time_equal, hash_secret, validate_git_ref, valida
 
 
 class JobCreate(BaseModel):
-    mode: Literal["auto_plan", "verify_spec"] = "auto_plan"
+    mode: Literal["auto_plan", "auto_verify", "verify_spec"] = "auto_verify"
     repository: str
     repository_ref: str = "main"
     arxiv_id: str | None = None
@@ -81,37 +81,60 @@ def _validate_worker_result(
     if not result:
         raise ValueError("successful worker callback requires a result")
 
-    if job.mode == "auto_plan":
-        if result.get("kind") != "auto_plan":
-            raise ValueError("AUTO_PLAN returned the wrong result kind")
+    if job.mode in {"auto_plan", "auto_verify"} and result.get("kind") == "auto_plan":
         if result.get("repository_commit") != job.repository_ref:
-            raise ValueError("AUTO_PLAN repository commit does not match pinned job")
+            raise ValueError("AUTO repository commit does not match pinned job")
         plan = result.get("plan")
         if not isinstance(plan, dict):
-            raise ValueError("AUTO_PLAN result is missing its plan")
-        expected = "succeeded" if plan.get("safe_to_execute") is True else "needs_review"
-        if status != expected:
-            raise ValueError("AUTO_PLAN status is inconsistent with plan safety")
+            raise ValueError("AUTO result is missing its plan")
+        if job.mode == "auto_verify":
+            # A plan alone is not scientific verification, even when safe to execute.
+            if status != "needs_review":
+                raise ValueError("AUTO_VERIFY planning-only result cannot succeed")
+        else:
+            expected = "succeeded" if plan.get("safe_to_execute") is True else "needs_review"
+            if status != expected:
+                raise ValueError("AUTO_PLAN status is inconsistent with plan safety")
         return None
 
-    if job.mode != "verify_spec" or result.get("kind") != "verification":
+    if job.mode not in {"auto_verify", "verify_spec"} or result.get("kind") != "verification":
         raise ValueError("verification job returned the wrong result kind")
+    if job.mode == "auto_verify" and result.get("zero_manifest") is not True:
+        raise ValueError("AUTO_VERIFY result lacks zero-manifest provenance")
+    if job.mode == "verify_spec" and result.get("zero_manifest") is True:
+        raise ValueError("VERIFY_SPEC cannot present a zero-manifest result")
 
-    bundle = VerificationBundle.model_validate(result.get("bundle"))
-    git = bundle.provenance.git
-    if git is None or git.commit != job.repository_ref:
-        raise ValueError("verification Git commit does not match pinned job")
-    if git.dirty:
-        raise ValueError("verification repository is dirty")
+    raw_bundles = [result.get("bundle")]
+    if job.mode == "auto_verify":
+        additional = result.get("additional_verifications", [])
+        if not isinstance(additional, list) or len(additional) > 3:
+            raise ValueError("invalid additional verification records")
+        if not isinstance(result.get("discovery"), dict):
+            raise ValueError("AUTO_VERIFY is missing frozen locator provenance")
+        for item in additional:
+            if not isinstance(item, dict) or not isinstance(item.get("discovery"), dict):
+                raise TypeError("additional verification lacks locator provenance")
+            raw_bundles.append(item.get("bundle"))
+
+    bundles = [VerificationBundle.model_validate(raw) for raw in raw_bundles]
+    for bundle in bundles:
+        git = bundle.provenance.git
+        if git is None or git.commit != job.repository_ref:
+            raise ValueError("verification Git commit does not match pinned job")
+        if git.dirty:
+            raise ValueError("verification repository is dirty")
 
     expected = (
         "succeeded"
-        if bundle.record.verdict.value in {"VERIFIED", "CONTRADICTED"}
+        if any(
+            bundle.record.verdict.value in {"VERIFIED", "CONTRADICTED"}
+            for bundle in bundles
+        )
         else "needs_review"
     )
     if status != expected:
-        raise ValueError("verification status is inconsistent with verdict")
-    return bundle
+        raise ValueError("verification status is inconsistent with verdicts")
+    return bundles[0]
 
 
 def _enrich_signed_result(config: ServiceConfig, result: dict | None) -> dict | None:
@@ -129,6 +152,19 @@ def _enrich_signed_result(config: ServiceConfig, result: dict | None) -> dict | 
     enriched = dict(result)
     enriched["statement"] = statement
     enriched["dsseEnvelope"] = envelope.model_dump(mode="json")
+
+    if result.get("zero_manifest") is True:
+        extra_signed = []
+        for item in result.get("additional_verifications", []):
+            other_bundle = VerificationBundle.model_validate(item["bundle"])
+            other_statement = build_verification_statement(other_bundle)
+            other_envelope = sign_statement_ed25519(other_statement, private_key)
+            extra_signed.append({
+                **item,
+                "statement": other_statement,
+                "dsseEnvelope": other_envelope.model_dump(mode="json"),
+            })
+        enriched["additional_verifications"] = extra_signed
     return enriched
 
 
@@ -297,10 +333,10 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
         arxiv_id = body.arxiv_id
-        if body.mode == "auto_plan" and not arxiv_id:
+        if body.mode in {"auto_plan", "auto_verify"} and not arxiv_id:
             raise HTTPException(
                 status_code=422,
-                detail="auto_plan requires an arXiv identifier",
+                detail="auto_plan and auto_verify require an arXiv identifier",
             )
         if arxiv_id:
             try:
@@ -421,7 +457,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         try:
             _validate_worker_result(job, body.status, body.result)
             result = _enrich_signed_result(active_config, body.result)
-        except (ValueError, binascii.Error) as exc:
+        except (ValueError, TypeError, binascii.Error) as exc:
             store.complete(
                 job_id,
                 status="failed",
@@ -460,13 +496,13 @@ small{color:#777}
 <h1>AgnXiv</h1>
 <p>Executable verification for computational research claims.</p>
 <label>API key<input id="key" type="password" placeholder="AgnXiv API key"></label>
-<label>Mode<select id="mode"><option value="auto_plan">Auto-plan paper</option><option value="verify_spec">Verify repository manifest</option></select></label>
+<label>Mode<select id="mode"><option value="auto_verify">Auto-verify paper</option><option value="auto_plan">Plan only</option><option value="verify_spec">Verify repository manifest</option></select></label>
 <label>GitHub repository<input id="repo" placeholder="owner/repository"></label>
 <label>Git ref<input id="ref" value="main"></label>
 <label>arXiv ID<input id="arxiv" placeholder="1403.6652"></label>
 <label>Manifest path<input id="spec" placeholder="agnxiv.json"></label>
 <button id="go">Submit</button>
-<p><small>AUTO_PLAN may return needs_review instead of certifying when evidence is ambiguous.</small></p>
+<p><small>Auto-verify executes only safe workflows, and abstains when claim evidence is ambiguous.</small></p>
 <pre id="out">Ready.</pre>
 <script>
 const out=document.getElementById("out");

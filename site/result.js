@@ -34,6 +34,17 @@ function blockers(text) {
     .map((line) => line.slice(2));
 }
 
+function additionalClaims(text) {
+  const marker = "### Additional zero-manifest claims";
+  const index = text.indexOf(marker);
+  if (index < 0) return [];
+  return text.slice(index + marker.length)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("- "))
+    .map((line) => line.slice(2));
+}
+
 function evidenceState(verdict, status, issueState) {
   const rawVerdict = String(verdict || "").toUpperCase();
   if (rawVerdict === "VERIFIED") return "REPRODUCED";
@@ -87,6 +98,7 @@ function render(issue, comment) {
   const expected = extract(raw, "Expected");
   const observed = extract(raw, "Observed");
   const stopped = blockers(raw);
+  const otherClaims = additionalClaims(raw);
   const title = issue.title.replace("[AgnXiv Verify]", "").trim() || "Verification request";
   const state = evidenceState(verdict, status, issue.state);
   const stateClass = badgeClass(state);
@@ -119,6 +131,12 @@ function render(issue, comment) {
       '</section>';
   }
 
+  const additionalHtml = otherClaims.length
+    ? '<section class="result-panel" style="margin-top:28px"><h2>Additional checked claims</h2>' +
+      '<ul class="blocker-list">' + otherClaims.map((item) => '<li>' + esc(item) + '</li>').join('') +
+      '</ul></section>'
+    : '';
+
   const blockersHtml = stopped.length
     ? '<section class="result-panel" style="margin-top:28px"><h2>Why AgnXiv stopped</h2>' +
       '<ul class="blocker-list">' + stopped.map((item) => '<li>' + esc(item) + '</li>').join('') +
@@ -141,7 +159,7 @@ function render(issue, comment) {
       '<p>Submitted ' + new Date(issue.created_at).toLocaleString() + '</p></div>' +
       '<span class="badge ' + stateClass + '">' + esc(state) + '</span>' +
     '</section>' +
-    '<div class="result-grid"><div>' + primary + blockersHtml + '</div>' +
+    '<div class="result-grid"><div>' + primary + additionalHtml + blockersHtml + '</div>' +
       '<aside class="result-panel"><h2>Provenance</h2><dl class="fact-list">' +
         paperFact +
         '<div><dt>Repository</dt><dd>' + esc(repository) + '</dd></div>' +

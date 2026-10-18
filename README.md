@@ -27,6 +27,14 @@ Direct verifier: https://sushxnthd.github.io/agnXiv/verify.html
 
 The repository Issue Form remains available as a fallback submission route.
 
+### Manifest-free scientific verification
+
+The default **Auto-verify** flow now accepts only a versioned arXiv paper and a public pinned GitHub repository. When planning, dependencies, files, and workflow ordering are safe enough, it builds a dependency-only runtime and executes the documented command without network access. Locator discovery is blinded to the paper's reported numerical result; it freezes a unique, labeled stdout metric selector and digest **before** running claim comparison. AgnXiv then executes the workflow again with the frozen selector and emits provenance-bound **claim-level** verdicts. If prerequisites or selectors are ambiguous, it returns `needs_review` without certifying the paper.
+
+**External integration case:** `arXiv:2604.15702`, `synthiumjp/metacognitive-monitoring-battery@2f83d0fa506e7af2b72ca191b65ce42e07c9e185`. The no-manifest runner recomputed two reported reliability statistics: split-half `0.504` versus `0.51` and Spearman–Brown `0.67` versus `0.68`. Under the predeclared 1% relative tolerance, both received a narrow `CONTRADICTED` claim-level verdict. These are small numeric differences, not assessments of the overall paper or its authors. Results depend on the reconstructed runtime, and floating dependencies do not guarantee publication-era equivalence. The full pinned Docker-backed public CI evidence is in `.github/workflows/zero-manifest-real-paper.yml`.
+
+**Known limitations:** Only uniquely mapped numeric stdout metrics can be verified automatically in this phase. A workflow that runs successfully without a trustworthy locator still abstains; publication novelty, significance, and full scientific validity remain outside AgnXiv's scope. The result is an integration demonstration, not a statistically representative false-pass measurement.
+
 ## Evidence network beta
 
 AgnXiv now treats verification as a living evidence network rather than a one-shot badge:

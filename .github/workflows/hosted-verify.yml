@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       mode:
-        description: auto_plan or verify_spec
+        description: auto_plan, auto_verify, or verify_spec
         required: true
         type: string
       repository:
@@ -20,7 +20,7 @@ on:
         required: true
         type: string
       arxiv_id:
-        description: arXiv ID for auto-plan jobs
+        description: arXiv ID for auto-plan or auto-verify jobs
         required: false
         type: string
       spec_path:

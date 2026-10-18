@@ -6,7 +6,7 @@ from pathlib import Path
 from .models import Claim, ClaimSource
 
 _NUMBER = (
-    r"(?<![A-Za-z0-9_.])[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
+    r"(?<![A-Za-z0-9_.])[-+]?(?:\d+(?:,\d{3})*(?:\.\d+)?|\.\d+)"
     r"(?:[eE][-+]?\d+)?(?![A-WYZa-wyz0-9_]|\.\d)"
 )
 _UNIT = (
@@ -37,6 +37,9 @@ _METRICS: dict[str, tuple[str, ...]] = {
     "runtime": ("runtime", "run time", "execution time"),
     "throughput": ("throughput",),
     "speedup": ("speedup", "speed-up"),
+    "split_half_r": ("split-half r", "split-half reliability", "split half r"),
+    "spearman_brown": ("spearman-brown", "spearman brown"),
+    "cohens_d": ("cohen's d", "cohens d", "cohen d"),
     "p_value": ("p-value", "p value"),
 }
 
@@ -81,6 +84,14 @@ def _alias_positions(context: str, alias: str) -> list[int]:
 
 
 def _metric_from_context(context: str) -> str | None:
+    # PDF extractors emit en dashes, nonbreaking hyphens, and minus signs
+    # for compound statistic names; normalize them before lexical matching.
+    context = (
+        context.replace("\u2013", "-")
+        .replace("\u2014", "-")
+        .replace("\u2011", "-")
+        .replace("\u2212", "-")
+    )
     best: tuple[int, str] | None = None
 
     for canonical, aliases in _METRICS.items():
@@ -194,7 +205,15 @@ def extract_quantitative_claims(
             match.start("value"),
             match.end("value"),
         )
-        metric = _metric_from_context(local_context)
+        # Resolve the metric nearest *before* this number, so a sentence
+        # reporting multiple statistics cannot label them all by the last one.
+        left = max(0, match.start("value") - 100)
+        for position in range(match.start("value") - 1, left - 1, -1):
+            if normalized[position] in ".!?" and _is_sentence_boundary(normalized, position):
+                left = position + 1
+                break
+        preceding = normalized[left:match.start("value")]
+        metric = _metric_from_context(preceding) or _metric_from_context(local_context)
 
         if not unit and not uncertainty_raw and value.is_integer() and 1900 <= value <= 2100:
             continue
