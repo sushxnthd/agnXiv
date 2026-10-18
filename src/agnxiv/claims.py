@@ -156,9 +156,7 @@ def extract_quantitative_claims(
         local_start = max(0, match.start() - 60)
         local_end = min(len(normalized), match.end() + 60)
         local_context = normalized[local_start:local_end]
-
-        prefix_context = normalized[max(0, match.start() - 120) : match.start()]
-        metric = _metric_from_context(prefix_context)
+        metric = _metric_from_context(local_context)
 
         if not unit and not uncertainty_raw and value.is_integer() and 1900 <= value <= 2100:
             continue
