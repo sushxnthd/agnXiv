@@ -15,6 +15,7 @@ class ServiceConfig:
     github_workflow: str
     max_active_jobs_per_key: int
     callback_secret: str
+    issuer_private_key_b64: str | None
 
     @classmethod
     def from_env(cls) -> ServiceConfig:
@@ -51,6 +52,7 @@ class ServiceConfig:
                 "AGNXIV_CALLBACK_SECRET",
                 "development-only-change-me",
             ),
+            issuer_private_key_b64=os.getenv("AGNXIV_ISSUER_PRIVATE_KEY_B64") or None,
         )
 
     @property
@@ -61,4 +63,5 @@ class ServiceConfig:
             and bool(self.github_token)
             and self.callback_secret != "development-only-change-me"
             and self.public_base_url.startswith("https://")
+            and bool(self.issuer_private_key_b64)
         )
