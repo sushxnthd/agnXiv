@@ -14,7 +14,6 @@ import urllib.request
 from agnxiv.auto import build_auto_plan
 from agnxiv.research import load_research_cases
 
-
 _PDF_META_RE = re.compile(
     r'<meta[^>]+name=["\\\']citation_pdf_url["\\\'][^>]+content=["\\\']([^"\\\']+)["\\\']',
     flags=re.IGNORECASE,
