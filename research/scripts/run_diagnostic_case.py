@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html.parser
 import json
 import re
 import subprocess
 import tempfile
-from html.parser import HTMLParser
+import urllib.parse
+import urllib.request
 from pathlib import Path
-from urllib.parse import urljoin
-from urllib.request import Request, urlopen
 
 from agnxiv.auto import build_auto_plan
 from agnxiv.research import load_research_cases
@@ -26,14 +26,14 @@ _PDF_META_RE_REVERSED = re.compile(
 
 
 def _fetch_bytes(url: str) -> tuple[bytes, str]:
-    http_request = Request(
+    http_request = urllib.request.Request(
         url,
         headers={
             "User-Agent": "AgnXiv-Research/0.1 (+https://github.com/sushxnthd/agnXiv)",
             "Accept": "application/pdf,text/html;q=0.9,*/*;q=0.5",
         },
     )
-    with urlopen(http_request, timeout=90) as response:
+    with urllib.request.urlopen(http_request, timeout=90) as response:
         data = response.read(60 * 1024 * 1024 + 1)
         final_url = response.geturl()
     if len(data) > 60 * 1024 * 1024:
@@ -41,7 +41,7 @@ def _fetch_bytes(url: str) -> tuple[bytes, str]:
     return data, final_url
 
 
-class _ArticleTextParser(HTMLParser):
+class _ArticleTextParser(html.parser.HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.parts: list[str] = []
@@ -82,7 +82,7 @@ def _materialize_manuscript(
     html = data[:5_000_000].decode("utf-8", errors="ignore")
     match = _PDF_META_RE.search(html) or _PDF_META_RE_REVERSED.search(html)
     if match:
-        pdf_url = urljoin(final_url, match.group(1))
+        pdf_url = urllib.parse.urljoin(final_url, match.group(1))
         pdf_data, resolved_pdf_url = _fetch_bytes(pdf_url)
         if pdf_data.startswith(b"%PDF"):
             destination = root / "paper.pdf"
