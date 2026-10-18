@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="AgnXiv turns computational research claims into executable verification records.">
+  <title>AgnXiv — executable verification for research claims</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="./">agnXiv</a>
+    <nav>
+      <a href="https://github.com/sushxnthd/agnXiv">GitHub</a>
+      <a class="button small" href="https://github.com/sushxnthd/agnXiv/issues/new?template=verify-paper.yml">Verify a paper</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Scientific verification infrastructure</div>
+      <h1>Turn research claims into executable tests.</h1>
+      <p class="lede">
+        AgnXiv maps computational claims to code and evidence, reconstructs the workflow,
+        executes it in isolation, and returns a replayable verdict instead of an AI opinion.
+      </p>
+      <div class="actions">
+        <a class="button" href="https://github.com/sushxnthd/agnXiv/issues/new?template=verify-paper.yml">Run a verification</a>
+        <a class="text-link" href="https://github.com/sushxnthd/agnXiv#readme">Read the specification →</a>
+      </div>
+      <div class="trust">
+        <span>VERIFIED</span>
+        <span>CONTRADICTED</span>
+        <span>UNABLE_TO_VERIFY</span>
+        <span>PARTIALLY_VERIFIED</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article>
+        <div class="num">01</div>
+        <h2>Compile the claim</h2>
+        <p>Extract material quantitative claims and connect them to source, data, commands, figures, and reported values.</p>
+      </article>
+      <article>
+        <div class="num">02</div>
+        <h2>Reconstruct the experiment</h2>
+        <p>Infer the environment and workflow, pin the repository commit, and execute only inside an isolated no-network sandbox.</p>
+      </article>
+      <article>
+        <div class="num">03</div>
+        <h2>Return evidence</h2>
+        <p>Compare observed results against an explicit policy and preserve the provenance needed to replay the verification.</p>
+      </article>
+    </section>
+
+    <section class="proof">
+      <div>
+        <div class="eyebrow">Zero-manifest benchmark</div>
+        <h2>DeepWalk: 88.9% of the verification pipeline automated.</h2>
+      </div>
+      <p>
+        Starting only from arXiv 1403.6652 and the public DeepWalk repository, AgnXiv
+        extracted claims, mapped evidence, inferred the environment, discovered and ordered
+        the two-stage experiment, resolved artifacts, and generated a draft verification
+        manifest. It correctly abstained because exact historical dependency and output
+        semantics were not yet trustworthy enough for unattended certification.
+      </p>
+    </section>
+
+    <section class="jobs">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Public queue</div>
+          <h2>Recent verification requests</h2>
+        </div>
+        <a class="text-link" href="https://github.com/sushxnthd/agnXiv/issues?q=is%3Aissue+%22%5BAgnXiv+Verify%5D%22">View all →</a>
+      </div>
+      <div id="jobs" class="job-list"><p class="muted">Loading recent requests…</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>agnXiv</span>
+    <span>Discovery may be probabilistic. Verification must be evidence-bound.</span>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
