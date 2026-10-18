@@ -1,5 +1,7 @@
 """Add tamper-evident hosted transparency log."""
 
+from datetime import UTC, datetime
+
 import sqlalchemy as sa
 from alembic import op
 
@@ -53,7 +55,7 @@ def upgrade() -> None:
                 "id": 1,
                 "sequence": 0,
                 "entry_hash": _ZERO_HASH,
-                "updated_at": sa.func.now(),
+                "updated_at": datetime.now(UTC),
             }
         ],
     )
