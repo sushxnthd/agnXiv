@@ -226,3 +226,76 @@ def test_store_idempotency_constraint_returns_existing_job(tmp_path) -> None:
     assert created_first is True
     assert created_second is False
     assert second.id == first.id
+
+
+
+def test_metrics_endpoint_requires_auth_and_reports_job_counts(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: None,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "d" * 40,
+    )
+    app = create_app(
+        _productionish_config(
+            f"sqlite:///{tmp_path / 'metrics.db'}",
+            issuer=None,
+        )
+    )
+
+    with TestClient(app) as client:
+        denied = client.get("/v1/metrics")
+        assert denied.status_code == 401
+
+        created = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "k" * 48},
+            json={
+                "mode": "auto_verify",
+                "repository": "owner/repo",
+                "arxiv_id": "2601.00001",
+            },
+        )
+        assert created.status_code == 202
+
+        metrics = client.get(
+            "/v1/metrics",
+            headers={"X-API-Key": "k" * 48},
+        )
+
+    assert metrics.status_code == 200
+    body = metrics.json()
+    assert body["schema_version"] == "agnxiv.metrics/1"
+    assert body["jobs_total"] == 1
+    assert body["jobs_active"] == 1
+    assert body["jobs_by_mode"]["auto_verify"] == 1
+
+
+def test_request_id_is_echoed_and_untrusted_values_are_replaced(tmp_path) -> None:
+    app = create_app(
+        _productionish_config(
+            f"sqlite:///{tmp_path / 'request-id.db'}",
+            issuer=None,
+        )
+    )
+
+    with TestClient(app) as client:
+        valid = client.get(
+            "/healthz",
+            headers={"X-Request-ID": "trace-123"},
+        )
+        invalid = client.get(
+            "/healthz",
+            headers={"X-Request-ID": "bad request id with spaces"},
+        )
+
+    assert valid.headers["X-Request-ID"] == "trace-123"
+    assert invalid.headers["X-Request-ID"] != "bad request id with spaces"
+    assert len(invalid.headers["X-Request-ID"]) == 32
