@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import tempfile
 import urllib.error
@@ -18,6 +19,9 @@ from .spec import execute_verification_spec, load_verification_spec
 _MAX_PAPER_BYTES = 50 * 1024 * 1024
 _MAX_REPOSITORY_BYTES = 2 * 1024 * 1024 * 1024
 _MAX_REPOSITORY_FILES = 20_000
+_HOSTED_IMAGE_RE = re.compile(
+    r"^python:3\.(?:10|11|12)(?:\.\d+)?-slim(?:-bookworm)?$"
+)
 
 
 class HostedRunnerError(RuntimeError):
@@ -141,6 +145,16 @@ def download_arxiv_pdf(arxiv_id: str, destination: Path) -> None:
         raise HostedRunnerError(f"could not download arXiv PDF: {exc}") from exc
 
 
+
+def _validate_hosted_image(image: str) -> str:
+    candidate = image.strip()
+    if not _HOSTED_IMAGE_RE.fullmatch(candidate):
+        raise HostedRunnerError(
+            "hosted beta allows only approved official Python slim runtimes"
+        )
+    return candidate
+
+
 def _pull_image(image: str) -> None:
     _run(["docker", "pull", image], timeout=600)
 
@@ -189,6 +203,7 @@ def execute_job(
                 raise HostedRunnerError("verification spec is not a regular file")
 
             spec = load_verification_spec(manifest)
+            base_image = _validate_hosted_image(spec.runtime.image)
             spec_base = manifest.parent.resolve()
             candidate_repo = Path(spec.repository)
             if candidate_repo.is_absolute():
@@ -207,10 +222,10 @@ def execute_job(
                     "verification spec repository is not a regular directory"
                 )
 
-            _pull_image(spec.runtime.image)
+            _pull_image(base_image)
             build = build_python_environment(
                 build_repository,
-                base_image=spec.runtime.image,
+                base_image=base_image,
             )
             bundle = execute_verification_spec(
                 manifest,
