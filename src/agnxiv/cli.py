@@ -152,6 +152,15 @@ def verify_command(
         Path | None,
         typer.Option(exists=True, dir_okay=False, readable=True),
     ] = None,
+    artifact: Annotated[
+        list[Path] | None,
+        typer.Option(
+            "--artifact",
+            exists=True,
+            readable=True,
+            help="External dataset/checkpoint; repeat to bind multiple artifacts.",
+        ),
+    ] = None,
     unit: Annotated[str | None, typer.Option()] = None,
     claim_text: Annotated[str, typer.Option()] = "CLI execution claim",
     tolerance: Annotated[float, typer.Option()] = 0.01,
@@ -175,6 +184,7 @@ def verify_command(
         command=command,
         policy=_policy(kind, tolerance, operator=operator),
         manuscript_path=manuscript,
+        artifact_paths=artifact,
         json_path=json_path,
         observation_scale=observation_scale,
     )
