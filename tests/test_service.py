@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 
@@ -8,6 +9,7 @@ from fastapi.testclient import TestClient
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
+from agnxiv.statement import generate_ed25519_keypair
 
 
 def _config(database_url: str) -> ServiceConfig:
@@ -102,6 +104,18 @@ def test_hosted_job_lifecycle_and_quota(tmp_path, monkeypatch) -> None:
         )
         assert callback.status_code == 200
 
+        replay = client.post(
+            f"/internal/jobs/{created['id']}/complete",
+            headers={
+                "X-AgnXiv-Callback-Token": _callback_token(created["id"]),
+            },
+            json={
+                "status": "failed",
+                "error": "attempted overwrite",
+            },
+        )
+        assert replay.status_code == 409
+
         fetched = client.get(
             f"/v1/jobs/{created['id']}",
             headers={"X-API-Key": "test-key"},
@@ -162,3 +176,29 @@ def test_readiness_requires_production_configuration(tmp_path) -> None:
     with TestClient(app) as client:
         assert client.get("/healthz").status_code == 200
         assert client.get("/readyz").status_code == 503
+
+
+def test_issuer_endpoint_exposes_public_key(tmp_path) -> None:
+    private_key, public_key, key_id = generate_ed25519_keypair()
+    config = _config(f"sqlite:///{tmp_path / 'service.db'}")
+    config = ServiceConfig(
+        database_url=config.database_url,
+        api_keys=config.api_keys,
+        public_base_url=config.public_base_url,
+        github_token=config.github_token,
+        github_repository=config.github_repository,
+        github_ref=config.github_ref,
+        github_workflow=config.github_workflow,
+        max_active_jobs_per_key=config.max_active_jobs_per_key,
+        callback_secret=config.callback_secret,
+        issuer_private_key_b64=base64.b64encode(private_key).decode("ascii"),
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        response = client.get("/v1/issuer")
+        assert response.status_code == 200
+        issuer = response.json()
+        assert issuer["algorithm"] == "Ed25519"
+        assert issuer["key_id"] == key_id
+        assert issuer["public_key_pem"].encode("ascii") == public_key
