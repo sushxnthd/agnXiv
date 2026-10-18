@@ -216,6 +216,13 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
         "manuscript_sha256": manuscript_sha256,
         "automation_score": plan.automation_score,
         "safe_to_execute": plan.safe_to_execute,
+        "environment": {
+            "confidence": plan.environment.confidence,
+            "dependency_source": plan.environment.dependency_source,
+            "dependency_precision": plan.environment.dependency_precision,
+            "historical_fidelity": plan.environment.historical_fidelity,
+            "inferred_packages": plan.environment.inferred_packages,
+        },
         "candidate_claims": len(plan.claims),
         "candidate_commands": len(plan.commands),
         "top_claim": plan.claims[0].claim.text if plan.claims else None,
