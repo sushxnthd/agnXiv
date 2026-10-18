@@ -1,6 +1,11 @@
+import json
+from pathlib import Path
+
+
 def main() -> None:
-    accuracy = 0.914
-    print(f"accuracy: {accuracy * 100:.1f}%")
+    artifact = Path("/agnxiv-artifacts/000-metric.json")
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    print(json.dumps({"metrics": {"accuracy": payload["accuracy"]}}))
 
 
 if __name__ == "__main__":
