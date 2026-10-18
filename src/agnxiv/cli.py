@@ -15,6 +15,7 @@ from .claims import extract_claims_from_pdf, extract_quantitative_claims
 from .models import Claim, Observation, VerificationPolicy
 from .pipeline import inspect_project, verify_with_command
 from .preprint import parse_arxiv_reference
+from .spec import execute_verification_spec
 from .statement import (
     AttestationSignatureError,
     DSSEEnvelope,
@@ -175,6 +176,38 @@ def build_env_command(
         typer.echo(str(exc), err=True)
         raise typer.Exit(code=2) from exc
     typer.echo(result.model_dump_json(indent=2))
+
+
+@app.command("verify-spec")
+def verify_spec_command(
+    spec_path: Annotated[
+        Path,
+        typer.Argument(exists=True, dir_okay=False, readable=True),
+    ],
+    sign_key: Annotated[
+        Path | None,
+        typer.Option(exists=True, dir_okay=False, readable=True),
+    ] = None,
+) -> None:
+    """Execute one declarative AgnXiv verification manifest."""
+    try:
+        bundle = execute_verification_spec(spec_path)
+    except (OSError, ValueError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=2) from exc
+
+    attestation = attest_bundle(bundle)
+    statement = build_verification_statement(bundle)
+    response = {
+        "bundle": bundle.model_dump(mode="json"),
+        "attestation": attestation.model_dump(mode="json"),
+        "statement": statement,
+    }
+    if sign_key is not None:
+        envelope = sign_statement_ed25519(statement, sign_key.read_bytes())
+        response["dsseEnvelope"] = envelope.model_dump(mode="json")
+
+    typer.echo(json.dumps(response, indent=2, default=str))
 
 
 @app.command("verify-number")
