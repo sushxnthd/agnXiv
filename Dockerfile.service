@@ -15,7 +15,15 @@ COPY migrations ./migrations
 
 RUN python -m pip install "pip==26.2.1" && \
     python -m pip install -c constraints-service.txt ".[service,sign,pdf]" && \
-    python -m pip check
+    python -m pip check && \
+    python -m pip uninstall -y \
+      setuptools \
+      wheel \
+      urllib3 \
+      jaraco.context \
+      msgpack \
+      pip && \
+    python -c "import alembic, cryptography, fastapi, jwt, psycopg, pydantic, pypdf, sqlalchemy, uvicorn"
 
 USER agnxiv
 
