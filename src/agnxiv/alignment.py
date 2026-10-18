@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 import math
 import re
@@ -74,10 +75,27 @@ _STOPWORDS = {
 }
 
 _PROCEDURE_CUES = {
-    "backcast", "cross", "entropy", "evaluation", "forecast", "gaussian",
-    "hyperparameter", "initialization", "initialize", "loss", "mask", "masked",
-    "objective", "residual", "split", "test", "training", "tuning", "update",
-    "validation", "zero",
+    "backcast", "cross", "entropy", "evaluate", "forecast", "gaussian",
+    "hyperparameter", "initialize", "loss", "mask", "objective", "residual",
+    "split", "test", "train", "tune", "update", "validate", "zero",
+}
+
+_CANONICAL_TOKEN = {
+    "evaluated": "evaluate",
+    "evaluating": "evaluate",
+    "evaluation": "evaluate",
+    "initialization": "initialize",
+    "initialized": "initialize",
+    "initializing": "initialize",
+    "masked": "mask",
+    "masking": "mask",
+    "residuals": "residual",
+    "trained": "train",
+    "training": "train",
+    "tuned": "tune",
+    "tuning": "tune",
+    "validated": "validate",
+    "validation": "validate",
 }
 
 
@@ -125,11 +143,13 @@ def load_localization_gold(path: str | Path) -> dict[str, LocalizationGold]:
 def _tokens(text: str) -> set[str]:
     expanded = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", text)
     expanded = expanded.replace("_", " ").replace("-", " ")
-    return {
-        token.lower()
-        for token in re.findall(r"[A-Za-z][A-Za-z0-9]{2,}", expanded)
-        if token.lower() not in _STOPWORDS
-    }
+    tokens: set[str] = set()
+    for raw in re.findall(r"[A-Za-z][A-Za-z0-9]{2,}", expanded):
+        lowered = raw.lower()
+        if lowered in _STOPWORDS:
+            continue
+        tokens.add(_CANONICAL_TOKEN.get(lowered, lowered))
+    return tokens
 
 
 def _paper_sentences(text: str) -> list[tuple[str, set[str]]]:
@@ -144,7 +164,32 @@ def _paper_sentences(text: str) -> list[tuple[str, set[str]]]:
     return rows[:3000]
 
 
-def _code_lines(repository: Path):
+def _docstring_line_numbers(text: str) -> set[int]:
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return set()
+
+    ignored: set[int] = set()
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Expr)
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+        ):
+            start = getattr(node, "lineno", 0)
+            end = getattr(node, "end_lineno", start)
+            ignored.update(range(start, end + 1))
+    return ignored
+
+
+def _code_lines(
+    repository: Path,
+    paper_tokens: set[str],
+    *,
+    line_budget: int = 50_000,
+):
+    paths: list[tuple[int, int, str, Path]] = []
     for path in repository.rglob("*.py"):
         if path.is_symlink() or not path.is_file():
             continue
@@ -152,19 +197,35 @@ def _code_lines(repository: Path):
         if any(part.startswith(".") for part in relative.parts):
             continue
         try:
-            if path.stat().st_size > 750_000:
-                continue
-            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+            size = path.stat().st_size
         except OSError:
             continue
+        if size > 750_000:
+            continue
+        path_overlap = len(_tokens(str(relative)) & paper_tokens)
+        paths.append((-path_overlap, len(relative.parts), str(relative), path))
 
-        for line_number, raw in enumerate(lines, start=1):
+    consumed = 0
+    for _, _, relative_text, path in sorted(paths):
+        if consumed >= line_budget:
+            break
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        ignored_lines = _docstring_line_numbers(text)
+        for line_number, raw in enumerate(text.splitlines(), start=1):
+            if consumed >= line_budget:
+                break
+            consumed += 1
+            if line_number in ignored_lines:
+                continue
             line = raw.strip()
             if not line or line.startswith("#") or len(line) > 500:
                 continue
             tokens = _tokens(line)
             if len(tokens) >= 2:
-                yield str(relative), line_number, line, tokens
+                yield relative_text, line_number, line, tokens
 
 
 def localize_paper_code(
@@ -194,9 +255,10 @@ def localize_paper_code(
             inverted[token].add(index)
 
     total_sentences = len(sentences)
+    paper_vocabulary = set().union(*(tokens for _, tokens in sentences))
     best: list[AlignmentCandidate] = []
 
-    for path, line_number, line, code_tokens in _code_lines(root):
+    for path, line_number, line, code_tokens in _code_lines(root, paper_vocabulary):
         sentence_indices: set[int] = set()
         for token in code_tokens:
             sentence_indices.update(inverted.get(token, ()))
@@ -219,7 +281,11 @@ def localize_paper_code(
 
             procedure_overlap = shared & _PROCEDURE_CUES
             if procedure_overlap:
-                score += 0.35 + 0.08 * min(3, len(procedure_overlap))
+                score += 0.55 + 0.12 * min(3, len(procedure_overlap))
+
+            path_overlap = _tokens(path) & paper_tokens
+            if path_overlap:
+                score += 0.18 * min(3, len(path_overlap))
 
             candidate = AlignmentCandidate(
                 path=path,
