@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import shlex
 import subprocess
 from dataclasses import dataclass
@@ -21,9 +22,16 @@ class SandboxLimits:
 
 
 @dataclass(frozen=True)
+class ArtifactMount:
+    host_path: str
+    container_path: str
+
+
+@dataclass(frozen=True)
 class ExecutionResult:
     command: tuple[str, ...]
     image_id: str
+    artifact_mounts: tuple[ArtifactMount, ...]
     returncode: int
     stdout: str
     stderr: str
@@ -59,17 +67,65 @@ def resolve_local_image_id(image: str) -> str:
     return image_id
 
 
+def _safe_artifact_name(name: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", name).strip("-")
+    return cleaned or "artifact"
+
+
+def prepare_artifact_mounts(
+    artifact_paths: list[str | Path] | None,
+) -> tuple[ArtifactMount, ...]:
+    """Resolve external evidence into deterministic read-only mount locations."""
+    mounts: list[ArtifactMount] = []
+
+    for index, value in enumerate(artifact_paths or []):
+        path = Path(value).resolve()
+        if not path.exists():
+            raise ValueError(f"artifact path does not exist: {path}")
+        if "," in str(path) or "\n" in str(path):
+            raise ValueError("artifact paths may not contain commas or newlines")
+
+        target = f"/agnxiv-artifacts/{index:03d}-{_safe_artifact_name(path.name)}"
+        mounts.append(
+            ArtifactMount(
+                host_path=str(path),
+                container_path=target,
+            )
+        )
+
+    return tuple(mounts)
+
+
+def _artifact_mount_args(mounts: tuple[ArtifactMount, ...]) -> list[str]:
+    args: list[str] = []
+    for mount in mounts:
+        args.extend(
+            [
+                "--mount",
+                (
+                    "type=bind,"
+                    f"src={mount.host_path},"
+                    f"dst={mount.container_path},"
+                    "readonly"
+                ),
+            ]
+        )
+    return args
+
+
 def docker_command(
     *,
     image: str,
     repository: str | Path,
     command: list[str],
+    artifact_paths: list[str | Path] | None = None,
     limits: SandboxLimits | None = None,
     workspace_mode: Literal["readonly", "ephemeral-copy"] = "ephemeral-copy",
 ) -> list[str]:
     """Build the locked-down Docker command used for research execution."""
     active_limits = limits or SandboxLimits()
     repo = Path(repository).resolve()
+    mounts = prepare_artifact_mounts(artifact_paths)
 
     if not repo.is_dir():
         raise ValueError(f"repository path is not a directory: {repo}")
@@ -99,6 +155,7 @@ def docker_command(
         str(active_limits.cpus),
         "--tmpfs",
         "/tmp:rw,noexec,nosuid,size=1g",
+        *_artifact_mount_args(mounts),
     ]
 
     if workspace_mode == "readonly":
@@ -137,16 +194,19 @@ def execute_in_docker(
     image: str,
     repository: str | Path,
     command: list[str],
+    artifact_paths: list[str | Path] | None = None,
     limits: SandboxLimits | None = None,
     workspace_mode: Literal["readonly", "ephemeral-copy"] = "ephemeral-copy",
 ) -> ExecutionResult:
-    """Execute research code with no network and an immutable host source tree."""
+    """Execute research code with no network and immutable host evidence."""
     active_limits = limits or SandboxLimits()
+    mounts = prepare_artifact_mounts(artifact_paths)
     image_id = resolve_local_image_id(image)
     full_command = docker_command(
         image=image_id,
         repository=repository,
         command=command,
+        artifact_paths=artifact_paths,
         limits=active_limits,
         workspace_mode=workspace_mode,
     )
@@ -165,6 +225,7 @@ def execute_in_docker(
     return ExecutionResult(
         command=tuple(full_command),
         image_id=image_id,
+        artifact_mounts=mounts,
         returncode=completed.returncode,
         stdout=completed.stdout,
         stderr=completed.stderr,
