@@ -185,6 +185,35 @@ class JobStore:
             )
             return session.scalar(statement)
 
+    def metrics(self) -> dict[str, object]:
+        """Return secret-free operator counters for the hosted control plane."""
+        with self.session_factory() as session:
+            status_rows = session.execute(
+                select(Job.status, func.count()).group_by(Job.status)
+            ).all()
+            mode_rows = session.execute(
+                select(Job.mode, func.count()).group_by(Job.mode)
+            ).all()
+            total = int(session.scalar(select(func.count()).select_from(Job)) or 0)
+            recent_cutoff = datetime.now(UTC) - timedelta(hours=1)
+            recent = int(
+                session.scalar(
+                    select(func.count())
+                    .select_from(Job)
+                    .where(Job.created_at >= recent_cutoff)
+                )
+                or 0
+            )
+        statuses = {str(key): int(value) for key, value in status_rows}
+        modes = {str(key): int(value) for key, value in mode_rows}
+        return {
+            "jobs_total": total,
+            "jobs_last_hour": recent,
+            "jobs_by_status": statuses,
+            "jobs_by_mode": modes,
+            "jobs_active": statuses.get("queued", 0) + statuses.get("running", 0),
+        }
+
     def count_active(self, api_key_hash: str) -> int:
         with self.session_factory() as session:
             statement = select(func.count()).select_from(Job).where(
