@@ -4,6 +4,7 @@ import json
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import DateTime, String, Text, create_engine, func, select, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
@@ -67,7 +68,7 @@ class JobStore:
             with self.engine.connect() as connection:
                 connection.execute(text("SELECT 1"))
             return True
-        except Exception:
+        except SQLAlchemyError:
             return False
 
     def create_job(
