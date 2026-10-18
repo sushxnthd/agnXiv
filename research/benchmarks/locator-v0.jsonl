@@ -1,0 +1,12 @@
+{"case_id":"LOC-001","claim_text":"Held-out test accuracy","metric":"accuracy","unit":"fraction","output":"reference accuracy: 91.4%\\nobserved accuracy: 82.4%\\n","expected_action":"SELECT","expected_value":0.824}
+{"case_id":"LOC-002","claim_text":"Held-out test accuracy","metric":"accuracy","unit":"fraction","output":"target accuracy=91.4%; observed accuracy=82.4%\\n","expected_action":"ABSTAIN","expected_value":null}
+{"case_id":"LOC-003","claim_text":"Primary result","metric":null,"unit":null,"output":"0.9\\n1.0\\n","expected_action":"ABSTAIN","expected_value":null}
+{"case_id":"LOC-004","claim_text":"Macro F1 on the evaluation set","metric":"f1","unit":null,"output":"f1: 0.71\\n","expected_action":"SELECT","expected_value":0.71}
+{"case_id":"LOC-005","claim_text":"Test accuracy on the held-out split","metric":"accuracy","unit":"fraction","output":"validation accuracy: 84.1%\\ntest accuracy: 82.0%\\n","expected_action":"ABSTAIN","expected_value":null}
+{"case_id":"LOC-006","claim_text":"Observed model accuracy","metric":"accuracy","unit":"fraction","output":"claimed accuracy: 91.4%\\nmeasured accuracy: 83.2%\\n","expected_action":"SELECT","expected_value":0.832}
+{"case_id":"LOC-007","claim_text":"AUROC on the evaluation cohort","metric":"auroc","unit":null,"output":"evaluation auroc = 0.873\\n","expected_action":"SELECT","expected_value":0.873}
+{"case_id":"LOC-008","claim_text":"Accuracy on the benchmark","metric":"accuracy","unit":"fraction","output":"evaluation accuracy = 88.6%\\n","expected_action":"SELECT","expected_value":0.886}
+{"case_id":"LOC-009","claim_text":"Accuracy under repeated runs","metric":"accuracy","unit":"fraction","output":"observed accuracy: 82.0%\\nobserved accuracy: 82.1%\\n","expected_action":"ABSTAIN","expected_value":null}
+{"case_id":"LOC-010","claim_text":"F1 score on the benchmark","metric":"f1","unit":"fraction","output":"reference f1: 88.0%\\nevaluation f1: 81.0%\\n","expected_action":"SELECT","expected_value":0.81}
+{"case_id":"LOC-011","claim_text":"Runtime latency of the evaluated method","metric":"latency","unit":"ms","output":"observed latency: 42 ms\\n","expected_action":"SELECT","expected_value":42}
+{"case_id":"LOC-012","claim_text":"Mean absolute error on the held-out data","metric":"mae","unit":null,"output":"reported MAE: 3.1\\nobserved MAE: 4.2\\n","expected_action":"SELECT","expected_value":4.2}

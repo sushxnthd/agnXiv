@@ -1,0 +1,38 @@
+name: research-locator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/benchmarks/locator-v0.jsonl"
+      - "src/agnxiv/outputs.py"
+      - "src/agnxiv/locator_bench.py"
+      - "research/scripts/run_locator_benchmark.py"
+      - ".github/workflows/research-locator.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run blinded locator benchmark
+        run: |
+          python research/scripts/run_locator_benchmark.py \
+            --output /tmp/locator-v0.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: locator-benchmark-v0
+          path: /tmp/locator-v0.json
+          retention-days: 90
+          if-no-files-found: error
