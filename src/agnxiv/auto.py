@@ -48,7 +48,7 @@ _HISTORICAL_ENV_PATTERNS = (
     r"reproduc(?:e|ibility).{0,80}(?:version|dependency|environment)",
 )
 
-_EXTERNAL_INPUT_SUFFIXES = (
+_FILE_SUFFIXES = (
     ".mat",
     ".csv",
     ".tsv",
@@ -63,7 +63,29 @@ _EXTERNAL_INPUT_SUFFIXES = (
     ".ckpt",
     ".h5",
     ".hdf5",
+    ".embeddings",
+    ".embedding",
+    ".txt",
 )
+
+_OUTPUT_FLAGS = {
+    "--output",
+    "--out",
+    "-o",
+}
+
+_INPUT_FLAGS = {
+    "--input",
+    "--emb",
+    "--embedding",
+    "--embeddings",
+    "--network",
+    "--data",
+    "--dataset",
+    "--labels",
+    "--checkpoint",
+    "--model",
+}
 
 
 def _read_manuscript(path: Path) -> list[Claim]:
@@ -84,48 +106,127 @@ def _read_readme(root: Path) -> str:
 
 
 def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
-    score = 0.15
+    score = 0.10
+
     if claim.reported_value is not None:
-        score += 0.20
+        score += 0.15
     if claim.metric:
-        score += 0.20
-    if claim.unit:
+        score += 0.25
+    if claim.unit == "fraction":
+        score += 0.15
+    elif claim.unit:
+        score += 0.05
+    if claim.reported_uncertainty is not None:
         score += 0.05
     if claim.source.page is not None:
         score += 0.05
+
+    lower = claim.text.lower()
+    if any(
+        token in lower
+        for token in (
+            "achiev",
+            "outperform",
+            "improv",
+            "reduc",
+            "increase",
+            "decrease",
+            "significant",
+            "result",
+            "score",
+        )
+    ):
+        score += 0.10
+
     if evidence:
-        score += min(0.35, 0.20 + evidence[0].score * 0.15)
+        score += min(0.20, 0.08 + evidence[0].score * 0.12)
+
     return min(score, 1.0)
 
 
 def _historical_environment_warnings(readme: str) -> list[str]:
     warnings: list[str] = []
     lower = readme.lower()
+
     for pattern in _HISTORICAL_ENV_PATTERNS:
         match = re.search(pattern, lower, flags=re.DOTALL)
         if not match:
             continue
+
         start = max(0, match.start() - 120)
         end = min(len(readme), match.end() + 180)
         excerpt = " ".join(readme[start:end].split())
         if excerpt and excerpt not in warnings:
             warnings.append(excerpt)
+
     return warnings[:4]
 
 
-def _missing_command_inputs(
+def _option_paths(
     command: CommandCandidate,
-    repository: Path,
-) -> list[str]:
-    missing: list[str] = []
-    for token in command.command:
-        cleaned = token.strip("'\"")
-        if not cleaned.lower().endswith(_EXTERNAL_INPUT_SUFFIXES):
+    flags: set[str],
+) -> set[str]:
+    values: set[str] = set()
+    tokens = command.command
+
+    for index, token in enumerate(tokens[:-1]):
+        if token not in flags:
             continue
-        candidate = repository / cleaned
-        if not candidate.exists():
-            missing.append(cleaned)
-    return missing
+        value = tokens[index + 1].strip("'\"")
+        if value.lower().endswith(_FILE_SUFFIXES):
+            values.add(value)
+
+    return values
+
+
+def _workflow_commands(
+    commands: list[CommandCandidate],
+    repository: Path,
+) -> tuple[list[CommandCandidate], list[str], bool]:
+    """Order a small documented command DAG and report unresolved input files."""
+    selected = [candidate for candidate in commands if candidate.score >= 0.84]
+    if not selected:
+        return [], [], False
+
+    produced_by: dict[str, int] = {}
+    inputs_by_index: dict[int, set[str]] = {}
+
+    for index, candidate in enumerate(selected):
+        for output in _option_paths(candidate, _OUTPUT_FLAGS):
+            produced_by[output] = index
+        inputs_by_index[index] = _option_paths(candidate, _INPUT_FLAGS)
+
+    dependencies: dict[int, set[int]] = {index: set() for index in range(len(selected))}
+    missing: list[str] = []
+
+    for index, inputs in inputs_by_index.items():
+        for value in inputs:
+            producer = produced_by.get(value)
+            if producer is not None and producer != index:
+                dependencies[index].add(producer)
+                continue
+            if not (repository / value).exists():
+                missing.append(value)
+
+    ordered: list[CommandCandidate] = []
+    remaining = set(range(len(selected)))
+
+    while remaining:
+        ready = [
+            index
+            for index in sorted(remaining)
+            if not (dependencies[index] & remaining)
+        ]
+        if not ready:
+            return selected, sorted(set(missing)), False
+
+        for index in ready:
+            ordered.append(selected[index])
+            remaining.remove(index)
+
+    has_explicit_dependency = any(dependencies.values())
+    order_confident = len(selected) == 1 or has_explicit_dependency
+    return ordered, sorted(set(missing)), order_confident
 
 
 def _default_policy(claim: Claim) -> VerificationPolicy:
@@ -138,14 +239,10 @@ def build_auto_plan(
     manuscript: str | Path,
     repository: str | Path,
 ) -> AutoPlan:
-    """Build a conservative zero-manifest verification plan.
-
-    The planner may generate a draft spec, but only marks it safe to execute
-    when the paper, environment, command, and observation paths are sufficiently
-    constrained. Discovery confidence never becomes a verification verdict.
-    """
+    """Build a conservative zero-manifest verification plan."""
     manuscript_path = Path(manuscript).resolve()
     repo = Path(repository).resolve()
+
     if not manuscript_path.is_file():
         raise ValueError(f"manuscript path is not a file: {manuscript_path}")
     if not repo.is_dir():
@@ -157,7 +254,7 @@ def build_auto_plan(
     readme = _read_readme(repo)
 
     ranked: list[RankedClaim] = []
-    for claim in raw_claims[:80]:
+    for claim in raw_claims[:120]:
         evidence = map_claim_to_repository(claim, repo, limit=5)
         ranked.append(
             RankedClaim(
@@ -172,11 +269,17 @@ def build_auto_plan(
     warnings = _historical_environment_warnings(readme)
 
     if not raw_claims:
-        blockers.append("No material quantitative claims were extracted from the manuscript.")
+        blockers.append(
+            "No material quantitative claims were extracted from the manuscript."
+        )
     if not commands:
-        blockers.append("No reproducibility/evaluation command could be discovered.")
+        blockers.append(
+            "No reproducibility/evaluation command could be discovered."
+        )
     if environment.confidence < 0.55:
-        blockers.append("The software environment could not be inferred with adequate confidence.")
+        blockers.append(
+            "The software environment could not be inferred with adequate confidence."
+        )
 
     if warnings:
         blockers.append(
@@ -184,42 +287,58 @@ def build_auto_plan(
             "exact reproduction requires environment archaeology."
         )
 
-    high_commands = [candidate for candidate in commands if candidate.score >= 0.84]
-    if len(high_commands) > 1:
+    workflow, missing_inputs, workflow_order_confident = _workflow_commands(
+        commands,
+        repo,
+    )
+
+    if missing_inputs:
         blockers.append(
-            "Multiple high-confidence research commands were discovered; "
-            "the workflow may be multi-stage."
+            "Documented command references missing local inputs: "
+            + ", ".join(missing_inputs)
         )
 
-    for candidate in high_commands[:3]:
-        missing = _missing_command_inputs(candidate, repo)
-        if missing:
-            blockers.append(
-                "Documented command references missing local inputs: " + ", ".join(missing)
-            )
+    if len(workflow) > 1 and not workflow_order_confident:
+        blockers.append(
+            "Multiple high-confidence research commands were discovered, but "
+            "their execution order could not be inferred safely."
+        )
+    elif len(workflow) > 1:
+        warnings.append(
+            f"A {len(workflow)}-stage research workflow was ordered by file dataflow."
+        )
 
     top_claim = ranked[0] if ranked else None
-    top_command = commands[0] if commands else None
 
     draft_spec: VerificationSpec | None = None
     observation_safe = False
-    if top_claim is not None and top_command is not None:
+
+    if top_claim is not None and workflow:
         observation = ObservationLocator(kind="semantic_stdout")
+        runtime = (
+            RuntimeSpec(
+                image=environment.base_image,
+                command=workflow[0].command,
+            )
+            if len(workflow) == 1
+            else RuntimeSpec(
+                image=environment.base_image,
+                commands=[candidate.command for candidate in workflow],
+            )
+        )
+
         draft_spec = VerificationSpec(
             repository=".",
             claim=top_claim.claim,
             policy=_default_policy(top_claim.claim),
-            runtime=RuntimeSpec(
-                image=environment.base_image,
-                command=top_command.command,
-            ),
+            runtime=runtime,
             manuscript=manuscript_path.name,
             observation=observation,
         )
-        observation_safe = False
         warnings.append(
             "A draft manifest was generated with semantic stdout parsing; "
-            "an explicit JSON/regex locator should be established before unattended certification."
+            "an explicit JSON/regex locator should be established before "
+            "unattended certification."
         )
 
     stages = [
@@ -253,9 +372,22 @@ def build_auto_plan(
             detail=f"{len(commands)} candidate research commands discovered",
         ),
         AutomationStage(
+            name="workflow_ordering",
+            complete=bool(workflow) and workflow_order_confident,
+            detail=(
+                f"{len(workflow)} command stage(s) ordered"
+                if workflow
+                else "no workflow available"
+            ),
+        ),
+        AutomationStage(
             name="artifact_resolution",
-            complete=not any("missing local inputs" in item for item in blockers),
-            detail="documented command inputs checked against repository",
+            complete=not missing_inputs,
+            detail=(
+                "documented external inputs resolved or generated by prior stages"
+                if not missing_inputs
+                else f"{len(missing_inputs)} missing input(s)"
+            ),
         ),
         AutomationStage(
             name="observation_locator",
