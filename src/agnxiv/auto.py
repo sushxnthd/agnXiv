@@ -231,25 +231,41 @@ def _option_paths(
     return values
 
 
+def _command_role(candidate: CommandCandidate) -> str:
+    joined = " ".join(candidate.command).lower()
+    script = Path(candidate.command[1]).name.lower() if len(candidate.command) > 1 else joined
+    if any(token in script for token in ("reproduce", "reproduction", "evaluate", "eval", "score", "scoring", "test", "benchmark")):
+        return "evaluation"
+    if any(token in script for token in ("train", "training", "fit", "tune")):
+        return "training"
+    if any(token in script for token in ("process", "preprocess", "prepare", "convert", "split")):
+        return "preparation"
+    return "other"
+
+
 def _workflow_commands(
     commands: list[CommandCandidate],
     repository: Path,
 ) -> tuple[list[CommandCandidate], list[str], bool]:
-    """Order a small documented command DAG and report unresolved input files."""
-    selected = [candidate for candidate in commands if candidate.score >= 0.84]
-    if not selected:
+    """Select a minimal documented verification workflow and order explicit dependencies."""
+    high_confidence = [candidate for candidate in commands if candidate.score >= 0.84]
+    if not high_confidence:
         return [], [], False
 
     produced_by: dict[str, int] = {}
     inputs_by_index: dict[int, set[str]] = {}
 
-    for index, candidate in enumerate(selected):
+    for index, candidate in enumerate(high_confidence):
         for output in _option_paths(candidate, _OUTPUT_FLAGS):
             produced_by[output] = index
         inputs_by_index[index] = _option_paths(candidate, _INPUT_FLAGS)
 
-    dependencies: dict[int, set[int]] = {index: set() for index in range(len(selected))}
-    missing: list[str] = []
+    dependencies: dict[int, set[int]] = {
+        index: set() for index in range(len(high_confidence))
+    }
+    missing_by_index: dict[int, set[str]] = {
+        index: set() for index in range(len(high_confidence))
+    }
 
     for index, inputs in inputs_by_index.items():
         for value in inputs:
@@ -258,7 +274,53 @@ def _workflow_commands(
                 dependencies[index].add(producer)
                 continue
             if not (repository / value).exists():
-                missing.append(value)
+                missing_by_index[index].add(value)
+
+    evaluation_indices = [
+        index
+        for index, candidate in enumerate(high_confidence)
+        if _command_role(candidate) == "evaluation"
+    ]
+
+    if len(evaluation_indices) == 1:
+        needed = set(evaluation_indices)
+        frontier = list(evaluation_indices)
+        while frontier:
+            child = frontier.pop()
+            for parent in dependencies[child]:
+                if parent not in needed:
+                    needed.add(parent)
+                    frontier.append(parent)
+        selected_indices = needed
+        target_is_unambiguous = True
+    elif len(evaluation_indices) > 1:
+        selected_indices = set(evaluation_indices)
+        target_is_unambiguous = False
+    else:
+        selected_indices = set(range(len(high_confidence)))
+        target_is_unambiguous = len(selected_indices) == 1
+
+    selected = [high_confidence[index] for index in sorted(selected_indices)]
+    remap = {old: new for new, old in enumerate(sorted(selected_indices))}
+    selected_dependencies: dict[int, set[int]] = {}
+    for old_index in sorted(selected_indices):
+        selected_dependencies[remap[old_index]] = {
+            remap[parent]
+            for parent in dependencies[old_index]
+            if parent in selected_indices
+        }
+
+    missing = sorted(
+        {
+            value
+            for old_index in selected_indices
+            for value in missing_by_index[old_index]
+            if not any(
+                value in _option_paths(high_confidence[parent], _OUTPUT_FLAGS)
+                for parent in selected_indices
+            )
+        }
+    )
 
     ordered: list[CommandCandidate] = []
     remaining = set(range(len(selected)))
@@ -267,7 +329,7 @@ def _workflow_commands(
         ready = [
             index
             for index in sorted(remaining)
-            if not (dependencies[index] & remaining)
+            if not (selected_dependencies[index] & remaining)
         ]
         if not ready:
             return selected, sorted(set(missing)), False
@@ -276,8 +338,11 @@ def _workflow_commands(
             ordered.append(selected[index])
             remaining.remove(index)
 
-    has_explicit_dependency = any(dependencies.values())
-    order_confident = len(selected) == 1 or has_explicit_dependency
+    has_explicit_dependency = any(selected_dependencies.values())
+    order_confident = (
+        target_is_unambiguous
+        and (len(selected) == 1 or has_explicit_dependency)
+    )
     return ordered, sorted(set(missing)), order_confident
 
 
