@@ -95,31 +95,42 @@ def _metric_from_context(context: str) -> str | None:
     return best[1] if best else None
 
 
+def _is_sentence_boundary(text: str, position: int) -> bool:
+    marker = text[position]
+    if marker in "!?":
+        return True
+    if marker != ".":
+        return False
+
+    previous = text[position - 1] if position > 0 else ""
+    following = text[position + 1] if position + 1 < len(text) else ""
+    if previous.isdigit() and following.isdigit():
+        return False
+    return True
+
+
 def _sentence_context(
     text: str,
     start: int,
     end: int,
     *,
-    radius: int = 100,
+    radius: int = 160,
 ) -> str:
-    """Return the local sentence containing a numeric report."""
-    left_boundary = max(
-        text.rfind(".", 0, start),
-        text.rfind("!", 0, start),
-        text.rfind("?", 0, start),
-    )
+    """Return local sentence context without splitting decimal numbers."""
+    left_boundary = -1
+    for position in range(start - 1, -1, -1):
+        if text[position] in ".!?" and _is_sentence_boundary(text, position):
+            left_boundary = position
+            break
     left = left_boundary + 1 if left_boundary >= 0 else 0
 
-    right_candidates = [
-        position
-        for marker in (".", "!", "?")
-        if (position := text.find(marker, end)) >= 0
-    ]
-    right = min(right_candidates) + 1 if right_candidates else len(text)
+    right = len(text)
+    for position in range(end, len(text)):
+        if text[position] in ".!?" and _is_sentence_boundary(text, position):
+            right = position + 1
+            break
 
-    return text[
-        max(left, start - radius) : min(right, end + radius)
-    ].strip()
+    return text[max(left, start - radius) : min(right, end + radius)].strip()
 
 
 def _looks_material(
