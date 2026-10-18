@@ -14,6 +14,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         with:
@@ -44,6 +46,10 @@ jobs:
               payload = json.load(handle)
 
           assert payload["status"] == "needs_review"
+          assert (
+              payload["result"]["repository_commit"]
+              == "6e6dff245e4692e9bea47e9017c1034e51afbf29"
+          )
           plan = payload["result"]["plan"]
 
           assert plan["safe_to_execute"] is False
