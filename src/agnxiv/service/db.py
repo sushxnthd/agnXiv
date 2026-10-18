@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, String, Text, create_engine, func, select
@@ -56,6 +55,7 @@ class JobStore:
     def create_job(
         self,
         *,
+        job_id: str,
         api_key_hash: str,
         mode: str,
         repository: str,
@@ -65,7 +65,7 @@ class JobStore:
         callback_token_hash: str,
     ) -> Job:
         job = Job(
-            id=str(uuid.uuid4()),
+            id=job_id,
             api_key_hash=api_key_hash,
             status="queued",
             mode=mode,
