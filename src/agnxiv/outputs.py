@@ -8,6 +8,17 @@ from .models import Claim, Observation
 
 _NUMBER_RE = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][-+]?\d+)?")
 
+_METRIC_ALIASES: dict[str, set[str]] = {
+    "accuracy": {"accuracy", "acc", "top1", "top-1"},
+    "f1": {"f1", "f1_score", "f1-score"},
+    "auroc": {"auroc", "roc_auc", "roc-auc"},
+    "auc": {"auc"},
+    "mae": {"mae", "mean_absolute_error"},
+    "mse": {"mse", "mean_squared_error"},
+    "rmse": {"rmse", "root_mean_squared_error"},
+    "bleu": {"bleu"},
+}
+
 
 class ObservationCandidate(BaseModel):
     observation: Observation
@@ -22,7 +33,15 @@ class ObservationCandidate(BaseModel):
 def _metric_tokens(metric: str | None) -> set[str]:
     if not metric:
         return set()
-    return {part.lower() for part in re.findall(r"[A-Za-z][A-Za-z0-9_-]*", metric)}
+
+    raw_tokens = {
+        part.lower()
+        for part in re.findall(r"[A-Za-z][A-Za-z0-9_-]*", metric)
+    }
+    expanded = set(raw_tokens)
+    for token in raw_tokens:
+        expanded.update(_METRIC_ALIASES.get(token, set()))
+    return expanded
 
 
 def extract_observation_candidates(
@@ -31,15 +50,22 @@ def extract_observation_candidates(
     *,
     limit: int = 10,
 ) -> list[ObservationCandidate]:
-    """Rank numeric outputs that could instantiate a claim."""
+    """Rank numeric outputs by structural/semantic evidence only.
+
+    The paper's reported numeric value is deliberately *not* used to choose an
+    observation. That prevents the parser from preferring a convenient number
+    simply because it would make the claim pass.
+    """
     metric_tokens = _metric_tokens(claim.metric)
     candidates: list[ObservationCandidate] = []
 
     for line_number, line in enumerate(output.splitlines(), start=1):
         line_lower = line.lower()
-        metric_hits = sum(token in line_lower for token in metric_tokens)
+        matched_tokens = {token for token in metric_tokens if token in line_lower}
+        metric_hits = len(matched_tokens)
+        numbers = list(_NUMBER_RE.finditer(line))
 
-        for match in _NUMBER_RE.finditer(line):
+        for index, match in enumerate(numbers):
             raw = float(match.group(0).replace(",", ""))
             normalized = raw
             percent_window = line[max(0, match.end() - 2) : match.end() + 2]
@@ -47,28 +73,28 @@ def extract_observation_candidates(
             if claim.unit == "fraction" and percent_like:
                 normalized = raw / 100.0
 
-            score = 0.05
+            score = 0.02
             rationale: list[str] = []
 
             if metric_hits:
-                score += min(0.55, 0.18 * metric_hits)
-                rationale.append(f"{metric_hits} metric-token matches")
+                score += min(0.62, 0.24 * metric_hits)
+                rationale.append(
+                    "metric labels present: " + ", ".join(sorted(matched_tokens))
+                )
 
-            if claim.reported_value is not None:
-                scale = max(abs(claim.reported_value), 1e-12)
-                relative_distance = abs(normalized - claim.reported_value) / scale
-                if relative_distance <= 0.001:
-                    score += 0.38
-                    rationale.append("extremely close to reported value")
-                elif relative_distance <= 0.01:
-                    score += 0.28
-                    rationale.append("close to reported value")
-                elif relative_distance <= 0.05:
-                    score += 0.16
-                    rationale.append("plausibly close to reported value")
+            if len(numbers) == 1:
+                score += 0.20
+                rationale.append("only numeric value on metric line")
+            elif index == 0 and metric_hits:
+                score += 0.08
+                rationale.append("first numeric value on labeled metric line")
+
+            if re.search(r"[:=]\s*" + re.escape(match.group(0)), line):
+                score += 0.18
+                rationale.append("value follows explicit key/value separator")
 
             if percent_like and claim.unit == "fraction":
-                score += 0.08
+                score += 0.10
                 rationale.append("percent output matches fractional claim unit")
 
             candidates.append(
@@ -96,9 +122,12 @@ def select_unambiguous_observation(
     """Select only when the best output is strong and clearly better than alternatives."""
     if not candidates:
         return None
+
     best = candidates[0]
     if best.score < minimum_score:
         return None
+
     if len(candidates) > 1 and best.score - candidates[1].score < minimum_margin:
         return None
+
     return best.observation
