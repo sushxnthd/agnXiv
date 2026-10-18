@@ -34,6 +34,7 @@ class BenchmarkReport(BaseModel):
     false_passes: int = Field(ge=0)
     false_contradictions: int = Field(ge=0)
     abstentions: int = Field(ge=0)
+    coverage: float = Field(ge=0.0, le=1.0)
     accuracy: float = Field(ge=0.0, le=1.0)
     false_pass_rate: float = Field(ge=0.0, le=1.0)
     results: list[BenchmarkCaseResult]
@@ -75,14 +76,16 @@ def run_recorded_benchmark(cases: list[RecordedBenchmarkCase]) -> BenchmarkRepor
     false_pass_eligible = sum(
         case.expected_verdict != Verdict.VERIFIED for case in cases
     )
+    abstentions = sum(
+        result.actual_verdict == Verdict.UNABLE_TO_VERIFY for result in results
+    )
     return BenchmarkReport(
         total=total,
         matched=sum(result.matched for result in results),
         false_passes=sum(result.false_pass for result in results),
         false_contradictions=sum(result.false_contradiction for result in results),
-        abstentions=sum(
-            result.actual_verdict == Verdict.UNABLE_TO_VERIFY for result in results
-        ),
+        abstentions=abstentions,
+        coverage=((total - abstentions) / total) if total else 0.0,
         accuracy=(sum(result.matched for result in results) / total) if total else 0.0,
         false_pass_rate=(
             sum(result.false_pass for result in results) / false_pass_eligible

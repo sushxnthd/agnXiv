@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import re
 import tempfile
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -11,16 +13,50 @@ from agnxiv.auto import build_auto_plan
 from agnxiv.research import load_research_cases
 
 
-def _download(url: str, destination: Path) -> None:
+_PDF_META_RE = re.compile(
+    r'<meta[^>]+name=["\\\']citation_pdf_url["\\\'][^>]+content=["\\\']([^"\\\']+)["\\\']',
+    flags=re.IGNORECASE,
+)
+_PDF_META_RE_REVERSED = re.compile(
+    r'<meta[^>]+content=["\\\']([^"\\\']+)["\\\'][^>]+name=["\\\']citation_pdf_url["\\\']',
+    flags=re.IGNORECASE,
+)
+
+
+def _fetch_bytes(url: str) -> tuple[bytes, str]:
     request = urllib.request.Request(
         url,
-        headers={"User-Agent": "AgnXiv-Research/0.1 (+https://github.com/sushxnthd/agnXiv)"},
+        headers={
+            "User-Agent": "AgnXiv-Research/0.1 (+https://github.com/sushxnthd/agnXiv)",
+            "Accept": "application/pdf,text/html;q=0.9,*/*;q=0.5",
+        },
     )
     with urllib.request.urlopen(request, timeout=90) as response:
         data = response.read(60 * 1024 * 1024 + 1)
+        final_url = response.geturl()
     if len(data) > 60 * 1024 * 1024:
         raise ValueError("paper download exceeds 60 MiB research limit")
-    destination.write_bytes(data)
+    return data, final_url
+
+
+def _download(url: str, destination: Path) -> str:
+    data, final_url = _fetch_bytes(url)
+    if data.startswith(b"%PDF"):
+        destination.write_bytes(data)
+        return final_url
+
+    html = data[:2_000_000].decode("utf-8", errors="ignore")
+    match = _PDF_META_RE.search(html) or _PDF_META_RE_REVERSED.search(html)
+    if match:
+        pdf_url = urllib.parse.urljoin(final_url, match.group(1))
+        pdf_data, resolved_pdf_url = _fetch_bytes(pdf_url)
+        if pdf_data.startswith(b"%PDF"):
+            destination.write_bytes(pdf_data)
+            return resolved_pdf_url
+
+    raise ValueError(
+        "paper URL did not resolve to a PDF and no valid citation_pdf_url was found"
+    )
 
 
 def _clone_pinned(repository: str, commit: str, destination: Path) -> None:
@@ -76,7 +112,7 @@ def run_case(manifest: Path, case_id: str, output_dir: Path) -> dict:
         manuscript = root / "paper.pdf"
         repository = root / "repository"
 
-        _download(case.paper_url_versioned, manuscript)
+        resolved_paper_url = _download(case.paper_url_versioned, manuscript)
         _clone_pinned(case.repository, case.commit, repository)
 
         plan = build_auto_plan(manuscript, repository)
@@ -89,6 +125,7 @@ def run_case(manifest: Path, case_id: str, output_dir: Path) -> dict:
         "evaluation_role": case.evaluation_role,
         "repository": case.repository,
         "commit": case.commit,
+        "resolved_paper_url": resolved_paper_url,
         "automation_score": plan.automation_score,
         "safe_to_execute": plan.safe_to_execute,
         "candidate_claims": len(plan.claims),
