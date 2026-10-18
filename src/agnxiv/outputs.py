@@ -14,15 +14,29 @@ _NUMBER_RE = re.compile(
 )
 
 _METRIC_ALIASES: dict[str, set[str]] = {
-    "accuracy": {"accuracy", "acc", "top1", "top-1"},
-    "f1": {"f1", "f1_score", "f1-score"},
-    "auroc": {"auroc", "roc_auc", "roc-auc"},
+    "accuracy": {
+        "accuracy",
+        "acc",
+        "top1",
+        "top-1",
+        "cas",
+        "classification accuracy score",
+    },
+    "f1": {"f1", "f1_score", "f1-score", "f1 score"},
+    "auroc": {"auroc", "roc_auc", "roc-auc", "roc auc"},
     "auc": {"auc"},
-    "mae": {"mae", "mean_absolute_error"},
-    "mse": {"mse", "mean_squared_error"},
-    "rmse": {"rmse", "root_mean_squared_error"},
-    "bleu": {"bleu"},
+    "mae": {"mae", "mean_absolute_error", "mean absolute error"},
+    "mse": {"mse", "mean_squared_error", "mean squared error"},
+    "rmse": {"rmse", "root_mean_squared_error", "root mean squared error"},
+    "bleu": {"bleu", "bleu-4", "bleu4"},
+    "latency": {"latency", "inference latency"},
+    "runtime": {"runtime", "run time", "execution time"},
+    "throughput": {"throughput", "samples/s", "samples per second"},
+    "p_value": {"p_value", "p-value", "p value"},
 }
+
+_SPLIT_QUALIFIERS = {"test", "validation", "train"}
+_SUMMARY_QUALIFIERS = {"mean", "median", "p90", "p95", "p99", "best"}
 
 
 class ObservationCandidate(BaseModel):
@@ -35,18 +49,143 @@ class ObservationCandidate(BaseModel):
     rationale: list[str] = Field(default_factory=list)
 
 
-def _metric_tokens(metric: str | None) -> set[str]:
+def _metric_aliases(metric: str | None) -> set[str]:
     if not metric:
         return set()
 
-    raw_tokens = {
-        part.lower()
-        for part in re.findall(r"[A-Za-z][A-Za-z0-9_-]*", metric)
+    canonical = metric.lower()
+    aliases = {canonical}
+    aliases.update(_METRIC_ALIASES.get(canonical, set()))
+    return aliases
+
+
+def _contains_alias(text: str, alias: str) -> bool:
+    return bool(
+        re.search(
+            rf"(?<![A-Za-z0-9]){re.escape(alias)}(?![A-Za-z0-9])",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+def _metric_matches(text: str, metric: str | None) -> set[str]:
+    return {
+        alias
+        for alias in _metric_aliases(metric)
+        if _contains_alias(text, alias)
     }
-    expanded = set(raw_tokens)
-    for token in raw_tokens:
-        expanded.update(_METRIC_ALIASES.get(token, set()))
-    return expanded
+
+
+def _local_key_before_number(line: str, start: int) -> str | None:
+    prefix = line[:start]
+    match = re.search(
+        r"([A-Za-z][A-Za-z0-9_/@-]*"
+        r"(?:\s+[A-Za-z][A-Za-z0-9_/@-]*){0,4})\s*[:=]\s*$",
+        prefix,
+    )
+    return match.group(1).strip() if match else None
+
+
+def _looks_like_metric_label_number(line: str, match: re.Match[str]) -> bool:
+    start = match.start()
+    end = match.end()
+
+    if start < 2 or line[start - 1] != "-" or not line[start - 2].isalnum():
+        return False
+
+    suffix = line[end:]
+    return bool(
+        re.match(
+            r"(?:\s+[A-Za-z][A-Za-z0-9_-]*){0,3}\s*[:=]",
+            suffix,
+        )
+    )
+
+
+def _numeric_matches(line: str) -> list[re.Match[str]]:
+    return [
+        match
+        for match in _NUMBER_RE.finditer(line)
+        if not _looks_like_metric_label_number(line, match)
+    ]
+
+
+def _claim_qualifiers(claim: Claim) -> set[str]:
+    lower = claim.text.lower()
+    qualifiers: set[str] = set()
+
+    if re.search(r"\btest\b|\bheld[- ]out\b", lower):
+        qualifiers.add("test")
+    if re.search(r"\bvalidation\b|\bval(?:idation)?\s+(?:set|split|fold|mae|loss)\b", lower):
+        qualifiers.add("validation")
+    if re.search(r"\btrain(?:ing)?\b", lower):
+        qualifiers.add("train")
+
+    if claim.metric not in {"mae", "mse", "rmse"} and re.search(r"\bmean\b", lower):
+        qualifiers.add("mean")
+    if re.search(r"\bmedian\b", lower):
+        qualifiers.add("median")
+    if re.search(r"\bp(?:90|95|99)\b", lower):
+        qualifiers.update(re.findall(r"\bp(?:90|95|99)\b", lower))
+    if re.search(r"\bbest\b", lower):
+        qualifiers.add("best")
+
+    return qualifiers
+
+
+def _line_qualifiers(line: str) -> set[str]:
+    lower = line.lower()
+    qualifiers: set[str] = set()
+
+    if re.search(r"\btest\b|(?:^|[/_])test(?:[/_:]|$)", lower):
+        qualifiers.add("test")
+    if re.search(r"\bvalidation\b|(?:^|[/_])val(?:[/_:]|$)", lower):
+        qualifiers.add("validation")
+    if re.search(r"\btrain(?:ing)?\b|(?:^|[/_])train(?:[/_:]|$)", lower):
+        qualifiers.add("train")
+    if re.search(r"\bmean\b", lower):
+        qualifiers.add("mean")
+    if re.search(r"\bmedian\b", lower):
+        qualifiers.add("median")
+    qualifiers.update(re.findall(r"\bp(?:90|95|99)\b", lower))
+    if re.search(r"\bbest\b", lower):
+        qualifiers.add("best")
+    if re.search(r"\bseed\s*\d*\b", lower):
+        qualifiers.add("seed")
+
+    return qualifiers
+
+
+def _qualifier_adjustment(
+    claim_qualifiers: set[str],
+    line_qualifiers: set[str],
+) -> tuple[float, list[str]]:
+    score = 0.0
+    rationale: list[str] = []
+
+    matches = claim_qualifiers & line_qualifiers
+    if matches:
+        score += 0.22 * len(matches)
+        rationale.append("claim qualifier match: " + ", ".join(sorted(matches)))
+
+    claim_splits = claim_qualifiers & _SPLIT_QUALIFIERS
+    line_splits = line_qualifiers & _SPLIT_QUALIFIERS
+    if claim_splits and line_splits and not (claim_splits & line_splits):
+        score -= 0.24
+        rationale.append("conflicting data split")
+
+    claim_summaries = claim_qualifiers & _SUMMARY_QUALIFIERS
+    line_summaries = line_qualifiers & _SUMMARY_QUALIFIERS
+    if claim_summaries and line_summaries and not (claim_summaries & line_summaries):
+        score -= 0.24
+        rationale.append("conflicting summary statistic")
+
+    if "mean" in claim_qualifiers and "seed" in line_qualifiers:
+        score -= 0.12
+        rationale.append("per-seed value for mean claim")
+
+    return score, rationale
 
 
 def _parse_json_payload(output: str) -> Any | None:
@@ -164,21 +303,14 @@ def extract_observation_candidates(
     The paper's reported numeric value is deliberately not used to choose an
     observation. This prevents answer-guided selection.
     """
-    metric_tokens = _metric_tokens(claim.metric)
+    claim_qualifiers = _claim_qualifiers(claim)
     candidates: list[ObservationCandidate] = []
 
     for line_number, line in enumerate(output.splitlines(), start=1):
         line_lower = line.lower()
-        matched_tokens = {
-            token
-            for token in metric_tokens
-            if re.search(
-                rf"(?<![A-Za-z0-9]){re.escape(token)}(?![A-Za-z0-9])",
-                line_lower,
-            )
-        }
-        metric_hits = len(matched_tokens)
-        numbers = list(_NUMBER_RE.finditer(line))
+        line_metric_matches = _metric_matches(line, claim.metric)
+        line_qualifiers = _line_qualifiers(line)
+        numbers = _numeric_matches(line)
 
         for index, match in enumerate(numbers):
             raw = float(match.group(0).replace(",", ""))
@@ -191,20 +323,28 @@ def extract_observation_candidates(
             score = 0.02
             rationale: list[str] = []
 
-            if metric_hits:
-                score += min(0.62, 0.24 * metric_hits)
+            local_key = _local_key_before_number(line, match.start())
+            local_matches = _metric_matches(local_key or "", claim.metric)
+
+            if local_matches:
+                score += min(0.62, 0.48 + 0.06 * (len(local_matches) - 1))
                 rationale.append(
-                    "metric labels present: " + ", ".join(sorted(matched_tokens))
+                    "metric bound to value key: " + ", ".join(sorted(local_matches))
+                )
+            elif line_metric_matches and local_key is None:
+                score += min(0.46, 0.24 * len(line_metric_matches))
+                rationale.append(
+                    "metric labels present: " + ", ".join(sorted(line_metric_matches))
                 )
 
             if len(numbers) == 1:
                 score += 0.20
                 rationale.append("only numeric value on metric line")
-            elif index == 0 and metric_hits:
-                score += 0.08
-                rationale.append("first numeric value on labeled metric line")
+            elif index == 0 and local_matches:
+                score += 0.04
+                rationale.append("first value bound to requested metric key")
 
-            if re.search(r"[:=]\s*" + re.escape(match.group(0)), line):
+            if local_key is not None:
                 score += 0.18
                 rationale.append("value follows explicit key/value separator")
 
@@ -212,9 +352,23 @@ def extract_observation_candidates(
                 score += 0.10
                 rationale.append("percent output matches fractional claim unit")
 
+            qualifier_score, qualifier_reasons = _qualifier_adjustment(
+                claim_qualifiers,
+                line_qualifiers,
+            )
+            score += qualifier_score
+            rationale.extend(qualifier_reasons)
+
             negative_cues = {
                 cue
-                for cue in ("target", "expected", "claimed", "reference", "reported", "paper value")
+                for cue in (
+                    "target",
+                    "expected",
+                    "claimed",
+                    "reference",
+                    "reported",
+                    "paper value",
+                )
                 if cue in line_lower
             }
             if negative_cues:
@@ -246,7 +400,7 @@ def extract_observation_candidates(
                 )
             )
 
-    candidates.sort(key=lambda c: c.score, reverse=True)
+    candidates.sort(key=lambda candidate: candidate.score, reverse=True)
     return candidates[:limit]
 
 
