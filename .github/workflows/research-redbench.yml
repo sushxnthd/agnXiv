@@ -41,8 +41,12 @@ jobs:
           import json
           with open("/tmp/redbench-report.json", encoding="utf-8") as handle:
               report = json.load(handle)
-          assert report["total"] >= 6
-          assert 0.0 <= report["false_pass_rate"] <= 1.0
+          assert report["total"] >= 12
+          assert report["matched"] == report["total"]
+          assert report["false_passes"] == 0
+          assert report["false_contradictions"] == 0
+          assert report["false_pass_rate"] == 0.0
+          assert report["coverage"] >= 0.50
           PY
       - uses: actions/upload-artifact@v4
         with:
