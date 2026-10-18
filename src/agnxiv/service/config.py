@@ -20,6 +20,7 @@ class ServiceConfig:
     issuer_private_key_b64: str | None
     job_stale_minutes: int = 45
     min_api_key_length: int = 32
+    issuer_previous_public_keys_b64: tuple[str, ...] = ()
 
     @classmethod
     def from_env(cls) -> ServiceConfig:
@@ -32,6 +33,14 @@ class ServiceConfig:
             "AGNXIV_PUBLIC_BASE_URL",
             "http://localhost:8000",
         ).rstrip("/")
+        issuer_previous_public_keys_b64 = tuple(
+            item.strip()
+            for item in os.getenv(
+                "AGNXIV_ISSUER_PREVIOUS_PUBLIC_KEYS_B64",
+                "",
+            ).split(",")
+            if item.strip()
+        )
         return cls(
             database_url=os.getenv(
                 "DATABASE_URL",
@@ -62,6 +71,7 @@ class ServiceConfig:
                 public_base_url + "/github-actions",
             ),
             issuer_private_key_b64=os.getenv("AGNXIV_ISSUER_PRIVATE_KEY_B64") or None,
+            issuer_previous_public_keys_b64=issuer_previous_public_keys_b64,
             job_stale_minutes=max(
                 5,
                 int(os.getenv("AGNXIV_JOB_STALE_MINUTES", "45")),
