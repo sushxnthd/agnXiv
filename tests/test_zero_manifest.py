@@ -1,7 +1,7 @@
 from agnxiv.claims import extract_quantitative_claims
 from agnxiv.models import Claim
 from agnxiv.outputs import extract_regex_observation
-from agnxiv.zero_manifest import discover_frozen_locator
+from agnxiv.zero_manifest import discover_frozen_locator, discover_frozen_locators
 
 
 def _claim(metric: str, value: float, *, number: int = 1) -> Claim:
@@ -76,3 +76,28 @@ def test_leading_dot_statistics_in_manuscript() -> None:
     assert ("spearman_brown", 0.68) in [
         (row.metric, row.reported_value) for row in claims
     ]
+
+def test_freezes_every_unique_metric_without_output_value_cherry_picking() -> None:
+    claims = [_claim("split_half_r", 0.51), _claim("spearman_brown", 0.68, number=2)]
+    output = "split-half r = 0.504\nSpearman-Brown = 0.676\n"
+    found = discover_frozen_locators(output, claims)
+    assert [row.metric for row in found] == ["split_half_r", "spearman_brown"]
+    assert all("0.504" not in row.regex for row in found)
+    assert all("0.676" not in row.regex for row in found)
+
+
+def test_allows_repeated_mentions_of_same_statistic() -> None:
+    claims = [_claim("split_half_r", 0.51), _claim("split_half_r", 0.51, number=2)]
+    found = discover_frozen_locators("split-half r = 0.504", claims)
+    assert len(found) == 1
+    assert found[0].claim_id == "C001"
+
+
+def test_pdf_dash_variant_reliability_metric() -> None:
+    claims = extract_quantitative_claims(
+        "The Spearman–Brown corrected reliability was 0.68."
+    )
+    assert any(
+        claim.metric == "spearman_brown" and claim.reported_value == 0.68
+        for claim in claims
+    )
