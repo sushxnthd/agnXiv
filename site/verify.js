@@ -67,7 +67,7 @@ function requestBody() {
   const ref = refInput.value.trim() || "main";
   const spec = specInput.value.trim();
   const modeLabel = mode === "auto"
-    ? "Auto-plan from arXiv + repository"
+    ? "Auto-verify from arXiv + repository"
     : "Verify an agnxiv.json manifest";
   return [
     "### Mode", "", modeLabel, "",
