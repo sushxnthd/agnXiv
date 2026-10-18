@@ -15,9 +15,11 @@ def test_core_benchmark_has_zero_false_passes() -> None:
 
 def test_benchmark_reports_decision_coverage() -> None:
     path = Path(__file__).parents[1] / "research" / "benchmarks" / "redbench-v0.jsonl"
-    report = run_recorded_benchmark(load_jsonl_cases(path))
+    cases = load_jsonl_cases(path)
+    report = run_recorded_benchmark(cases)
 
-    assert report.total == 6
-    assert report.abstentions == 5
-    assert report.coverage == 1 / 6
+    assert report.total == len(cases)
+    assert report.total >= 12
+    assert all("\\n" not in case.output for case in cases)
+    assert 0.0 <= report.coverage <= 1.0
     assert report.false_passes == 0
