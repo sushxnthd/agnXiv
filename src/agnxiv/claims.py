@@ -7,12 +7,50 @@ from .models import Claim, ClaimSource
 
 _NUMBER = r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
 _QUANT_RE = re.compile(
-    rf"(?P<prefix>.{{0,90}}?)"
+    rf"(?P<prefix>.{{0,110}}?)"
     rf"(?P<value>{_NUMBER})"
     rf"(?:\s*(?:±|\+/-)\s*(?P<uncertainty>{_NUMBER}))?"
-    rf"\s*(?P<unit>%|percent|ms|s|seconds?|minutes?|hours?|GB|MB|KB|"
-    rf"accuracy|F1|AUROC|AUC|BLEU|MAE|MSE|RMSE)?",
+    rf"\s*(?P<unit>%|percent|ms|s|seconds?|minutes?|hours?|GB|MB|KB)?",
     flags=re.IGNORECASE,
+)
+
+_METRICS: dict[str, tuple[str, ...]] = {
+    "accuracy": ("accuracy", "acc", "top-1", "top1"),
+    "precision": ("precision",),
+    "recall": ("recall",),
+    "f1": ("f1", "f1-score", "f1 score"),
+    "auroc": ("auroc", "roc-auc", "roc auc"),
+    "auc": ("auc",),
+    "bleu": ("bleu",),
+    "mae": ("mae", "mean absolute error"),
+    "mse": ("mse", "mean squared error"),
+    "rmse": ("rmse", "root mean squared error"),
+    "loss": ("loss",),
+    "latency": ("latency",),
+    "runtime": ("runtime", "run time", "execution time"),
+    "throughput": ("throughput",),
+    "speedup": ("speedup", "speed-up"),
+    "p_value": ("p-value", "p value", "p="),
+}
+
+_CLAIM_SIGNALS = (
+    "achiev",
+    "outperform",
+    "improv",
+    "reduc",
+    "increase",
+    "decrease",
+    "significant",
+    "result",
+    "obtain",
+    "reach",
+    "report",
+    "yield",
+    "mean",
+    "median",
+    "average",
+    "error",
+    "score",
 )
 
 
@@ -20,11 +58,30 @@ def _clean_number(raw: str) -> float:
     return float(raw.replace(",", ""))
 
 
-def _metric_from_context(prefix: str, unit: str | None) -> str | None:
-    if unit and unit.lower() not in {"%", "percent"}:
-        return unit
-    words = re.findall(r"[A-Za-z][A-Za-z0-9_-]*", prefix)
-    return " ".join(words[-4:]) if words else None
+def _metric_from_context(context: str) -> str | None:
+    lower = context.lower()
+    best: tuple[int, str] | None = None
+
+    for canonical, aliases in _METRICS.items():
+        for alias in aliases:
+            position = lower.rfind(alias)
+            if position >= 0 and (best is None or position > best[0]):
+                best = (position, canonical)
+
+    return best[1] if best else None
+
+
+def _looks_material(
+    *,
+    context: str,
+    unit: str | None,
+    uncertainty_raw: str | None,
+    metric: str | None,
+) -> bool:
+    lower = context.lower()
+    if unit or uncertainty_raw or metric:
+        return True
+    return any(signal in lower for signal in _CLAIM_SIGNALS)
 
 
 def extract_quantitative_claims(
@@ -33,41 +90,52 @@ def extract_quantitative_claims(
     manuscript: str | None = None,
     page: int | None = None,
 ) -> list[Claim]:
-    """Extract candidate numeric claims.
+    """Extract candidate material quantitative claims.
 
-    This is intentionally conservative infrastructure, not the final semantic
-    Claim Compiler. Later agent/model extraction can feed the same Claim schema.
+    This deterministic pass intentionally favors precision over recall. A later
+    semantic compiler may propose additional claims, but it feeds the same Claim
+    schema and cannot directly award a verification verdict.
     """
     claims: list[Claim] = []
     normalized = " ".join(text.split())
 
-    for idx, match in enumerate(_QUANT_RE.finditer(normalized), start=1):
-        prefix = match.group("prefix").strip()
+    for match in _QUANT_RE.finditer(normalized):
         value = _clean_number(match.group("value"))
         uncertainty_raw = match.group("uncertainty")
         unit = match.group("unit")
 
+        start = max(0, match.start() - 100)
+        end = min(len(normalized), match.end() + 100)
+        quote = normalized[start:end].strip()
+        prefix_context = normalized[start:match.start()]
+        metric = _metric_from_context(prefix_context)
+
         if not unit and not uncertainty_raw and value.is_integer() and 1900 <= value <= 2100:
             continue
 
-        start = max(0, match.start() - 80)
-        end = min(len(normalized), match.end() + 80)
-        quote = normalized[start:end].strip()
+        if not _looks_material(
+            context=quote,
+            unit=unit,
+            uncertainty_raw=uncertainty_raw,
+            metric=metric,
+        ):
+            continue
 
+        percent = bool(unit and unit.lower() in {"%", "percent"})
         claims.append(
             Claim(
-                id=f"C{idx:03d}",
+                id="PENDING",
                 text=quote,
-                metric=_metric_from_context(prefix, unit),
-                reported_value=value / 100 if unit and unit.lower() in {"%", "percent"} else value,
+                metric=metric,
+                reported_value=value / 100 if percent else value,
                 reported_uncertainty=(
                     _clean_number(uncertainty_raw) / 100
-                    if uncertainty_raw and unit and unit.lower() in {"%", "percent"}
+                    if uncertainty_raw and percent
                     else _clean_number(uncertainty_raw)
                     if uncertainty_raw
                     else None
                 ),
-                unit="fraction" if unit and unit.lower() in {"%", "percent"} else unit,
+                unit="fraction" if percent else unit,
                 source=ClaimSource(
                     manuscript=manuscript,
                     page=page,
@@ -75,6 +143,9 @@ def extract_quantitative_claims(
                 ),
             )
         )
+
+    for idx, claim in enumerate(claims, start=1):
+        claim.id = f"C{idx:03d}"
 
     return claims
 
