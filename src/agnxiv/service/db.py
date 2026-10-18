@@ -4,7 +4,7 @@ import json
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import DateTime, String, Text, UniqueConstraint, create_engine, func, select, text, update
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
@@ -114,6 +114,49 @@ class JobStore:
             session.commit()
             session.refresh(job)
         return job
+
+    def create_job_idempotent(
+        self,
+        *,
+        job_id: str,
+        api_key_hash: str,
+        mode: str,
+        repository: str,
+        repository_ref: str,
+        arxiv_id: str | None,
+        spec_path: str | None,
+        idempotency_key_hash: str,
+        request_fingerprint: str,
+    ) -> tuple[Job, bool]:
+        """Create exactly one job for an API-key/idempotency-key pair."""
+        job = Job(
+            id=job_id,
+            api_key_hash=api_key_hash,
+            status="queued",
+            mode=mode,
+            repository=repository,
+            repository_ref=repository_ref,
+            arxiv_id=arxiv_id,
+            spec_path=spec_path,
+            idempotency_key_hash=idempotency_key_hash,
+            request_fingerprint=request_fingerprint,
+        )
+        with self.session_factory() as session:
+            session.add(job)
+            try:
+                session.commit()
+                session.refresh(job)
+                return job, True
+            except IntegrityError:
+                session.rollback()
+                statement = select(Job).where(
+                    Job.api_key_hash == api_key_hash,
+                    Job.idempotency_key_hash == idempotency_key_hash,
+                )
+                existing = session.scalar(statement)
+                if existing is None:
+                    raise
+                return existing, False
 
     def get_job(self, job_id: str) -> Job | None:
         with self.session_factory() as session:
