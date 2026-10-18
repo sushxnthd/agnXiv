@@ -64,3 +64,18 @@ def test_sentence_context_does_not_split_second_decimal() -> None:
         item for item in claims if abs((item.reported_value or 0) - 0.773) < 1e-9
     )
     assert "76.0% memory" in claim.text
+
+
+def test_image_dimensions_are_not_multiplier_claims() -> None:
+    claims = extract_quantitative_claims(
+        "Our model synthesizes 512×512 images. It accelerates decoding by 64×."
+    )
+
+    assert not any(
+        claim.reported_value == 512 and claim.unit in {"×", "x"}
+        for claim in claims
+    )
+    assert any(
+        claim.reported_value == 64 and claim.unit in {"×", "x"}
+        for claim in claims
+    )
