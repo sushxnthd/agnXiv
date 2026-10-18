@@ -88,3 +88,54 @@ def test_explicit_regex_locator_requires_one_capture() -> None:
     from agnxiv.outputs import extract_regex_observation
 
     assert extract_regex_observation("accuracy: 0.8", r"accuracy: \d+\.\d+") is None
+
+
+def test_metric_alias_requires_token_boundary() -> None:
+    claim = Claim(
+        id="C1",
+        text="Accuracy is 91.4%.",
+        metric="accuracy",
+        reported_value=0.914,
+        unit="fraction",
+    )
+    candidates = extract_observation_candidates(
+        "account: 91.4%\nobserved result: 82.4%\n",
+        claim,
+    )
+    selected = select_unambiguous_observation(candidates)
+
+    assert selected is not None
+    assert abs(selected.value - 0.824) < 1e-9
+
+
+def test_reference_metric_loses_to_observed_metric_without_answer_matching() -> None:
+    claim = Claim(
+        id="C1",
+        text="Accuracy is 91.4%.",
+        metric="accuracy",
+        reported_value=0.914,
+        unit="fraction",
+    )
+    candidates = extract_observation_candidates(
+        "reference accuracy: 91.4%\nobserved accuracy: 82.4%\n",
+        claim,
+    )
+    selected = select_unambiguous_observation(candidates)
+
+    assert selected is not None
+    assert abs(selected.value - 0.824) < 1e-9
+
+
+def test_mixed_target_observed_same_line_remains_ambiguous() -> None:
+    claim = Claim(
+        id="C1",
+        text="Accuracy is 91.4%.",
+        metric="accuracy",
+        reported_value=0.914,
+        unit="fraction",
+    )
+    candidates = extract_observation_candidates(
+        "target accuracy=91.4%; observed accuracy=82.4%\n",
+        claim,
+    )
+    assert select_unambiguous_observation(candidates) is None
