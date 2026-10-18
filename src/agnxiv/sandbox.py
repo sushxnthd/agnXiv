@@ -7,6 +7,10 @@ from pathlib import Path
 from typing import Literal
 
 
+class SandboxError(RuntimeError):
+    """A controlled failure while preparing or executing an isolated run."""
+
+
 @dataclass(frozen=True)
 class SandboxLimits:
     memory: str = "4g"
@@ -30,20 +34,28 @@ def resolve_local_image_id(image: str) -> str:
     if not image.strip():
         raise ValueError("container image is required")
 
-    completed = subprocess.run(
-        ["docker", "image", "inspect", "--format", "{{.Id}}", image],
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=False,
-    )
+    try:
+        completed = subprocess.run(
+            ["docker", "image", "inspect", "--format", "{{.Id}}", image],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise SandboxError(f"could not inspect container image: {exc}") from exc
+
     if completed.returncode != 0:
         message = completed.stderr.strip() or completed.stdout.strip()
-        raise RuntimeError(f"container image is not available locally: {image}: {message}")
+        raise SandboxError(
+            f"container image is not available locally: {image}: {message}"
+        )
 
     image_id = completed.stdout.strip()
     if not image_id.startswith("sha256:"):
-        raise RuntimeError(f"Docker returned a non-content-addressed image ID: {image_id}")
+        raise SandboxError(
+            f"Docker returned a non-content-addressed image ID: {image_id}"
+        )
     return image_id
 
 
@@ -52,11 +64,13 @@ def docker_command(
     image: str,
     repository: str | Path,
     command: list[str],
-    limits: SandboxLimits = SandboxLimits(),
+    limits: SandboxLimits | None = None,
     workspace_mode: Literal["readonly", "ephemeral-copy"] = "ephemeral-copy",
 ) -> list[str]:
     """Build the locked-down Docker command used for research execution."""
+    active_limits = limits or SandboxLimits()
     repo = Path(repository).resolve()
+
     if not repo.is_dir():
         raise ValueError(f"repository path is not a directory: {repo}")
     if not image.strip():
@@ -78,11 +92,11 @@ def docker_command(
         "--security-opt",
         "no-new-privileges",
         "--pids-limit",
-        str(limits.pids),
+        str(active_limits.pids),
         "--memory",
-        limits.memory,
+        active_limits.memory,
         "--cpus",
-        str(limits.cpus),
+        str(active_limits.cpus),
         "--tmpfs",
         "/tmp:rw,noexec,nosuid,size=1g",
     ]
@@ -108,7 +122,7 @@ def docker_command(
         "--mount",
         f"type=bind,src={repo},dst=/source,readonly",
         "--tmpfs",
-        f"/workspace:rw,nosuid,size={limits.workspace_size}",
+        f"/workspace:rw,nosuid,size={active_limits.workspace_size}",
         "--workdir",
         "/workspace",
         image,
@@ -123,25 +137,31 @@ def execute_in_docker(
     image: str,
     repository: str | Path,
     command: list[str],
-    limits: SandboxLimits = SandboxLimits(),
+    limits: SandboxLimits | None = None,
     workspace_mode: Literal["readonly", "ephemeral-copy"] = "ephemeral-copy",
 ) -> ExecutionResult:
     """Execute research code with no network and an immutable host source tree."""
+    active_limits = limits or SandboxLimits()
     image_id = resolve_local_image_id(image)
     full_command = docker_command(
         image=image_id,
         repository=repository,
         command=command,
-        limits=limits,
+        limits=active_limits,
         workspace_mode=workspace_mode,
     )
-    completed = subprocess.run(
-        full_command,
-        capture_output=True,
-        text=True,
-        timeout=limits.timeout_seconds,
-        check=False,
-    )
+
+    try:
+        completed = subprocess.run(
+            full_command,
+            capture_output=True,
+            text=True,
+            timeout=active_limits.timeout_seconds,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise SandboxError(f"isolated execution failed: {exc}") from exc
+
     return ExecutionResult(
         command=tuple(full_command),
         image_id=image_id,
