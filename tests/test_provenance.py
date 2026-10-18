@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from agnxiv.provenance import fingerprint_tree
+from agnxiv.provenance import fingerprint_artifact, fingerprint_tree
 
 
 def test_tree_digest_changes_with_research_content(tmp_path: Path) -> None:
@@ -14,3 +14,28 @@ def test_tree_digest_changes_with_research_content(tmp_path: Path) -> None:
     assert before.tree_digest != after.tree_digest
     assert before.file_count == 1
     assert after.file_count == 1
+
+
+def test_file_artifact_fingerprint_changes_with_content(tmp_path: Path) -> None:
+    artifact = tmp_path / "checkpoint.bin"
+    artifact.write_bytes(b"version-one")
+    before = fingerprint_artifact(artifact)
+
+    artifact.write_bytes(b"version-two")
+    after = fingerprint_artifact(artifact)
+
+    assert before.kind == "file"
+    assert before.sha256 != after.sha256
+    assert before.file_count == 1
+
+
+def test_directory_artifact_is_content_addressed(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / "dataset"
+    artifact_dir.mkdir()
+    (artifact_dir / "data.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+
+    fingerprint = fingerprint_artifact(artifact_dir)
+
+    assert fingerprint.kind == "directory"
+    assert fingerprint.file_count == 1
+    assert fingerprint.size_bytes > 0
