@@ -8,18 +8,24 @@ The core contract is deliberately narrower than peer review:
 
 AgnXiv does **not** certify that a paper is universally true, novel, important, or publishable. It certifies specific computational claims under explicit evidence and policies.
 
-## GitHub-hosted service
+## Public product
 
-The public beta runs entirely on GitHub:
+AgnXiv's public beta is a standalone GitHub Pages product:
 
-1. Open **Verify a paper** from the repository Issue Forms.
-2. Choose **Auto-plan** for an arXiv paper + public GitHub repository, or **Verify manifest** for a repository that already contains an `agnxiv.json` verification spec.
-3. GitHub Actions runs the trusted AgnXiv worker on an ephemeral hosted runner.
-4. The result is posted back to the request issue with a link to the immutable Actions execution record.
+https://sushxnthd.github.io/agnXiv/
 
-Start here: https://github.com/sushxnthd/agnXiv/issues/new?template=verify-paper.yml
+The user-facing flow is:
 
-The static frontend is published from `site/` through GitHub Pages. The repository and issue workflow remain fully usable even without the Pages frontend.
+1. Open the AgnXiv verifier.
+2. Paste an arXiv paper and public GitHub repository, or choose an existing `agnxiv.json` manifest.
+3. AgnXiv validates and prepares the request inside the product UI.
+4. GitHub appears only for the final authenticated confirmation because GitHub Pages cannot create repository issues anonymously without exposing credentials.
+5. GitHub Actions runs the trusted AgnXiv worker on an ephemeral hosted runner.
+6. Results are rendered back on a dedicated AgnXiv verification-record page; the underlying issue and Actions run remain the public provenance layer.
+
+Direct verifier: https://sushxnthd.github.io/agnXiv/verify.html
+
+The repository Issue Form remains available as a fallback submission route.
 
 ## What is implemented
 
