@@ -21,12 +21,26 @@ app = typer.Typer(
 )
 
 
-def _policy(kind: str, tolerance: float, minimum_repetitions: int = 1) -> VerificationPolicy:
+def _policy(
+    kind: str,
+    tolerance: float,
+    minimum_repetitions: int = 1,
+    operator: str = "approx",
+) -> VerificationPolicy:
     if kind not in {"relative", "absolute"}:
         raise typer.BadParameter("kind must be 'relative' or 'absolute'")
+    if operator not in {"approx", "at_least", "at_most"}:
+        raise typer.BadParameter(
+            "operator must be 'approx', 'at_least', or 'at_most'"
+        )
     validated_kind = cast(Literal["relative", "absolute"], kind)
+    validated_operator = cast(
+        Literal["approx", "at_least", "at_most"],
+        operator,
+    )
     return VerificationPolicy(
         kind=validated_kind,
+        operator=validated_operator,
         tolerance=tolerance,
         minimum_repetitions=minimum_repetitions,
     )
@@ -97,6 +111,10 @@ def verify_number_command(
         typer.Option(help="Relative fraction by default (0.01 = 1%)."),
     ] = 0.01,
     kind: Annotated[str, typer.Option(help="'relative' or 'absolute'.")] = "relative",
+    operator: Annotated[
+        str,
+        typer.Option(help="'approx', 'at_least', or 'at_most'."),
+    ] = "approx",
     minimum_repetitions: Annotated[int, typer.Option(min=1)] = 1,
 ) -> None:
     """Apply AgnXiv's deterministic verifier to a numeric claim."""
@@ -105,7 +123,7 @@ def verify_number_command(
         text="CLI verification",
         reported_value=expected,
     )
-    policy = _policy(kind, tolerance, minimum_repetitions)
+    policy = _policy(kind, tolerance, minimum_repetitions, operator)
     record = verify_numeric_claim(
         claim,
         [Observation(value=value) for value in observed],
@@ -138,6 +156,9 @@ def verify_command(
     claim_text: Annotated[str, typer.Option()] = "CLI execution claim",
     tolerance: Annotated[float, typer.Option()] = 0.01,
     kind: Annotated[str, typer.Option()] = "relative",
+    operator: Annotated[str, typer.Option()] = "approx",
+    json_path: Annotated[str | None, typer.Option()] = None,
+    observation_scale: Annotated[float, typer.Option()] = 1.0,
 ) -> None:
     """Run one explicit command and emit an auditable verification bundle."""
     claim = Claim(
@@ -152,8 +173,10 @@ def verify_command(
         repository,
         image=image,
         command=command,
-        policy=_policy(kind, tolerance),
+        policy=_policy(kind, tolerance, operator=operator),
         manuscript_path=manuscript,
+        json_path=json_path,
+        observation_scale=observation_scale,
     )
     attestation = attest_bundle(bundle)
     typer.echo(
@@ -174,6 +197,7 @@ def robustness_command(
     observed: Annotated[list[float], typer.Option("--observed")],
     tolerance: Annotated[float, typer.Option()] = 0.01,
     kind: Annotated[str, typer.Option()] = "relative",
+    operator: Annotated[str, typer.Option()] = "approx",
     minimum_pass_fraction: Annotated[float, typer.Option()] = 0.8,
     minimum_repetitions: Annotated[int, typer.Option(min=1)] = 5,
 ) -> None:
@@ -182,7 +206,7 @@ def robustness_command(
     summary = assess_repeated_observations(
         claim,
         [Observation(value=value) for value in observed],
-        _policy(kind, tolerance),
+        _policy(kind, tolerance, operator=operator),
         minimum_pass_fraction=minimum_pass_fraction,
         minimum_repetitions=minimum_repetitions,
     )
