@@ -394,3 +394,58 @@ def test_hosted_api_rejects_invalid_arxiv_id(tmp_path, monkeypatch) -> None:
             },
         )
         assert response.status_code == 422
+
+
+def test_auto_verify_api_dispatches_and_rejects_fake_plan_success(
+    tmp_path, monkeypatch,
+) -> None:
+    sent = []
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: sent.append(request),
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "a" * 40,
+    )
+    monkeypatch.setattr(
+        "agnxiv.service.app.verify_github_actions_token",
+        lambda token, policy: {"repository": policy.repository},
+    )
+    app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
+    with TestClient(app) as client:
+        missing = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={"mode": "auto_verify", "repository": "owner/repo"},
+        )
+        assert missing.status_code == 422
+
+        created = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={
+                "mode": "auto_verify",
+                "repository": "phanein/deepwalk",
+                "arxiv_id": "1403.6652",
+            },
+        )
+        assert created.status_code == 202
+        assert sent[0].mode == "auto_verify"
+        assert sent[0].repository_ref == "a" * 40
+
+        invalid = client.post(
+            f"/internal/jobs/{created.json()['id']}/complete",
+            headers={"Authorization": "Bearer trusted"},
+            json={
+                "status": "succeeded",
+                "result": {
+                    "kind": "auto_plan",
+                    "repository_commit": "a" * 40,
+                    "plan": {"safe_to_execute": True},
+                },
+            },
+        )
+        assert invalid.status_code == 422
