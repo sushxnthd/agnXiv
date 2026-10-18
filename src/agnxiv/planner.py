@@ -40,6 +40,7 @@ _RESEARCH_TERMS = (
 
 def _clean_readme_line(raw: str) -> str:
     line = raw.strip()
+    line = line.removeprefix(">").strip()
     line = line.removeprefix("$").strip()
     line = line.strip(chr(96)).strip()
     return line
@@ -64,12 +65,15 @@ def _looks_like_command_start(line: str) -> bool:
         "evaluate",
         "eval",
         "benchmark",
+        "bash",
+        "sh",
     }
-    return option_heavy or python_command or explicit_research_cli
+    shell_script = first.endswith(".sh")
+    return option_heavy or python_command or explicit_research_cli or shell_script
 
 
 def _readme_commands(text: str) -> list[tuple[list[str], str]]:
-    """Extract documented research shell commands, joining wrapped option lines."""
+    """Extract documented research commands without executing README content."""
     commands: list[tuple[list[str], str]] = []
     lines = [_clean_readme_line(raw) for raw in text.splitlines()]
 
@@ -80,22 +84,36 @@ def _readme_commands(text: str) -> list[tuple[list[str], str]]:
             index += 1
             continue
 
-        parts = [line]
+        parts = [line.removesuffix("\\").rstrip()]
         cursor = index + 1
-        while cursor < len(lines) and lines[cursor].startswith("--"):
-            parts.append(lines[cursor])
-            cursor += 1
+        continued = line.endswith("\\")
 
-        joined = " ".join(parts)
+        while cursor < len(lines):
+            next_line = lines[cursor]
+            if continued:
+                if not next_line:
+                    break
+                parts.append(next_line.removesuffix("\\").rstrip())
+                continued = next_line.endswith("\\")
+                cursor += 1
+                continue
+            if next_line.startswith("--"):
+                parts.append(next_line.removesuffix("\\").rstrip())
+                continued = next_line.endswith("\\")
+                cursor += 1
+                continue
+            break
+
+        joined = " ".join(part for part in parts if part)
         try:
             tokens = shlex.split(joined)
         except ValueError:
-            index = cursor
+            index = max(index + 1, cursor)
             continue
 
         if tokens:
             commands.append((tokens, joined))
-        index = cursor
+        index = max(index + 1, cursor)
 
     return commands
 
@@ -155,14 +173,18 @@ def discover_commands(repository: str | Path, *, limit: int = 15) -> list[Comman
 
         for tokens, raw in _readme_commands(text):
             score = 0.84
-            if "repro" in raw.lower():
+            lower_raw = raw.lower()
+            if "repro" in lower_raw:
                 score = 0.94
             elif (
-                "eval" in raw.lower()
-                or "score" in raw.lower()
-                or "scoring" in raw.lower()
+                "eval" in lower_raw
+                or "score" in lower_raw
+                or "scoring" in lower_raw
+                or "predict" in lower_raw
             ):
                 score = 0.90
+            elif tokens[0] in {"bash", "sh"} or tokens[0].endswith(".sh"):
+                score = 0.88
             candidates.append(
                 CommandCandidate(
                     command=tokens,
