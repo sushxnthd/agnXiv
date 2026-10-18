@@ -9,6 +9,7 @@ from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
 from agnxiv.service.db import Job, JobStore, TransparencyEntry
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
+from agnxiv.statement import generate_ed25519_keypair
 
 
 def _productionish_config(database_url: str, *, issuer: str | None = None) -> ServiceConfig:
