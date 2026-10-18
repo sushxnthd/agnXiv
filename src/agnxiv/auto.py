@@ -7,7 +7,11 @@ from pydantic import BaseModel, Field
 
 from .claims import extract_claims_from_pdf, extract_quantitative_claims
 from .environment import EnvironmentSpec, infer_python_environment
-from .evidence import (\n    EvidenceCandidate,\n    build_repository_evidence_index,\n    map_claim_to_index,\n)
+from .evidence import (
+    EvidenceCandidate,
+    build_repository_evidence_index,
+    map_claim_to_index,
+)
 from .models import Claim, VerificationPolicy
 from .planner import CommandCandidate, discover_commands
 from .spec import ObservationLocator, RuntimeSpec, VerificationSpec
