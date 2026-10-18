@@ -9,23 +9,29 @@ from agnxiv.network import (
 )
 
 
-def test_record_preserves_mixed_evidence() -> None:
+def test_record_preserves_mixed_independent_evidence() -> None:
     record = ScientificRecord(
         paper_id="1403.6652",
         attempts=[
             EvidenceAttempt(
                 attempt_id="AX-1",
                 paper_id="1403.6652",
-                repository="owner/repo",
+                claim_id="C1",
+                repository="owner/repo-a",
                 repository_ref="main",
                 status=AttemptStatus.REPRODUCED,
+                evidence_grade=EvidenceGrade.STRONG,
+                independence_key="implementation-a",
             ),
             EvidenceAttempt(
                 attempt_id="AX-2",
                 paper_id="1403.6652",
-                repository="owner/repo",
+                claim_id="C1",
+                repository="owner/repo-b",
                 repository_ref="main",
                 status=AttemptStatus.RESULT_DIVERGENCE,
+                evidence_grade=EvidenceGrade.STRONG,
+                independence_key="implementation-b",
             ),
         ],
     )
@@ -34,6 +40,7 @@ def test_record_preserves_mixed_evidence() -> None:
     assert summary.current_state == "MIXED_EVIDENCE"
     assert summary.reproduced == 1
     assert summary.divergences == 1
+    assert summary.claim_states[0].independent_clusters == 2
 
 
 def test_auto_plan_becomes_evidence_incomplete_attempt() -> None:
