@@ -5,6 +5,14 @@ from statistics import fmean
 from .models import Claim, Observation, Verdict, VerificationPolicy, VerificationRecord
 
 
+def _allowed_slack(expected: float, policy: VerificationPolicy) -> float:
+    if policy.kind == "absolute":
+        return policy.tolerance
+    if expected == 0:
+        return policy.tolerance
+    return abs(expected) * policy.tolerance
+
+
 def verify_numeric_claim(
     claim: Claim,
     observations: list[Observation],
@@ -44,26 +52,29 @@ def verify_numeric_claim(
     observed = fmean(o.value for o in observations)
     expected = claim.reported_value
     absolute_error = abs(observed - expected)
+    relative_error = (
+        0.0
+        if expected == 0 and absolute_error == 0
+        else None
+        if expected == 0
+        else absolute_error / abs(expected)
+    )
+    slack = _allowed_slack(expected, policy)
 
-    if expected == 0:
-        relative_error = 0.0 if absolute_error == 0 else None
-    else:
-        relative_error = absolute_error / abs(expected)
-
-    if policy.kind == "absolute":
-        passed = absolute_error <= policy.tolerance
-        comparison = f"absolute error {absolute_error:.6g} <= {policy.tolerance:.6g}"
-    elif expected == 0:
-        passed = absolute_error <= policy.tolerance
+    if policy.operator == "approx":
+        passed = absolute_error <= slack
         comparison = (
-            "reported value is zero; relative error is undefined, so the "
-            f"tolerance is applied as an absolute bound: {absolute_error:.6g} "
-            f"<= {policy.tolerance:.6g}"
+            f"|observed - reported| = {absolute_error:.6g} "
+            f"<= allowed slack {slack:.6g}"
         )
+    elif policy.operator == "at_least":
+        boundary = expected - slack
+        passed = observed >= boundary
+        comparison = f"observed {observed:.6g} >= lower bound {boundary:.6g}"
     else:
-        assert relative_error is not None
-        passed = relative_error <= policy.tolerance
-        comparison = f"relative error {relative_error:.4%} <= {policy.tolerance:.4%}"
+        boundary = expected + slack
+        passed = observed <= boundary
+        comparison = f"observed {observed:.6g} <= upper bound {boundary:.6g}"
 
     verdict = Verdict.VERIFIED if passed else Verdict.CONTRADICTED
 
