@@ -104,9 +104,7 @@ def _is_sentence_boundary(text: str, position: int) -> bool:
 
     previous = text[position - 1] if position > 0 else ""
     following = text[position + 1] if position + 1 < len(text) else ""
-    if previous.isdigit() and following.isdigit():
-        return False
-    return True
+    return not (previous.isdigit() and following.isdigit())
 
 
 def _sentence_context(
