@@ -30,7 +30,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Dependency installers do not receive the research source tree.
 - [ ] Dedicated sandbox provider / microVM boundary for workloads beyond public beta risk envelope.
 - [x] Continuous Python dependency vulnerability scanning with a blocking `pip-audit` gate and CycloneDX SBOM output.
-- [ ] Container/OS package vulnerability scanning.
+- [x] Container/OS and Python-library vulnerability scanning blocks fixed HIGH/CRITICAL findings in the production image.
 - [ ] External security review and threat-model review.
 
 ### Control-plane reliability
@@ -45,9 +45,11 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Capability metadata endpoint exposes the supported API contract without secrets.
 - [x] Idempotency keys for job creation, with database uniqueness and conflicting-request rejection.
 - [x] Authenticated operator job metrics and request correlation IDs.
-- [ ] Alerting and error-budget SLOs.
-- [ ] Backup/restore drill for production PostgreSQL.
-- [ ] Key rotation procedure and issuer-key rollover metadata.
+- [x] Error-budget/SLO policy and scheduled synthetic probes exist for the public product and hosted readiness endpoint.
+- [ ] Production service URL plus operator notification routing are configured and tested after deployment.
+- [x] Scheduled PostgreSQL logical backup/clean-restore rehearsal verifies jobs plus the transparency chain in CI.
+- [ ] A restore drill against the actual production database provider and its backup mechanism has been completed.
+- [x] Key rotation procedure and issuer-key rollover metadata are implemented; current and retained previous public keys are published by `/v1/issuer`.
 - [ ] Multi-region execution strategy and disaster recovery.
 
 ### Evidence durability
@@ -56,9 +58,23 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Verification statements can be signed with DSSE/Ed25519.
 - [x] Living Attempt → Record → Challenge model exists.
 - [x] Independence-aware claim aggregation exists with regression coverage.
-- [ ] Append-only transparency log independent of GitHub issue availability.
-- [ ] Long-term artifact retention policy.
+- [x] Hosted job finalization atomically writes a hash-chained, tamper-evident PostgreSQL receipt independent of GitHub issue availability.
+- [ ] Transparency history is externally anchored/witnessed so a full database compromise cannot rewrite the entire chain undetectably.
+- [x] Long-term evidence and ephemeral execution-artifact retention policy is documented.
 - [ ] DOI/publisher registry integration.
+
+## Current launch blockers after production-hardening v2
+
+The repository can now enforce substantially stronger operational invariants, but the hosted service must **not** be called fully production-grade yet. Remaining blockers require evidence or infrastructure outside a code-only CI pass:
+
+1. held-out false-pass evidence at the predeclared confidence bound;
+2. broader central-claim and historical-environment validation;
+3. a stronger isolation boundary than a shared-kernel Docker container for workloads outside the public-beta envelope;
+4. external security/threat-model review;
+5. an actual hosted control-plane deployment with alert routing, production-provider restore rehearsal, and disaster-recovery testing;
+6. an external transparency witness/anchor.
+
+The connected Railway account currently has no AgnXiv project deployed, so deployment-specific gates cannot yet be truthfully marked complete.
 
 ## Evidence grades
 
