@@ -42,6 +42,7 @@ def _clean_readme_line(raw: str) -> str:
     line = raw.strip()
     line = line.removeprefix(">").strip()
     line = line.removeprefix("$").strip()
+    line = line.removeprefix("!").strip()
     line = line.strip(chr(96)).strip()
     return line
 
