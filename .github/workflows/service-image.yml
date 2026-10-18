@@ -20,7 +20,7 @@ jobs:
 
       - name: Start service container
         run: |
-          docker run -d --rm             --name agnxiv-service-test             -p 18000:8000             -e PORT=8000             agnxiv-service:test
+          docker run -d --rm             --name agnxiv-service-test             -p 18000:8000             -e PORT=8000             -e DATABASE_URL=sqlite:////tmp/agnxiv-service.db             agnxiv-service:test
 
       - name: Wait for health endpoint
         run: |
