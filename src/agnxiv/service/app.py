@@ -4,8 +4,8 @@ import base64
 import binascii
 import uuid
 from contextlib import asynccontextmanager
-from urllib.parse import urlparse
 from typing import Annotated, Literal
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
