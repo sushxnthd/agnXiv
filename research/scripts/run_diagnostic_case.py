@@ -11,6 +11,7 @@ import tempfile
 import urllib.parse
 import urllib.request
 
+from agnxiv.alignment import load_localization_gold, localize_paper_code, score_localization
 from agnxiv.auto import build_auto_plan
 from agnxiv.research import load_centrality_gold, load_research_cases, score_centrality_ranking
 
@@ -116,6 +117,15 @@ def _materialize_manuscript(
     )
 
 
+def _manuscript_text(path: pathlib.Path) -> str:
+    if path.suffix.lower() == ".pdf":
+        from pypdf import PdfReader
+
+        reader = PdfReader(str(path))
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
+    return path.read_text(encoding="utf-8", errors="ignore")
+
+
 def _clone_pinned(repository: str, commit: str, destination: pathlib.Path) -> None:
     subprocess.run(["git", "init", str(destination)], check=True, capture_output=True)
     subprocess.run(
@@ -191,6 +201,28 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
 
         plan = build_auto_plan(manuscript, repository)
 
+        localization = None
+        localization_path = pathlib.Path(
+            "research/benchmarks/localization-gold-v0.jsonl"
+        )
+        if localization_path.exists():
+            localization_gold = load_localization_gold(localization_path).get(case.case_id)
+            if localization_gold is not None:
+                candidates = localize_paper_code(
+                    _manuscript_text(manuscript),
+                    repository,
+                    limit=250,
+                )
+                localization = score_localization(
+                    case.case_id,
+                    candidates,
+                    localization_gold,
+                ).model_dump(mode="json")
+                localization["top_candidates"] = [
+                    item.model_dump(mode="json")
+                    for item in candidates[:10]
+                ]
+
     gold_path = pathlib.Path("research/benchmarks/centrality-gold-v0.jsonl")
     centrality = None
     if gold_path.exists():
@@ -228,6 +260,7 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
         "top_claim": plan.claims[0].claim.text if plan.claims else None,
         "top_claim_score": plan.claims[0].score if plan.claims else None,
         "centrality": centrality,
+        "localization": localization,
         "stages": stage_map,
         "blockers": plan.blockers,
         "warnings": plan.warnings,
