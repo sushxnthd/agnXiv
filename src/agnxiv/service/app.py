@@ -24,7 +24,7 @@ from ..statement import (
     sign_statement_ed25519,
 )
 from .config import ServiceConfig
-from .db import Job, JobStore, job_result
+from .db import Job, JobQuotaExceeded, JobStore, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
 from .oidc import GitHubOIDCPolicy, OIDCVerificationError, verify_github_actions_token
 from .security import (
@@ -566,9 +566,8 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             ) from exc
 
         job_id = str(uuid.uuid4())
-        created = True
-        if idempotency_key_hash is not None and request_fingerprint is not None:
-            job, created = store.create_job_idempotent(
+        try:
+            job, created = store.create_job_guarded(
                 job_id=job_id,
                 api_key_hash=api_hash,
                 mode=body.mode,
@@ -576,26 +575,26 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 repository_ref=pinned_ref,
                 arxiv_id=arxiv_id,
                 spec_path=body.spec_path,
+                max_active=active_config.max_active_jobs_per_key,
+                max_recent=active_config.max_jobs_per_hour,
                 idempotency_key_hash=idempotency_key_hash,
                 request_fingerprint=request_fingerprint,
             )
-            if not created:
-                if job.request_fingerprint != request_fingerprint:
-                    raise HTTPException(
-                        status_code=409,
-                        detail="Idempotency-Key was already used for a different request",
-                    )
-                return _job_view(job)
-        else:
-            job = store.create_job(
-                job_id=job_id,
-                api_key_hash=api_hash,
-                mode=body.mode,
-                repository=repository,
-                repository_ref=pinned_ref,
-                arxiv_id=arxiv_id,
-                spec_path=body.spec_path,
+        except JobQuotaExceeded as exc:
+            detail = (
+                "active job quota exceeded"
+                if exc.kind == "active"
+                else "hourly job quota exceeded"
             )
+            raise HTTPException(status_code=429, detail=detail) from exc
+
+        if not created:
+            if job.request_fingerprint != request_fingerprint:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Idempotency-Key was already used for a different request",
+                )
+            return _job_view(job)
 
         request = DispatchRequest(
             job_id=job.id,
