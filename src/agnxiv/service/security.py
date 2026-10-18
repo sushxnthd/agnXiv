@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from hashlib import sha256
 from hmac import compare_digest
+from hashlib import sha256
 
 
 _GITHUB_HTTPS_PREFIX = "https://github.com/"
