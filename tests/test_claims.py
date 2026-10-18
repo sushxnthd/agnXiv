@@ -53,3 +53,14 @@ def test_extracts_compact_multiplier_claim() -> None:
         claim.reported_value == 64 and claim.unit and claim.unit.lower() == "x"
         for claim in claims
     )
+
+
+def test_sentence_context_does_not_split_second_decimal() -> None:
+    claims = extract_quantitative_claims(
+        "Our method saves 77.3% training time and 76.0% memory compared with baselines."
+    )
+
+    claim = next(
+        item for item in claims if abs((item.reported_value or 0) - 0.773) < 1e-9
+    )
+    assert "76.0% memory" in claim.text
