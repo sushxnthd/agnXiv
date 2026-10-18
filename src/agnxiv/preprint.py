@@ -33,10 +33,8 @@ def parse_arxiv_reference(value: str) -> ArxivReference:
     """Parse modern or legacy arXiv identifiers while preserving the version."""
     cleaned = value.strip()
     for prefix in ("https://arxiv.org/abs/", "https://arxiv.org/pdf/"):
-        if cleaned.startswith(prefix):
-            cleaned = cleaned[len(prefix) :]
-    if cleaned.endswith(".pdf"):
-        cleaned = cleaned[:-4]
+        cleaned = cleaned.removeprefix(prefix)
+    cleaned = cleaned.removesuffix(".pdf")
 
     match = _ARXIV_RE.fullmatch(cleaned)
     if not match:
