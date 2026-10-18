@@ -73,7 +73,9 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
         assert len(dispatched) == 1
         assert dispatched[0].repository == "phanein/deepwalk"
         assert dispatched[0].arxiv_id == "1403.6652"
-        assert dispatched[0].oidc_audience == "https://agnxiv.example/github-actions"
+        assert dispatched[0].oidc_audience == (
+            "https://agnxiv.example/github-actions/jobs/" + created["id"]
+        )
 
         quota = client.post(
             "/v1/jobs",
