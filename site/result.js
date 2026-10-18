@@ -131,6 +131,8 @@ function render(issue, comment) {
   const paperAction = paperId
     ? '<a class="button ghost" href="./lookup.html?q=' + encodeURIComponent(paperId) + '">View paper evidence</a>'
     : '';
+  const challengeAction =
+    '<a class="button ghost" href="./challenge.html?issue=' + issue.number + '">Challenge this attempt</a>';
 
   root.innerHTML =
     '<section class="result-header">' +
@@ -150,7 +152,7 @@ function render(issue, comment) {
         '<div><dt>Attempt ID</dt><dd>AX-GH-' + issue.number + '</dd></div>' +
       '</dl><a class="raw-link" href="' + issue.html_url + '">Inspect execution provenance →</a></aside>' +
     '</div>' +
-    '<div class="result-actions">' + paperAction +
+    '<div class="result-actions">' + paperAction + challengeAction +
       '<a class="button primary" href="./verify.html' + (paperId ? '?arxiv=' + encodeURIComponent(paperId) : '') + '">Add an independent attempt</a></div>';
 }
 
