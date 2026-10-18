@@ -1,6 +1,12 @@
 from pathlib import Path
 
-from agnxiv.research import (\n    CentralityGold,\n    SelectiveOutcome,\n    load_research_cases,\n    score_centrality_ranking,\n    score_selective_verification,\n)
+from agnxiv.research import (
+    CentralityGold,
+    SelectiveOutcome,
+    load_research_cases,
+    score_centrality_ranking,
+    score_selective_verification,
+)
 
 
 def test_selective_metrics_separate_false_passes_from_abstention() -> None:
