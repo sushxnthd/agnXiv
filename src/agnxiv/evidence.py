@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
 from pathlib import Path
+
+from pydantic import BaseModel, Field
 
 from .models import Claim, EvidenceRef
 
@@ -13,11 +14,10 @@ TEXT_EXTENSIONS = {
 IGNORE_DIRS = {".git", ".venv", "venv", "node_modules", "dist", "build", "__pycache__"}
 
 
-@dataclass(frozen=True)
-class EvidenceCandidate:
+class EvidenceCandidate(BaseModel):
     ref: EvidenceRef
-    score: float
-    reasons: tuple[str, ...]
+    score: float = Field(ge=0.0, le=1.0)
+    reasons: list[str] = Field(default_factory=list)
 
 
 def _tokens(text: str) -> set[str]:
@@ -36,8 +36,9 @@ def map_claim_to_repository(
 ) -> list[EvidenceCandidate]:
     """Rank repository files/lines that may produce or encode a claim.
 
-    This is a deterministic retrieval stage. An agent can later inspect the
-    highest-ranked candidates to infer the actual execution path.
+    Reported values may be used here only as retrieval hints. They are never
+    used by the output parser to choose the observation that determines a
+    verification verdict.
     """
     root = Path(repository)
     if not root.is_dir():
@@ -72,12 +73,15 @@ def map_claim_to_repository(
 
             score = 0.0
             reasons: list[str] = []
+
             if token_overlap:
                 score += min(0.6, 0.12 * token_overlap)
                 reasons.append(f"{token_overlap} semantic token matches")
+
             if numeric_hits:
                 score += min(0.7, 0.35 * numeric_hits)
-                reasons.append(f"{numeric_hits} reported-value matches")
+                reasons.append(f"{numeric_hits} claim-value retrieval hints")
+
             if path.suffix.lower() in {".py", ".r", ".jl", ".m", ".sh"} and score:
                 score += 0.1
                 reasons.append("executable source")
@@ -87,11 +91,9 @@ def map_claim_to_repository(
 
             candidates.append(
                 EvidenceCandidate(
-                    ref=EvidenceRef(
-                        path=f"{path.relative_to(root)}:{line_no}",
-                    ),
+                    ref=EvidenceRef(path=f"{path.relative_to(root)}:{line_no}"),
                     score=min(score, 1.0),
-                    reasons=tuple(reasons),
+                    reasons=reasons,
                 )
             )
 
