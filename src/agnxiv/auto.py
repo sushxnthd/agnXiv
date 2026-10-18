@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from .claims import extract_claims_from_pdf, extract_quantitative_claims
 from .environment import EnvironmentSpec, infer_python_environment
-from .evidence import EvidenceCandidate, map_claim_to_repository
+from .evidence import (\n    EvidenceCandidate,\n    build_repository_evidence_index,\n    map_claim_to_index,\n)
 from .models import Claim, VerificationPolicy
 from .planner import CommandCandidate, discover_commands
 from .spec import ObservationLocator, RuntimeSpec, VerificationSpec
@@ -370,9 +370,10 @@ def build_auto_plan(
     commands = discover_commands(repo)
     readme = _read_readme(repo)
 
+    evidence_index = build_repository_evidence_index(repo)
     ranked: list[RankedClaim] = []
     for claim in raw_claims[:120]:
-        evidence = map_claim_to_repository(claim, repo, limit=5)
+        evidence = map_claim_to_index(claim, evidence_index, limit=5)
         ranked.append(
             RankedClaim(
                 claim=claim,
@@ -384,6 +385,11 @@ def build_auto_plan(
 
     blockers: list[str] = []
     warnings = _historical_environment_warnings(readme)
+    if evidence_index.truncated:
+        warnings.append(
+            "Repository evidence indexing reached its safety budget; lower-priority "
+            "files were not scanned."
+        )
 
     if not raw_claims:
         blockers.append(
