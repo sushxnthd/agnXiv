@@ -1,0 +1,100 @@
+name: research-diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/**"
+      - "src/agnxiv/research.py"
+      - ".github/workflows/research-diagnostic.yml"
+  workflow_dispatch:
+    inputs:
+      case_id:
+        description: Optional single registered case ID
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    strategy:
+      fail-fast: false
+      matrix:
+        case_id:
+          - SCICOQA-63197a77
+          - SCICOQA-3f098eb0
+          - SCICOQA-7c8468c8
+    if: github.event_name != 'workflow_dispatch' || inputs.case_id == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[pdf]"
+
+      - name: Run static diagnostic
+        run: |
+          python research/scripts/run_diagnostic_case.py \
+            --case-id "${{ matrix.case_id }}" \
+            --output-dir "/tmp/${{ matrix.case_id }}"
+
+      - name: Assert diagnostic contract
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          case_id = os.environ["CASE_ID"]
+          payload = json.loads(
+              (Path("/tmp") / case_id / "summary.json").read_text(encoding="utf-8")
+          )
+          assert payload["schema_version"] == "agnxiv.research-diagnostic/1"
+          assert payload["evaluation_role"] == "diagnostic_nonblind"
+          assert 0.0 <= payload["automation_score"] <= 1.0
+          assert "observation_locator" in payload["stages"]
+          PY
+        env:
+          CASE_ID: ${{ matrix.case_id }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-diagnostic-${{ matrix.case_id }}
+          path: /tmp/${{ matrix.case_id }}
+          retention-days: 90
+          if-no-files-found: error
+
+  single-diagnostic:
+    if: github.event_name == 'workflow_dispatch' && inputs.case_id != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[pdf]"
+      - run: |
+          python research/scripts/run_diagnostic_case.py \
+            --case-id "${{ inputs.case_id }}" \
+            --output-dir "/tmp/research-diagnostic"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-diagnostic-${{ inputs.case_id }}
+          path: /tmp/research-diagnostic
+          retention-days: 90
+          if-no-files-found: error
