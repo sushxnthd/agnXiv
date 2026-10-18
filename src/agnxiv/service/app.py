@@ -35,7 +35,6 @@ from .security import (
     validate_idempotency_key,
 )
 
-
 _LOGGER = logging.getLogger("agnxiv.service")
 
 
