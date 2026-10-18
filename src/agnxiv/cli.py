@@ -7,10 +7,12 @@ from typing import Annotated, Literal, cast
 import typer
 
 from .attestation import attest_bundle
+from .benchmark import load_jsonl_cases, run_recorded_benchmark
 from .challenge import assess_repeated_observations
 from .claims import extract_claims_from_pdf, extract_quantitative_claims
 from .models import Claim, Observation, VerificationPolicy
 from .pipeline import inspect_project, verify_with_command
+from .preprint import parse_arxiv_reference
 from .verify import verify_numeric_claim
 
 app = typer.Typer(
@@ -43,6 +45,14 @@ def claims_command(
             manuscript=path.name,
         )
     typer.echo(json.dumps([claim.model_dump(mode="json") for claim in claims], indent=2))
+
+
+@app.command("arxiv-id")
+def arxiv_id_command(
+    value: Annotated[str, typer.Argument()],
+) -> None:
+    """Normalize an arXiv identifier while preserving its exact version."""
+    typer.echo(parse_arxiv_reference(value).model_dump_json(indent=2))
 
 
 @app.command("inspect")
@@ -120,6 +130,10 @@ def verify_command(
     ],
     expected: Annotated[float, typer.Option()],
     metric: Annotated[str, typer.Option()],
+    manuscript: Annotated[
+        Path | None,
+        typer.Option(exists=True, dir_okay=False, readable=True),
+    ] = None,
     unit: Annotated[str | None, typer.Option()] = None,
     claim_text: Annotated[str, typer.Option()] = "CLI execution claim",
     tolerance: Annotated[float, typer.Option()] = 0.01,
@@ -139,6 +153,7 @@ def verify_command(
         image=image,
         command=command,
         policy=_policy(kind, tolerance),
+        manuscript_path=manuscript,
     )
     attestation = attest_bundle(bundle)
     typer.echo(
@@ -172,6 +187,15 @@ def robustness_command(
         minimum_repetitions=minimum_repetitions,
     )
     typer.echo(summary.model_dump_json(indent=2))
+
+
+@app.command("benchmark")
+def benchmark_command(
+    path: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+) -> None:
+    """Run a recorded-output benchmark and report false-pass rate."""
+    report = run_recorded_benchmark(load_jsonl_cases(path))
+    typer.echo(report.model_dump_json(indent=2))
 
 
 if __name__ == "__main__":
