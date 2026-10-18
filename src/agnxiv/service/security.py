@@ -1,29 +1,34 @@
 from __future__ import annotations
 
-import hashlib  # noqa: I001
+import hashlib
 import hmac
 import re
-from urllib import parse
 
 
 _GITHUB_SLUG_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+_GITHUB_HTTPS_PREFIX = "https://github.com/"
 
 
 def hash_secret(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return hashlib.sha256(value.encode()).hexdigest()
 
 
 def constant_time_equal(left: str, right: str) -> bool:
-    return hmac.compare_digest(left.encode("utf-8"), right.encode("utf-8"))
+    return hmac.compare_digest(left.encode(), right.encode())
 
 
 def validate_github_slug(value: str) -> str:
-    candidate = value.strip().removesuffix(".git")
-    if candidate.startswith(("http://", "https://")):
-        parsed = parse.urlparse(candidate)
-        if parsed.scheme != "https" or parsed.netloc.lower() != "github.com":
+    candidate = value.strip()
+
+    if candidate.startswith("http://"):
+        raise ValueError("only HTTPS GitHub repositories are supported")
+
+    if candidate.startswith("https://"):
+        if not candidate.startswith(_GITHUB_HTTPS_PREFIX):
             raise ValueError("only HTTPS GitHub repositories are supported")
-        candidate = parsed.path.strip("/").removesuffix(".git")
+        candidate = candidate.removeprefix(_GITHUB_HTTPS_PREFIX)
+
+    candidate = candidate.strip("/").removesuffix(".git")
 
     if not _GITHUB_SLUG_RE.fullmatch(candidate):
         raise ValueError("repository must be a GitHub owner/repository slug")
