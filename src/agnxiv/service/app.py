@@ -157,8 +157,16 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
     @app.middleware("http")
     async def security_headers(request, call_next):
         content_length = request.headers.get("content-length")
-        if content_length and int(content_length) > 5 * 1024 * 1024:
-            raise HTTPException(status_code=413, detail="request body too large")
+        if content_length:
+            try:
+                request_bytes = int(content_length)
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=400,
+                    detail="invalid content-length header",
+                ) from exc
+            if request_bytes > 5 * 1024 * 1024:
+                raise HTTPException(status_code=413, detail="request body too large")
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
