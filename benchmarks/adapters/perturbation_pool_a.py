@@ -7,8 +7,8 @@ only the released raw result JSON and implements the target statistic directly.
 from __future__ import annotations
 
 import json
-from statistics import fmean
 from pathlib import Path
+from statistics import fmean
 
 
 def spread(values: list[float]) -> float:
