@@ -152,3 +152,66 @@ def summarize_evidence_independence(
         independent_components=len(components),
         components=components,
     )
+
+
+class CentralityGold(BaseModel):
+    case_id: str
+    required_substrings: list[str] = Field(min_length=1)
+    rationale: str
+
+
+class CentralityResult(BaseModel):
+    case_id: str
+    first_gold_rank: int | None
+    recall_at_1: bool
+    recall_at_3: bool
+    recall_at_5: bool
+
+
+def _normalize_centrality_text(value: str) -> str:
+    return " ".join(value.lower().replace(",", "").split())
+
+
+def score_centrality_ranking(
+    case_id: str,
+    ranked_claim_texts: list[str],
+    gold: CentralityGold,
+) -> CentralityResult:
+    if gold.case_id != case_id:
+        raise ValueError("centrality gold case does not match evaluated case")
+
+    required = [_normalize_centrality_text(item) for item in gold.required_substrings]
+    first_rank: int | None = None
+    for rank, text in enumerate(ranked_claim_texts, start=1):
+        normalized = _normalize_centrality_text(text)
+        if all(item in normalized for item in required):
+            first_rank = rank
+            break
+
+    return CentralityResult(
+        case_id=case_id,
+        first_gold_rank=first_rank,
+        recall_at_1=first_rank == 1,
+        recall_at_3=first_rank is not None and first_rank <= 3,
+        recall_at_5=first_rank is not None and first_rank <= 5,
+    )
+
+
+def load_centrality_gold(path: str | Path) -> dict[str, CentralityGold]:
+    rows: dict[str, CentralityGold] = {}
+    for line_number, raw in enumerate(
+        Path(path).read_text(encoding="utf-8").splitlines(),
+        start=1,
+    ):
+        if not raw.strip():
+            continue
+        try:
+            item = CentralityGold.model_validate(json.loads(raw))
+        except (json.JSONDecodeError, ValueError) as exc:
+            raise ValueError(
+                f"invalid centrality gold row on line {line_number}: {exc}"
+            ) from exc
+        if item.case_id in rows:
+            raise ValueError(f"duplicate centrality gold case: {item.case_id}")
+        rows[item.case_id] = item
+    return rows
