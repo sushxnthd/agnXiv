@@ -19,6 +19,7 @@ from ..pipeline import VerificationBundle
 from ..preprint import parse_arxiv_reference
 from ..statement import (
     build_verification_statement,
+    public_key_id_from_pem,
     public_key_pem_from_private,
     sign_statement_ed25519,
 )
@@ -223,16 +224,49 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         allowed_hosts=allowed_hosts,
     )
 
+    def issuer_keyset() -> dict:
+        if not active_config.issuer_private_key_b64:
+            raise ValueError("issuer private key is missing")
+        private_key = base64.b64decode(
+            active_config.issuer_private_key_b64,
+            validate=True,
+        )
+        current_pem, current_id = public_key_pem_from_private(private_key)
+        keys = [
+            {
+                "key_id": current_id,
+                "algorithm": "Ed25519",
+                "status": "current",
+                "public_key_pem": current_pem.decode("ascii"),
+            }
+        ]
+        seen = {current_id}
+        for encoded in active_config.issuer_previous_public_keys_b64:
+            public_pem = base64.b64decode(encoded, validate=True)
+            key_id = public_key_id_from_pem(public_pem)
+            if key_id in seen:
+                raise ValueError("issuer rollover key identifiers must be unique")
+            seen.add(key_id)
+            keys.append(
+                {
+                    "key_id": key_id,
+                    "algorithm": "Ed25519",
+                    "status": "previous",
+                    "public_key_pem": public_pem.decode("ascii"),
+                }
+            )
+        return {
+            "schema_version": "agnxiv.issuer-keyset/1",
+            "current_key_id": current_id,
+            "keys": keys,
+        }
+
     def issuer_key_valid() -> bool:
         if not active_config.issuer_private_key_b64:
             return False
         try:
-            private_key = base64.b64decode(
-                active_config.issuer_private_key_b64,
-                validate=True,
-            )
-            public_key_pem_from_private(private_key)
-        except (ValueError, binascii.Error):
+            issuer_keyset()
+        except (ValueError, UnicodeDecodeError, binascii.Error):
             return False
         return True
 
@@ -364,6 +398,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "scientific_contract": "claim-level execution evidence; no paper truth score",
             "zero_manifest": True,
             "signed_statements": bool(active_config.issuer_private_key_b64),
+            "issuer_rollover_keys": len(active_config.issuer_previous_public_keys_b64),
             "transparency_log": True,
         }
 
@@ -423,20 +458,19 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 detail="hosted issuer key is not configured",
             )
         try:
-            private_key = base64.b64decode(
-                active_config.issuer_private_key_b64,
-                validate=True,
-            )
-            public_pem, key_id = public_key_pem_from_private(private_key)
-        except (ValueError, binascii.Error) as exc:
+            keyset = issuer_keyset()
+        except (ValueError, UnicodeDecodeError, binascii.Error) as exc:
             raise HTTPException(
                 status_code=503,
-                detail="hosted issuer key is invalid",
+                detail="hosted issuer keyset is invalid",
             ) from exc
+        current = keyset["keys"][0]
         return {
-            "key_id": key_id,
-            "algorithm": "Ed25519",
-            "public_key_pem": public_pem.decode("ascii"),
+            **keyset,
+            # Backward-compatible aliases for clients that predate key rollover.
+            "key_id": current["key_id"],
+            "algorithm": current["algorithm"],
+            "public_key_pem": current["public_key_pem"],
         }
 
     @app.post("/v1/jobs", response_model=JobView, status_code=202)
