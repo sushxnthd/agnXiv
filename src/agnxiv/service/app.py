@@ -4,10 +4,12 @@ import base64
 import binascii
 import uuid
 from contextlib import asynccontextmanager
+from urllib.parse import urlparse
 from typing import Annotated, Literal
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from ..pipeline import VerificationBundle
@@ -156,6 +158,22 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         description="Executable verification for computational research claims.",
         lifespan=lifespan,
     )
+    public_host = urlparse(active_config.public_base_url).hostname
+    allowed_hosts = [
+        host
+        for host in (
+            public_host,
+            "healthcheck.railway.app",
+            "localhost",
+            "127.0.0.1",
+            "testserver",
+        )
+        if host
+    ]
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=allowed_hosts,
+    )
 
     def authenticate(api_key: str | None) -> tuple[str, str]:
         if not active_config.api_keys:
@@ -178,17 +196,38 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         if content_length:
             try:
                 request_bytes = int(content_length)
-            except ValueError as exc:
-                raise HTTPException(
+            except ValueError:
+                return JSONResponse(
                     status_code=400,
-                    detail="invalid content-length header",
-                ) from exc
+                    content={"detail": "invalid content-length header"},
+                )
             if request_bytes > 5 * 1024 * 1024:
-                raise HTTPException(status_code=413, detail="request body too large")
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "request body too large"},
+                )
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        )
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "base-uri 'none'; "
+            "frame-ancestors 'none'; "
+            "form-action 'none'; "
+            "img-src 'self' data:; "
+            "style-src 'self' 'unsafe-inline'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "connect-src 'self'"
+        )
+        if request.url.path == "/" or request.url.path.startswith(("/v1/", "/internal/")):
+            response.headers["Cache-Control"] = "no-store"
         return response
 
     @app.get("/healthz")
