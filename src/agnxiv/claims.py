@@ -7,11 +7,11 @@ from .models import Claim, ClaimSource
 
 _NUMBER = (
     r"(?<![A-Za-z0-9_.])[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
-    r"(?:[eE][-+]?\d+)?(?![A-Za-z0-9_.])"
+    r"(?:[eE][-+]?\d+)?(?![A-WYZa-wyz0-9_.])"
 )
 _UNIT = (
     r"%(?!\w)|percent\b|ms\b|s\b|seconds?\b|minutes?\b|hours?\b|"
-    r"GB\b|MB\b|KB\b"
+    r"GB\b|MB\b|KB\b|x\b|×|times?\b|fold\b"
 )
 _QUANT_RE = re.compile(
     rf"(?P<prefix>.{{0,110}}?)"
