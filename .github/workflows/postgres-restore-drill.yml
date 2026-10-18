@@ -68,15 +68,18 @@ jobs:
           from agnxiv.service.db import JobStore
 
           store = JobStore(os.environ["DATABASE_URL"])
-          job = store.create_job(
+          job, created = store.create_job_guarded(
               job_id="00000000-0000-0000-0000-000000009001",
-              api_key_hash="restore-drill",
+              api_key_hash="a" * 64,
               mode="auto_verify",
               repository="owner/research",
               repository_ref="a" * 40,
               arxiv_id="2601.00001",
               spec_path=None,
+              max_active=3,
+              max_recent=20,
           )
+          assert created is True
           store.mark_running(job.id)
           store.complete(
               job.id,
