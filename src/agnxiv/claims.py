@@ -84,6 +84,14 @@ def _alias_positions(context: str, alias: str) -> list[int]:
 
 
 def _metric_from_context(context: str) -> str | None:
+    # PDF extractors emit en dashes, nonbreaking hyphens, and minus signs
+    # for compound statistic names; normalize them before lexical matching.
+    context = (
+        context.replace("\u2013", "-")
+        .replace("\u2014", "-")
+        .replace("\u2011", "-")
+        .replace("\u2212", "-")
+    )
     best: tuple[int, str] | None = None
 
     for canonical, aliases in _METRICS.items():
