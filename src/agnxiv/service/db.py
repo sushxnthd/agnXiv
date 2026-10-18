@@ -23,6 +23,14 @@ class Base(DeclarativeBase):
     pass
 
 
+class JobQuotaExceeded(RuntimeError):
+    """A hosted API key exceeded a database-enforced job quota."""
+
+    def __init__(self, kind: str) -> None:
+        self.kind = kind
+        super().__init__(kind)
+
+
 class Job(Base):
     __tablename__ = "agnxiv_jobs"
     __table_args__ = (
@@ -244,6 +252,105 @@ class JobStore:
                     Job.idempotency_key_hash == idempotency_key_hash,
                 )
                 existing = session.scalar(statement)
+                if existing is None:
+                    raise
+                return existing, False
+
+    def create_job_guarded(
+        self,
+        *,
+        job_id: str,
+        api_key_hash: str,
+        mode: str,
+        repository: str,
+        repository_ref: str,
+        arxiv_id: str | None,
+        spec_path: str | None,
+        max_active: int,
+        max_recent: int,
+        recent_minutes: int = 60,
+        idempotency_key_hash: str | None = None,
+        request_fingerprint: str | None = None,
+    ) -> tuple[Job, bool]:
+        """Atomically reserve quota and create a hosted job.
+
+        Production PostgreSQL serializes reservations per API-key hash with an
+        advisory transaction lock, closing the count-then-insert race across
+        multiple control-plane replicas.
+        """
+        with self.session_factory() as session:
+            if self.database_url.startswith("postgresql+"):
+                raw = int(api_key_hash[:16], 16)
+                lock_key = raw if raw < 2**63 else raw - 2**64
+                session.execute(
+                    text("SELECT pg_advisory_xact_lock(:lock_key)"),
+                    {"lock_key": lock_key},
+                )
+
+            if idempotency_key_hash is not None:
+                existing = session.scalar(
+                    select(Job).where(
+                        Job.api_key_hash == api_key_hash,
+                        Job.idempotency_key_hash == idempotency_key_hash,
+                    )
+                )
+                if existing is not None:
+                    return existing, False
+
+            active = int(
+                session.scalar(
+                    select(func.count()).select_from(Job).where(
+                        Job.api_key_hash == api_key_hash,
+                        Job.status.in_(("queued", "running")),
+                    )
+                )
+                or 0
+            )
+            if active >= max(1, max_active):
+                raise JobQuotaExceeded("active")
+
+            cutoff = datetime.now(UTC) - timedelta(
+                minutes=max(1, recent_minutes)
+            )
+            recent = int(
+                session.scalar(
+                    select(func.count()).select_from(Job).where(
+                        Job.api_key_hash == api_key_hash,
+                        Job.created_at >= cutoff,
+                    )
+                )
+                or 0
+            )
+            if recent >= max(1, max_recent):
+                raise JobQuotaExceeded("hourly")
+
+            job = Job(
+                id=job_id,
+                api_key_hash=api_key_hash,
+                status="queued",
+                mode=mode,
+                repository=repository,
+                repository_ref=repository_ref,
+                arxiv_id=arxiv_id,
+                spec_path=spec_path,
+                idempotency_key_hash=idempotency_key_hash,
+                request_fingerprint=request_fingerprint,
+            )
+            session.add(job)
+            try:
+                session.commit()
+                session.refresh(job)
+                return job, True
+            except IntegrityError:
+                session.rollback()
+                if idempotency_key_hash is None:
+                    raise
+                existing = session.scalar(
+                    select(Job).where(
+                        Job.api_key_hash == api_key_hash,
+                        Job.idempotency_key_hash == idempotency_key_hash,
+                    )
+                )
                 if existing is None:
                     raise
                 return existing, False
