@@ -19,9 +19,32 @@ class SandboxLimits:
 @dataclass(frozen=True)
 class ExecutionResult:
     command: tuple[str, ...]
+    image_id: str
     returncode: int
     stdout: str
     stderr: str
+
+
+def resolve_local_image_id(image: str) -> str:
+    """Resolve a local image reference to the immutable image content ID."""
+    if not image.strip():
+        raise ValueError("container image is required")
+
+    completed = subprocess.run(
+        ["docker", "image", "inspect", "--format", "{{.Id}}", image],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    if completed.returncode != 0:
+        message = completed.stderr.strip() or completed.stdout.strip()
+        raise RuntimeError(f"container image is not available locally: {image}: {message}")
+
+    image_id = completed.stdout.strip()
+    if not image_id.startswith("sha256:"):
+        raise RuntimeError(f"Docker returned a non-content-addressed image ID: {image_id}")
+    return image_id
 
 
 def docker_command(
@@ -75,9 +98,6 @@ def docker_command(
             *command,
         ]
 
-    # The fingerprinted host repository remains immutable. A disposable copy is
-    # made inside container tmpfs so normal research scripts may create outputs,
-    # caches or checkpoints without mutating the verified source tree.
     shell_command = (
         "cp -a /source/. /workspace/ && "
         "cd /workspace && "
@@ -106,13 +126,10 @@ def execute_in_docker(
     limits: SandboxLimits = SandboxLimits(),
     workspace_mode: Literal["readonly", "ephemeral-copy"] = "ephemeral-copy",
 ) -> ExecutionResult:
-    """Execute research code with no network and an immutable host source tree.
-
-    Images must already exist locally; pull-never prevents Docker from silently
-    fetching an unpinned image at verification time.
-    """
+    """Execute research code with no network and an immutable host source tree."""
+    image_id = resolve_local_image_id(image)
     full_command = docker_command(
-        image=image,
+        image=image_id,
         repository=repository,
         command=command,
         limits=limits,
@@ -127,6 +144,7 @@ def execute_in_docker(
     )
     return ExecutionResult(
         command=tuple(full_command),
+        image_id=image_id,
         returncode=completed.returncode,
         stdout=completed.stdout,
         stderr=completed.stderr,
