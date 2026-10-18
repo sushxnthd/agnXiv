@@ -14,6 +14,7 @@ class ServiceConfig:
     github_ref: str
     github_workflow: str
     max_active_jobs_per_key: int
+    max_jobs_per_hour: int
     oidc_audience: str
     issuer_private_key_b64: str | None
 
@@ -24,16 +25,17 @@ class ServiceConfig:
             for item in os.getenv("AGNXIV_API_KEYS", "").split(",")
             if item.strip()
         )
+        public_base_url = os.getenv(
+            "AGNXIV_PUBLIC_BASE_URL",
+            "http://localhost:8000",
+        ).rstrip("/")
         return cls(
             database_url=os.getenv(
                 "DATABASE_URL",
                 "sqlite:///./agnxiv-service.db",
             ),
             api_keys=api_keys,
-            public_base_url=os.getenv(
-                "AGNXIV_PUBLIC_BASE_URL",
-                "http://localhost:8000",
-            ).rstrip("/"),
+            public_base_url=public_base_url,
             github_token=os.getenv("AGNXIV_GITHUB_TOKEN") or None,
             github_repository=os.getenv(
                 "AGNXIV_GITHUB_REPOSITORY",
@@ -48,15 +50,13 @@ class ServiceConfig:
                 1,
                 int(os.getenv("AGNXIV_MAX_ACTIVE_JOBS_PER_KEY", "3")),
             ),
+            max_jobs_per_hour=max(
+                1,
+                int(os.getenv("AGNXIV_MAX_JOBS_PER_HOUR", "20")),
+            ),
             oidc_audience=os.getenv(
                 "AGNXIV_OIDC_AUDIENCE",
-                (
-                    os.getenv(
-                        "AGNXIV_PUBLIC_BASE_URL",
-                        "http://localhost:8000",
-                    ).rstrip("/")
-                    + "/github-actions"
-                ),
+                public_base_url + "/github-actions",
             ),
             issuer_private_key_b64=os.getenv("AGNXIV_ISSUER_PRIVATE_KEY_B64") or None,
         )
