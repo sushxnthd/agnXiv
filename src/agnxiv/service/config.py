@@ -14,7 +14,7 @@ class ServiceConfig:
     github_ref: str
     github_workflow: str
     max_active_jobs_per_key: int
-    callback_secret: str
+    oidc_audience: str
     issuer_private_key_b64: str | None
 
     @classmethod
@@ -48,9 +48,15 @@ class ServiceConfig:
                 1,
                 int(os.getenv("AGNXIV_MAX_ACTIVE_JOBS_PER_KEY", "3")),
             ),
-            callback_secret=os.getenv(
-                "AGNXIV_CALLBACK_SECRET",
-                "development-only-change-me",
+            oidc_audience=os.getenv(
+                "AGNXIV_OIDC_AUDIENCE",
+                (
+                    os.getenv(
+                        "AGNXIV_PUBLIC_BASE_URL",
+                        "http://localhost:8000",
+                    ).rstrip("/")
+                    + "/github-actions"
+                ),
             ),
             issuer_private_key_b64=os.getenv("AGNXIV_ISSUER_PRIVATE_KEY_B64") or None,
         )
@@ -61,7 +67,7 @@ class ServiceConfig:
             self.database_url.startswith(("postgresql://", "postgresql+psycopg://"))
             and bool(self.api_keys)
             and bool(self.github_token)
-            and self.callback_secret != "development-only-change-me"
             and self.public_base_url.startswith("https://")
+            and self.oidc_audience.startswith("https://")
             and bool(self.issuer_private_key_b64)
         )
