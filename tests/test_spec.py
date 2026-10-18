@@ -146,3 +146,97 @@ def test_manifest_rejects_absolute_repository_path(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="must be relative"):
         execute_verification_spec(spec_path)
+
+
+def test_runtime_supports_ordered_command_sequence(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / "stage1.py").write_text("print('stage1')\n", encoding="utf-8")
+    (tmp_path / "stage2.py").write_text("print('stage2')\n", encoding="utf-8")
+    spec_path = tmp_path / "agnxiv-multistage.json"
+    spec_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "agnxiv.spec/1",
+                "repository": ".",
+                "claim": {
+                    "id": "C1",
+                    "text": "Accuracy is 91.4%.",
+                    "metric": "accuracy",
+                    "reported_value": 0.914
+                },
+                "policy": {
+                    "kind": "relative",
+                    "operator": "approx",
+                    "tolerance": 0.01
+                },
+                "runtime": {
+                    "image": "local:test",
+                    "commands": [
+                        ["python", "stage1.py"],
+                        ["python", "stage2.py"]
+                    ]
+                },
+                "observation": {
+                    "kind": "json_path",
+                    "value": "metrics.accuracy"
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    captured: list[list[str]] = []
+
+    def fake_verify_with_command(claim, repository, **kwargs):
+        from agnxiv.environment import EnvironmentSpec
+        from agnxiv.models import Observation
+        from agnxiv.pipeline import VerificationBundle
+        from agnxiv.provenance import fingerprint_tree
+        from agnxiv.verify import verify_numeric_claim
+
+        captured.append(kwargs["command"])
+        record = verify_numeric_claim(
+            claim,
+            [Observation(value=0.914)],
+            kwargs["policy"],
+        )
+        return VerificationBundle(
+            claim=claim,
+            provenance=fingerprint_tree(repository),
+            environment=EnvironmentSpec(),
+            record=record,
+        )
+
+    monkeypatch.setattr("agnxiv.spec.verify_with_command", fake_verify_with_command)
+
+    bundle = execute_verification_spec(spec_path)
+
+    assert bundle.record.verdict == Verdict.VERIFIED
+    assert len(captured) == 1
+    assert captured[0][:2] == ["sh", "-lc"]
+    assert "python stage1.py && python stage2.py" in captured[0][2]
+
+
+def test_runtime_rejects_command_and_commands_together() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        VerificationSpec.model_validate(
+            {
+                "schema_version": "agnxiv.spec/1",
+                "claim": {
+                    "id": "C1",
+                    "text": "Result is 1.",
+                    "reported_value": 1.0
+                },
+                "policy": {
+                    "kind": "absolute",
+                    "operator": "approx",
+                    "tolerance": 0.0
+                },
+                "runtime": {
+                    "image": "local:test",
+                    "command": ["python", "a.py"],
+                    "commands": [["python", "b.py"]]
+                }
+            }
+        )
