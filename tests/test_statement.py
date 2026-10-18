@@ -13,9 +13,9 @@ from agnxiv.provenance import (
     fingerprint_tree,
 )
 from agnxiv.statement import (
-    AttestationSignatureError,
     PREDICATE_TYPE,
     STATEMENT_TYPE,
+    AttestationSignatureError,
     build_verification_statement,
     generate_ed25519_keypair,
     sign_statement_ed25519,
