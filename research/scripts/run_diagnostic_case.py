@@ -235,6 +235,10 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
             ).model_dump(mode="json")
 
     stage_map = {stage.name: stage.complete for stage in plan.stages}
+    environment_reproduction_ready = (
+        plan.environment.dependency_precision in {"version-pinned", "locked"}
+        and plan.environment.historical_fidelity == "constrained"
+    )
     summary = {
         "schema_version": "agnxiv.research-diagnostic/1",
         "case_id": case.case_id,
@@ -253,6 +257,7 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
             "dependency_source": plan.environment.dependency_source,
             "dependency_precision": plan.environment.dependency_precision,
             "historical_fidelity": plan.environment.historical_fidelity,
+            "reproduction_ready": environment_reproduction_ready,
             "inferred_packages": plan.environment.inferred_packages,
         },
         "candidate_claims": len(plan.claims),
