@@ -39,3 +39,14 @@ def test_external_artifacts_get_deterministic_readonly_mounts(tmp_path: Path) ->
     joined = " ".join(command)
     assert str(artifact.resolve()) in joined
     assert "dst=/agnxiv-artifacts/000-dataset.csv,readonly" in joined
+
+def test_workspace_copy_excludes_git_metadata(tmp_path: Path) -> None:
+    command = docker_command(
+        image="python:3.11-slim",
+        repository=tmp_path,
+        command=["python", "evaluate.py"],
+    )
+    shell_command = command[-1]
+    assert "! -name .git" in shell_command
+    assert "cp -R /source/. /workspace/" not in shell_command
+    assert "--network" in command
