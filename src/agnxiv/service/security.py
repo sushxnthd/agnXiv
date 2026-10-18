@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from hashlib import sha256
 from hmac import compare_digest
@@ -15,6 +16,37 @@ def hash_secret(value: str) -> str:
 
 def constant_time_equal(left: str, right: str) -> bool:
     return compare_digest(left.encode(), right.encode())
+
+
+def validate_idempotency_key(value: str) -> str:
+    key = value.strip()
+    if not (8 <= len(key) <= 200):
+        raise ValueError("Idempotency-Key must be 8-200 characters")
+    if not key.isascii() or any(ord(char) < 33 or ord(char) > 126 for char in key):
+        raise ValueError("Idempotency-Key must use printable ASCII without spaces")
+    return key
+
+
+def fingerprint_job_request(
+    *,
+    mode: str,
+    repository: str,
+    repository_ref: str,
+    arxiv_id: str | None,
+    spec_path: str | None,
+) -> str:
+    payload = json.dumps(
+        {
+            "mode": mode,
+            "repository": repository,
+            "repository_ref": repository_ref,
+            "arxiv_id": arxiv_id,
+            "spec_path": spec_path,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return sha256(payload.encode()).hexdigest()
 
 
 def _valid_slug_part(value: str) -> bool:
