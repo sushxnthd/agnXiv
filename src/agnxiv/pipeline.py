@@ -5,14 +5,14 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from .evidence import EvidenceCandidate, map_claim_to_repository
 from .environment import EnvironmentSpec, infer_python_environment
+from .evidence import EvidenceCandidate, map_claim_to_repository
 from .models import (
     Claim,
     Observation,
+    Verdict,
     VerificationPolicy,
     VerificationRecord,
-    Verdict,
 )
 from .outputs import (
     ObservationCandidate,
@@ -21,7 +21,7 @@ from .outputs import (
 )
 from .planner import CommandCandidate, discover_commands
 from .provenance import ProvenanceManifest, fingerprint_tree
-from .sandbox import ExecutionResult, SandboxLimits, execute_in_docker
+from .sandbox import ExecutionResult, SandboxError, SandboxLimits, execute_in_docker
 from .verify import verify_numeric_claim
 
 
@@ -96,9 +96,10 @@ def verify_with_command(
     image: str,
     command: list[str],
     policy: VerificationPolicy,
-    limits: SandboxLimits = SandboxLimits(),
+    limits: SandboxLimits | None = None,
 ) -> VerificationBundle:
     """Execute one explicit research command and verify one numeric claim."""
+    active_limits = limits or SandboxLimits()
     provenance, environment, evidence, commands = inspect_project(claim, repository)
 
     try:
@@ -106,9 +107,9 @@ def verify_with_command(
             image=image,
             repository=repository,
             command=command,
-            limits=limits,
+            limits=active_limits,
         )
-    except Exception as exc:
+    except SandboxError as exc:
         return VerificationBundle(
             claim=claim,
             provenance=provenance,
@@ -118,7 +119,7 @@ def verify_with_command(
             record=_unable_record(
                 claim,
                 policy,
-                rationale=f"Execution could not be completed: {type(exc).__name__}: {exc}",
+                rationale=f"Execution could not be completed: {exc}",
             ),
         )
 
