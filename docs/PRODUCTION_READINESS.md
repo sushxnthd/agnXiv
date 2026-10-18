@@ -42,8 +42,9 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Active-job and hourly quotas exist.
 - [x] Liveness and strict readiness endpoints exist.
 - [x] Capability metadata endpoint exposes the supported API contract without secrets.
-- [ ] Idempotency keys for job creation.
-- [ ] Operator metrics, alerting, and error-budget SLOs.
+- [x] Idempotency keys for job creation, with database uniqueness and conflicting-request rejection.
+- [x] Authenticated operator job metrics and request correlation IDs.
+- [ ] Alerting and error-budget SLOs.
 - [ ] Backup/restore drill for production PostgreSQL.
 - [ ] Key rotation procedure and issuer-key rollover metadata.
 - [ ] Multi-region execution strategy and disaster recovery.
