@@ -83,7 +83,7 @@ footer{border-top:1px solid var(--line)}.footer-inner{min-height:84px;display:fl
 .lookup-record-head{display:flex;justify-content:space-between;gap:30px;align-items:flex-start;padding:30px;background:white;border:1px solid var(--line);border-radius:14px 14px 0 0}
 .lookup-record-head h2{font-size:38px;letter-spacing:-.05em;margin:12px 0 4px}
 .lookup-record-head p{margin:0;color:var(--muted);font-size:12px}
-.lookup-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-top:0;background:#f0f1ea}
+.lookup-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-top:0;background:#f0f1ea}
 .lookup-stats div{padding:22px 28px;display:flex;align-items:baseline;gap:9px}
 .lookup-stats div+div{border-left:1px solid var(--line)}
 .lookup-stats strong{font-size:26px;letter-spacing:-.045em}
