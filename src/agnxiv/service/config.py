@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import urlparse
 from dataclasses import dataclass
 
 
@@ -17,6 +18,8 @@ class ServiceConfig:
     max_jobs_per_hour: int
     oidc_audience: str
     issuer_private_key_b64: str | None
+    job_stale_minutes: int = 45
+    min_api_key_length: int = 32
 
     @classmethod
     def from_env(cls) -> ServiceConfig:
@@ -59,15 +62,43 @@ class ServiceConfig:
                 public_base_url + "/github-actions",
             ),
             issuer_private_key_b64=os.getenv("AGNXIV_ISSUER_PRIVATE_KEY_B64") or None,
+            job_stale_minutes=max(
+                5,
+                int(os.getenv("AGNXIV_JOB_STALE_MINUTES", "45")),
+            ),
+            min_api_key_length=max(
+                16,
+                int(os.getenv("AGNXIV_MIN_API_KEY_LENGTH", "32")),
+            ),
         )
 
     @property
+    def production_issues(self) -> list[str]:
+        issues: list[str] = []
+        if not self.database_url.startswith(("postgresql://", "postgresql+psycopg://")):
+            issues.append("database_not_postgresql")
+        if not self.api_keys:
+            issues.append("api_keys_missing")
+        elif any(len(key) < self.min_api_key_length for key in self.api_keys):
+            issues.append("api_key_too_short")
+        elif len(set(self.api_keys)) != len(self.api_keys):
+            issues.append("duplicate_api_keys")
+        if not self.github_token:
+            issues.append("github_dispatch_token_missing")
+        public = urlparse(self.public_base_url)
+        if (
+            public.scheme != "https"
+            or not public.hostname
+            or public.hostname in {"localhost", "127.0.0.1"}
+        ):
+            issues.append("public_https_url_invalid")
+        audience = urlparse(self.oidc_audience)
+        if audience.scheme != "https" or not audience.hostname:
+            issues.append("oidc_audience_invalid")
+        if not self.issuer_private_key_b64:
+            issues.append("issuer_key_missing")
+        return issues
+
+    @property
     def production_ready(self) -> bool:
-        return (
-            self.database_url.startswith(("postgresql://", "postgresql+psycopg://"))
-            and bool(self.api_keys)
-            and bool(self.github_token)
-            and self.public_base_url.startswith("https://")
-            and self.oidc_audience.startswith("https://")
-            and bool(self.issuer_private_key_b64)
-        )
+        return not self.production_issues
