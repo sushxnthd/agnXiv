@@ -3,7 +3,17 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import DateTime, String, Text, UniqueConstraint, create_engine, func, select, text, update
+from sqlalchemy import (
+    DateTime,
+    String,
+    Text,
+    UniqueConstraint,
+    create_engine,
+    func,
+    select,
+    text,
+    update,
+)
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
