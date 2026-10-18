@@ -55,6 +55,8 @@ def map_claim_to_repository(
     candidates: list[EvidenceCandidate] = []
 
     for path in root.rglob("*"):
+        if path.is_symlink():
+            continue
         if not path.is_file() or path.suffix.lower() not in TEXT_EXTENSIONS:
             continue
         if any(part in IGNORE_DIRS for part in path.parts):
