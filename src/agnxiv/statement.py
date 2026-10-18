@@ -48,6 +48,14 @@ def build_verification_statement(bundle: Any) -> dict[str, Any]:
         }
     ]
 
+    if bundle.verification_spec_sha256 is not None:
+        subjects.append(
+            {
+                "name": "verification-spec",
+                "digest": {"sha256": bundle.verification_spec_sha256},
+            }
+        )
+
     if bundle.manuscript is not None:
         subjects.append(
             {
@@ -76,6 +84,14 @@ def build_verification_statement(bundle: Any) -> dict[str, Any]:
             "artifactMounts": bundle.execution.artifact_mounts,
         }
 
+    git = bundle.provenance.git
+    source = {
+        "treeSha256": bundle.provenance.tree_digest,
+        "gitCommit": git.commit if git is not None else None,
+        "gitBranch": git.branch if git is not None else None,
+        "gitDirty": git.dirty if git is not None else None,
+    }
+
     record = bundle.record
     return {
         "_type": STATEMENT_TYPE,
@@ -84,6 +100,7 @@ def build_verification_statement(bundle: Any) -> dict[str, Any]:
         "predicate": {
             "schemaVersion": "agnxiv.verification/v1",
             "bundleSha256": canonical_json_sha256(bundle.model_dump(mode="json")),
+            "source": source,
             "claim": bundle.claim.model_dump(mode="json"),
             "verificationPolicy": record.policy.model_dump(mode="json"),
             "result": {
