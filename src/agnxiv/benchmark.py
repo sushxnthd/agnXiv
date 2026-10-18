@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from .models import Claim, VerificationPolicy, Verdict
+from .models import Claim, Verdict, VerificationPolicy
 from .outputs import extract_observation_candidates, select_unambiguous_observation
 from .verify import verify_numeric_claim
 
