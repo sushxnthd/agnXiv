@@ -1,0 +1,5 @@
+AgnXiv integration fixture
+
+We evaluate a deterministic toy classifier. The model achieves an accuracy of 91.4% on the held-out test set.
+
+This fixture exists only to exercise the complete verification pipeline.
