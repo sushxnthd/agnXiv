@@ -113,7 +113,7 @@ def _validate_worker_result(
             raise ValueError("AUTO_VERIFY is missing frozen locator provenance")
         for item in additional:
             if not isinstance(item, dict) or not isinstance(item.get("discovery"), dict):
-                raise ValueError("additional verification lacks locator provenance")
+                raise TypeError("additional verification lacks locator provenance")
             raw_bundles.append(item.get("bundle"))
 
     bundles = [VerificationBundle.model_validate(raw) for raw in raw_bundles]
@@ -457,7 +457,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         try:
             _validate_worker_result(job, body.status, body.result)
             result = _enrich_signed_result(active_config, body.result)
-        except (ValueError, binascii.Error) as exc:
+        except (ValueError, TypeError, binascii.Error) as exc:
             store.complete(
                 job_id,
                 status="failed",
