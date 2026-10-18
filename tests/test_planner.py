@@ -26,3 +26,61 @@ def test_does_not_discover_symlinked_entrypoint(tmp_path: Path) -> None:
         pytest.skip("symlinks are not available on this platform")
 
     assert discover_commands(tmp_path) == []
+
+
+def test_discovers_markdown_blockquote_command(tmp_path: Path) -> None:
+    (tmp_path / "README.md").write_text(
+        "> python train.py --dataset data --epochs 10\n",
+        encoding="utf-8",
+    )
+
+    commands = discover_commands(tmp_path)
+
+    assert any(
+        candidate.command == [
+            "python",
+            "train.py",
+            "--dataset",
+            "data",
+            "--epochs",
+            "10",
+        ]
+        for candidate in commands
+    )
+
+
+def test_discovers_backslash_continued_command(tmp_path: Path) -> None:
+    (tmp_path / "README.md").write_text(
+        "python main.py experiment=supervised \\\n"
+        "    experiment.model=saint \\\n"
+        "    data=bank_sup\n",
+        encoding="utf-8",
+    )
+
+    commands = discover_commands(tmp_path)
+
+    assert any(
+        candidate.command == [
+            "python",
+            "main.py",
+            "experiment=supervised",
+            "experiment.model=saint",
+            "data=bank_sup",
+        ]
+        for candidate in commands
+    )
+
+
+def test_discovers_documented_bash_experiment_script(tmp_path: Path) -> None:
+    (tmp_path / "README.md").write_text(
+        "bash ./scripts/ECL_script/Koopa.sh\n",
+        encoding="utf-8",
+    )
+
+    commands = discover_commands(tmp_path)
+
+    assert any(
+        candidate.command == ["bash", "./scripts/ECL_script/Koopa.sh"]
+        and candidate.score >= 0.88
+        for candidate in commands
+    )
