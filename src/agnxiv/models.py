@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Literal
 
@@ -50,7 +50,7 @@ class VerificationPolicy(BaseModel):
     minimum_repetitions: int = Field(default=1, ge=1)
 
     @model_validator(mode="after")
-    def validate_relative_tolerance(self) -> "VerificationPolicy":
+    def validate_relative_tolerance(self) -> VerificationPolicy:
         if self.kind == "relative" and self.tolerance > 1:
             raise ValueError("relative tolerance must be expressed as a fraction, e.g. 0.01")
         return self
@@ -74,4 +74,4 @@ class VerificationRecord(BaseModel):
     absolute_error: float | None
     relative_error: float | None
     rationale: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
