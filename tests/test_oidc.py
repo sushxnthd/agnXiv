@@ -11,6 +11,9 @@ class _SigningKey:
     key = object()
 
 
+_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImsifQ.e30.c2ln"
+
+
 def _policy() -> GitHubOIDCPolicy:
     return GitHubOIDCPolicy(
         audience="https://agnxiv.example/github-actions",
@@ -42,7 +45,7 @@ def test_oidc_policy_accepts_only_expected_workflow(monkeypatch) -> None:
         lambda *args, **kwargs: _claims(),
     )
 
-    verified = verify_github_actions_token("token", _policy())
+    verified = verify_github_actions_token(_TOKEN, _policy())
 
     assert verified["repository"] == "sushxnthd/agnXiv"
 
@@ -79,3 +82,41 @@ def test_oidc_policy_rejects_wrong_claim(
 
     with pytest.raises(OIDCVerificationError, match=field):
         verify_github_actions_token("token", _policy())
+
+
+def test_oidc_rejects_malformed_token_before_jwks_lookup(monkeypatch) -> None:
+    called = False
+
+    def should_not_run(token):
+        nonlocal called
+        called = True
+        raise AssertionError("JWKS lookup should not run")
+
+    monkeypatch.setattr(
+        "agnxiv.service.oidc._JWK_CLIENT.get_signing_key_from_jwt",
+        should_not_run,
+    )
+
+    with pytest.raises(OIDCVerificationError, match="token shape"):
+        verify_github_actions_token("not-a-jwt", _policy())
+    with pytest.raises(OIDCVerificationError, match="token shape"):
+        verify_github_actions_token("a" * 20_000, _policy())
+    assert called is False
+
+
+def test_oidc_rejects_wrong_algorithm_before_jwks_lookup(monkeypatch) -> None:
+    called = False
+
+    def should_not_run(token):
+        nonlocal called
+        called = True
+        raise AssertionError("JWKS lookup should not run")
+
+    monkeypatch.setattr(
+        "agnxiv.service.oidc._JWK_CLIENT.get_signing_key_from_jwt",
+        should_not_run,
+    )
+    hs_token = "eyJhbGciOiJIUzI1NiIsImtpZCI6ImsifQ.e30.c2ln"
+    with pytest.raises(OIDCVerificationError, match="signing header"):
+        verify_github_actions_token(hs_token, _policy())
+    assert called is False
