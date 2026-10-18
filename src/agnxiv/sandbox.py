@@ -286,7 +286,12 @@ def _run_bounded_process(
             process.kill()
         except OSError:
             pass
-        process.wait(timeout=10)
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired as exc:
+            raise SandboxError(
+                "isolated execution process did not terminate after kill"
+            ) from exc
 
     for thread in threads:
         thread.join(timeout=10)
