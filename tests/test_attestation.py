@@ -1,12 +1,11 @@
 from pathlib import Path
 
 from agnxiv.attestation import attest_bundle
-from agnxiv.models import Claim, VerificationPolicy
-from agnxiv.pipeline import VerificationBundle
 from agnxiv.environment import EnvironmentSpec
+from agnxiv.models import Claim, Observation, VerificationPolicy
+from agnxiv.pipeline import VerificationBundle
 from agnxiv.provenance import fingerprint_tree
 from agnxiv.verify import verify_numeric_claim
-from agnxiv.models import Observation
 
 
 def test_attestation_is_bound_to_bundle_contents(tmp_path: Path) -> None:
