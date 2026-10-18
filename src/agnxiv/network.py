@@ -2,11 +2,19 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
+from hashlib import sha256
+import json
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from .models import Verdict
+
+
+class EvidenceGrade(StrEnum):
+    STRONG = "STRONG"
+    CONDITIONAL = "CONDITIONAL"
+    INCONCLUSIVE = "INCONCLUSIVE"
 
 
 class AttemptStatus(StrEnum):
@@ -45,6 +53,10 @@ class EvidenceAttempt(BaseModel):
     automation_score: float | None = Field(default=None, ge=0.0, le=1.0)
     blockers: list[str] = Field(default_factory=list)
     execution_record_url: str | None = None
+    dependency_precision: str | None = None
+    observation_method: str | None = None
+    evidence_grade: EvidenceGrade = EvidenceGrade.INCONCLUSIVE
+    independence_key: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -74,6 +86,18 @@ class ScientificChallenge(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
+class ClaimEvidenceSummary(BaseModel):
+    claim_key: str
+    attempts: int
+    independent_clusters: int
+    strong_reproduced_clusters: int
+    strong_divergent_clusters: int
+    conditional_reproduced_clusters: int
+    conditional_divergent_clusters: int
+    conflicting_clusters: int
+    current_state: str
+
+
 class RecordSummary(BaseModel):
     paper_id: str
     attempts: int
@@ -83,6 +107,96 @@ class RecordSummary(BaseModel):
     unresolved: int
     open_challenges: int
     current_state: str
+    claim_states: list[ClaimEvidenceSummary] = Field(default_factory=list)
+
+
+def _claim_key(attempt: EvidenceAttempt) -> str:
+    return attempt.claim_id or attempt.claim_text or "__paper_level__"
+
+
+def _cluster_key(attempt: EvidenceAttempt) -> str:
+    return (
+        attempt.independence_key
+        or f"{attempt.repository}@{attempt.pinned_commit or attempt.repository_ref}"
+    )
+
+
+def aggregate_claim_evidence(
+    attempts: list[EvidenceAttempt],
+) -> list[ClaimEvidenceSummary]:
+    """Aggregate by independent evidence cluster instead of naive attempt votes."""
+    grouped: dict[str, list[EvidenceAttempt]] = {}
+    for attempt in attempts:
+        grouped.setdefault(_claim_key(attempt), []).append(attempt)
+
+    summaries: list[ClaimEvidenceSummary] = []
+    for claim_key, claim_attempts in sorted(grouped.items()):
+        clusters: dict[str, list[EvidenceAttempt]] = {}
+        for attempt in claim_attempts:
+            clusters.setdefault(_cluster_key(attempt), []).append(attempt)
+
+        strong_reproduced = 0
+        strong_divergent = 0
+        conditional_reproduced = 0
+        conditional_divergent = 0
+        conflicts = 0
+
+        for cluster_attempts in clusters.values():
+            decided = {
+                attempt.status
+                for attempt in cluster_attempts
+                if attempt.status
+                in {AttemptStatus.REPRODUCED, AttemptStatus.RESULT_DIVERGENCE}
+            }
+            if len(decided) > 1:
+                conflicts += 1
+                continue
+
+            status = next(iter(decided), None)
+            if status is None:
+                continue
+            strongest = (
+                EvidenceGrade.STRONG
+                if any(a.evidence_grade == EvidenceGrade.STRONG for a in cluster_attempts)
+                else EvidenceGrade.CONDITIONAL
+            )
+            if strongest == EvidenceGrade.STRONG:
+                if status == AttemptStatus.REPRODUCED:
+                    strong_reproduced += 1
+                else:
+                    strong_divergent += 1
+            elif status == AttemptStatus.REPRODUCED:
+                conditional_reproduced += 1
+            else:
+                conditional_divergent += 1
+
+        if strong_reproduced and strong_divergent:
+            state = "MIXED_EVIDENCE"
+        elif strong_divergent:
+            state = "RESULT_DIVERGENCE"
+        elif strong_reproduced:
+            state = "REPRODUCED"
+        elif conditional_reproduced or conditional_divergent:
+            state = "CONDITIONAL_EVIDENCE"
+        elif conflicts:
+            state = "CLUSTER_CONFLICT"
+        else:
+            state = "UNRESOLVED"
+
+        summaries.append(
+            ClaimEvidenceSummary(
+                claim_key=claim_key,
+                attempts=len(claim_attempts),
+                independent_clusters=len(clusters),
+                strong_reproduced_clusters=strong_reproduced,
+                strong_divergent_clusters=strong_divergent,
+                conditional_reproduced_clusters=conditional_reproduced,
+                conditional_divergent_clusters=conditional_divergent,
+                conflicting_clusters=conflicts,
+                current_state=state,
+            )
+        )
+    return summaries
 
 
 class ScientificRecord(BaseModel):
@@ -117,6 +231,19 @@ class ScientificRecord(BaseModel):
         else:
             state = "UNTESTED"
 
+        claim_states = aggregate_claim_evidence(self.attempts)
+        strong_states = {item.current_state for item in claim_states}
+        if "MIXED_EVIDENCE" in strong_states or (
+            "REPRODUCED" in strong_states and "RESULT_DIVERGENCE" in strong_states
+        ):
+            state = "MIXED_EVIDENCE"
+        elif "RESULT_DIVERGENCE" in strong_states:
+            state = "RESULT_DIVERGENCE"
+        elif "REPRODUCED" in strong_states:
+            state = "REPRODUCED"
+        elif "CONDITIONAL_EVIDENCE" in strong_states:
+            state = "CONDITIONAL_EVIDENCE"
+
         return RecordSummary(
             paper_id=self.paper_id,
             attempts=len(self.attempts),
@@ -126,7 +253,163 @@ class ScientificRecord(BaseModel):
             unresolved=unresolved,
             open_challenges=open_challenges,
             current_state=state,
+            claim_states=claim_states,
         )
+
+
+def _evidence_metadata(
+    result: dict[str, Any],
+    bundle: dict[str, Any],
+    *,
+    repository: str,
+) -> tuple[str | None, str | None, EvidenceGrade, str]:
+    build = result.get("build") or {}
+    plan = build.get("plan") or {}
+    dependency_precision = plan.get("dependency_precision")
+    observation_method = bundle.get("observation_method")
+    execution = bundle.get("execution") or {}
+    record = bundle.get("record") or {}
+    raw_verdict = record.get("verdict")
+
+    decided = raw_verdict in {
+        Verdict.VERIFIED.value,
+        Verdict.CONTRADICTED.value,
+        Verdict.PARTIALLY_VERIFIED.value,
+    }
+    execution_sound = (
+        execution.get("returncode") == 0
+        and execution.get("source_unchanged") is True
+        and execution.get("artifacts_unchanged") is not False
+    )
+    locator_sound = observation_method in {
+        "explicit_json_path",
+        "explicit_regex",
+    }
+    strong_environment = dependency_precision in {
+        "base-only",
+        "version-pinned",
+        "hash-pinned",
+        "locked",
+    }
+    if decided and execution_sound and locator_sound and strong_environment:
+        grade = EvidenceGrade.STRONG
+    elif decided and execution_sound and locator_sound:
+        grade = EvidenceGrade.CONDITIONAL
+    else:
+        grade = EvidenceGrade.INCONCLUSIVE
+
+    git = (bundle.get("provenance") or {}).get("git") or {}
+    artifact_hashes = sorted(
+        str(item.get("sha256"))
+        for item in (bundle.get("artifacts") or [])
+        if item.get("sha256")
+    )
+    cluster_payload = json.dumps(
+        {
+            "repository": repository,
+            "commit": git.get("commit"),
+            "artifacts": artifact_hashes,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    independence_key = sha256(cluster_payload.encode("utf-8")).hexdigest()
+    return dependency_precision, observation_method, grade, independence_key
+
+
+def _attempt_from_verification(
+    *,
+    request: dict[str, Any],
+    result: dict[str, Any],
+    bundle: dict[str, Any],
+    attempt_id: str,
+    execution_record_url: str | None,
+) -> EvidenceAttempt:
+    paper_id = request.get("arxiv_id")
+    repository = str(request.get("repository") or "unknown")
+    repository_ref = str(request.get("repository_ref") or "unknown")
+    record = bundle.get("record") or {}
+    claim = bundle.get("claim") or {}
+    git = (bundle.get("provenance") or {}).get("git") or {}
+    raw_verdict = record.get("verdict")
+    verdict = Verdict(raw_verdict) if raw_verdict in set(Verdict) else None
+    mapped = {
+        Verdict.VERIFIED: AttemptStatus.REPRODUCED,
+        Verdict.PARTIALLY_VERIFIED: AttemptStatus.PARTIALLY_REPRODUCED,
+        Verdict.CONTRADICTED: AttemptStatus.RESULT_DIVERGENCE,
+        Verdict.UNABLE_TO_VERIFY: AttemptStatus.INCONCLUSIVE,
+    }.get(verdict, AttemptStatus.INCONCLUSIVE)
+    dependency_precision, observation_method, grade, independence_key = (
+        _evidence_metadata(result, bundle, repository=repository)
+    )
+    return EvidenceAttempt(
+        attempt_id=attempt_id,
+        paper_id=paper_id,
+        claim_id=claim.get("id"),
+        claim_text=claim.get("text"),
+        repository=repository,
+        repository_ref=repository_ref,
+        pinned_commit=git.get("commit"),
+        expected=record.get("expected"),
+        observed=record.get("observed_mean"),
+        verdict=verdict,
+        status=mapped,
+        execution_record_url=execution_record_url,
+        dependency_precision=dependency_precision,
+        observation_method=observation_method,
+        evidence_grade=grade,
+        independence_key=independence_key,
+    )
+
+
+def attempts_from_github_payload(
+    payload: dict[str, Any],
+    *,
+    attempt_id: str,
+    execution_record_url: str | None = None,
+) -> list[EvidenceAttempt]:
+    """Normalize all claim-level verification bundles from one worker payload."""
+    result = payload.get("result") or {}
+    if result.get("kind") != "verification":
+        return [
+            attempt_from_github_payload(
+                payload,
+                attempt_id=attempt_id,
+                execution_record_url=execution_record_url,
+            )
+        ]
+
+    request = payload.get("request") or {}
+    bundles: list[dict[str, Any]] = []
+    primary = result.get("bundle")
+    if isinstance(primary, dict):
+        bundles.append(primary)
+    for item in result.get("additional_verifications") or []:
+        if isinstance(item, dict) and isinstance(item.get("bundle"), dict):
+            bundles.append(item["bundle"])
+
+    if not bundles:
+        return [
+            EvidenceAttempt(
+                attempt_id=attempt_id,
+                paper_id=request.get("arxiv_id"),
+                repository=str(request.get("repository") or "unknown"),
+                repository_ref=str(request.get("repository_ref") or "unknown"),
+                status=AttemptStatus.INCONCLUSIVE,
+                blockers=["verification result contained no claim bundles"],
+            )
+        ]
+
+    return [
+        _attempt_from_verification(
+            request=request,
+            result=result,
+            bundle=bundle,
+            attempt_id=attempt_id if index == 0 else f"{attempt_id}-C{index + 1}",
+            execution_record_url=execution_record_url,
+        )
+        for index, bundle in enumerate(bundles)
+    ]
 
 
 def attempt_from_github_payload(
@@ -181,31 +464,11 @@ def attempt_from_github_payload(
 
     if kind == "verification":
         bundle = result.get("bundle") or {}
-        record = bundle.get("record") or {}
-        claim = bundle.get("claim") or {}
-        git = (bundle.get("provenance") or {}).get("git") or {}
-        raw_verdict = record.get("verdict")
-        verdict = Verdict(raw_verdict) if raw_verdict in set(Verdict) else None
-
-        mapped = {
-            Verdict.VERIFIED: AttemptStatus.REPRODUCED,
-            Verdict.PARTIALLY_VERIFIED: AttemptStatus.PARTIALLY_REPRODUCED,
-            Verdict.CONTRADICTED: AttemptStatus.RESULT_DIVERGENCE,
-            Verdict.UNABLE_TO_VERIFY: AttemptStatus.INCONCLUSIVE,
-        }.get(verdict, AttemptStatus.INCONCLUSIVE)
-
-        return EvidenceAttempt(
+        return _attempt_from_verification(
+            request=request,
+            result=result,
+            bundle=bundle,
             attempt_id=attempt_id,
-            paper_id=paper_id,
-            claim_id=claim.get("id"),
-            claim_text=claim.get("text"),
-            repository=repository,
-            repository_ref=repository_ref,
-            pinned_commit=git.get("commit"),
-            expected=record.get("expected"),
-            observed=record.get("observed_mean"),
-            verdict=verdict,
-            status=mapped,
             execution_record_url=execution_record_url,
         )
 
