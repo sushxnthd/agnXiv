@@ -2,9 +2,6 @@ from __future__ import annotations
 
 import base64
 import binascii
-import hashlib
-import hmac
-import secrets
 import uuid
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
@@ -22,6 +19,7 @@ from ..statement import (
 from .config import ServiceConfig
 from .db import Job, JobStore, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
+from .oidc import GitHubOIDCPolicy, OIDCVerificationError, verify_github_actions_token
 from .security import constant_time_equal, hash_secret, validate_git_ref, validate_github_slug
 
 
@@ -67,31 +65,6 @@ def _job_view(job: Job) -> JobView:
         created_at=job.created_at.isoformat(),
         updated_at=job.updated_at.isoformat(),
     )
-
-
-def _callback_token(secret: str, job_id: str) -> str:
-    nonce = secrets.token_urlsafe(24)
-    message = f"{job_id}.{nonce}".encode()
-    signature = hmac.new(
-        secret.encode(),
-        message,
-        hashlib.sha256,
-    ).hexdigest()
-    return f"{nonce}.{signature}"
-
-
-def _verify_callback_token(secret: str, job_id: str, token: str) -> bool:
-    try:
-        nonce, supplied = token.rsplit(".", 1)
-    except ValueError:
-        return False
-    message = f"{job_id}.{nonce}".encode()
-    expected = hmac.new(
-        secret.encode(),
-        message,
-        hashlib.sha256,
-    ).hexdigest()
-    return hmac.compare_digest(supplied, expected)
 
 
 def _enrich_signed_result(config: ServiceConfig, result: dict | None) -> dict | None:
@@ -189,6 +162,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                     "api_keys": bool(active_config.api_keys),
                     "issuer_key": bool(active_config.issuer_private_key_b64),
                     "https_public_url": active_config.public_base_url.startswith("https://"),
+                    "oidc_audience": active_config.oidc_audience.startswith("https://"),
                 },
             )
         return {"status": "ready"}
@@ -259,7 +233,6 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             )
 
         job_id = str(uuid.uuid4())
-        callback_token = _callback_token(active_config.callback_secret, job_id)
         job = store.create_job(
             job_id=job_id,
             api_key_hash=api_hash,
@@ -268,7 +241,6 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             repository_ref=repository_ref,
             arxiv_id=body.arxiv_id,
             spec_path=body.spec_path,
-            callback_token_hash=hash_secret(callback_token),
         )
 
         request = DispatchRequest(
@@ -281,7 +253,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             callback_url=(
                 f"{active_config.public_base_url}/internal/jobs/{job.id}/complete"
             ),
-            callback_token=callback_token,
+            oidc_audience=active_config.oidc_audience,
         )
 
         store.mark_running(job.id)
@@ -315,7 +287,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
     def complete_job(
         job_id: str,
         body: WorkerCallback,
-        x_agnxiv_callback_token: Annotated[str | None, Header()] = None,
+        authorization: Annotated[str | None, Header()] = None,
     ) -> dict:
         job = store.get_job(job_id)
         if job is None:
@@ -325,19 +297,21 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 status_code=409,
                 detail="job is already finalized",
             )
-        if not x_agnxiv_callback_token:
-            raise HTTPException(status_code=401, detail="missing callback token")
-        if not _verify_callback_token(
-            active_config.callback_secret,
-            job_id,
-            x_agnxiv_callback_token,
-        ):
-            raise HTTPException(status_code=401, detail="invalid callback token")
-        if not constant_time_equal(
-            job.callback_token_hash,
-            hash_secret(x_agnxiv_callback_token),
-        ):
-            raise HTTPException(status_code=401, detail="callback token revoked")
+        if not authorization or not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="missing GitHub OIDC token")
+        token = authorization.removeprefix("Bearer ").strip()
+        try:
+            verify_github_actions_token(
+                token,
+                GitHubOIDCPolicy(
+                    audience=active_config.oidc_audience,
+                    repository=active_config.github_repository,
+                    ref=active_config.github_ref,
+                    workflow=active_config.github_workflow,
+                ),
+            )
+        except OIDCVerificationError as exc:
+            raise HTTPException(status_code=401, detail="untrusted workflow identity") from exc
 
         try:
             result = _enrich_signed_result(active_config, body.result)
