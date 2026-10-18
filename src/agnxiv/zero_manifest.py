@@ -14,7 +14,7 @@ import shlex
 from hashlib import sha256
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .auto import AutoPlan, build_auto_plan
 from .claims import extract_claims_from_pdf, extract_quantitative_claims
@@ -69,36 +69,39 @@ class ZeroManifestOutcome(BaseModel):
     plan: AutoPlan
     frozen_locator: FrozenLocator | None = None
     bundle: VerificationBundle | None = None
+    frozen_locators: list[FrozenLocator] = Field(default_factory=list)
+    bundles: list[VerificationBundle] = Field(default_factory=list)
 
 
-def discover_frozen_locator(stdout: str, claims: list[Claim]) -> FrozenLocator | None:
-    """Bind only unique paper metrics to unique observed key/value stdout lines.
+def discover_frozen_locators(stdout: str, claims: list[Claim]) -> list[FrozenLocator]:
+    """Compile all unique metric bindings without looking at observed values.
 
-    Never compare a candidate observation to a reported answer when selecting.
-    Do not synthesize a numeric regex from the observed numeric value.
+    Repeated mentions of the *same* manuscript statistic can be collapsed,
+    but competing distinct reported values are always ambiguous.
     """
     lines: dict[str, list[tuple[str, bool]]] = {}
     for line in stdout.splitlines():
         match = _LINE.fullmatch(line)
-        if not match:
+        if match is None:
             continue
         label = match.group("label").strip()
         key = _normalize_label(label)
         if any(bad in key for bad in _BAD_LABELS):
             continue
-        if not key or not match.group("value"):
-            continue
         lines.setdefault(key, []).append((label, match.group("percent") == "%"))
 
-    eligible: list[tuple[int, Claim, str, bool]] = []
-    for rank, metric in enumerate(_PREFERRED):
+    frozen: list[FrozenLocator] = []
+    for metric in _PREFERRED:
         matches = [
             claim for claim in claims
             if claim.metric == metric and claim.reported_value is not None
         ]
-        # Multiple manuscript values for the same metric are not safely
-        # distinguishable with only a metric label. Do not cherry-pick one.
-        if len(matches) != 1:
+        if not matches:
+            continue
+        manuscript_values = {
+            (row.reported_value, row.unit) for row in matches
+        }
+        if len(manuscript_values) != 1:
             continue
         possible = [
             item
@@ -110,36 +113,33 @@ def discover_frozen_locator(stdout: str, claims: list[Claim]) -> FrozenLocator |
             continue
         label, percent = possible[0]
         claim = matches[0]
-        # A percentage display is a fraction claim only when the paper
-        # explicitly reports the corresponding percentage unit.
         if percent and claim.unit != "fraction":
             continue
-        if not percent and claim.unit == "fraction":
-            # Printed 0.51 can represent a fraction, but 51 without "%"
-            # must never be rescaled based on the expected paper value.
-            pass
-        eligible.append((rank, claim, label, percent))
+        regex = (
+            r"^\s*" + re.escape(label) + r"\s*[:=]\s*"
+            + rf"(?P<value>{_FLOAT})"
+            + (r"%" if percent else "")
+            + r"\s*$"
+        )
+        frozen.append(
+            FrozenLocator(
+                claim_id=claim.id,
+                metric=metric,
+                regex=regex,
+                scale=0.01 if percent else 1.0,
+                label=label,
+                discovery_stdout_sha256=sha256(
+                    stdout.encode("utf-8")
+                ).hexdigest(),
+            )
+        )
+    return frozen
 
-    if not eligible:
-        return None
 
-    # Fixed precedence based on metric identity, not observed or expected values.
-    _, claim, label, percent = min(eligible, key=lambda row: row[0])
-    regex = (
-        r"^\s*" + re.escape(label) + r"\s*[:=]\s*"
-        + rf"(?P<value>{_FLOAT})"
-        + (r"%" if percent else "")
-        + r"\s*$"
-    )
-    return FrozenLocator(
-        claim_id=claim.id,
-        metric=claim.metric or "",
-        regex=regex,
-        scale=0.01 if percent else 1.0,
-        label=label,
-        discovery_stdout_sha256=sha256(stdout.encode("utf-8")).hexdigest(),
-    )
-
+def discover_frozen_locator(stdout: str, claims: list[Claim]) -> FrozenLocator | None:
+    """Compatibility interface: first claim in predeclared metric order."""
+    all_locators = discover_frozen_locators(stdout, claims)
+    return all_locators[0] if all_locators else None
 
 def _claims(path: Path) -> list[Claim]:
     if path.suffix.lower() == ".pdf":
@@ -213,8 +213,8 @@ def run_zero_manifest(
         )
 
     paper_claims = _claims(paper)
-    locator = discover_frozen_locator(discovery.stdout, paper_claims)
-    if locator is None:
+    locators = discover_frozen_locators(discovery.stdout, paper_claims)
+    if not locators:
         from collections import Counter
 
         claim_metrics = Counter(
@@ -234,35 +234,45 @@ def run_zero_manifest(
             ),
             plan=plan,
         )
-    selected = next(
-        (row for row in paper_claims if row.id == locator.claim_id), None
-    )
-    if selected is None:
+    # Freeze all eligible locators before comparing *any* observed value to
+    # the paper. Do not select only the claim that happens to reproduce.
+    bundles: list[VerificationBundle] = []
+    for locator in locators[:4]:
+        selected = next(
+            (row for row in paper_claims if row.id == locator.claim_id), None
+        )
+        if selected is None:
+            continue
+        bundle = verify_with_command(
+            selected,
+            repo,
+            image=image,
+            command=command,
+            policy=plan.draft_spec.policy.__class__(
+                kind="absolute" if selected.unit == "fraction" else "relative",
+                tolerance=0.01,
+            ),
+            manuscript_path=paper,
+            output_regex=locator.regex,
+            observation_scale=locator.scale,
+        )
+        bundles.append(bundle)
+
+    if not bundles:
         return ZeroManifestOutcome(
             status="UNABLE_TO_VERIFY",
-            reason="Frozen claim no longer matches manuscript.",
+            reason="All frozen manuscript claim references became unavailable.",
             plan=plan,
         )
 
-    # The claim's reported value is consulted only *after* the regex has
-    # been frozen. The verification worker performs an independent rerun.
-    bundle = verify_with_command(
-        selected,
-        repo,
-        image=image,
-        command=command,
-        policy=plan.draft_spec.policy.__class__(
-            kind="absolute" if selected.unit == "fraction" else "relative",
-            tolerance=0.01,
-        ),
-        manuscript_path=paper,
-        output_regex=locator.regex,
-        observation_scale=locator.scale,
-    )
     return ZeroManifestOutcome(
-        status=bundle.record.verdict.value,
-        reason=bundle.record.rationale,
+        status=bundles[0].record.verdict.value,
+        reason="; ".join(
+            f"{row.claim.metric}: {row.record.verdict.value}" for row in bundles
+        ),
         plan=plan,
-        frozen_locator=locator,
-        bundle=bundle,
+        frozen_locator=locators[0],
+        bundle=bundles[0],
+        frozen_locators=locators[:len(bundles)],
+        bundles=bundles,
     )
