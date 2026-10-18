@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from agnxiv.sandbox import SandboxLimits, docker_command
+from agnxiv.sandbox import SandboxLimits, docker_command, prepare_artifact_mounts
 
 
 def test_docker_command_is_locked_down(tmp_path: Path) -> None:
@@ -20,3 +20,22 @@ def test_docker_command_is_locked_down(tmp_path: Path) -> None:
     assert "--memory 2g" in joined
     assert "--cpus 1.0" in joined
     assert "readonly" in joined
+
+
+def test_external_artifacts_get_deterministic_readonly_mounts(tmp_path: Path) -> None:
+    artifact = tmp_path / "dataset.csv"
+    artifact.write_text("x,y\n1,2\n", encoding="utf-8")
+
+    mounts = prepare_artifact_mounts([artifact])
+    assert len(mounts) == 1
+    assert mounts[0].container_path == "/agnxiv-artifacts/000-dataset.csv"
+
+    command = docker_command(
+        image="python:3.11-slim",
+        repository=tmp_path,
+        command=["python", "evaluate.py"],
+        artifact_paths=[artifact],
+    )
+    joined = " ".join(command)
+    assert str(artifact.resolve()) in joined
+    assert "dst=/agnxiv-artifacts/000-dataset.csv,readonly" in joined
