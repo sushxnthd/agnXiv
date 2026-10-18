@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import base64
+
+import pytest
 from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
-from agnxiv.service.db import Job, JobStore, TransparencyEntry
+from agnxiv.service.db import Job, JobQuotaExceeded, JobStore, TransparencyEntry
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
 from agnxiv.statement import generate_ed25519_keypair
 
@@ -467,3 +469,45 @@ def test_readiness_rejects_duplicate_issuer_rollover_key(tmp_path) -> None:
 
     assert response.status_code == 503
     assert "issuer_key_invalid" in response.json()["detail"]["issues"]
+
+
+def test_database_guarded_quota_preserves_idempotent_retry(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'guarded-quota.db'}")
+    store.initialize()
+    common = {
+        "api_key_hash": "a" * 64,
+        "mode": "auto_verify",
+        "repository": "owner/repo",
+        "repository_ref": "d" * 40,
+        "arxiv_id": "2601.00100",
+        "spec_path": None,
+        "max_active": 1,
+        "max_recent": 20,
+        "idempotency_key_hash": "i" * 64,
+        "request_fingerprint": "r" * 64,
+    }
+    first, created = store.create_job_guarded(
+        job_id="00000000-0000-0000-0000-000000000201",
+        **common,
+    )
+    assert created is True
+
+    retry, retry_created = store.create_job_guarded(
+        job_id="00000000-0000-0000-0000-000000000202",
+        **common,
+    )
+    assert retry_created is False
+    assert retry.id == first.id
+
+    with pytest.raises(JobQuotaExceeded, match="active"):
+        store.create_job_guarded(
+            job_id="00000000-0000-0000-0000-000000000203",
+            api_key_hash="a" * 64,
+            mode="auto_verify",
+            repository="owner/other",
+            repository_ref="e" * 40,
+            arxiv_id="2601.00101",
+            spec_path=None,
+            max_active=1,
+            max_recent=20,
+        )
