@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import hashlib
+import hashlib  # noqa: I001
 import hmac
 import re
 from urllib import parse
