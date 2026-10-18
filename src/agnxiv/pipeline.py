@@ -18,6 +18,7 @@ from .outputs import (
     ObservationCandidate,
     extract_json_observation,
     extract_observation_candidates,
+    extract_regex_observation,
     select_unambiguous_observation,
 )
 from .planner import CommandCandidate, discover_commands
@@ -128,10 +129,14 @@ def verify_with_command(
     manuscript_path: str | Path | None = None,
     artifact_paths: list[str | Path] | None = None,
     json_path: str | None = None,
+    output_regex: str | None = None,
     observation_scale: float = 1.0,
     limits: SandboxLimits | None = None,
 ) -> VerificationBundle:
     """Execute one explicit research command and verify one numeric claim."""
+    if json_path is not None and output_regex is not None:
+        raise ValueError("json_path and output_regex are mutually exclusive")
+
     active_limits = limits or SandboxLimits()
     provenance, environment, evidence, commands = inspect_project(claim, repository)
     manuscript = (
@@ -240,6 +245,18 @@ def verify_with_command(
         missing_rationale = (
             f"Execution succeeded, but JSON path {json_path!r} did not resolve "
             "to a numeric observation."
+        )
+    elif output_regex is not None:
+        observation = extract_regex_observation(
+            result.stdout,
+            output_regex,
+            scale=observation_scale,
+        )
+        observation_method = "explicit_regex"
+        observation_locator = output_regex
+        missing_rationale = (
+            "Execution succeeded, but the declared regex did not resolve "
+            "to exactly one numeric observation."
         )
     else:
         observation_candidates = extract_observation_candidates(result.stdout, claim)
