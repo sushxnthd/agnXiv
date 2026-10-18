@@ -76,7 +76,7 @@ function requestBody() {
     "### arXiv ID", "", mode === "auto" ? arxiv : "_No response_", "",
     "### Verification manifest path", "", mode === "manifest" ? spec : "_No response_", "",
     "### Acknowledgement", "",
-    "- [x] I understand that a public repository manifest may execute code inside AgnXiv's isolated no-network verification sandbox.", ""
+    "- [x] I understand that public research code may execute inside AgnXiv's isolated no-network verification sandbox.", ""
   ].join("\n");
 }
 
