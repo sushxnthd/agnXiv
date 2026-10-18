@@ -8,7 +8,7 @@ The control plane contains:
 
 - FastAPI API and browser console;
 - PostgreSQL job persistence;
-- API-key authentication and per-key active-job quotas;
+- API-key authentication with active-job and hourly quotas;
 - fixed GitHub Actions dispatch;
 - strict GitHub Actions OIDC verification;
 - result validation;
@@ -69,7 +69,7 @@ GET /readyz is readiness. It returns HTTP 503 until production configuration is 
 
 GET /v1/issuer publishes the Ed25519 public issuer key and key ID.
 
-POST /v1/jobs submits either:
+Every submitted repository ref is resolved to an exact 40-character Git commit before dispatch. Returned evidence must match that pinned commit.\n\nPOST /v1/jobs submits either:
 
 - auto_plan: repository + exact Git ref + arXiv identifier;
 - verify_spec: repository + exact Git ref + path to an AgnXiv manifest.
@@ -107,7 +107,7 @@ Private manuscripts are intentionally excluded until a confidential execution pr
 
 The repository includes Dockerfile.service, railway.toml, .env.example, Alembic migrations, and a service-image smoke test.
 
-Create a Railway service from this repository and attach PostgreSQL. Configure the required environment variables. Railway should build Dockerfile.service and health-check /healthz.
+Create a Railway service from this repository and attach PostgreSQL. Configure the required environment variables. Railway should build Dockerfile.service and health-check /readyz so a deployment cannot become active until its production configuration and database are ready.
 
 The API must be reachable over HTTPS before hosted workers can return results.
 
