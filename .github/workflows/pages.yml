@@ -33,6 +33,7 @@ jobs:
           node --check site/app.js
           node --check site/verify.js
           node --check site/result.js
+          node --check site/lookup.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
