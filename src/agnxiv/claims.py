@@ -119,9 +119,13 @@ def _looks_like_label_or_citation(
     start = match.start("value")
     end = match.end("value")
 
-    if start > 0 and end < len(normalized):
-        if normalized[start - 1] == "[" and normalized[end] == "]":
-            return True
+    if (
+        start > 0
+        and end < len(normalized)
+        and normalized[start - 1] == "["
+        and normalized[end] == "]"
+    ):
+        return True
 
     prefix = normalized[max(0, start - 40) : start]
     return bool(_LABEL_RE.search(prefix))
