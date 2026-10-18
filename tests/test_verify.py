@@ -1,4 +1,4 @@
-from agnxiv.models import Claim, Observation, VerificationPolicy, Verdict
+from agnxiv.models import Claim, Observation, Verdict, VerificationPolicy
 from agnxiv.verify import verify_numeric_claim
 
 
