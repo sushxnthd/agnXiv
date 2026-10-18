@@ -11,6 +11,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from ..pipeline import VerificationBundle
+from ..preprint import parse_arxiv_reference
 from ..statement import (
     build_verification_statement,
     public_key_pem_from_private,
@@ -65,6 +66,50 @@ def _job_view(job: Job) -> JobView:
         created_at=job.created_at.isoformat(),
         updated_at=job.updated_at.isoformat(),
     )
+
+
+def _validate_worker_result(
+    job: Job,
+    status: str,
+    result: dict | None,
+) -> VerificationBundle | None:
+    if status == "failed":
+        return None
+
+    if not result:
+        raise ValueError("successful worker callback requires a result")
+
+    if job.mode == "auto_plan":
+        if result.get("kind") != "auto_plan":
+            raise ValueError("AUTO_PLAN returned the wrong result kind")
+        if result.get("repository_commit") != job.repository_ref:
+            raise ValueError("AUTO_PLAN repository commit does not match pinned job")
+        plan = result.get("plan")
+        if not isinstance(plan, dict):
+            raise ValueError("AUTO_PLAN result is missing its plan")
+        expected = "succeeded" if plan.get("safe_to_execute") is True else "needs_review"
+        if status != expected:
+            raise ValueError("AUTO_PLAN status is inconsistent with plan safety")
+        return None
+
+    if job.mode != "verify_spec" or result.get("kind") != "verification":
+        raise ValueError("verification job returned the wrong result kind")
+
+    bundle = VerificationBundle.model_validate(result.get("bundle"))
+    git = bundle.provenance.git
+    if git is None or git.commit != job.repository_ref:
+        raise ValueError("verification Git commit does not match pinned job")
+    if git.dirty:
+        raise ValueError("verification repository is dirty")
+
+    expected = (
+        "succeeded"
+        if bundle.record.verdict.value in {"VERIFIED", "CONTRADICTED"}
+        else "needs_review"
+    )
+    if status != expected:
+        raise ValueError("verification status is inconsistent with verdict")
+    return bundle
 
 
 def _enrich_signed_result(config: ServiceConfig, result: dict | None) -> dict | None:
@@ -152,12 +197,14 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
 
     @app.get("/readyz")
     def readyz() -> dict:
-        if not active_config.production_ready:
+        database_connected = store.ping()
+        if not active_config.production_ready or not database_connected:
             raise HTTPException(
                 status_code=503,
                 detail={
                     "status": "not-ready",
                     "database": active_config.database_url.split(":", 1)[0],
+                    "database_connected": database_connected,
                     "github_dispatch": bool(active_config.github_token),
                     "api_keys": bool(active_config.api_keys),
                     "issuer_key": bool(active_config.issuer_private_key_b64),
@@ -165,7 +212,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                     "oidc_audience": active_config.oidc_audience.startswith("https://"),
                 },
             )
-        return {"status": "ready"}
+        return {"status": "ready", "database_connected": True}
 
     @app.get("/v1/issuer")
     def issuer() -> dict:
@@ -210,11 +257,17 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-        if body.mode == "auto_plan" and not body.arxiv_id:
+        arxiv_id = body.arxiv_id
+        if body.mode == "auto_plan" and not arxiv_id:
             raise HTTPException(
                 status_code=422,
                 detail="auto_plan requires an arXiv identifier",
             )
+        if arxiv_id:
+            try:
+                arxiv_id = parse_arxiv_reference(arxiv_id).versioned_id
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
         if body.mode == "verify_spec" and not body.spec_path:
             raise HTTPException(
                 status_code=422,
@@ -231,6 +284,19 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 status_code=429,
                 detail="active job quota exceeded",
             )
+        if store.count_recent(api_hash) >= active_config.max_jobs_per_hour:
+            raise HTTPException(
+                status_code=429,
+                detail="hourly job quota exceeded",
+            )
+
+        try:
+            pinned_ref = dispatcher.resolve_commit(repository, repository_ref)
+        except DispatchError as exc:
+            raise HTTPException(
+                status_code=422,
+                detail="repository ref could not be resolved",
+            ) from exc
 
         job_id = str(uuid.uuid4())
         job = store.create_job(
@@ -238,8 +304,8 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             api_key_hash=api_hash,
             mode=body.mode,
             repository=repository,
-            repository_ref=repository_ref,
-            arxiv_id=body.arxiv_id,
+            repository_ref=pinned_ref,
+            arxiv_id=arxiv_id,
             spec_path=body.spec_path,
         )
 
@@ -314,6 +380,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             raise HTTPException(status_code=401, detail="untrusted workflow identity") from exc
 
         try:
+            _validate_worker_result(job, body.status, body.result)
             result = _enrich_signed_result(active_config, body.result)
         except (ValueError, binascii.Error) as exc:
             store.complete(
