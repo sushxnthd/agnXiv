@@ -212,15 +212,30 @@ def run_zero_manifest(
             plan=plan,
         )
 
-    locator = discover_frozen_locator(discovery.stdout, _claims(paper))
+    paper_claims = _claims(paper)
+    locator = discover_frozen_locator(discovery.stdout, paper_claims)
     if locator is None:
+        from collections import Counter
+
+        claim_metrics = Counter(
+            row.metric for row in paper_claims if row.reported_value is not None
+        )
+        stdout_labels = Counter(
+            _normalize_label(match.group("label"))
+            for line in discovery.stdout.splitlines()
+            if (match := _LINE.fullmatch(line))
+        )
         return ZeroManifestOutcome(
             status="UNABLE_TO_VERIFY",
-            reason="No unique, answer-blind paper-claim ↔ stdout-metric locator.",
+            reason=(
+                "No unique, answer-blind paper-claim ↔ stdout-metric locator. "
+                f"manuscript_metric_counts={dict(claim_metrics)}; "
+                f"stdout_label_counts={dict(stdout_labels)}"
+            ),
             plan=plan,
         )
     selected = next(
-        (row for row in _claims(paper) if row.id == locator.claim_id), None
+        (row for row in paper_claims if row.id == locator.claim_id), None
     )
     if selected is None:
         return ZeroManifestOutcome(
