@@ -16,6 +16,7 @@ from .models import (
 )
 from .outputs import (
     ObservationCandidate,
+    extract_json_observation,
     extract_observation_candidates,
     select_unambiguous_observation,
 )
@@ -44,7 +45,7 @@ class ExecutionSummary(BaseModel):
 
 
 class VerificationBundle(BaseModel):
-    schema_version: str = "agnxiv.bundle/0.3"
+    schema_version: str = "agnxiv.bundle/0.4"
     claim: Claim
     manuscript: DocumentFingerprint | None = None
     provenance: ProvenanceManifest
@@ -52,6 +53,8 @@ class VerificationBundle(BaseModel):
     evidence_candidates: list[EvidenceCandidate] = Field(default_factory=list)
     command_candidates: list[CommandCandidate] = Field(default_factory=list)
     execution: ExecutionSummary | None = None
+    observation_method: str | None = None
+    observation_locator: str | None = None
     observation_candidates: list[ObservationCandidate] = Field(default_factory=list)
     record: VerificationRecord
 
@@ -103,6 +106,8 @@ def verify_with_command(
     command: list[str],
     policy: VerificationPolicy,
     manuscript_path: str | Path | None = None,
+    json_path: str | None = None,
+    observation_scale: float = 1.0,
     limits: SandboxLimits | None = None,
 ) -> VerificationBundle:
     """Execute one explicit research command and verify one numeric claim."""
@@ -180,17 +185,34 @@ def verify_with_command(
             ),
         )
 
-    observation_candidates = extract_observation_candidates(result.stdout, claim)
-    observation = select_unambiguous_observation(observation_candidates)
+    observation_candidates: list[ObservationCandidate] = []
+    if json_path is not None:
+        observation = extract_json_observation(
+            result.stdout,
+            json_path,
+            scale=observation_scale,
+        )
+        observation_method = "explicit_json_path"
+        observation_locator = json_path
+        missing_rationale = (
+            f"Execution succeeded, but JSON path {json_path!r} did not resolve "
+            "to a numeric observation."
+        )
+    else:
+        observation_candidates = extract_observation_candidates(result.stdout, claim)
+        observation = select_unambiguous_observation(observation_candidates)
+        observation_method = "semantic_stdout"
+        observation_locator = None
+        missing_rationale = (
+            "Execution succeeded, but AgnXiv could not identify an unambiguous "
+            "observation for this claim without using the reported answer as a hint."
+        )
 
     if observation is None:
         record = _unable_record(
             claim,
             policy,
-            rationale=(
-                "Execution succeeded, but AgnXiv could not identify an unambiguous "
-                "observation for this claim without using the reported answer as a hint."
-            ),
+            rationale=missing_rationale,
         )
     else:
         observation.output_digest = execution.stdout_sha256
@@ -204,6 +226,8 @@ def verify_with_command(
         evidence_candidates=evidence,
         command_candidates=commands,
         execution=execution,
+        observation_method=observation_method,
+        observation_locator=observation_locator,
         observation_candidates=observation_candidates,
         record=record,
     )
