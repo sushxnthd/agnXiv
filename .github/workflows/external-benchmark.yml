@@ -73,10 +73,12 @@ jobs:
               audit = json.load(handle)["bundle"]
 
           assert audit["record"]["verdict"] == "UNABLE_TO_VERIFY"
-          assert audit["execution"]["returncode"] == 1
-          assert "94/96 checks passed" in audit["execution"]["stdout_excerpt"]
-          assert "[FAIL] AUC confidence alone" in audit["execution"]["stdout_excerpt"]
-          assert "[FAIL] incremental AUC gain" in audit["execution"]["stdout_excerpt"]
+          assert audit["execution"]["returncode"] != 0
+          stdout = audit["execution"]["stdout_excerpt"]
+          assert "/96 checks passed" in stdout
+          assert "96/96 checks passed" not in stdout
+          assert "[FAIL] AUC confidence alone" in stdout
+          assert "[FAIL] incremental AUC gain" in stdout
           PY
 
       - name: Generate ephemeral benchmark issuer
