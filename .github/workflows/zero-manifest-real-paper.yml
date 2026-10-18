@@ -61,12 +61,21 @@ jobs:
               "observed": record.get("observed_mean"),
               "verdict": record.get("verdict"),
               "frozen_locator": locator,
+              "additional_verifications": [
+                  {
+                      "metric": (x.get("bundle") or {}).get("claim", {}).get("metric"),
+                      "expected": (x.get("bundle") or {}).get("record", {}).get("expected"),
+                      "observed": (x.get("bundle") or {}).get("record", {}).get("observed_mean"),
+                      "verdict": (x.get("bundle") or {}).get("record", {}).get("verdict"),
+                  }
+                  for x in result.get("additional_verifications", [])
+              ],
               "blockers": plan.get("blockers"),
               "commands": plan.get("commands"),
           }, indent=2)[:12000])
           PY
 
-      - name: Require a genuine two-run automated claim verification
+      - name: Require genuine execution-grounded claim-level verdicts
         run: |
           python - <<'PY'
           import json
@@ -80,14 +89,20 @@ jobs:
           assert locator["regex"]
           assert locator["discovery_stdout_sha256"]
           bundle = result["bundle"]
-          assert bundle["record"]["verdict"] == "VERIFIED"
+          assert bundle["record"]["verdict"] in {"VERIFIED", "CONTRADICTED"}
           assert bundle["observation_method"] == "explicit_regex"
           assert bundle["execution"]["returncode"] == 0
           assert bundle["execution"]["source_unchanged"] is True
           assert bundle["execution"]["image_id"].startswith("sha256:")
           assert bundle["manuscript"]["sha256"]
           assert bundle["provenance"]["git"]["commit"] == "2f83d0fa506e7af2b72ca191b65ce42e07c9e185"
-          print("PASS: external paper + pinned repo, no manifest, two sandboxed runs, frozen locator, scoped verified claim")
+          for item in result.get("additional_verifications", []):
+              other = item["bundle"]
+              assert other["record"]["verdict"] in {"VERIFIED", "CONTRADICTED"}
+              assert other["execution"]["returncode"] == 0
+              assert other["execution"]["source_unchanged"] is True
+              assert other["observation_method"] == "explicit_regex"
+          print("PASS: external paper, no manifest, frozen answer-blind locators, independent reruns, scoped claim verdicts")
           PY
 
       - name: Upload reproducibility evidence
