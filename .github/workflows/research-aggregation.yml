@@ -1,0 +1,52 @@
+name: research-aggregation
+
+on:
+  push:
+    paths:
+      - "src/agnxiv/network.py"
+      - "research/benchmarks/aggregation-v1.jsonl"
+      - "research/scripts/run_aggregation_benchmark.py"
+      - ".github/workflows/research-aggregation.yml"
+  pull_request:
+    paths:
+      - "src/agnxiv/network.py"
+      - "research/benchmarks/aggregation-v1.jsonl"
+      - "research/scripts/run_aggregation_benchmark.py"
+      - ".github/workflows/research-aggregation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aggregation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run independence-aware aggregation benchmark
+        run: |
+          python research/scripts/run_aggregation_benchmark.py \
+            --output /tmp/aggregation-v1.json
+      - name: Require zero benchmark regressions
+        run: |
+          python - <<'PY'
+          import json
+          with open("/tmp/aggregation-v1.json", encoding="utf-8") as handle:
+              report = json.load(handle)
+          assert report["cases"] >= 8
+          assert report["matched"] == report["cases"]
+          assert report["accuracy"] == 1.0
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aggregation-v1-report
+          path: /tmp/aggregation-v1.json
+          retention-days: 90
+          if-no-files-found: error
