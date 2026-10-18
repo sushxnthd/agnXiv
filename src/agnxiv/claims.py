@@ -6,7 +6,7 @@ from pathlib import Path
 from .models import Claim, ClaimSource
 
 _NUMBER = (
-    r"(?<![A-Za-z0-9_.])[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
+    r"(?<![A-Za-z0-9_.])[-+]?(?:\d+(?:,\d{3})*(?:\.\d+)?|\.\d+)"
     r"(?:[eE][-+]?\d+)?(?![A-WYZa-wyz0-9_]|\.\d)"
 )
 _UNIT = (
