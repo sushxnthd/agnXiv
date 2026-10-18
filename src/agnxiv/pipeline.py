@@ -20,7 +20,12 @@ from .outputs import (
     select_unambiguous_observation,
 )
 from .planner import CommandCandidate, discover_commands
-from .provenance import ProvenanceManifest, fingerprint_tree
+from .provenance import (
+    DocumentFingerprint,
+    ProvenanceManifest,
+    fingerprint_document,
+    fingerprint_tree,
+)
 from .sandbox import ExecutionResult, SandboxError, SandboxLimits, execute_in_docker
 from .verify import verify_numeric_claim
 
@@ -39,8 +44,9 @@ class ExecutionSummary(BaseModel):
 
 
 class VerificationBundle(BaseModel):
-    schema_version: str = "agnxiv.bundle/0.2"
+    schema_version: str = "agnxiv.bundle/0.3"
     claim: Claim
+    manuscript: DocumentFingerprint | None = None
     provenance: ProvenanceManifest
     environment: EnvironmentSpec
     evidence_candidates: list[EvidenceCandidate] = Field(default_factory=list)
@@ -96,11 +102,15 @@ def verify_with_command(
     image: str,
     command: list[str],
     policy: VerificationPolicy,
+    manuscript_path: str | Path | None = None,
     limits: SandboxLimits | None = None,
 ) -> VerificationBundle:
     """Execute one explicit research command and verify one numeric claim."""
     active_limits = limits or SandboxLimits()
     provenance, environment, evidence, commands = inspect_project(claim, repository)
+    manuscript = (
+        fingerprint_document(manuscript_path) if manuscript_path is not None else None
+    )
 
     try:
         result: ExecutionResult = execute_in_docker(
@@ -112,6 +122,7 @@ def verify_with_command(
     except SandboxError as exc:
         return VerificationBundle(
             claim=claim,
+            manuscript=manuscript,
             provenance=provenance,
             environment=environment,
             evidence_candidates=evidence,
@@ -140,6 +151,7 @@ def verify_with_command(
     if not execution.source_unchanged:
         return VerificationBundle(
             claim=claim,
+            manuscript=manuscript,
             provenance=provenance,
             environment=environment,
             evidence_candidates=evidence,
@@ -155,6 +167,7 @@ def verify_with_command(
     if result.returncode != 0:
         return VerificationBundle(
             claim=claim,
+            manuscript=manuscript,
             provenance=provenance,
             environment=environment,
             evidence_candidates=evidence,
@@ -185,6 +198,7 @@ def verify_with_command(
 
     return VerificationBundle(
         claim=claim,
+        manuscript=manuscript,
         provenance=provenance,
         environment=environment,
         evidence_candidates=evidence,
