@@ -32,37 +32,65 @@ _RESEARCH_TERMS = (
     "result",
     "experiment",
     "score",
+    "scoring",
     "benchmark",
     "paper",
 )
 
 
+def _clean_readme_line(raw: str) -> str:
+    line = raw.strip()
+    line = line.removeprefix("$").strip()
+    line = line.strip(chr(96)).strip()
+    return line
+
+
+def _looks_like_command_start(line: str) -> bool:
+    if not line or line.startswith("--"):
+        return False
+    if not re.match(r"^[A-Za-z0-9_.-]+(?:\s|$)", line):
+        return False
+    if line.lower().startswith(("pip ", "python -m pip ", "git ", "cd ")):
+        return False
+
+    lower = line.lower()
+    option_heavy = line.count("--") >= 2
+    python_command = lower.startswith(("python ", "python3 "))
+    return (
+        option_heavy
+        or python_command
+        or any(term in lower for term in _RESEARCH_TERMS)
+    )
+
+
 def _readme_commands(text: str) -> list[tuple[list[str], str]]:
-    """Extract plausible documented shell commands without executing them."""
+    """Extract documented research shell commands, joining wrapped option lines."""
     commands: list[tuple[list[str], str]] = []
+    lines = [_clean_readme_line(raw) for raw in text.splitlines()]
 
-    for raw in text.splitlines():
-        line = raw.strip()
-        line = line.removeprefix("$").strip()
-        line = line.strip(chr(96)).strip()
-        if not line:
-            continue
-
-        if not re.match(r"^[A-Za-z0-9_.-]+(?:\s|$)", line):
-            continue
-        if line.lower().startswith(("pip ", "python -m pip ", "git ", "cd ")):
-            continue
-        if not any(term in line.lower() for term in _RESEARCH_TERMS):
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if not _looks_like_command_start(line):
+            index += 1
             continue
 
+        parts = [line]
+        cursor = index + 1
+        while cursor < len(lines) and lines[cursor].startswith("--"):
+            parts.append(lines[cursor])
+            cursor += 1
+
+        joined = " ".join(parts)
         try:
-            tokens = shlex.split(line)
+            tokens = shlex.split(joined)
         except ValueError:
-            continue
-        if not tokens:
+            index = cursor
             continue
 
-        commands.append((tokens, line))
+        if tokens:
+            commands.append((tokens, joined))
+        index = cursor
 
     return commands
 
@@ -124,7 +152,11 @@ def discover_commands(repository: str | Path, *, limit: int = 15) -> list[Comman
             score = 0.84
             if "repro" in raw.lower():
                 score = 0.94
-            elif "eval" in raw.lower() or "score" in raw.lower():
+            elif (
+                "eval" in raw.lower()
+                or "score" in raw.lower()
+                or "scoring" in raw.lower()
+            ):
                 score = 0.90
             candidates.append(
                 CommandCandidate(
