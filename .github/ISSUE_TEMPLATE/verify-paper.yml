@@ -13,7 +13,7 @@ body:
     attributes:
       label: Mode
       options:
-        - Auto-plan from arXiv + repository
+        - Auto-verify from arXiv + repository
         - Verify an agnxiv.json manifest
     validations:
       required: true
