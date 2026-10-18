@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import base64
 import binascii
+import json
+import logging
+import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
@@ -31,6 +34,9 @@ from .security import (
     validate_github_slug,
     validate_idempotency_key,
 )
+
+
+_LOGGER = logging.getLogger("agnxiv.service")
 
 
 class JobCreate(BaseModel):
@@ -248,6 +254,20 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
 
     @app.middleware("http")
     async def security_headers(request, call_next):
+        supplied_request_id = request.headers.get("x-request-id", "")
+        request_id = (
+            supplied_request_id
+            if (
+                1 <= len(supplied_request_id) <= 64
+                and supplied_request_id.isascii()
+                and all(
+                    char.isalnum() or char in "._-"
+                    for char in supplied_request_id
+                )
+            )
+            else uuid.uuid4().hex
+        )
+        started = time.perf_counter()
         content_length = request.headers.get("content-length")
         if content_length:
             try:
@@ -284,6 +304,23 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         )
         if request.url.path == "/" or request.url.path.startswith(("/v1/", "/internal/")):
             response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Request-ID"] = request_id
+        _LOGGER.info(
+            json.dumps(
+                {
+                    "event": "http_request",
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status": response.status_code,
+                    "duration_ms": round(
+                        (time.perf_counter() - started) * 1000,
+                        3,
+                    ),
+                },
+                separators=(",", ":"),
+            )
+        )
         return response
 
     @app.get("/healthz")
@@ -318,6 +355,17 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "scientific_contract": "claim-level execution evidence; no paper truth score",
             "zero_manifest": True,
             "signed_statements": bool(active_config.issuer_private_key_b64),
+        }
+
+    @app.get("/v1/metrics")
+    def metrics(
+        x_api_key: Annotated[str | None, Header()] = None,
+    ) -> dict:
+        authenticate(x_api_key)
+        store.reap_stale(minutes=active_config.job_stale_minutes)
+        return {
+            "schema_version": "agnxiv.metrics/1",
+            **store.metrics(),
         }
 
     @app.get("/v1/issuer")
