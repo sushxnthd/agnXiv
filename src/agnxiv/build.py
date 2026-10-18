@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -21,6 +23,12 @@ class BuildPlan(BaseModel):
     base_image: str
     dependency_file: str | None
     dependency_sha256: str | None
+    dependency_precision: Literal[
+        "base-only",
+        "floating",
+        "version-pinned",
+        "hash-pinned",
+    ]
     dockerfile: str
     network_required: bool
     safe_manifest_only: bool
@@ -34,6 +42,7 @@ class BuildPlan(BaseModel):
                 self.base_image,
                 self.dependency_file or "",
                 self.dependency_sha256 or "",
+                self.dependency_precision,
                 self.dockerfile,
             ]
         )
@@ -66,6 +75,43 @@ _UNSAFE_REQUIREMENT_MARKERS = (
     "--find-links",
     "--trusted-host",
 )
+
+_EXACT_REQUIREMENT_RE = re.compile(
+    r"^[A-Za-z0-9_.-]+(?:\[[A-Za-z0-9_.,-]+\])?==[^\s;\\]+"
+)
+
+
+def _active_requirement_lines(path: Path) -> list[str]:
+    return [
+        raw.strip()
+        for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        if raw.strip() and not raw.lstrip().startswith("#")
+    ]
+
+
+def classify_dependency_precision(path: str | Path) -> Literal[
+    "floating",
+    "version-pinned",
+    "hash-pinned",
+]:
+    """Classify how precisely a requirements file identifies dependencies."""
+    requirement_path = Path(path)
+    lines = _active_requirement_lines(requirement_path)
+    package_lines = [
+        line
+        for line in lines
+        if not line.startswith("-") and not line.startswith("\\")
+    ]
+
+    if not package_lines:
+        return "floating"
+
+    all_exact = all(_EXACT_REQUIREMENT_RE.match(line) for line in package_lines)
+    if not all_exact:
+        return "floating"
+
+    has_hashes = any("--hash=sha256:" in line for line in lines)
+    return "hash-pinned" if has_hashes else "version-pinned"
 
 
 def audit_requirements(path: str | Path) -> list[str]:
@@ -113,6 +159,7 @@ def plan_python_environment(
             base_image=base_image,
             dependency_file=None,
             dependency_sha256=None,
+            dependency_precision="base-only",
             dockerfile=(
                 f"FROM {base_image}\n"
                 "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1\n"
@@ -134,6 +181,7 @@ def plan_python_environment(
         base_image=base_image,
         dependency_file="requirements.txt",
         dependency_sha256=sha256_file(requirements),
+        dependency_precision=classify_dependency_precision(requirements),
         dockerfile=dockerfile,
         network_required=True,
         safe_manifest_only=not rejected,
