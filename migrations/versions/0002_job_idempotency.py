@@ -23,18 +23,18 @@ def upgrade() -> None:
         "agnxiv_jobs",
         ["idempotency_key_hash"],
     )
-    op.create_unique_constraint(
+    op.create_index(
         "uq_agnxiv_jobs_api_idempotency",
         "agnxiv_jobs",
         ["api_key_hash", "idempotency_key_hash"],
+        unique=True,
     )
 
 
 def downgrade() -> None:
-    op.drop_constraint(
+    op.drop_index(
         "uq_agnxiv_jobs_api_idempotency",
-        "agnxiv_jobs",
-        type_="unique",
+        table_name="agnxiv_jobs",
     )
     op.drop_index(
         "ix_agnxiv_jobs_idempotency_key_hash",
