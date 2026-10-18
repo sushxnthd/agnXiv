@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+from hashlib import sha256
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import (
     DateTime,
+    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -59,6 +61,74 @@ class Job(Base):
     )
 
 
+class TransparencyHead(Base):
+    __tablename__ = "agnxiv_transparency_head"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    entry_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+    )
+
+
+class TransparencyEntry(Base):
+    __tablename__ = "agnxiv_transparency_entries"
+
+    sequence: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[str] = mapped_column(String(36), unique=True, index=True)
+    event_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    payload_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    previous_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    entry_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+_ZERO_HASH = "0" * 64
+
+
+def _utc_text(value: datetime) -> str:
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+def _canonical_digest(payload: object) -> str:
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        default=str,
+    ).encode("utf-8")
+    return sha256(encoded).hexdigest()
+
+
+def _transparency_hash(
+    *,
+    sequence: int,
+    job_id: str,
+    status: str,
+    payload_sha256: str,
+    previous_hash: str,
+    created_at: datetime,
+) -> str:
+    return _canonical_digest(
+        {
+            "schema_version": "agnxiv.transparency/1",
+            "sequence": sequence,
+            "job_id": job_id,
+            "event_type": "job_finalized",
+            "status": status,
+            "payload_sha256": payload_sha256,
+            "previous_hash": previous_hash,
+            "created_at": _utc_text(created_at),
+        }
+    )
+
+
 class JobStore:
     def __init__(self, database_url: str) -> None:
         normalized_url = (
@@ -85,6 +155,17 @@ class JobStore:
     def initialize(self) -> None:
         if self.database_url.startswith("sqlite"):
             Base.metadata.create_all(self.engine)
+            with self.session_factory() as session:
+                if session.get(TransparencyHead, 1) is None:
+                    session.add(
+                        TransparencyHead(
+                            id=1,
+                            sequence=0,
+                            entry_hash=_ZERO_HASH,
+                            updated_at=datetime.now(UTC),
+                        )
+                    )
+                    session.commit()
 
     def ping(self) -> bool:
         try:
@@ -235,25 +316,36 @@ class JobStore:
         self._update(job_id, status="running", error=None)
 
     def reap_stale(self, *, minutes: int) -> int:
-        """Fail queued/running jobs whose callback never arrived."""
+        """Fail stale jobs and append one tamper-evident finalization entry each."""
         cutoff = datetime.now(UTC) - timedelta(minutes=max(1, minutes))
-        now = datetime.now(UTC)
         with self.session_factory() as session:
-            statement = (
-                update(Job)
-                .where(
-                    Job.status.in_(("queued", "running")),
-                    Job.updated_at < cutoff,
-                )
-                .values(
-                    status="failed",
-                    error="hosted verification exceeded its callback deadline",
-                    updated_at=now,
+            jobs = list(
+                session.scalars(
+                    select(Job)
+                    .where(
+                        Job.status.in_(("queued", "running")),
+                        Job.updated_at < cutoff,
+                    )
+                    .order_by(Job.created_at, Job.id)
+                    .with_for_update()
                 )
             )
-            result = session.execute(statement)
+            for job in jobs:
+                now = datetime.now(UTC)
+                job.status = "failed"
+                job.error = "hosted verification exceeded its callback deadline"
+                job.result_json = None
+                job.updated_at = now
+                self._append_transparency(
+                    session,
+                    job=job,
+                    status="failed",
+                    result=None,
+                    error=job.error,
+                    created_at=now,
+                )
             session.commit()
-            return int(result.rowcount or 0)
+            return len(jobs)
 
     def complete(
         self,
@@ -263,12 +355,205 @@ class JobStore:
         result: dict | None,
         error: str | None,
     ) -> None:
-        self._update(
-            job_id,
-            status=status,
-            result_json=json.dumps(result, separators=(",", ":")) if result else None,
-            error=error,
+        """Finalize a job and atomically append its transparency receipt."""
+        with self.session_factory() as session:
+            job = session.scalar(
+                select(Job).where(Job.id == job_id).with_for_update()
+            )
+            if job is None:
+                raise KeyError(job_id)
+            now = datetime.now(UTC)
+            job.status = status
+            job.result_json = (
+                json.dumps(result, separators=(",", ":")) if result else None
+            )
+            job.error = error
+            job.updated_at = now
+            self._append_transparency(
+                session,
+                job=job,
+                status=status,
+                result=result,
+                error=error,
+                created_at=now,
+            )
+            session.commit()
+
+    def _append_transparency(
+        self,
+        session,
+        *,
+        job: Job,
+        status: str,
+        result: dict | None,
+        error: str | None,
+        created_at: datetime,
+    ) -> TransparencyEntry:
+        existing = session.scalar(
+            select(TransparencyEntry).where(TransparencyEntry.job_id == job.id)
         )
+        if existing is not None:
+            raise ValueError(f"job already has a transparency entry: {job.id}")
+
+        head = session.scalar(
+            select(TransparencyHead)
+            .where(TransparencyHead.id == 1)
+            .with_for_update()
+        )
+        if head is None:
+            head = TransparencyHead(
+                id=1,
+                sequence=0,
+                entry_hash=_ZERO_HASH,
+                updated_at=created_at,
+            )
+            session.add(head)
+            session.flush()
+
+        sequence = head.sequence + 1
+        payload_sha256 = _canonical_digest(
+            {
+                "job_id": job.id,
+                "status": status,
+                "result": result,
+                "error": error,
+            }
+        )
+        entry_hash = _transparency_hash(
+            sequence=sequence,
+            job_id=job.id,
+            status=status,
+            payload_sha256=payload_sha256,
+            previous_hash=head.entry_hash,
+            created_at=created_at,
+        )
+        entry = TransparencyEntry(
+            sequence=sequence,
+            job_id=job.id,
+            event_type="job_finalized",
+            status=status,
+            payload_sha256=payload_sha256,
+            previous_hash=head.entry_hash,
+            entry_hash=entry_hash,
+            created_at=created_at,
+        )
+        session.add(entry)
+        head.sequence = sequence
+        head.entry_hash = entry_hash
+        head.updated_at = created_at
+        return entry
+
+    def transparency_head(self) -> dict[str, object]:
+        with self.session_factory() as session:
+            head = session.get(TransparencyHead, 1)
+            if head is None:
+                return {"sequence": 0, "entry_hash": _ZERO_HASH}
+            return {
+                "sequence": head.sequence,
+                "entry_hash": head.entry_hash,
+                "updated_at": _utc_text(head.updated_at),
+            }
+
+    def transparency_entries(
+        self,
+        *,
+        after: int = 0,
+        limit: int = 100,
+    ) -> list[dict[str, object]]:
+        size = min(max(1, limit), 500)
+        with self.session_factory() as session:
+            rows = list(
+                session.scalars(
+                    select(TransparencyEntry)
+                    .where(TransparencyEntry.sequence > max(0, after))
+                    .order_by(TransparencyEntry.sequence)
+                    .limit(size)
+                )
+            )
+        return [self._transparency_view(row) for row in rows]
+
+    def transparency_for_job(self, job_id: str) -> dict[str, object] | None:
+        with self.session_factory() as session:
+            row = session.scalar(
+                select(TransparencyEntry).where(TransparencyEntry.job_id == job_id)
+            )
+            return None if row is None else self._transparency_view(row)
+
+    def verify_transparency_chain(self) -> dict[str, object]:
+        """Verify the complete local hash chain and its materialized head."""
+        with self.session_factory() as session:
+            rows = list(
+                session.scalars(
+                    select(TransparencyEntry).order_by(TransparencyEntry.sequence)
+                )
+            )
+            head = session.get(TransparencyHead, 1)
+
+        expected_previous = _ZERO_HASH
+        expected_sequence = 0
+        for row in rows:
+            expected_sequence += 1
+            if row.sequence != expected_sequence:
+                return {
+                    "valid": False,
+                    "reason": "sequence_gap",
+                    "sequence": row.sequence,
+                }
+            if row.previous_hash != expected_previous:
+                return {
+                    "valid": False,
+                    "reason": "previous_hash_mismatch",
+                    "sequence": row.sequence,
+                }
+            computed = _transparency_hash(
+                sequence=row.sequence,
+                job_id=row.job_id,
+                status=row.status,
+                payload_sha256=row.payload_sha256,
+                previous_hash=row.previous_hash,
+                created_at=row.created_at,
+            )
+            if computed != row.entry_hash:
+                return {
+                    "valid": False,
+                    "reason": "entry_hash_mismatch",
+                    "sequence": row.sequence,
+                }
+            expected_previous = row.entry_hash
+
+        if head is None:
+            return {
+                "valid": not rows,
+                "reason": None if not rows else "missing_head",
+                "entries": len(rows),
+            }
+        if head.sequence != expected_sequence or head.entry_hash != expected_previous:
+            return {
+                "valid": False,
+                "reason": "head_mismatch",
+                "entries": len(rows),
+            }
+        return {
+            "valid": True,
+            "reason": None,
+            "entries": len(rows),
+            "head_sequence": head.sequence,
+            "head_hash": head.entry_hash,
+        }
+
+    @staticmethod
+    def _transparency_view(row: TransparencyEntry) -> dict[str, object]:
+        return {
+            "schema_version": "agnxiv.transparency/1",
+            "sequence": row.sequence,
+            "job_id": row.job_id,
+            "event_type": row.event_type,
+            "status": row.status,
+            "payload_sha256": row.payload_sha256,
+            "previous_hash": row.previous_hash,
+            "entry_hash": row.entry_hash,
+            "created_at": _utc_text(row.created_at),
+        }
 
     def _update(self, job_id: str, **values: object) -> None:
         with self.session_factory() as session:
