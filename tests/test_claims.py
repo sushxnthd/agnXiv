@@ -25,3 +25,20 @@ def test_metric_is_bound_to_nearby_number_not_adjacent_claim() -> None:
 
     assert ten.metric == "f1"
     assert sixty.metric is None
+
+
+def test_claim_text_is_sentence_bounded_not_neighboring_numeric_context() -> None:
+    claims = extract_quantitative_claims(
+        "The reference classifier has accuracy 76.6%. "
+        "Our proposed method achieves accuracy 92.4% on the same test set."
+    )
+
+    reference = next(
+        claim for claim in claims if abs((claim.reported_value or 0) - 0.766) < 1e-9
+    )
+    proposed = next(
+        claim for claim in claims if abs((claim.reported_value or 0) - 0.924) < 1e-9
+    )
+
+    assert "proposed method" not in reference.text.lower()
+    assert "proposed method" in proposed.text.lower()

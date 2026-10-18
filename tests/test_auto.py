@@ -73,3 +73,26 @@ def test_auto_plan_orders_generated_intermediate(tmp_path: Path) -> None:
         stage for stage in plan.stages if stage.name == "workflow_ordering"
     )
     assert workflow_stage.complete is True
+
+
+def test_auto_plan_prefers_explicit_contribution_over_reference_metric(
+    tmp_path: Path,
+) -> None:
+    paper = tmp_path / "paper.txt"
+    paper.write_text(
+        "The accuracy of a reference classifier is 76.6% and is included for reference. "
+        "Our proposed method achieves accuracy of 92.4% and outperforms the baseline.",
+        encoding="utf-8",
+    )
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+    (repo / "evaluate.py").write_text(
+        "print('accuracy: 92.4%')\n",
+        encoding="utf-8",
+    )
+
+    plan = build_auto_plan(paper, repo)
+
+    assert plan.claims
+    assert "proposed method" in plan.claims[0].claim.text.lower()

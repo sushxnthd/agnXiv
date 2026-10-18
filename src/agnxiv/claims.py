@@ -202,7 +202,7 @@ def extract_quantitative_claims(
         claims.append(
             Claim(
                 id="PENDING",
-                text=quote,
+                text=local_context,
                 metric=metric,
                 reported_value=value / 100 if percent else value,
                 reported_uncertainty=(

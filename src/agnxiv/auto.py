@@ -141,7 +141,51 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
     if evidence:
         score += min(0.20, 0.08 + evidence[0].score * 0.12)
 
-    return min(score, 1.0)
+    numeric_tokens = re.findall(
+        r"(?<![A-Za-z0-9_.])[-+]?\\d+(?:\\.\\d+)?%?",
+        claim.text,
+    )
+    word_tokens = re.findall(r"[A-Za-z]{2,}", claim.text)
+
+    if len(numeric_tokens) >= 6 and len(numeric_tokens) >= max(4, len(word_tokens) // 2):
+        score -= 0.22
+    elif len(numeric_tokens) >= 4:
+        score -= 0.08
+
+    if any(
+        phrase in lower
+        for phrase in (
+            "for reference",
+            "included for reference",
+            "common practice",
+            "we follow",
+            "baseline result",
+        )
+    ):
+        score -= 0.14
+
+    if any(
+        phrase in lower
+        for phrase in (
+            "our model",
+            "our method",
+            "our approach",
+            "our proposed",
+            "we achieve",
+            "we obtain",
+            "we outperform",
+            "proposed method",
+        )
+    ):
+        score += 0.12
+
+    if "state-of-the-art" in lower or "sota" in lower:
+        score += 0.06
+
+    if len(claim.text) > 420:
+        score -= 0.06
+
+    return min(max(score, 0.0), 1.0)
 
 
 def _historical_environment_warnings(readme: str) -> list[str]:
