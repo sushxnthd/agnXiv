@@ -1,0 +1,132 @@
+name: postgres-restore-drill
+
+on:
+  push:
+    paths:
+      - "src/agnxiv/service/**"
+      - "migrations/**"
+      - "alembic.ini"
+      - ".github/workflows/postgres-restore-drill.yml"
+  pull_request:
+    paths:
+      - "src/agnxiv/service/**"
+      - "migrations/**"
+      - "alembic.ini"
+      - ".github/workflows/postgres-restore-drill.yml"
+  schedule:
+    - cron: "41 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  restore-drill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_DB: agnxiv
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d agnxiv"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/agnxiv
+      PGPASSWORD: postgres
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install service and PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          python -m pip install -e ".[service,sign,pdf]"
+
+      - name: Apply production schema
+        run: alembic upgrade head
+
+      - name: Seed one finalized verification receipt
+        run: |
+          python - <<'PY'
+          import os
+          from agnxiv.service.db import JobStore
+
+          store = JobStore(os.environ["DATABASE_URL"])
+          job = store.create_job(
+              job_id="00000000-0000-0000-0000-000000009001",
+              api_key_hash="restore-drill",
+              mode="auto_verify",
+              repository="owner/research",
+              repository_ref="a" * 40,
+              arxiv_id="2601.00001",
+              spec_path=None,
+          )
+          store.mark_running(job.id)
+          store.complete(
+              job.id,
+              status="succeeded",
+              result={
+                  "kind": "verification",
+                  "drill": True,
+                  "statement": {"digest": "restore-test"},
+              },
+              error=None,
+          )
+          assert store.verify_transparency_chain()["valid"] is True
+          PY
+
+      - name: Create logical backup
+        run: |
+          pg_dump "$DATABASE_URL" --format=custom --file=/tmp/agnxiv-production-drill.dump
+          test -s /tmp/agnxiv-production-drill.dump
+
+      - name: Restore into clean database
+        run: |
+          createdb --host=localhost --username=postgres agnxiv_restore
+          pg_restore             --host=localhost             --username=postgres             --dbname=agnxiv_restore             --exit-on-error             /tmp/agnxiv-production-drill.dump
+
+      - name: Verify restored evidence and transparency chain
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/agnxiv_restore
+        run: |
+          python - <<'PY'
+          import os
+          from agnxiv.service.db import JobStore, job_result
+
+          store = JobStore(os.environ["DATABASE_URL"])
+          assert store.ping()
+          job = store.get_job("00000000-0000-0000-0000-000000009001")
+          assert job is not None
+          assert job.status == "succeeded"
+          assert job_result(job)["drill"] is True
+          receipt = store.transparency_for_job(job.id)
+          assert receipt is not None
+          verification = store.verify_transparency_chain()
+          assert verification["valid"] is True, verification
+          assert verification["entries"] == 1
+          print("PostgreSQL backup/restore and evidence-chain verification passed.")
+          PY
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: postgres-restore-drill-backup
+          path: /tmp/agnxiv-production-drill.dump
+          retention-days: 7
+          if-no-files-found: warn
