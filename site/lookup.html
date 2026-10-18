@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Look up the public verification state of a computational paper in AgnXiv.">
+  <title>Paper lookup — AgnXiv</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="lookup">
+  <header class="topbar">
+    <div class="shell nav-shell">
+      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>by Kernellum Labs</small></span></a>
+      <nav class="nav-links">
+        <a class="active" href="./lookup.html">Lookup</a>
+        <a href="./verify.html">Verify</a>
+        <a href="./#runs">Registry</a>
+        <a href="./#method">Method</a>
+      </nav>
+      <a class="button compact" href="./verify.html">New verification</a>
+    </div>
+  </header>
+
+  <main class="shell lookup-shell">
+    <section class="lookup-hero">
+      <div class="eyebrow">AgnXiv Lookup</div>
+      <h1>Check a paper before you trust it.</h1>
+      <p>Search an arXiv paper or AgnXiv record to see what has actually been attempted, reproduced, contradicted, or left unresolved.</p>
+      <form id="lookup-form" class="lookup-form">
+        <input id="lookup-query" autocomplete="off" placeholder="arXiv URL, 1403.6652, or AX-GH-26" aria-label="Paper or AgnXiv record">
+        <button class="button primary" type="submit">Check evidence</button>
+      </form>
+      <p class="lookup-note">No record means AgnXiv has no public evidence yet. It does not imply that the paper is wrong or irreproducible.</p>
+    </section>
+
+    <section id="lookup-result" class="lookup-result hidden"></section>
+
+    <section class="lookup-explainer">
+      <article><span>01</span><h3>Attempts survive</h3><p>Failed, partial, and blocked reproductions remain visible instead of disappearing into issue threads and private notebooks.</p></article>
+      <article><span>02</span><h3>Divergence is neutral</h3><p>A mismatched execution is recorded as result divergence, not misconduct or a universal claim that the paper is false.</p></article>
+      <article><span>03</span><h3>Evidence stays inspectable</h3><p>Each public attempt links back to the exact repository, commit, execution record, and AgnXiv verification page.</p></article>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>by Kernellum Labs</small></span></a>
+      <span>Evidence-bound verification for computational research.</span>
+      <a href="https://github.com/sushxnthd/agnXiv">Source & technical docs</a>
+    </div>
+  </footer>
+  <script src="./lookup.js"></script>
+</body>
+</html>
