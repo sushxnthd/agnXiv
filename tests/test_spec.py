@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from agnxiv.models import Verdict
 from agnxiv.sandbox import ExecutionResult
 from agnxiv.spec import (
@@ -133,8 +135,6 @@ def test_manifest_rejects_parent_directory_escape(tmp_path: Path) -> None:
     spec_path = tmp_path / "agnxiv-escape.json"
     _write_minimal_spec(spec_path, "../outside")
 
-    import pytest
-
     with pytest.raises(ValueError, match="escapes the verification workspace"):
         execute_verification_spec(spec_path)
 
@@ -143,8 +143,6 @@ def test_manifest_rejects_absolute_repository_path(tmp_path: Path) -> None:
     spec_path = tmp_path / "agnxiv-absolute.json"
     absolute = str((tmp_path.parent / "outside").resolve())
     _write_minimal_spec(spec_path, absolute)
-
-    import pytest
 
     with pytest.raises(ValueError, match="must be relative"):
         execute_verification_spec(spec_path)
