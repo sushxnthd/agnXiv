@@ -37,6 +37,9 @@ _METRICS: dict[str, tuple[str, ...]] = {
     "runtime": ("runtime", "run time", "execution time"),
     "throughput": ("throughput",),
     "speedup": ("speedup", "speed-up"),
+    "split_half_r": ("split-half r", "split-half reliability", "split half r"),
+    "spearman_brown": ("spearman-brown", "spearman brown"),
+    "cohens_d": ("cohen's d", "cohens d", "cohen d"),
     "p_value": ("p-value", "p value"),
 }
 
@@ -194,7 +197,10 @@ def extract_quantitative_claims(
             match.start("value"),
             match.end("value"),
         )
-        metric = _metric_from_context(local_context)
+        # Resolve the metric nearest *before* this number, so a sentence
+        # reporting multiple statistics cannot label them all by the last one.
+        preceding = normalized[max(0, match.start("value") - 100) : match.start("value")]
+        metric = _metric_from_context(preceding) or _metric_from_context(local_context)
 
         if not unit and not uncertainty_raw and value.is_integer() and 1900 <= value <= 2100:
             continue
