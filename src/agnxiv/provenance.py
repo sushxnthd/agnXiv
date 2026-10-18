@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import subprocess
 from pathlib import Path
 from typing import Literal
 
@@ -39,9 +40,16 @@ class ArtifactFingerprint(BaseModel):
     file_count: int = Field(ge=1)
 
 
+class GitIdentity(BaseModel):
+    commit: str
+    branch: str | None = None
+    dirty: bool
+
+
 class ProvenanceManifest(BaseModel):
     algorithm: str = "sha256"
     tree_digest: str
+    git: GitIdentity | None = None
     files: list[FileFingerprint]
     file_count: int = Field(ge=0)
     total_bytes: int = Field(ge=0)
@@ -58,6 +66,41 @@ def sha256_file(path: str | Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def detect_git_identity(root: str | Path) -> GitIdentity | None:
+    """Return Git commit/branch/dirty state when the path belongs to a worktree."""
+    base = Path(root).resolve()
+
+    def run(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", "-C", str(base), *args],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+
+    try:
+        commit_result = run("rev-parse", "HEAD")
+        if commit_result.returncode != 0:
+            return None
+
+        branch_result = run("symbolic-ref", "--short", "-q", "HEAD")
+        status_result = run("status", "--porcelain", "--untracked-files=normal")
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+    commit = commit_result.stdout.strip()
+    if not commit:
+        return None
+
+    branch = branch_result.stdout.strip() if branch_result.returncode == 0 else None
+    return GitIdentity(
+        commit=commit,
+        branch=branch or None,
+        dirty=status_result.returncode != 0 or bool(status_result.stdout.strip()),
+    )
 
 
 def fingerprint_document(path: str | Path) -> DocumentFingerprint:
@@ -113,6 +156,7 @@ def fingerprint_tree(
 
     return ProvenanceManifest(
         tree_digest=tree_hasher.hexdigest(),
+        git=detect_git_identity(base),
         files=files,
         file_count=len(files),
         total_bytes=sum(file.size_bytes for file in files),
