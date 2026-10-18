@@ -1,0 +1,51 @@
+name: research-redbench
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/benchmarks/redbench-v0.jsonl"
+      - "src/agnxiv/outputs.py"
+      - "src/agnxiv/benchmark.py"
+      - ".github/workflows/research-redbench.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run adversarial recorded-output benchmark
+        run: |
+          python - <<'PY' | tee /tmp/redbench-report.json
+          import json
+          from agnxiv.benchmark import load_jsonl_cases, run_recorded_benchmark
+
+          report = run_recorded_benchmark(
+              load_jsonl_cases("research/benchmarks/redbench-v0.jsonl")
+          )
+          print(json.dumps(report.model_dump(mode="json"), indent=2))
+          PY
+      - name: Assert research report contract
+        run: |
+          python - <<'PY'
+          import json
+          with open("/tmp/redbench-report.json", encoding="utf-8") as handle:
+              report = json.load(handle)
+          assert report["total"] >= 6
+          assert 0.0 <= report["false_pass_rate"] <= 1.0
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: redbench-v0-report
+          path: /tmp/redbench-report.json
+          retention-days: 90

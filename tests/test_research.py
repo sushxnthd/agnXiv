@@ -27,3 +27,22 @@ def test_scicoqa_pilot_manifest_is_valid() -> None:
     assert all(case.evaluation_role == "diagnostic_nonblind" for case in cases)
     assert all(case.commit for case in cases)
     assert len({case.case_id for case in cases}) == len(cases)
+
+
+def test_evidence_independence_collapses_correlated_attempts() -> None:
+    from agnxiv.research import EvidenceDependency, summarize_evidence_independence
+
+    summary = summarize_evidence_independence(
+        ["A", "B", "C"],
+        [
+            EvidenceDependency(
+                left_attempt="A",
+                right_attempt="B",
+                shared_factors=["author_code", "checkpoint"],
+            )
+        ],
+    )
+
+    assert summary.independent_components == 2
+    assert ["A", "B"] in summary.components
+    assert ["C"] in summary.components

@@ -90,3 +90,64 @@ def load_research_cases(path: str | Path) -> list[ResearchCase]:
                 f"invalid research case on line {line_number}: {exc}"
             ) from exc
     return rows
+
+
+class EvidenceDependency(BaseModel):
+    left_attempt: str
+    right_attempt: str
+    shared_factors: list[
+        Literal[
+            "author_code",
+            "derived_code",
+            "checkpoint",
+            "data_split",
+            "preprocessing",
+            "environment",
+        ]
+    ] = Field(min_length=1)
+
+
+class IndependenceSummary(BaseModel):
+    attempts: int
+    dependency_edges: int
+    independent_components: int
+    components: list[list[str]]
+
+
+def summarize_evidence_independence(
+    attempt_ids: list[str],
+    dependencies: list[EvidenceDependency],
+) -> IndependenceSummary:
+    parent = {attempt_id: attempt_id for attempt_id in attempt_ids}
+
+    def find(value: str) -> str:
+        while parent[value] != value:
+            parent[value] = parent[parent[value]]
+            value = parent[value]
+        return value
+
+    def union(left: str, right: str) -> None:
+        root_left = find(left)
+        root_right = find(right)
+        if root_left != root_right:
+            parent[root_right] = root_left
+
+    for dependency in dependencies:
+        if dependency.left_attempt not in parent or dependency.right_attempt not in parent:
+            raise ValueError("dependency references an unknown attempt")
+        union(dependency.left_attempt, dependency.right_attempt)
+
+    groups: dict[str, list[str]] = {}
+    for attempt_id in attempt_ids:
+        groups.setdefault(find(attempt_id), []).append(attempt_id)
+
+    components = sorted(
+        (sorted(group) for group in groups.values()),
+        key=lambda group: group[0] if group else "",
+    )
+    return IndependenceSummary(
+        attempts=len(attempt_ids),
+        dependency_edges=len(dependencies),
+        independent_components=len(components),
+        components=components,
+    )
