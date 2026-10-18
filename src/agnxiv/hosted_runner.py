@@ -15,6 +15,7 @@ from .preprint import parse_arxiv_reference
 from .provenance import detect_git_identity
 from .service.security import validate_git_ref, validate_github_slug
 from .spec import execute_verification_spec, load_verification_spec
+from .zero_manifest import run_zero_manifest
 
 _MAX_PAPER_BYTES = 50 * 1024 * 1024
 _MAX_REPOSITORY_BYTES = 2 * 1024 * 1024 * 1024
@@ -172,20 +173,63 @@ def execute_job(
         repo = workspace / "repository"
         checkout_repository(repository, repository_ref, repo)
 
-        if mode == "auto_plan":
+        if mode in {"auto_plan", "auto_verify"}:
             if not arxiv_id:
-                raise HostedRunnerError("AUTO_PLAN requires an arXiv identifier")
+                raise HostedRunnerError("AUTO mode requires an arXiv identifier")
             paper = workspace / "paper.pdf"
             download_arxiv_pdf(arxiv_id, paper)
-            plan = build_auto_plan(paper, repo)
             identity = detect_git_identity(repo)
             if identity is None:
                 raise HostedRunnerError("checked-out repository has no Git identity")
-            status = "succeeded" if plan.safe_to_execute else "needs_review"
+
+            if mode == "auto_plan":
+                plan = build_auto_plan(paper, repo)
+                return "needs_review", {
+                    "kind": "auto_plan",
+                    "repository_commit": identity.commit,
+                    "plan": plan.model_dump(mode="json"),
+                }
+
+            plan = build_auto_plan(paper, repo)
+            # Do not create a network-capable or source-installing runtime.
+            # Running the first execution requires safe plan prerequisites.
+            required = {
+                "paper_ingest", "claim_compilation", "repository_mapping",
+                "environment_inference", "command_discovery",
+                "workflow_ordering", "artifact_resolution",
+            }
+            completed = {stage.name for stage in plan.stages if stage.complete}
+            if plan.blockers or not required.issubset(completed):
+                return "needs_review", {
+                    "kind": "auto_plan",
+                    "repository_commit": identity.commit,
+                    "plan": plan.model_dump(mode="json"),
+                    "reason": "The plan did not pass execution prerequisites.",
+                }
+
+            base_image = _validate_hosted_image(plan.environment.base_image)
+            _pull_image(base_image)
+            build = build_python_environment(repo, base_image=base_image)
+            outcome = run_zero_manifest(paper, repo, image=build.image_ref)
+
+            if outcome.bundle is None:
+                return "needs_review", {
+                    "kind": "auto_plan",
+                    "repository_commit": identity.commit,
+                    "plan": outcome.plan.model_dump(mode="json"),
+                    "reason": outcome.reason,
+                }
+            verdict = outcome.bundle.record.verdict.value
+            status = (
+                "succeeded" if verdict in {"VERIFIED", "CONTRADICTED"}
+                else "needs_review"
+            )
             return status, {
-                "kind": "auto_plan",
-                "repository_commit": identity.commit,
-                "plan": plan.model_dump(mode="json"),
+                "kind": "verification",
+                "zero_manifest": True,
+                "build": build.model_dump(mode="json"),
+                "discovery": outcome.frozen_locator.model_dump(mode="json"),
+                "bundle": outcome.bundle.model_dump(mode="json"),
             }
 
         if mode == "verify_spec":
