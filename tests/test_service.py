@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import base64
-import hashlib
-import hmac
 
 from fastapi.testclient import TestClient
 
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
+from agnxiv.service.oidc import OIDCVerificationError
 from agnxiv.statement import generate_ed25519_keypair
 
 
@@ -22,22 +21,12 @@ def _config(database_url: str) -> ServiceConfig:
         github_ref="main",
         github_workflow="hosted-verify.yml",
         max_active_jobs_per_key=1,
-        callback_secret="callback-secret",
+        oidc_audience="https://agnxiv.example/github-actions",
         issuer_private_key_b64=None,
     )
 
 
-def _callback_token(job_id: str) -> str:
-    nonce = "fixed-nonce"
-    signature = hmac.new(
-        b"callback-secret",
-        f"{job_id}.{nonce}".encode(),
-        hashlib.sha256,
-    ).hexdigest()
-    return f"{nonce}.{signature}"
-
-
-def test_hosted_job_lifecycle_and_quota(tmp_path, monkeypatch) -> None:
+def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
     dispatched = []
 
     def fake_dispatch(self, request):
@@ -45,8 +34,14 @@ def test_hosted_job_lifecycle_and_quota(tmp_path, monkeypatch) -> None:
 
     monkeypatch.setattr(GitHubActionsDispatcher, "dispatch", fake_dispatch)
     monkeypatch.setattr(
-        "agnxiv.service.app.secrets.token_urlsafe",
-        lambda _: "fixed-nonce",
+        "agnxiv.service.app.verify_github_actions_token",
+        lambda token, policy: {
+            "repository": policy.repository,
+            "ref": "refs/heads/main",
+            "workflow_ref": (
+                "sushxnthd/agnXiv/.github/workflows/hosted-verify.yml@refs/heads/main"
+            ),
+        },
     )
 
     database = f"sqlite:///{tmp_path / 'service.db'}"
@@ -70,6 +65,7 @@ def test_hosted_job_lifecycle_and_quota(tmp_path, monkeypatch) -> None:
         assert len(dispatched) == 1
         assert dispatched[0].repository == "phanein/deepwalk"
         assert dispatched[0].arxiv_id == "1403.6652"
+        assert dispatched[0].oidc_audience == "https://agnxiv.example/github-actions"
 
         quota = client.post(
             "/v1/jobs",
@@ -91,9 +87,7 @@ def test_hosted_job_lifecycle_and_quota(tmp_path, monkeypatch) -> None:
 
         callback = client.post(
             f"/internal/jobs/{created['id']}/complete",
-            headers={
-                "X-AgnXiv-Callback-Token": _callback_token(created["id"]),
-            },
+            headers={"Authorization": "Bearer trusted-github-oidc"},
             json={
                 "status": "needs_review",
                 "result": {
@@ -106,9 +100,7 @@ def test_hosted_job_lifecycle_and_quota(tmp_path, monkeypatch) -> None:
 
         replay = client.post(
             f"/internal/jobs/{created['id']}/complete",
-            headers={
-                "X-AgnXiv-Callback-Token": _callback_token(created["id"]),
-            },
+            headers={"Authorization": "Bearer trusted-github-oidc"},
             json={
                 "status": "failed",
                 "error": "attempted overwrite",
@@ -124,6 +116,44 @@ def test_hosted_job_lifecycle_and_quota(tmp_path, monkeypatch) -> None:
         final = fetched.json()
         assert final["status"] == "needs_review"
         assert final["result"]["plan"]["automation_score"] == 0.75
+
+
+def test_hosted_callback_rejects_untrusted_oidc(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: None,
+    )
+
+    def reject(token, policy):
+        raise OIDCVerificationError("wrong workflow")
+
+    monkeypatch.setattr(
+        "agnxiv.service.app.verify_github_actions_token",
+        reject,
+    )
+
+    app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={
+                "mode": "auto_plan",
+                "repository": "phanein/deepwalk",
+                "arxiv_id": "1403.6652",
+            },
+        )
+        assert response.status_code == 202
+        job_id = response.json()["id"]
+
+        callback = client.post(
+            f"/internal/jobs/{job_id}/complete",
+            headers={"Authorization": "Bearer impostor"},
+            json={"status": "failed", "error": "nope"},
+        )
+        assert callback.status_code == 401
 
 
 def test_hosted_api_rejects_unsafe_inputs(tmp_path, monkeypatch) -> None:
@@ -168,7 +198,7 @@ def test_readiness_requires_production_configuration(tmp_path) -> None:
         github_ref="main",
         github_workflow="hosted-verify.yml",
         max_active_jobs_per_key=3,
-        callback_secret="development-only-change-me",
+        oidc_audience="http://localhost:8000/github-actions",
         issuer_private_key_b64=None,
     )
     app = create_app(config)
@@ -180,17 +210,17 @@ def test_readiness_requires_production_configuration(tmp_path) -> None:
 
 def test_issuer_endpoint_exposes_public_key(tmp_path) -> None:
     private_key, public_key, key_id = generate_ed25519_keypair()
-    config = _config(f"sqlite:///{tmp_path / 'service.db'}")
+    original = _config(f"sqlite:///{tmp_path / 'service.db'}")
     config = ServiceConfig(
-        database_url=config.database_url,
-        api_keys=config.api_keys,
-        public_base_url=config.public_base_url,
-        github_token=config.github_token,
-        github_repository=config.github_repository,
-        github_ref=config.github_ref,
-        github_workflow=config.github_workflow,
-        max_active_jobs_per_key=config.max_active_jobs_per_key,
-        callback_secret=config.callback_secret,
+        database_url=original.database_url,
+        api_keys=original.api_keys,
+        public_base_url=original.public_base_url,
+        github_token=original.github_token,
+        github_repository=original.github_repository,
+        github_ref=original.github_ref,
+        github_workflow=original.github_workflow,
+        max_active_jobs_per_key=original.max_active_jobs_per_key,
+        oidc_audience=original.oidc_audience,
         issuer_private_key_b64=base64.b64encode(private_key).decode("ascii"),
     )
     app = create_app(config)
