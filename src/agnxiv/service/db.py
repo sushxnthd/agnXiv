@@ -529,6 +529,56 @@ class JobStore:
             )
             return None if row is None else self._transparency_view(row)
 
+    def verify_transparency_head(self) -> dict[str, object]:
+        """Perform an O(1) integrity check suitable for readiness probes."""
+        with self.session_factory() as session:
+            head = session.get(TransparencyHead, 1)
+            latest = session.scalar(
+                select(TransparencyEntry)
+                .order_by(TransparencyEntry.sequence.desc())
+                .limit(1)
+            )
+
+        if head is None:
+            return {"valid": False, "reason": "missing_head"}
+        if head.sequence == 0:
+            return {
+                "valid": head.entry_hash == _ZERO_HASH and latest is None,
+                "reason": (
+                    None
+                    if head.entry_hash == _ZERO_HASH and latest is None
+                    else "empty_head_mismatch"
+                ),
+                "head_sequence": 0,
+                "head_hash": head.entry_hash,
+            }
+        if latest is None or latest.sequence != head.sequence:
+            return {
+                "valid": False,
+                "reason": "head_sequence_mismatch",
+                "head_sequence": head.sequence,
+            }
+        computed = _transparency_hash(
+            sequence=latest.sequence,
+            job_id=latest.job_id,
+            status=latest.status,
+            payload_sha256=latest.payload_sha256,
+            previous_hash=latest.previous_hash,
+            created_at=latest.created_at,
+        )
+        if computed != latest.entry_hash or latest.entry_hash != head.entry_hash:
+            return {
+                "valid": False,
+                "reason": "head_hash_mismatch",
+                "head_sequence": head.sequence,
+            }
+        return {
+            "valid": True,
+            "reason": None,
+            "head_sequence": head.sequence,
+            "head_hash": head.entry_hash,
+        }
+
     def verify_transparency_chain(self) -> dict[str, object]:
         """Verify the complete local hash chain and its materialized head."""
         with self.session_factory() as session:
