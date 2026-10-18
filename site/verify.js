@@ -29,7 +29,11 @@ function setMode(mode) {
   document.querySelectorAll(".manifest-field").forEach((node) => node.classList.toggle("hidden", mode !== "manifest"));
   arxivInput.required = mode === "auto";
   specInput.required = mode === "manifest";
-  updatePreflight();
+  const initialArxiv = new URLSearchParams(window.location.search).get("arxiv");
+if (initialArxiv) {
+  arxivInput.value = normalizeArxiv(initialArxiv);
+}
+updatePreflight();
 }
 
 function validRepo(value) {
