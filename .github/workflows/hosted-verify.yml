@@ -1,0 +1,93 @@
+name: hosted-verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: AgnXiv job ID
+        required: true
+        type: string
+      mode:
+        description: auto_plan or verify_spec
+        required: true
+        type: string
+      repository:
+        description: GitHub owner/repository
+        required: true
+        type: string
+      repository_ref:
+        description: Git ref
+        required: true
+        type: string
+      arxiv_id:
+        description: Optional arXiv ID
+        required: false
+        type: string
+      spec_path:
+        description: Optional AgnXiv manifest path
+        required: false
+        type: string
+      callback_url:
+        description: AgnXiv control-plane callback URL
+        required: true
+        type: string
+      callback_token:
+        description: One-time callback credential
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout AgnXiv worker
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install worker
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[pdf]"
+
+      - name: Execute untrusted research job without service credentials
+        env:
+          AGNXIV_JOB_MODE: ${{ inputs.mode }}
+          AGNXIV_REPOSITORY: ${{ inputs.repository }}
+          AGNXIV_REPOSITORY_REF: ${{ inputs.repository_ref }}
+          AGNXIV_ARXIV_ID: ${{ inputs.arxiv_id }}
+          AGNXIV_SPEC_PATH: ${{ inputs.spec_path }}
+        run: |
+          python -m agnxiv.hosted_runner \
+            --mode "$AGNXIV_JOB_MODE" \
+            --repository "$AGNXIV_REPOSITORY" \
+            --repository-ref "$AGNXIV_REPOSITORY_REF" \
+            --arxiv-id "$AGNXIV_ARXIV_ID" \
+            --spec-path "$AGNXIV_SPEC_PATH" \
+            --output /tmp/agnxiv-hosted-result.json
+
+      - name: Deliver result with one-time credential
+        env:
+          AGNXIV_CALLBACK_URL: ${{ inputs.callback_url }}
+          AGNXIV_CALLBACK_TOKEN: ${{ inputs.callback_token }}
+        run: |
+          python -m agnxiv.hosted_callback \
+            --result /tmp/agnxiv-hosted-result.json \
+            --callback-url "$AGNXIV_CALLBACK_URL" \
+            --callback-token "$AGNXIV_CALLBACK_TOKEN"
+
+      - name: Upload execution record for operator debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agnxiv-job-${{ inputs.job_id }}
+          path: /tmp/agnxiv-hosted-result.json
+          if-no-files-found: ignore
+          retention-days: 7
