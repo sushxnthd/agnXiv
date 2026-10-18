@@ -1,0 +1,69 @@
+name: deepwalk-auto
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  auto-plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install AgnXiv planner
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[pdf]"
+
+      - name: Run zero-manifest planning on DeepWalk
+        run: |
+          python -m agnxiv.hosted_runner \
+            --mode auto_plan \
+            --repository phanein/deepwalk \
+            --repository-ref 6e6dff245e4692e9bea47e9017c1034e51afbf29 \
+            --arxiv-id 1403.6652 \
+            --output /tmp/deepwalk-auto.json
+          cat /tmp/deepwalk-auto.json
+
+      - name: Assert useful automation without unsafe certification
+        run: |
+          python - <<'PY'
+          import json
+
+          with open("/tmp/deepwalk-auto.json", encoding="utf-8") as handle:
+              payload = json.load(handle)
+
+          assert payload["status"] == "needs_review"
+          plan = payload["result"]["plan"]
+
+          assert plan["safe_to_execute"] is False
+          assert plan["automation_score"] >= 0.625
+          assert len(plan["claims"]) > 0
+          assert len(plan["commands"]) >= 2
+
+          commands = [" ".join(item["command"]) for item in plan["commands"]]
+          assert any(command.startswith("deepwalk ") for command in commands)
+          assert any("example_graphs/scoring.py" in command for command in commands)
+
+          blockers = " ".join(plan["blockers"]).lower()
+          assert "historical dependency" in blockers
+          assert "multiple high-confidence research commands" in blockers
+
+          stages = {item["name"]: item for item in plan["stages"]}
+          assert stages["paper_ingest"]["complete"] is True
+          assert stages["claim_compilation"]["complete"] is True
+          assert stages["environment_inference"]["complete"] is True
+          assert stages["command_discovery"]["complete"] is True
+          assert stages["verification_spec"]["complete"] is True
+          assert stages["observation_locator"]["complete"] is False
+          PY
