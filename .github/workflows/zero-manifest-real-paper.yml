@@ -6,11 +6,15 @@ on:
       - "src/**"
       - "tests/**"
       - ".github/workflows/zero-manifest-real-paper.yml"
+      - "pyproject.toml"
+      - "constraints-service.txt"
   pull_request:
     paths:
       - "src/**"
       - "tests/**"
       - ".github/workflows/zero-manifest-real-paper.yml"
+      - "pyproject.toml"
+      - "constraints-service.txt"
   workflow_dispatch:
 
 permissions:
