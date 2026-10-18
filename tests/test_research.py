@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from agnxiv.research import SelectiveOutcome, load_research_cases, score_selective_verification
+from agnxiv.research import (\n    CentralityGold,\n    SelectiveOutcome,\n    load_research_cases,\n    score_centrality_ranking,\n    score_selective_verification,\n)
 
 
 def test_selective_metrics_separate_false_passes_from_abstention() -> None:
@@ -54,3 +54,23 @@ def test_research_case_supports_alternate_manuscript_sources() -> None:
 
     assert bp_case.paper_alternate_urls
     assert "fullTextXML" in bp_case.paper_alternate_urls[0]
+
+
+def test_centrality_ranking_reports_first_gold_rank() -> None:
+    gold = CentralityGold(
+        case_id="paper-a",
+        required_substrings=["10000 times", "3 times"],
+        rationale="abstract contribution",
+    )
+    result = score_centrality_ranking(
+        "paper-a",
+        [
+            "A reference result reports 30% latency.",
+            "LoRA reduces trainable parameters by 10,000 times and GPU memory by 3 times.",
+        ],
+        gold,
+    )
+
+    assert result.first_gold_rank == 2
+    assert result.recall_at_1 is False
+    assert result.recall_at_3 is True
