@@ -29,11 +29,7 @@ function setMode(mode) {
   document.querySelectorAll(".manifest-field").forEach((node) => node.classList.toggle("hidden", mode !== "manifest"));
   arxivInput.required = mode === "auto";
   specInput.required = mode === "manifest";
-  const initialArxiv = new URLSearchParams(window.location.search).get("arxiv");
-if (initialArxiv) {
-  arxivInput.value = normalizeArxiv(initialArxiv);
-}
-updatePreflight();
+  updatePreflight();
 }
 
 function validRepo(value) {
@@ -154,4 +150,9 @@ document.getElementById("load-demo").addEventListener("click", () => {
 modal.addEventListener("click", (event) => {
   if (event.target === modal) modal.classList.add("hidden");
 });
+
+const initialArxiv = new URLSearchParams(window.location.search).get("arxiv");
+if (initialArxiv) {
+  arxivInput.value = normalizeArxiv(initialArxiv);
+}
 updatePreflight();
