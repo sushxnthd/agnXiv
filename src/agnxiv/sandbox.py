@@ -143,6 +143,10 @@ def docker_command(
         "--network",
         "none",
         "--read-only",
+        "--user",
+        "65534:65534",
+        "--env",
+        "HOME=/tmp",
         "--cap-drop",
         "ALL",
         "--security-opt",
@@ -154,7 +158,7 @@ def docker_command(
         "--cpus",
         str(active_limits.cpus),
         "--tmpfs",
-        "/tmp:rw,noexec,nosuid,size=1g",
+        "/tmp:rw,noexec,nosuid,nodev,size=1g,uid=65534,gid=65534,mode=1777",
         *_artifact_mount_args(mounts),
     ]
 
@@ -180,7 +184,10 @@ def docker_command(
         "--mount",
         f"type=bind,src={repo},dst=/source,readonly",
         "--tmpfs",
-        f"/workspace:rw,nosuid,size={active_limits.workspace_size}",
+        (
+            f"/workspace:rw,nosuid,nodev,size={active_limits.workspace_size},"
+            "uid=65534,gid=65534,mode=0755"
+        ),
         "--workdir",
         "/workspace",
         image,
