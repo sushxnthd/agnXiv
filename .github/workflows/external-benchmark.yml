@@ -61,6 +61,9 @@ jobs:
           IMAGE_REF="$(cat /tmp/external-image-ref.txt)"
           agnxiv verify-command external/perturbation-measurements             --image "$IMAGE_REF"             --cmd python             --cmd evaluation/reproduce.py             --expected 26.6             --metric gap-G             --claim-text "Pool A gap G (15-85) is 26.6."             --kind absolute             --tolerance 0.2             --artifact external/perturbation-measurements/results/paper_numbers.json             --output-regex 'Pool A gap G \(15-85\).*got\s+(?P<value>[-+]?\d+(?:\.\d+)?)'             --sign-key /tmp/external-private.pem             > /tmp/external-verification.json
 
+      - name: Show third-party verification record
+        run: cat /tmp/external-verification.json
+
       - name: Assert third-party verification
         run: |
           python - <<'PY'
