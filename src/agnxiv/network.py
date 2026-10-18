@@ -61,7 +61,12 @@ class ScientificChallenge(BaseModel):
     challenge_id: str
     paper_id: str | None = None
     claim_id: str | None = None
+    claim_text: str | None = None
     attempt_id: str
+    target_reported_result: str | None = None
+    challenger_repository: str
+    challenger_ref: str
+    challenger_observed_result: str
     status: ChallengeStatus = ChallengeStatus.OPEN
     rationale: str
     challenger_evidence_url: str | None = None
