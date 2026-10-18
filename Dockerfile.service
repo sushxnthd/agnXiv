@@ -1,0 +1,22 @@
+FROM python:3.11.17-slim-bookworm
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1
+
+RUN groupadd --system agnxiv && useradd --system --gid agnxiv --create-home agnxiv
+
+WORKDIR /app
+
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+
+RUN python -m pip install --upgrade pip && \
+    python -m pip install ".[service,sign,pdf]"
+
+USER agnxiv
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
