@@ -4,7 +4,6 @@ import base64
 from datetime import UTC, datetime, timedelta
 
 import pytest
-
 from fastapi.testclient import TestClient
 
 from agnxiv.service.app import create_app
