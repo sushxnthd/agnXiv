@@ -249,9 +249,13 @@ def verify_command(
     kind: Annotated[str, typer.Option()] = "relative",
     operator: Annotated[str, typer.Option()] = "approx",
     json_path: Annotated[str | None, typer.Option()] = None,
+    output_regex: Annotated[str | None, typer.Option()] = None,
     observation_scale: Annotated[float, typer.Option()] = 1.0,
 ) -> None:
     """Run one explicit command and emit an auditable verification bundle."""
+    if json_path is not None and output_regex is not None:
+        raise typer.BadParameter("json-path and output-regex are mutually exclusive")
+
     claim = Claim(
         id="CLI-RUN",
         text=claim_text,
@@ -268,6 +272,7 @@ def verify_command(
         manuscript_path=manuscript,
         artifact_paths=artifact,
         json_path=json_path,
+        output_regex=output_regex,
         observation_scale=observation_scale,
     )
     attestation = attest_bundle(bundle)
