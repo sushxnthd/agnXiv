@@ -395,3 +395,74 @@ def test_transparency_api_publishes_receipts_but_full_verification_requires_auth
     assert denied.status_code == 401
     assert verified.status_code == 200
     assert verified.json()["valid"] is True
+
+
+def test_issuer_endpoint_keeps_previous_public_key_during_rotation(tmp_path) -> None:
+    current_private, current_public, current_id = generate_ed25519_keypair()
+    _, previous_public, previous_id = generate_ed25519_keypair()
+    base = _productionish_config(
+        f"sqlite:///{tmp_path / 'issuer-rotation.db'}",
+        issuer=base64.b64encode(current_private).decode("ascii"),
+    )
+    config = ServiceConfig(
+        database_url=base.database_url,
+        api_keys=base.api_keys,
+        public_base_url=base.public_base_url,
+        github_token=base.github_token,
+        github_repository=base.github_repository,
+        github_ref=base.github_ref,
+        github_workflow=base.github_workflow,
+        max_active_jobs_per_key=base.max_active_jobs_per_key,
+        max_jobs_per_hour=base.max_jobs_per_hour,
+        oidc_audience=base.oidc_audience,
+        issuer_private_key_b64=base.issuer_private_key_b64,
+        issuer_previous_public_keys_b64=(
+            base64.b64encode(previous_public).decode("ascii"),
+        ),
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        response = client.get("/v1/issuer")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema_version"] == "agnxiv.issuer-keyset/1"
+    assert body["current_key_id"] == current_id
+    assert body["key_id"] == current_id
+    assert body["public_key_pem"].encode("ascii") == current_public
+    assert [(row["key_id"], row["status"]) for row in body["keys"]] == [
+        (current_id, "current"),
+        (previous_id, "previous"),
+    ]
+
+
+def test_readiness_rejects_duplicate_issuer_rollover_key(tmp_path) -> None:
+    private_key, public_key, _ = generate_ed25519_keypair()
+    encoded_private = base64.b64encode(private_key).decode("ascii")
+    encoded_public = base64.b64encode(public_key).decode("ascii")
+    base = _productionish_config(
+        f"sqlite:///{tmp_path / 'issuer-duplicate.db'}",
+        issuer=encoded_private,
+    )
+    config = ServiceConfig(
+        database_url=base.database_url,
+        api_keys=base.api_keys,
+        public_base_url=base.public_base_url,
+        github_token=base.github_token,
+        github_repository=base.github_repository,
+        github_ref=base.github_ref,
+        github_workflow=base.github_workflow,
+        max_active_jobs_per_key=base.max_active_jobs_per_key,
+        max_jobs_per_hour=base.max_jobs_per_hour,
+        oidc_audience=base.oidc_audience,
+        issuer_private_key_b64=encoded_private,
+        issuer_previous_public_keys_b64=(encoded_public,),
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        response = client.get("/readyz")
+
+    assert response.status_code == 503
+    assert "issuer_key_invalid" in response.json()["detail"]["issues"]
