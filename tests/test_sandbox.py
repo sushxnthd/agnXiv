@@ -1,6 +1,15 @@
+import sys
 from pathlib import Path
 
-from agnxiv.sandbox import SandboxLimits, docker_command, prepare_artifact_mounts
+import pytest
+
+from agnxiv.sandbox import (
+    SandboxError,
+    SandboxLimits,
+    _run_bounded_process,
+    docker_command,
+    prepare_artifact_mounts,
+)
 
 
 def test_docker_command_is_locked_down(tmp_path: Path) -> None:
@@ -54,3 +63,32 @@ def test_workspace_copy_excludes_git_metadata(tmp_path: Path) -> None:
     assert "! -name .git" in shell_command
     assert "cp -R /source/. /workspace/" not in shell_command
     assert "--network" in command
+
+
+def test_bounded_process_accepts_small_output() -> None:
+    returncode, stdout, stderr = _run_bounded_process(
+        [sys.executable, "-c", "print('bounded-ok')"],
+        timeout_seconds=5,
+        output_bytes=4096,
+    )
+    assert returncode == 0
+    assert b"bounded-ok" in stdout
+    assert stderr == b""
+
+
+def test_bounded_process_kills_output_flood() -> None:
+    with pytest.raises(SandboxError, match="output limit"):
+        _run_bounded_process(
+            [sys.executable, "-c", "print('x' * 1000000)"],
+            timeout_seconds=5,
+            output_bytes=4096,
+        )
+
+
+def test_bounded_process_kills_timeout() -> None:
+    with pytest.raises(SandboxError, match="exceeded timeout"):
+        _run_bounded_process(
+            [sys.executable, "-c", "import time; time.sleep(5)"],
+            timeout_seconds=1,
+            output_bytes=4096,
+        )
