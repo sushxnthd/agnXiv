@@ -42,3 +42,14 @@ def test_claim_text_is_sentence_bounded_not_neighboring_numeric_context() -> Non
 
     assert "proposed method" not in reference.text.lower()
     assert "proposed method" in proposed.text.lower()
+
+
+def test_extracts_compact_multiplier_claim() -> None:
+    claims = extract_quantitative_claims(
+        "Our method accelerates autoregressive decoding by up to 64x."
+    )
+
+    assert any(
+        claim.reported_value == 64 and claim.unit and claim.unit.lower() == "x"
+        for claim in claims
+    )
