@@ -3,9 +3,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+
+from pydantic import BaseModel
 
 from .hosted_runner import HostedRunnerError, execute_job
 from .preprint import parse_arxiv_reference
@@ -18,8 +18,7 @@ _SECTION_RE = re.compile(
 )
 
 
-@dataclass(frozen=True)
-class GitHubVerificationRequest:
+class GitHubVerificationRequest(BaseModel):
     mode: str
     repository: str
     repository_ref: str
@@ -91,7 +90,7 @@ def read_issue_event(path: str | Path) -> GitHubVerificationRequest:
     return parse_issue_body(body)
 
 
-def _summary(payload: dict[str, Any]) -> str:
+def _summary(payload: dict) -> str:
     status = payload.get("status", "failed")
     result = payload.get("result")
     error = payload.get("error")
@@ -186,7 +185,7 @@ def run_issue(event_path: str | Path, output_dir: str | Path) -> dict[str, Any]:
             "result": result,
             "error": None,
         }
-    except (ValueError, HostedRunnerError) as exc:
+    except (TypeError, ValueError, HostedRunnerError) as exc:
         payload = {
             "request": {},
             "status": "failed",
