@@ -169,7 +169,14 @@ def extract_observation_candidates(
 
     for line_number, line in enumerate(output.splitlines(), start=1):
         line_lower = line.lower()
-        matched_tokens = {token for token in metric_tokens if token in line_lower}
+        matched_tokens = {
+            token
+            for token in metric_tokens
+            if re.search(
+                rf"(?<![A-Za-z0-9]){re.escape(token)}(?![A-Za-z0-9])",
+                line_lower,
+            )
+        }
         metric_hits = len(matched_tokens)
         numbers = list(_NUMBER_RE.finditer(line))
 
@@ -205,6 +212,28 @@ def extract_observation_candidates(
                 score += 0.10
                 rationale.append("percent output matches fractional claim unit")
 
+            negative_cues = {
+                cue
+                for cue in ("target", "expected", "claimed", "reference", "reported", "paper value")
+                if cue in line_lower
+            }
+            if negative_cues:
+                score -= 0.28
+                rationale.append(
+                    "non-observation cue present: " + ", ".join(sorted(negative_cues))
+                )
+
+            positive_cues = {
+                cue
+                for cue in ("observed", "measured", "result", "evaluation", "eval")
+                if cue in line_lower
+            }
+            if positive_cues and not negative_cues:
+                score += 0.16
+                rationale.append(
+                    "observation cue present: " + ", ".join(sorted(positive_cues))
+                )
+
             candidates.append(
                 ObservationCandidate(
                     observation=Observation(value=normalized),
@@ -212,7 +241,7 @@ def extract_observation_candidates(
                     normalized_value=normalized,
                     line=line.strip(),
                     line_number=line_number,
-                    score=min(score, 1.0),
+                    score=min(max(score, 0.0), 1.0),
                     rationale=rationale,
                 )
             )
