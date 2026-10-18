@@ -29,7 +29,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Returned Git commit must match the control-plane pinned commit.
 - [x] Dependency installers do not receive the research source tree.
 - [ ] Dedicated sandbox provider / microVM boundary for workloads beyond public beta risk envelope.
-- [ ] Continuous dependency/container vulnerability scanning.
+- [x] Continuous Python dependency vulnerability scanning with a blocking `pip-audit` gate and CycloneDX SBOM output.
+- [ ] Container/OS package vulnerability scanning.
 - [ ] External security review and threat-model review.
 
 ### Control-plane reliability
