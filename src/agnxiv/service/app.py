@@ -370,7 +370,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         if not database_connected:
             issues.append("database_unreachable")
         else:
-            transparency = store.verify_transparency_chain()
+            transparency = store.verify_transparency_head()
             if not transparency.get("valid"):
                 issues.append("transparency_log_invalid")
         if issues:
