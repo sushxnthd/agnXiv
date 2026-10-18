@@ -8,6 +8,7 @@ import typer
 
 from .attestation import attest_bundle
 from .benchmark import load_jsonl_cases, run_recorded_benchmark
+from .build import EnvironmentBuildError, build_python_environment
 from .challenge import assess_repeated_observations
 from .claims import extract_claims_from_pdf, extract_quantitative_claims
 from .models import Claim, Observation, VerificationPolicy
@@ -97,6 +98,23 @@ def inspect_command(
         "command_candidates": [item.model_dump(mode="json") for item in commands],
     }
     typer.echo(json.dumps(payload, indent=2))
+
+
+@app.command("build-env")
+def build_env_command(
+    repository: Annotated[
+        Path,
+        typer.Argument(exists=True, file_okay=False, readable=True),
+    ],
+    base_image: Annotated[str, typer.Option()] = "python:3.11-slim",
+) -> None:
+    """Build a manifest-only runtime and return its immutable image identity."""
+    try:
+        result = build_python_environment(repository, base_image=base_image)
+    except EnvironmentBuildError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(result.model_dump_json(indent=2))
 
 
 @app.command("verify-number")
