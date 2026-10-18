@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shlex
 from pathlib import Path
 from typing import Literal
 
@@ -27,7 +28,24 @@ class ObservationLocator(BaseModel):
 
 class RuntimeSpec(BaseModel):
     image: str
-    command: list[str] = Field(min_length=1)
+    command: list[str] | None = None
+    commands: list[list[str]] | None = None
+
+    @model_validator(mode="after")
+    def validate_commands(self) -> RuntimeSpec:
+        has_command = bool(self.command)
+        has_commands = bool(self.commands)
+        if has_command == has_commands:
+            raise ValueError("runtime requires exactly one of command or commands")
+        if self.commands and any(not command for command in self.commands):
+            raise ValueError("runtime commands may not be empty")
+        return self
+
+    def command_sequence(self) -> list[list[str]]:
+        if self.commands:
+            return self.commands
+        assert self.command is not None
+        return [self.command]
 
 
 class VerificationSpec(BaseModel):
@@ -97,11 +115,22 @@ def execute_verification_spec(
         spec.observation.value if spec.observation.kind == "regex" else None
     )
 
+    sequence = spec.runtime.command_sequence()
+    command = (
+        sequence[0]
+        if len(sequence) == 1
+        else [
+            "sh",
+            "-lc",
+            " && ".join(shlex.join(item) for item in sequence),
+        ]
+    )
+
     bundle = verify_with_command(
         spec.claim,
         repository,
         image=image_override or spec.runtime.image,
-        command=spec.runtime.command,
+        command=command,
         policy=spec.policy,
         manuscript_path=manuscript,
         artifact_paths=artifacts,
