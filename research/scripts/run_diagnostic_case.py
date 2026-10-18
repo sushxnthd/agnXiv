@@ -12,7 +12,7 @@ import urllib.parse
 import urllib.request
 
 from agnxiv.auto import build_auto_plan
-from agnxiv.research import load_research_cases
+from agnxiv.research import load_centrality_gold, load_research_cases, score_centrality_ranking
 
 _PDF_META_RE = re.compile(
     r'<meta[^>]+name=["\\\']citation_pdf_url["\\\'][^>]+content=["\\\']([^"\\\']+)["\\\']',
@@ -191,6 +191,17 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
 
         plan = build_auto_plan(manuscript, repository)
 
+    gold_path = pathlib.Path("research/benchmarks/centrality-gold-v0.jsonl")
+    centrality = None
+    if gold_path.exists():
+        gold = load_centrality_gold(gold_path).get(case.case_id)
+        if gold is not None:
+            centrality = score_centrality_ranking(
+                case.case_id,
+                [item.claim.text for item in plan.claims],
+                gold,
+            ).model_dump(mode="json")
+
     stage_map = {stage.name: stage.complete for stage in plan.stages}
     summary = {
         "schema_version": "agnxiv.research-diagnostic/1",
@@ -209,6 +220,7 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
         "candidate_commands": len(plan.commands),
         "top_claim": plan.claims[0].claim.text if plan.claims else None,
         "top_claim_score": plan.claims[0].score if plan.claims else None,
+        "centrality": centrality,
         "stages": stage_map,
         "blockers": plan.blockers,
         "warnings": plan.warnings,
