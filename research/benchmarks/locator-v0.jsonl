@@ -2,7 +2,7 @@
 {"case_id":"LOC-002","claim_text":"Held-out test accuracy","metric":"accuracy","unit":"fraction","output":"target accuracy=91.4%; observed accuracy=82.4%\n","expected_action":"ABSTAIN","expected_value":null}
 {"case_id":"LOC-003","claim_text":"Primary result","metric":null,"unit":null,"output":"0.9\n1.0\n","expected_action":"ABSTAIN","expected_value":null}
 {"case_id":"LOC-004","claim_text":"Macro F1 on the evaluation set","metric":"f1","unit":null,"output":"f1: 0.71\n","expected_action":"SELECT","expected_value":0.71}
-{"case_id":"LOC-005","claim_text":"Test accuracy on the held-out split","metric":"accuracy","unit":"fraction","output":"validation accuracy: 84.1%\ntest accuracy: 82.0%\n","expected_action":"ABSTAIN","expected_value":null}
+{"case_id":"LOC-005","claim_text":"Accuracy reported by the experiment","metric":"accuracy","unit":"fraction","output":"validation accuracy: 84.1%\ntest accuracy: 82.0%","expected_action":"ABSTAIN","expected_value":null}
 {"case_id":"LOC-006","claim_text":"Observed model accuracy","metric":"accuracy","unit":"fraction","output":"claimed accuracy: 91.4%\nmeasured accuracy: 83.2%\n","expected_action":"SELECT","expected_value":0.832}
 {"case_id":"LOC-007","claim_text":"AUROC on the evaluation cohort","metric":"auroc","unit":null,"output":"evaluation auroc = 0.873\n","expected_action":"SELECT","expected_value":0.873}
 {"case_id":"LOC-008","claim_text":"Accuracy on the benchmark","metric":"accuracy","unit":"fraction","output":"evaluation accuracy = 88.6%\n","expected_action":"SELECT","expected_value":0.886}
@@ -10,3 +10,21 @@
 {"case_id":"LOC-010","claim_text":"F1 score on the benchmark","metric":"f1","unit":"fraction","output":"reference f1: 88.0%\nevaluation f1: 81.0%\n","expected_action":"SELECT","expected_value":0.81}
 {"case_id":"LOC-011","claim_text":"Runtime latency of the evaluated method","metric":"latency","unit":"ms","output":"observed latency: 42 ms\n","expected_action":"SELECT","expected_value":42}
 {"case_id":"LOC-012","claim_text":"Mean absolute error on the held-out data","metric":"mae","unit":null,"output":"reported MAE: 3.1\nobserved MAE: 4.2\n","expected_action":"SELECT","expected_value":4.2}
+{"case_id":"LOC-013","claim_text":"Test accuracy on the held-out set","metric":"accuracy","unit":"fraction","output":"validation accuracy: 84.1%\ntest accuracy: 82.0%\n","expected_action":"SELECT","expected_value":0.82}
+{"case_id":"LOC-014","claim_text":"Validation accuracy used for model selection","metric":"accuracy","unit":"fraction","output":"validation accuracy: 84.1%\ntest accuracy: 82.0%\n","expected_action":"SELECT","expected_value":0.841}
+{"case_id":"LOC-015","claim_text":"Mean accuracy across random seeds","metric":"accuracy","unit":"fraction","output":"seed 1 accuracy: 81.9%\nseed 2 accuracy: 82.3%\nseed 3 accuracy: 82.1%\nmean accuracy: 82.1%\n","expected_action":"SELECT","expected_value":0.821}
+{"case_id":"LOC-016","claim_text":"F1 score on the evaluation set","metric":"f1","unit":null,"output":"accuracy=0.82 f1=0.71\n","expected_action":"SELECT","expected_value":0.71}
+{"case_id":"LOC-017","claim_text":"Accuracy on the evaluation set","metric":"accuracy","unit":null,"output":"accuracy=0.82 f1=0.71\n","expected_action":"SELECT","expected_value":0.82}
+{"case_id":"LOC-018","claim_text":"Top-1 accuracy on ImageNet","metric":"accuracy","unit":"fraction","output":"top-1 accuracy: 82.3%\n","expected_action":"SELECT","expected_value":0.823}
+{"case_id":"LOC-019","claim_text":"Mean accuracy across runs","metric":"accuracy","unit":"fraction","output":"accuracy: 82.4% ± 0.3%\n","expected_action":"SELECT","expected_value":0.824}
+{"case_id":"LOC-020","claim_text":"Test MAE on the held-out fold","metric":"mae","unit":null,"output":"val/mae: 3.9\ntest/mae: 4.2\n","expected_action":"SELECT","expected_value":4.2}
+{"case_id":"LOC-021","claim_text":"Validation MAE used for tuning","metric":"mae","unit":null,"output":"val/mae: 3.9\ntest/mae: 4.2\n","expected_action":"SELECT","expected_value":3.9}
+{"case_id":"LOC-022","claim_text":"Classification accuracy score","metric":"accuracy","unit":null,"output":"CAS: 0.76\n","expected_action":"SELECT","expected_value":0.76}
+{"case_id":"LOC-023","claim_text":"Best observed accuracy","metric":"accuracy","unit":"fraction","output":"best accuracy: 82.4% at epoch 91\n","expected_action":"SELECT","expected_value":0.824}
+{"case_id":"LOC-024","claim_text":"Accuracy on the evaluation set","metric":"accuracy","unit":null,"output":"accuracy=0.82, f1=0.71\n","expected_action":"SELECT","expected_value":0.82}
+{"case_id":"LOC-025","claim_text":"F1 score on the evaluation set","metric":"f1","unit":null,"output":"accuracy=0.82, f1=0.71\n","expected_action":"SELECT","expected_value":0.71}
+{"case_id":"LOC-026","claim_text":"RMSE on the test cohort","metric":"rmse","unit":null,"output":"rmse: 1.2 (95% CI 1.0-1.4)\n","expected_action":"SELECT","expected_value":1.2}
+{"case_id":"LOC-027","claim_text":"Evaluation throughput","metric":"throughput","unit":null,"output":"throughput: 123.4 samples/s\n","expected_action":"SELECT","expected_value":123.4}
+{"case_id":"LOC-028","claim_text":"BLEU score","metric":"bleu","unit":null,"output":"BLEU-4: 32.1\n","expected_action":"SELECT","expected_value":32.1}
+{"case_id":"LOC-029","claim_text":"Statistical p-value","metric":"p_value","unit":null,"output":"p-value = 0.003\n","expected_action":"SELECT","expected_value":0.003}
+{"case_id":"LOC-030","claim_text":"Median inference latency","metric":"latency","unit":"ms","output":"median latency: 42 ms\np95 latency: 60 ms\n","expected_action":"SELECT","expected_value":42}
