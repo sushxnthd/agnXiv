@@ -57,3 +57,34 @@ def test_explicit_json_locator_rejects_boolean() -> None:
     from agnxiv.outputs import extract_json_observation
 
     assert extract_json_observation('{"passed": true}', "passed") is None
+
+
+def test_explicit_regex_locator_extracts_one_declared_value() -> None:
+    from agnxiv.outputs import extract_regex_observation
+
+    output = "paper 26.6\nPool A gap G (15-85) got 26.4\n"
+    observation = extract_regex_observation(
+        output,
+        r"Pool A gap G \(15-85\) got (?P<value>[-+]?\d+\.\d+)",
+    )
+
+    assert observation is not None
+    assert abs(observation.value - 26.4) < 1e-9
+
+
+def test_explicit_regex_locator_rejects_multiple_matches() -> None:
+    from agnxiv.outputs import extract_regex_observation
+
+    output = "accuracy: 0.8\naccuracy: 0.9\n"
+    observation = extract_regex_observation(
+        output,
+        r"accuracy: (?P<value>\d+\.\d+)",
+    )
+
+    assert observation is None
+
+
+def test_explicit_regex_locator_requires_one_capture() -> None:
+    from agnxiv.outputs import extract_regex_observation
+
+    assert extract_regex_observation("accuracy: 0.8", r"accuracy: \d+\.\d+") is None
