@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import os
 import re
 import shlex
 import subprocess
+import tempfile
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -19,6 +22,7 @@ class SandboxLimits:
     pids: int = 256
     timeout_seconds: int = 600
     workspace_size: str = "4g"
+    output_bytes: int = 16 * 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -197,6 +201,135 @@ def docker_command(
     ]
 
 
+def _run_bounded_process(
+    command: list[str],
+    *,
+    timeout_seconds: int,
+    output_bytes: int,
+) -> tuple[int, bytes, bytes]:
+    """Run a child process without allowing unbounded captured output."""
+    if timeout_seconds <= 0:
+        raise ValueError("timeout_seconds must be positive")
+    if output_bytes <= 0:
+        raise ValueError("output_bytes must be positive")
+
+    try:
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except OSError as exc:
+        raise SandboxError(f"isolated execution failed to start: {exc}") from exc
+
+    buffers = {"stdout": bytearray(), "stderr": bytearray()}
+    total = 0
+    lock = threading.Lock()
+    output_exceeded = threading.Event()
+
+    def drain(name: str, stream) -> None:
+        nonlocal total
+        try:
+            while True:
+                chunk = (
+                    stream.read1(64 * 1024)
+                    if hasattr(stream, "read1")
+                    else stream.read(64 * 1024)
+                )
+                if not chunk:
+                    return
+                should_kill = False
+                with lock:
+                    remaining = output_bytes - total
+                    if remaining > 0:
+                        accepted = chunk[:remaining]
+                        buffers[name].extend(accepted)
+                        total += len(accepted)
+                    if len(chunk) > max(0, remaining) or total >= output_bytes:
+                        output_exceeded.set()
+                        should_kill = True
+                if should_kill:
+                    try:
+                        process.kill()
+                    except OSError:
+                        pass
+                    return
+        finally:
+            try:
+                stream.close()
+            except OSError:
+                pass
+
+    assert process.stdout is not None
+    assert process.stderr is not None
+    threads = [
+        threading.Thread(
+            target=drain,
+            args=("stdout", process.stdout),
+            daemon=True,
+        ),
+        threading.Thread(
+            target=drain,
+            args=("stderr", process.stderr),
+            daemon=True,
+        ),
+    ]
+    for thread in threads:
+        thread.start()
+
+    timed_out = False
+    try:
+        process.wait(timeout=timeout_seconds)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        try:
+            process.kill()
+        except OSError:
+            pass
+        process.wait(timeout=10)
+
+    for thread in threads:
+        thread.join(timeout=10)
+    if any(thread.is_alive() for thread in threads):
+        try:
+            process.kill()
+        except OSError:
+            pass
+        raise SandboxError("isolated execution output streams did not terminate")
+
+    if timed_out:
+        raise SandboxError(
+            f"isolated execution exceeded timeout of {timeout_seconds} seconds"
+        )
+    if output_exceeded.is_set():
+        raise SandboxError(
+            f"isolated execution exceeded output limit of {output_bytes} bytes"
+        )
+
+    return process.returncode, bytes(buffers["stdout"]), bytes(buffers["stderr"])
+
+
+def _cleanup_container(cidfile: Path, *, force: bool) -> None:
+    """Remove an abnormal Docker container and always remove its cidfile."""
+    try:
+        container_id = (
+            cidfile.read_text(encoding="utf-8", errors="ignore").strip()
+            if cidfile.exists()
+            else ""
+        )
+        if force and re.fullmatch(r"[0-9a-f]{12,64}", container_id):
+            subprocess.run(
+                ["docker", "rm", "-f", container_id],
+                capture_output=True,
+                timeout=30,
+                check=False,
+            )
+    except (OSError, subprocess.SubprocessError):
+        pass
+    finally:
+        cidfile.unlink(missing_ok=True)
+
+
 def execute_in_docker(
     *,
     image: str,
@@ -219,22 +352,34 @@ def execute_in_docker(
         workspace_mode=workspace_mode,
     )
 
+    fd, cidfile_name = tempfile.mkstemp(prefix="agnxiv-cid-", suffix=".txt")
+    os.close(fd)
+    cidfile = Path(cidfile_name)
+    cidfile.unlink(missing_ok=True)
+    bounded_command = [
+        *full_command[:2],
+        "--cidfile",
+        str(cidfile),
+        *full_command[2:],
+    ]
+
     try:
-        completed = subprocess.run(
-            full_command,
-            capture_output=True,
-            text=True,
-            timeout=active_limits.timeout_seconds,
-            check=False,
+        returncode, stdout_bytes, stderr_bytes = _run_bounded_process(
+            bounded_command,
+            timeout_seconds=active_limits.timeout_seconds,
+            output_bytes=active_limits.output_bytes,
         )
-    except (OSError, subprocess.SubprocessError) as exc:
-        raise SandboxError(f"isolated execution failed: {exc}") from exc
+    except SandboxError:
+        _cleanup_container(cidfile, force=True)
+        raise
+    else:
+        _cleanup_container(cidfile, force=False)
 
     return ExecutionResult(
         command=tuple(full_command),
         image_id=image_id,
         artifact_mounts=mounts,
-        returncode=completed.returncode,
-        stdout=completed.stdout,
-        stderr=completed.stderr,
+        returncode=returncode,
+        stdout=stdout_bytes.decode("utf-8", errors="replace"),
+        stderr=stderr_bytes.decode("utf-8", errors="replace"),
     )
