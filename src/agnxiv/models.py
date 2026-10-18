@@ -46,7 +46,8 @@ class Claim(BaseModel):
 
 class VerificationPolicy(BaseModel):
     kind: Literal["absolute", "relative"] = "relative"
-    tolerance: float = Field(gt=0)
+    operator: Literal["approx", "at_least", "at_most"] = "approx"
+    tolerance: float = Field(ge=0)
     minimum_repetitions: int = Field(default=1, ge=1)
 
     @model_validator(mode="after")
@@ -64,7 +65,7 @@ class Observation(BaseModel):
 
 
 class VerificationRecord(BaseModel):
-    schema_version: str = "agnxiv.verify/0.1"
+    schema_version: str = "agnxiv.verify/0.2"
     claim: Claim
     policy: VerificationPolicy
     observations: list[Observation]
