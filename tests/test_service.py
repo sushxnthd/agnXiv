@@ -21,6 +21,7 @@ def _config(database_url: str) -> ServiceConfig:
         github_ref="main",
         github_workflow="hosted-verify.yml",
         max_active_jobs_per_key=1,
+        max_jobs_per_hour=20,
         oidc_audience="https://agnxiv.example/github-actions",
         issuer_private_key_b64=None,
     )
@@ -33,6 +34,11 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
         dispatched.append(request)
 
     monkeypatch.setattr(GitHubActionsDispatcher, "dispatch", fake_dispatch)
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "a" * 40,
+    )
     monkeypatch.setattr(
         "agnxiv.service.app.verify_github_actions_token",
         lambda token, policy: {
@@ -62,6 +68,7 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
         created = response.json()
         assert created["status"] == "running"
         assert created["repository"] == "phanein/deepwalk"
+        assert created["repository_ref"] == "a" * 40
         assert len(dispatched) == 1
         assert dispatched[0].repository == "phanein/deepwalk"
         assert dispatched[0].arxiv_id == "1403.6652"
@@ -92,7 +99,11 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
                 "status": "needs_review",
                 "result": {
                     "kind": "auto_plan",
-                    "plan": {"automation_score": 0.75},
+                    "repository_commit": "a" * 40,
+                    "plan": {
+                        "automation_score": 0.75,
+                        "safe_to_execute": False,
+                    },
                 },
             },
         )
@@ -123,6 +134,11 @@ def test_hosted_callback_rejects_untrusted_oidc(tmp_path, monkeypatch) -> None:
         GitHubActionsDispatcher,
         "dispatch",
         lambda self, request: None,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "b" * 40,
     )
 
     def reject(token, policy):
@@ -162,6 +178,11 @@ def test_hosted_api_rejects_unsafe_inputs(tmp_path, monkeypatch) -> None:
         "dispatch",
         lambda self, request: None,
     )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "c" * 40,
+    )
     app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
 
     with TestClient(app) as client:
@@ -198,6 +219,7 @@ def test_readiness_requires_production_configuration(tmp_path) -> None:
         github_ref="main",
         github_workflow="hosted-verify.yml",
         max_active_jobs_per_key=3,
+        max_jobs_per_hour=20,
         oidc_audience="http://localhost:8000/github-actions",
         issuer_private_key_b64=None,
     )
@@ -220,6 +242,7 @@ def test_issuer_endpoint_exposes_public_key(tmp_path) -> None:
         github_ref=original.github_ref,
         github_workflow=original.github_workflow,
         max_active_jobs_per_key=original.max_active_jobs_per_key,
+        max_jobs_per_hour=original.max_jobs_per_hour,
         oidc_audience=original.oidc_audience,
         issuer_private_key_b64=base64.b64encode(private_key).decode("ascii"),
     )
