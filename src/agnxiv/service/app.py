@@ -330,10 +330,15 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
     def readyz() -> dict:
         database_connected = store.ping()
         issues = list(active_config.production_issues)
+        transparency = {"valid": False, "reason": "database_unreachable"}
         if active_config.issuer_private_key_b64 and not issuer_key_valid():
             issues.append("issuer_key_invalid")
         if not database_connected:
             issues.append("database_unreachable")
+        else:
+            transparency = store.verify_transparency_chain()
+            if not transparency.get("valid"):
+                issues.append("transparency_log_invalid")
         if issues:
             raise HTTPException(
                 status_code=503,
@@ -341,9 +346,14 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                     "status": "not-ready",
                     "issues": sorted(set(issues)),
                     "database": active_config.database_url.split(":", 1)[0],
+                    "transparency": transparency,
                 },
             )
-        return {"status": "ready", "database_connected": True}
+        return {
+            "status": "ready",
+            "database_connected": True,
+            "transparency": transparency,
+        }
 
     @app.get("/v1/meta")
     def meta() -> dict:
@@ -354,6 +364,44 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "scientific_contract": "claim-level execution evidence; no paper truth score",
             "zero_manifest": True,
             "signed_statements": bool(active_config.issuer_private_key_b64),
+            "transparency_log": True,
+        }
+
+    @app.get("/v1/transparency/head")
+    def transparency_head() -> dict:
+        return {
+            "schema_version": "agnxiv.transparency-head/1",
+            **store.transparency_head(),
+        }
+
+    @app.get("/v1/transparency")
+    def transparency_page(after: int = 0, limit: int = 100) -> dict:
+        if after < 0 or not 1 <= limit <= 500:
+            raise HTTPException(
+                status_code=422,
+                detail="after must be >= 0 and limit must be between 1 and 500",
+            )
+        return {
+            "schema_version": "agnxiv.transparency-page/1",
+            "head": store.transparency_head(),
+            "entries": store.transparency_entries(after=after, limit=limit),
+        }
+
+    @app.get("/v1/transparency/jobs/{job_id}")
+    def transparency_job(job_id: str) -> dict:
+        receipt = store.transparency_for_job(job_id)
+        if receipt is None:
+            raise HTTPException(status_code=404, detail="transparency receipt not found")
+        return receipt
+
+    @app.get("/v1/transparency/verify")
+    def transparency_verify(
+        x_api_key: Annotated[str | None, Header()] = None,
+    ) -> dict:
+        authenticate(x_api_key)
+        return {
+            "schema_version": "agnxiv.transparency-verification/1",
+            **store.verify_transparency_chain(),
         }
 
     @app.get("/v1/metrics")
