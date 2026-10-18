@@ -23,7 +23,14 @@ from .config import ServiceConfig
 from .db import Job, JobStore, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
 from .oidc import GitHubOIDCPolicy, OIDCVerificationError, verify_github_actions_token
-from .security import constant_time_equal, hash_secret, validate_git_ref, validate_github_slug
+from .security import (
+    constant_time_equal,
+    fingerprint_job_request,
+    hash_secret,
+    validate_git_ref,
+    validate_github_slug,
+    validate_idempotency_key,
+)
 
 
 class JobCreate(BaseModel):
@@ -341,6 +348,10 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
     def create_job(
         body: JobCreate,
         x_api_key: Annotated[str | None, Header()] = None,
+        idempotency_key: Annotated[
+            str | None,
+            Header(alias="Idempotency-Key"),
+        ] = None,
     ) -> JobView:
         _, api_hash = authenticate(x_api_key)
         store.reap_stale(minutes=active_config.job_stale_minutes)
@@ -379,6 +390,33 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         ):
             raise HTTPException(status_code=422, detail="unsafe spec_path")
 
+        idempotency_key_hash: str | None = None
+        request_fingerprint: str | None = None
+        if idempotency_key is not None:
+            try:
+                normalized_idempotency = validate_idempotency_key(idempotency_key)
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            idempotency_key_hash = hash_secret(normalized_idempotency)
+            request_fingerprint = fingerprint_job_request(
+                mode=body.mode,
+                repository=repository,
+                repository_ref=repository_ref,
+                arxiv_id=arxiv_id,
+                spec_path=body.spec_path,
+            )
+            existing = store.get_by_idempotency(
+                api_key_hash=api_hash,
+                idempotency_key_hash=idempotency_key_hash,
+            )
+            if existing is not None:
+                if existing.request_fingerprint != request_fingerprint:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Idempotency-Key was already used for a different request",
+                    )
+                return _job_view(existing)
+
         if store.count_active(api_hash) >= active_config.max_active_jobs_per_key:
             raise HTTPException(
                 status_code=429,
@@ -399,15 +437,36 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             ) from exc
 
         job_id = str(uuid.uuid4())
-        job = store.create_job(
-            job_id=job_id,
-            api_key_hash=api_hash,
-            mode=body.mode,
-            repository=repository,
-            repository_ref=pinned_ref,
-            arxiv_id=arxiv_id,
-            spec_path=body.spec_path,
-        )
+        created = True
+        if idempotency_key_hash is not None and request_fingerprint is not None:
+            job, created = store.create_job_idempotent(
+                job_id=job_id,
+                api_key_hash=api_hash,
+                mode=body.mode,
+                repository=repository,
+                repository_ref=pinned_ref,
+                arxiv_id=arxiv_id,
+                spec_path=body.spec_path,
+                idempotency_key_hash=idempotency_key_hash,
+                request_fingerprint=request_fingerprint,
+            )
+            if not created:
+                if job.request_fingerprint != request_fingerprint:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Idempotency-Key was already used for a different request",
+                    )
+                return _job_view(job)
+        else:
+            job = store.create_job(
+                job_id=job_id,
+                api_key_hash=api_hash,
+                mode=body.mode,
+                repository=repository,
+                repository_ref=pinned_ref,
+                arxiv_id=arxiv_id,
+                spec_path=body.spec_path,
+            )
 
         request = DispatchRequest(
             job_id=job.id,
