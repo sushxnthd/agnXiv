@@ -23,12 +23,14 @@ service = [
   "uvicorn[standard]>=0.32,<1",
   "sqlalchemy>=2.0,<3",
   "psycopg[binary]>=3.2,<4",
+  "alembic>=1.14,<2",
 ]
 dev = [
   "cryptography>=42,<50",
   "fastapi>=0.115,<1",
   "sqlalchemy>=2.0,<3",
   "psycopg[binary]>=3.2,<4",
+  "alembic>=1.14,<2",
   "httpx>=0.27,<1",
   "pytest>=8,<9",
   "ruff>=0.6,<1",
