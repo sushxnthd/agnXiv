@@ -14,7 +14,7 @@
       "id": "bench100",
       "name": "AgnXiv Bench 100",
       "priority": "S+",
-      "status": "active",
+      "status": "pilot_complete_scale_pending",
       "primary_metric": "false_pass_rate",
       "target": "100 independently selected papers with stratified difficulty and full failure taxonomy"
     },
@@ -22,7 +22,7 @@
       "id": "selective",
       "name": "Selective verification and abstention",
       "priority": "S+",
-      "status": "active",
+      "status": "v0_regression_complete",
       "primary_metric": "risk_coverage_curve",
       "target": "maximize verification coverage subject to a <=1% empirical false-pass target on labeled cases"
     },
@@ -30,7 +30,7 @@
       "id": "scicoqa",
       "name": "Execution-grounded paper-code discrepancy detection",
       "priority": "S+",
-      "status": "active",
+      "status": "v0_diagnostic_complete",
       "primary_metric": "real_discrepancy_recall_at_precision",
       "target": "outperform static paper+code baselines using evidence graphs and executable probes"
     },
@@ -38,7 +38,7 @@
       "id": "env",
       "name": "Environment archaeology",
       "priority": "S+",
-      "status": "active",
+      "status": "v0_diagnostic_complete",
       "primary_metric": "historical_environment_recovery_rate",
       "target": "recover minimal publication-era environments for broken historical repositories"
     },
@@ -46,7 +46,7 @@
       "id": "centrality",
       "name": "Central-claim identification",
       "priority": "S",
-      "status": "active",
+      "status": "v0_diagnostic_complete",
       "primary_metric": "central_claim_recall_at_k",
       "target": "verify scientifically central claims before incidental metrics"
     },
@@ -54,7 +54,7 @@
       "id": "locator",
       "name": "Leakage-free observation discovery",
       "priority": "S",
-      "status": "active",
+      "status": "v0_synthetic_complete_real_integration_pending",
       "primary_metric": "locator_accuracy_blinded",
       "target": "select the correct output without access to the reported numeric answer"
     },
@@ -62,7 +62,7 @@
       "id": "dag",
       "name": "Claim-Evidence DAG extraction",
       "priority": "S",
-      "status": "active",
+      "status": "v0_localization_proxy_complete_full_dag_pending",
       "primary_metric": "critical_path_recall",
       "target": "recover claim-to-paper-to-code-to-data-to-environment execution paths"
     },
@@ -70,7 +70,7 @@
       "id": "lineage",
       "name": "Paper lineage reconstruction",
       "priority": "A+",
-      "status": "active",
+      "status": "protocol_ready_ablation_pending",
       "primary_metric": "execution_gain_from_lineage",
       "target": "recover implementation details inherited from cited work"
     },
@@ -78,7 +78,7 @@
       "id": "reimplementation",
       "name": "Independent reimplementation",
       "priority": "A+",
-      "status": "active",
+      "status": "single_independent_pilot_complete",
       "primary_metric": "v4_success_rate",
       "target": "separate author-code reproduction from independently implemented evidence"
     },
@@ -86,7 +86,7 @@
       "id": "aggregation",
       "name": "Conflicting evidence aggregation",
       "priority": "A+",
-      "status": "active",
+      "status": "protocol_ready_experiment_pending",
       "primary_metric": "calibrated_record_state_accuracy",
       "target": "represent correlated and independent replications without a universal truth score"
     },
@@ -94,7 +94,7 @@
       "id": "redbench",
       "name": "Adversarial scientific verification",
       "priority": "A",
-      "status": "active",
+      "status": "v0_complete",
       "primary_metric": "adversarial_false_pass_rate",
       "target": "stress-test hardcoded metrics, prompt injection, path attacks, seed gaming, leakage and sandbox-aware behavior"
     },
@@ -102,7 +102,7 @@
       "id": "crossdomain",
       "name": "Cross-domain generalization",
       "priority": "A",
-      "status": "active",
+      "status": "pilot_started",
       "primary_metric": "coverage_by_domain",
       "target": "extend beyond ML into physics, quantitative biology and other computational sciences"
     }
@@ -133,5 +133,7 @@
       "use": "paper-lineage and executability ablations",
       "size": "external comparative baseline"
     }
-  ]
+  ],
+  "phase": "v0_complete",
+  "v0_freeze": "2026-10-18"
 }
