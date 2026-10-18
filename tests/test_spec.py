@@ -101,3 +101,50 @@ def test_executes_and_binds_verification_spec(
     assert bundle.record.verdict == Verdict.VERIFIED
     assert bundle.verification_spec_sha256 is not None
     assert bundle.observation_method == "explicit_json_path"
+
+
+def _write_minimal_spec(path: Path, repository: str) -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "agnxiv.spec/1",
+                "repository": repository,
+                "claim": {
+                    "id": "C1",
+                    "text": "Result is 1.0.",
+                    "reported_value": 1.0,
+                },
+                "policy": {
+                    "kind": "absolute",
+                    "operator": "approx",
+                    "tolerance": 0.0,
+                },
+                "runtime": {
+                    "image": "local:test",
+                    "command": ["python", "run.py"],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_manifest_rejects_parent_directory_escape(tmp_path: Path) -> None:
+    spec_path = tmp_path / "agnxiv-escape.json"
+    _write_minimal_spec(spec_path, "../outside")
+
+    import pytest
+
+    with pytest.raises(ValueError, match="escapes the verification workspace"):
+        execute_verification_spec(spec_path)
+
+
+def test_manifest_rejects_absolute_repository_path(tmp_path: Path) -> None:
+    spec_path = tmp_path / "agnxiv-absolute.json"
+    absolute = str((tmp_path.parent / "outside").resolve())
+    _write_minimal_spec(spec_path, absolute)
+
+    import pytest
+
+    with pytest.raises(ValueError, match="must be relative"):
+        execute_verification_spec(spec_path)
