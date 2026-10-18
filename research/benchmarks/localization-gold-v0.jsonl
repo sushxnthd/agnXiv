@@ -1,0 +1,4 @@
+{"case_id":"SCICOQA-3f098eb0","target_path":"models/Koopa.py","target_line_terms":["time_var_backcast","residual"],"detector_visible":false}
+{"case_id":"SCICOQA-63197a77","target_path":"loralib/layers.py","target_line_terms":["lora_A","lora_B","zeros_","normal_"],"detector_visible":false}
+{"case_id":"SCICOQA-7c8468c8","target_path":"training_transformer.py","target_line_terms":["cross_entropy","logits","target"],"detector_visible":false}
+{"case_id":"SCICOQA-183bd763","target_path":"code/train/tune.py","target_line_terms":["test/sbp_mae"],"detector_visible":false}
