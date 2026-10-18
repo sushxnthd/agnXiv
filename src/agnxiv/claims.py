@@ -95,6 +95,33 @@ def _metric_from_context(context: str) -> str | None:
     return best[1] if best else None
 
 
+def _sentence_context(
+    text: str,
+    start: int,
+    end: int,
+    *,
+    radius: int = 100,
+) -> str:
+    """Return the local sentence containing a numeric report."""
+    left_boundary = max(
+        text.rfind(".", 0, start),
+        text.rfind("!", 0, start),
+        text.rfind("?", 0, start),
+    )
+    left = left_boundary + 1 if left_boundary >= 0 else 0
+
+    right_candidates = [
+        position
+        for marker in (".", "!", "?")
+        if (position := text.find(marker, end)) >= 0
+    ]
+    right = min(right_candidates) + 1 if right_candidates else len(text)
+
+    return text[
+        max(left, start - radius) : min(right, end + radius)
+    ].strip()
+
+
 def _looks_material(
     *,
     context: str,
@@ -153,9 +180,11 @@ def extract_quantitative_claims(
         end = min(len(normalized), match.end() + 100)
         quote = normalized[start:end].strip()
 
-        local_start = max(0, match.start() - 60)
-        local_end = min(len(normalized), match.end() + 60)
-        local_context = normalized[local_start:local_end]
+        local_context = _sentence_context(
+            normalized,
+            match.start("value"),
+            match.end("value"),
+        )
         metric = _metric_from_context(local_context)
 
         if not unit and not uncertainty_raw and value.is_integer() and 1900 <= value <= 2100:
