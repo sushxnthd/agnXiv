@@ -8,6 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from .hosted_runner import HostedRunnerError, execute_job
+from .network import attempt_from_github_payload
 from .preprint import parse_arxiv_reference
 from .service.security import validate_git_ref, validate_github_slug
 
@@ -201,6 +202,24 @@ def run_issue(event_path: str | Path, output_dir: str | Path) -> dict:
 
     (output / "result.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    issue_number = "unknown"
+    try:
+        event = json.loads(Path(event_path).read_text(encoding="utf-8"))
+        raw_number = (event.get("issue") or {}).get("number")
+        if isinstance(raw_number, int):
+            issue_number = str(raw_number)
+    except (OSError, json.JSONDecodeError):
+        pass
+
+    attempt = attempt_from_github_payload(
+        payload,
+        attempt_id=f"AX-GH-{issue_number}",
+    )
+    (output / "attempt.json").write_text(
+        json.dumps(attempt.model_dump(mode="json"), indent=2, sort_keys=True),
         encoding="utf-8",
     )
     (output / "summary.md").write_text(_summary(payload), encoding="utf-8")
