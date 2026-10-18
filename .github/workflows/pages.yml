@@ -28,6 +28,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Validate frontend JavaScript
+        run: |
+          node --check site/app.js
+          node --check site/verify.js
+          node --check site/result.js
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
