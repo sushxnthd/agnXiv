@@ -401,6 +401,8 @@ def _default_policy(claim: Claim) -> VerificationPolicy:
 def build_auto_plan(
     manuscript: str | Path,
     repository: str | Path,
+    *,
+    claims_override: list[Claim] | None = None,
 ) -> AutoPlan:
     """Build a conservative zero-manifest verification plan."""
     manuscript_path = Path(manuscript).resolve()
@@ -411,7 +413,11 @@ def build_auto_plan(
     if not repo.is_dir():
         raise ValueError(f"repository path is not a directory: {repo}")
 
-    raw_claims = _read_manuscript(manuscript_path)
+    raw_claims = (
+        list(claims_override)
+        if claims_override is not None
+        else _read_manuscript(manuscript_path)
+    )
     environment = infer_python_environment(repo)
     commands = discover_commands(repo)
     readme = _read_readme(repo)
