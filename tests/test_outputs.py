@@ -139,3 +139,104 @@ def test_mixed_target_observed_same_line_remains_ambiguous() -> None:
         claim,
     )
     assert select_unambiguous_observation(candidates) is None
+
+
+def test_claim_split_qualifier_selects_test_metric() -> None:
+    claim = Claim(
+        id="C1",
+        text="Test accuracy on the held-out set.",
+        metric="accuracy",
+        unit="fraction",
+    )
+    candidates = extract_observation_candidates(
+        "validation accuracy: 84.1%\ntest accuracy: 82.0%\n",
+        claim,
+    )
+    selected = select_unambiguous_observation(candidates)
+
+    assert selected is not None
+    assert abs(selected.value - 0.82) < 1e-9
+
+
+def test_claim_split_qualifier_selects_validation_metric() -> None:
+    claim = Claim(
+        id="C1",
+        text="Validation MAE used for model selection.",
+        metric="mae",
+    )
+    candidates = extract_observation_candidates(
+        "val/mae: 3.9\ntest/mae: 4.2\n",
+        claim,
+    )
+    selected = select_unambiguous_observation(candidates)
+
+    assert selected is not None
+    assert abs(selected.value - 3.9) < 1e-9
+
+
+def test_local_key_binds_metric_to_value_on_multi_metric_line() -> None:
+    f1_claim = Claim(id="C1", text="F1 score.", metric="f1")
+    accuracy_claim = Claim(id="C2", text="Accuracy.", metric="accuracy")
+
+    f1 = select_unambiguous_observation(
+        extract_observation_candidates("accuracy=0.82 f1=0.71\n", f1_claim)
+    )
+    accuracy = select_unambiguous_observation(
+        extract_observation_candidates("accuracy=0.82 f1=0.71\n", accuracy_claim)
+    )
+
+    assert f1 is not None and abs(f1.value - 0.71) < 1e-9
+    assert accuracy is not None and abs(accuracy.value - 0.82) < 1e-9
+
+
+def test_metric_label_digit_is_not_observation() -> None:
+    claim = Claim(id="C1", text="BLEU score.", metric="bleu")
+    candidates = extract_observation_candidates("BLEU-4: 32.1\n", claim)
+    selected = select_unambiguous_observation(candidates)
+
+    assert selected is not None
+    assert abs(selected.value - 32.1) < 1e-9
+    assert all(candidate.raw_value != 4 for candidate in candidates)
+
+
+def test_p_value_alias_is_recognized() -> None:
+    claim = Claim(id="C1", text="Statistical p-value.", metric="p_value")
+    selected = select_unambiguous_observation(
+        extract_observation_candidates("p-value = 0.003\n", claim)
+    )
+
+    assert selected is not None
+    assert abs(selected.value - 0.003) < 1e-12
+
+
+def test_summary_qualifier_selects_median_over_p95() -> None:
+    claim = Claim(
+        id="C1",
+        text="Median inference latency.",
+        metric="latency",
+        unit="ms",
+    )
+    selected = select_unambiguous_observation(
+        extract_observation_candidates(
+            "median latency: 42 ms\np95 latency: 60 ms\n",
+            claim,
+        )
+    )
+
+    assert selected is not None
+    assert abs(selected.value - 42.0) < 1e-9
+
+
+def test_target_and_observed_on_same_line_still_abstains_after_key_binding() -> None:
+    claim = Claim(
+        id="C1",
+        text="Test accuracy.",
+        metric="accuracy",
+        unit="fraction",
+    )
+    candidates = extract_observation_candidates(
+        "target accuracy=91.4%; observed accuracy=82.4%\n",
+        claim,
+    )
+
+    assert select_unambiguous_observation(candidates) is None
