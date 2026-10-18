@@ -68,3 +68,12 @@ def test_relative_threshold_allows_declared_slack() -> None:
         ),
     )
     assert record.verdict == Verdict.VERIFIED
+
+
+def test_absolute_tolerance_includes_decimal_boundary() -> None:
+    record = verify_numeric_claim(
+        Claim(id="C1", text="Gap is 26.6.", reported_value=26.6),
+        [Observation(value=26.4)],
+        VerificationPolicy(kind="absolute", tolerance=0.2),
+    )
+    assert record.verdict == Verdict.VERIFIED
