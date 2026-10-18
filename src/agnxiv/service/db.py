@@ -31,6 +31,10 @@ class JobQuotaExceeded(RuntimeError):
         super().__init__(kind)
 
 
+class JobAlreadyFinalized(RuntimeError):
+    """A terminal hosted job cannot be finalized a second time."""
+
+
 class Job(Base):
     __tablename__ = "agnxiv_jobs"
     __table_args__ = (
@@ -519,6 +523,8 @@ class JobStore:
             )
             if job is None:
                 raise KeyError(job_id)
+            if job.status not in {"queued", "running"}:
+                raise JobAlreadyFinalized(job_id)
             now = datetime.now(UTC)
             job.status = status
             job.result_json = (
