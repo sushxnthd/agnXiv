@@ -211,6 +211,19 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         allowed_hosts=allowed_hosts,
     )
 
+    def issuer_key_valid() -> bool:
+        if not active_config.issuer_private_key_b64:
+            return False
+        try:
+            private_key = base64.b64decode(
+                active_config.issuer_private_key_b64,
+                validate=True,
+            )
+            public_key_pem_from_private(private_key)
+        except (ValueError, binascii.Error):
+            return False
+        return True
+
     def authenticate(api_key: str | None) -> tuple[str, str]:
         if not active_config.api_keys:
             if api_key not in {None, "", "development"}:
@@ -273,21 +286,32 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
     @app.get("/readyz")
     def readyz() -> dict:
         database_connected = store.ping()
-        if not active_config.production_ready or not database_connected:
+        issues = list(active_config.production_issues)
+        if active_config.issuer_private_key_b64 and not issuer_key_valid():
+            issues.append("issuer_key_invalid")
+        if not database_connected:
+            issues.append("database_unreachable")
+        if issues:
             raise HTTPException(
                 status_code=503,
                 detail={
                     "status": "not-ready",
+                    "issues": sorted(set(issues)),
                     "database": active_config.database_url.split(":", 1)[0],
-                    "database_connected": database_connected,
-                    "github_dispatch": bool(active_config.github_token),
-                    "api_keys": bool(active_config.api_keys),
-                    "issuer_key": bool(active_config.issuer_private_key_b64),
-                    "https_public_url": active_config.public_base_url.startswith("https://"),
-                    "oidc_audience": active_config.oidc_audience.startswith("https://"),
                 },
             )
         return {"status": "ready", "database_connected": True}
+
+    @app.get("/v1/meta")
+    def meta() -> dict:
+        return {
+            "service": "agnxiv",
+            "api_version": "v1",
+            "verification_modes": ["auto_verify", "auto_plan", "verify_spec"],
+            "scientific_contract": "claim-level execution evidence; no paper truth score",
+            "zero_manifest": True,
+            "signed_statements": bool(active_config.issuer_private_key_b64),
+        }
 
     @app.get("/v1/issuer")
     def issuer() -> dict:
@@ -319,6 +343,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         x_api_key: Annotated[str | None, Header()] = None,
     ) -> JobView:
         _, api_hash = authenticate(x_api_key)
+        store.reap_stale(minutes=active_config.job_stale_minutes)
 
         if dispatcher is None:
             raise HTTPException(
@@ -419,6 +444,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         x_api_key: Annotated[str | None, Header()] = None,
     ) -> JobView:
         _, api_hash = authenticate(x_api_key)
+        store.reap_stale(minutes=active_config.job_stale_minutes)
         job = store.get_job(job_id)
         if job is None or job.api_key_hash != api_hash:
             raise HTTPException(status_code=404, detail="job not found")
@@ -430,6 +456,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         body: WorkerCallback,
         authorization: Annotated[str | None, Header()] = None,
     ) -> dict:
+        store.reap_stale(minutes=active_config.job_stale_minutes)
         job = store.get_job(job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="job not found")
