@@ -160,6 +160,19 @@ def generate_ed25519_keypair() -> tuple[bytes, bytes, str]:
     return private_pem, public_pem, key_id
 
 
+def public_key_pem_from_private(private_key_pem: bytes) -> tuple[bytes, str]:
+    """Derive the public issuer key and stable key identifier."""
+    from cryptography.hazmat.primitives import serialization
+
+    private_key = _load_ed25519_private_key(private_key_pem)
+    public_key = private_key.public_key()
+    public_pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return public_pem, _key_id(public_key)
+
+
 def _load_ed25519_private_key(private_key_pem: bytes):
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
