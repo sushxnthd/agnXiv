@@ -9,8 +9,9 @@ RUN groupadd --system agnxiv && useradd --system --gid agnxiv --create-home agnx
 
 WORKDIR /app
 
-COPY pyproject.toml README.md LICENSE ./
+COPY pyproject.toml README.md LICENSE alembic.ini ./
 COPY src ./src
+COPY migrations ./migrations
 
 RUN python -m pip install --upgrade pip && \
     python -m pip install ".[service,sign,pdf]"
@@ -19,4 +20,4 @@ USER agnxiv
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
