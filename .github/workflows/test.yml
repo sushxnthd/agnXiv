@@ -22,9 +22,12 @@ jobs:
       - run: pytest
       - name: Prepare integration runtime
         run: docker pull python:3.11-slim
+      - name: Generate ephemeral verification issuer
+        run: |
+          agnxiv keygen             --private-out /tmp/agnxiv-private.pem             --public-out /tmp/agnxiv-public.pem             > /tmp/agnxiv-key.json
       - name: Run end-to-end AgnXiv verification
         run: |
-          agnxiv verify-command examples/fixture-paper             --image python:3.11-slim             --cmd python             --cmd reproduce.py             --expected 0.914             --metric accuracy             --unit fraction             --manuscript examples/fixture-paper/paper.txt             > /tmp/agnxiv-integration.json
+          agnxiv verify-command examples/fixture-paper             --image python:3.11-slim             --cmd python             --cmd reproduce.py             --expected 0.914             --metric accuracy             --unit fraction             --manuscript examples/fixture-paper/paper.txt             --artifact examples/fixture-data/metric.json             --json-path metrics.accuracy             --sign-key /tmp/agnxiv-private.pem             > /tmp/agnxiv-integration.json
       - name: Show integration verification record
         run: cat /tmp/agnxiv-integration.json
       - name: Assert verification evidence
@@ -37,11 +40,39 @@ jobs:
 
           bundle = payload["bundle"]
           attestation = payload["attestation"]
+          statement = payload["statement"]
+          envelope = payload["dsseEnvelope"]
 
           assert bundle["record"]["verdict"] == "VERIFIED"
           assert bundle["execution"]["source_unchanged"] is True
+          assert bundle["execution"]["artifacts_unchanged"] is True
           assert bundle["execution"]["image_id"].startswith("sha256:")
+          assert bundle["observation_method"] == "explicit_json_path"
+          assert bundle["observation_locator"] == "metrics.accuracy"
           assert bundle["manuscript"]["sha256"]
+          assert len(bundle["artifacts"]) == 1
           assert attestation["manuscript_sha256"] == bundle["manuscript"]["sha256"]
+          assert attestation["artifact_sha256"] == [bundle["artifacts"][0]["sha256"]]
           assert attestation["repository_tree_sha256"] == bundle["provenance"]["tree_digest"]
+          assert statement["_type"] == "https://in-toto.io/Statement/v1"
+          assert statement["predicate"]["result"]["verdict"] == "VERIFIED"
+          assert envelope["payloadType"] == "application/vnd.in-toto+json"
+
+          with open("/tmp/agnxiv-envelope.json", "w", encoding="utf-8") as handle:
+              json.dump(envelope, handle)
+          PY
+      - name: Verify DSSE envelope independently
+        run: |
+          agnxiv verify-envelope /tmp/agnxiv-envelope.json             --public-key /tmp/agnxiv-public.pem             > /tmp/agnxiv-verified-statement.json
+      - name: Assert authenticated statement
+        run: |
+          python - <<'PY'
+          import json
+
+          with open("/tmp/agnxiv-verified-statement.json", encoding="utf-8") as handle:
+              statement = json.load(handle)
+
+          assert statement["_type"] == "https://in-toto.io/Statement/v1"
+          assert statement["predicate"]["result"]["verdict"] == "VERIFIED"
+          assert len(statement["subject"]) == 3
           PY
