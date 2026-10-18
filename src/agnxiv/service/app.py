@@ -69,7 +69,7 @@ def _callback_token(secret: str, job_id: str) -> str:
     nonce = secrets.token_urlsafe(24)
     message = f"{job_id}.{nonce}".encode()
     signature = hmac.new(
-        secret.encode("utf-8"),
+        secret.encode(),
         message,
         hashlib.sha256,
     ).hexdigest()
