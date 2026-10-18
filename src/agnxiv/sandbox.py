@@ -113,7 +113,7 @@ def docker_command(
         ]
 
     shell_command = (
-        "cp -a /source/. /workspace/ && "
+        "cp -R /source/. /workspace/ && "
         "cd /workspace && "
         "exec " + shlex.join(command)
     )
