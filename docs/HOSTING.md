@@ -53,7 +53,7 @@ Set the values shown in .env.example.
 A production-ready instance requires:
 
 - PostgreSQL DATABASE_URL;
-- one or more long random AGNXIV_API_KEYS;
+- one or more random AGNXIV_API_KEYS meeting AGNXIV_MIN_API_KEY_LENGTH (32 by default);
 - HTTPS AGNXIV_PUBLIC_BASE_URL;
 - AGNXIV_GITHUB_TOKEN permitted to dispatch workflows in the AgnXiv repository;
 - AGNXIV_OIDC_AUDIENCE bound to the hosted service;
@@ -67,22 +67,31 @@ GET /healthz is liveness.
 
 GET /readyz is readiness. It returns HTTP 503 until production configuration is complete.
 
+GET /v1/meta publishes the supported verification modes and service contract without secrets.
+
+GET /v1/metrics returns authenticated, secret-free job counters for operators.
+
 GET /v1/issuer publishes the Ed25519 public issuer key and key ID.
 
-Every submitted repository ref is resolved to an exact 40-character Git commit before dispatch. Returned evidence must match that pinned commit.\n\nPOST /v1/jobs submits either:
+Every submitted repository ref is resolved to an exact 40-character Git commit before dispatch. Returned evidence must match that pinned commit.
 
-- auto_plan: repository + exact Git ref + arXiv identifier;
-- verify_spec: repository + exact Git ref + path to an AgnXiv manifest.
+POST /v1/jobs submits:
 
-GET /v1/jobs/{job_id} returns state and result for the submitting API key.
+- auto_verify: repository + Git ref + arXiv identifier; execute only when safety-critical planning stages are resolved;
+- auto_plan: repository + Git ref + arXiv identifier; planning/triage only;
+- verify_spec: repository + Git ref + path to an AgnXiv manifest.
+
+Clients should send an Idempotency-Key header for POST /v1/jobs. The service binds that key to a canonical request fingerprint. Retries return the existing job; reusing the same key for different inputs returns HTTP 409. The database also enforces per-API-key idempotency uniqueness to close concurrent retry races.
+
+GET /v1/jobs/{job_id} returns state and result for the submitting API key. Queued/running jobs whose callback never arrives are failed after AGNXIV_JOB_STALE_MINUTES, preventing permanent quota exhaustion.
 
 The internal completion endpoint accepts only a trusted GitHub Actions OIDC identity.
 
-## AUTO_PLAN semantics
+## AUTO_VERIFY and AUTO_PLAN semantics
 
-AUTO_PLAN is a planning and triage workflow, not a shortcut to VERIFIED.
+AUTO_VERIFY extends the conservative planner with answer-blind locator freezing and isolated execution. AUTO_PLAN remains planning and triage only; neither mode may turn a discovery score directly into VERIFIED.
 
-It automatically attempts:
+The automatic planner attempts:
 
 1. exact arXiv paper retrieval;
 2. quantitative claim extraction;
@@ -94,6 +103,8 @@ It automatically attempts:
 8. draft verification-manifest generation.
 
 If the exact environment, workflow, or output locator remains ambiguous, the result is needs_review.
+
+When AUTO_VERIFY reaches execution, the raw numeric verifier verdict is preserved separately from evidence strength. Floating or otherwise weakly reconstructed dependency environments are labeled CONDITIONAL evidence; they are not presented as publication-era equivalence.
 
 A probabilistic discovery score cannot directly become a scientific verification verdict.
 
@@ -126,3 +137,12 @@ The public key is also exposed through GET /v1/issuer for independent verificati
 The hosted service is allowed to return needs_review.
 
 It is not allowed to silently relax scientific or security requirements to increase the apparent success rate.
+
+
+## Operational hardening
+
+- Requests receive an X-Request-ID correlation identifier. A safe client-supplied ID is echoed; unsafe values are replaced.
+- Hosted job metrics are available only after API-key authentication.
+- GitHub Actions used in trusted workflows are pinned to immutable commit SHAs.
+- The service container does not trust arbitrary X-Forwarded-* headers.
+- Readiness validates database type/connectivity, HTTPS configuration, API-key strength, GitHub dispatch configuration, and issuer-key parseability.
