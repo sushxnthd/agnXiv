@@ -14,6 +14,7 @@ class ResearchCase(BaseModel):
     source_task_id: str | None = None
     paper_url: str
     paper_url_versioned: str | None = None
+    paper_alternate_urls: list[str] = Field(default_factory=list)
     repository: str | None = None
     commit: str | None = None
     origin_url: str | None = None

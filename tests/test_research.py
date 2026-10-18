@@ -46,3 +46,11 @@ def test_evidence_independence_collapses_correlated_attempts() -> None:
     assert summary.independent_components == 2
     assert ["A", "B"] in summary.components
     assert ["C"] in summary.components
+
+
+def test_research_case_supports_alternate_manuscript_sources() -> None:
+    cases = load_research_cases(Path("research/benchmarks/scicoqa-pilot-v0.jsonl"))
+    bp_case = next(case for case in cases if case.case_id == "SCICOQA-183bd763")
+
+    assert bp_case.paper_alternate_urls
+    assert "fullTextXML" in bp_case.paper_alternate_urls[0]

@@ -169,9 +169,25 @@ def run_case(manifest: Path, case_id: str, output_dir: Path) -> dict:
         root = Path(temp)
         repository = root / "repository"
 
-        manuscript, resolved_paper_url, manuscript_kind, manuscript_sha256 = (
-            _materialize_manuscript(case.paper_url_versioned, root)
-        )
+        manuscript = None
+        materialization_errors: list[str] = []
+        candidate_urls = [case.paper_url_versioned, *case.paper_alternate_urls]
+        for candidate_url in candidate_urls:
+            try:
+                (
+                    manuscript,
+                    resolved_paper_url,
+                    manuscript_kind,
+                    manuscript_sha256,
+                ) = _materialize_manuscript(candidate_url, root)
+                break
+            except (OSError, ValueError) as exc:
+                materialization_errors.append(f"{candidate_url}: {exc}")
+
+        if manuscript is None:
+            raise ValueError(
+                "all manuscript sources failed: " + " | ".join(materialization_errors)
+            )
         _clone_pinned(case.repository, case.commit, repository)
 
         plan = build_auto_plan(manuscript, repository)
@@ -185,6 +201,7 @@ def run_case(manifest: Path, case_id: str, output_dir: Path) -> dict:
         "repository": case.repository,
         "commit": case.commit,
         "resolved_paper_url": resolved_paper_url,
+        "manuscript_source_candidates": candidate_urls,
         "manuscript_kind": manuscript_kind,
         "manuscript_sha256": manuscript_sha256,
         "automation_score": plan.automation_score,
