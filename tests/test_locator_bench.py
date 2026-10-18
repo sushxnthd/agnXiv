@@ -5,7 +5,7 @@ from agnxiv.locator_bench import load_locator_cases, run_locator_benchmark
 
 def test_locator_benchmark_masks_reported_answers() -> None:
     cases = load_locator_cases(Path("research/benchmarks/locator-v0.jsonl"))
-    assert len(cases) == 12
+    assert len(cases) == 30
     result = run_locator_benchmark(cases)
     assert result.cases == 12
     assert all("\\n" not in case.output for case in cases)
