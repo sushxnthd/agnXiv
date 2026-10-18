@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
 from agnxiv.service.db import Job, JobStore
+from agnxiv.service.dispatcher import GitHubActionsDispatcher
 
 
 def _productionish_config(database_url: str, *, issuer: str | None = None) -> ServiceConfig:
@@ -109,3 +110,119 @@ def test_stale_jobs_are_failed_and_release_active_quota(tmp_path) -> None:
     assert stale is not None
     assert stale.status == "failed"
     assert "callback deadline" in (stale.error or "")
+
+
+
+def test_hosted_job_submission_is_idempotent(tmp_path, monkeypatch) -> None:
+    dispatched = []
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: dispatched.append(request),
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "a" * 40,
+    )
+    config = _productionish_config(
+        f"sqlite:///{tmp_path / 'service.db'}",
+        issuer=None,
+    )
+    app = create_app(config)
+    headers = {
+        "X-API-Key": "k" * 48,
+        "Idempotency-Key": "verify-paper-2601-00001",
+    }
+    body = {
+        "mode": "auto_verify",
+        "repository": "owner/repo",
+        "repository_ref": "main",
+        "arxiv_id": "2601.00001",
+    }
+
+    with TestClient(app) as client:
+        first = client.post("/v1/jobs", headers=headers, json=body)
+        second = client.post("/v1/jobs", headers=headers, json=body)
+
+    assert first.status_code == 202
+    assert second.status_code == 202
+    assert first.json()["id"] == second.json()["id"]
+    assert len(dispatched) == 1
+
+
+def test_idempotency_key_reuse_for_different_request_is_rejected(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: None,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "b" * 40,
+    )
+    app = create_app(
+        _productionish_config(
+            f"sqlite:///{tmp_path / 'service.db'}",
+            issuer=None,
+        )
+    )
+    headers = {
+        "X-API-Key": "k" * 48,
+        "Idempotency-Key": "same-key-different-input",
+    }
+
+    with TestClient(app) as client:
+        first = client.post(
+            "/v1/jobs",
+            headers=headers,
+            json={
+                "mode": "auto_verify",
+                "repository": "owner/repo",
+                "arxiv_id": "2601.00001",
+            },
+        )
+        second = client.post(
+            "/v1/jobs",
+            headers=headers,
+            json={
+                "mode": "auto_verify",
+                "repository": "owner/repo",
+                "arxiv_id": "2601.00002",
+            },
+        )
+
+    assert first.status_code == 202
+    assert second.status_code == 409
+
+
+def test_store_idempotency_constraint_returns_existing_job(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'idempotent.db'}")
+    store.initialize()
+    kwargs = {
+        "api_key_hash": "api-hash",
+        "mode": "auto_verify",
+        "repository": "owner/repo",
+        "repository_ref": "c" * 40,
+        "arxiv_id": "2601.00001",
+        "spec_path": None,
+        "idempotency_key_hash": "idem-hash",
+        "request_fingerprint": "request-hash",
+    }
+
+    first, created_first = store.create_job_idempotent(
+        job_id="00000000-0000-0000-0000-000000000011",
+        **kwargs,
+    )
+    second, created_second = store.create_job_idempotent(
+        job_id="00000000-0000-0000-0000-000000000012",
+        **kwargs,
+    )
+
+    assert created_first is True
+    assert created_second is False
+    assert second.id == first.id
