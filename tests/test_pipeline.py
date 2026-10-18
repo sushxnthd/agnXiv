@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from agnxiv.models import Claim, VerificationPolicy, Verdict
+from agnxiv.models import Claim, Verdict, VerificationPolicy
 from agnxiv.pipeline import verify_with_command
 from agnxiv.sandbox import ExecutionResult
 
