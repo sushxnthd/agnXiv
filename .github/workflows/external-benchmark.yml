@@ -58,6 +58,9 @@ jobs:
           IMAGE_REF="$(cat /tmp/external-image-ref.txt)"
           agnxiv verify-command external/perturbation-measurements             --image "$IMAGE_REF"             --cmd python             --cmd evaluation/reproduce.py             --expected 96             --metric reported-checks             --claim-text "All 96 released paper-number checks reproduce."             --kind absolute             --tolerance 0             --output-regex '(?P<value>[0-9]+)/96 checks passed'             > /tmp/author-reproduction-audit.json
 
+      - name: Show complete reproduction audit
+        run: cat /tmp/author-reproduction-audit.json
+
       - name: Assert the complete checker is not certifiable
         run: |
           python - <<'PY'
