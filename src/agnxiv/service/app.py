@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import hashlib
 import hmac
 import json
@@ -9,7 +10,7 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
 
-from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
@@ -150,6 +151,17 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 return api_key, hash_secret(api_key)
         raise HTTPException(status_code=401, detail="invalid API key")
 
+    @app.middleware("http")
+    async def security_headers(request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length and int(content_length) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="request body too large")
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["X-Frame-Options"] = "DENY"
+        return response
+
     @app.get("/healthz")
     def healthz() -> dict:
         return {"status": "ok"}
@@ -237,6 +249,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             callback_token=callback_token,
         )
 
+        store.mark_running(job.id)
         try:
             dispatcher.dispatch(request)
         except DispatchError as exc:
@@ -248,7 +261,6 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             )
             raise HTTPException(status_code=502, detail=str(exc)) from exc
 
-        store.mark_running(job.id)
         refreshed = store.get_job(job.id)
         assert refreshed is not None
         return _job_view(refreshed)
@@ -289,7 +301,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
 
         try:
             result = _enrich_signed_result(active_config, body.result)
-        except Exception as exc:
+        except (ValueError, binascii.Error) as exc:
             store.complete(
                 job_id,
                 status="failed",
@@ -307,7 +319,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         return {"ok": True}
 
     @app.get("/", response_class=HTMLResponse)
-    def console(_: Request) -> str:
+    def console() -> str:
         return """<!doctype html>
 <html>
 <head>
