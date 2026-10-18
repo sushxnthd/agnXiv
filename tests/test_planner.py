@@ -84,3 +84,22 @@ def test_discovers_documented_bash_experiment_script(tmp_path: Path) -> None:
         and candidate.score >= 0.88
         for candidate in commands
     )
+
+
+def test_discovers_notebook_style_python_command(tmp_path: Path) -> None:
+    (tmp_path / "README.md").write_text(
+        "!python predict.py --checkpoint model.ckpt\n",
+        encoding="utf-8",
+    )
+
+    commands = discover_commands(tmp_path)
+
+    assert any(
+        candidate.command == [
+            "python",
+            "predict.py",
+            "--checkpoint",
+            "model.ckpt",
+        ]
+        for candidate in commands
+    )
