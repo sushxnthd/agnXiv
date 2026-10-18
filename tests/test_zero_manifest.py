@@ -63,3 +63,16 @@ def test_extracts_adjacent_reported_reliability_metrics() -> None:
     assert ("split_half_r", 0.51) in numeric_metrics
     assert ("spearman_brown", 0.68) in numeric_metrics
     assert ("cohens_d", 4.57) in numeric_metrics
+
+def test_leading_dot_statistics_in_manuscript() -> None:
+    text = (
+        "Reliability was measured: split-half r=.51 and "
+        "Spearman-Brown=.68 in our experiments."
+    )
+    claims = extract_quantitative_claims(text)
+    assert ("split_half_r", 0.51) in [
+        (row.metric, row.reported_value) for row in claims
+    ]
+    assert ("spearman_brown", 0.68) in [
+        (row.metric, row.reported_value) for row in claims
+    ]
