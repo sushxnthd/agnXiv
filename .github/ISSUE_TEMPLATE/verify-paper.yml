@@ -1,0 +1,59 @@
+name: Verify a paper
+description: Run AgnXiv on a public arXiv paper and/or GitHub repository
+title: "[AgnXiv Verify] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submit a public computational research artifact for automated AgnXiv analysis.
+        AUTO_PLAN never certifies when the evidence chain remains ambiguous.
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - Auto-plan from arXiv + repository
+        - Verify an agnxiv.json manifest
+    validations:
+      required: true
+
+  - type: input
+    id: repository
+    attributes:
+      label: Public GitHub repository
+      description: owner/repository or a public https://github.com/... URL
+      placeholder: phanein/deepwalk
+    validations:
+      required: true
+
+  - type: input
+    id: ref
+    attributes:
+      label: Git ref
+      description: Branch, tag, or commit. AgnXiv pins the exact commit used.
+      value: main
+    validations:
+      required: true
+
+  - type: input
+    id: arxiv
+    attributes:
+      label: arXiv ID
+      description: Required for Auto-plan. Leave blank for Verify manifest.
+      placeholder: 1403.6652
+
+  - type: input
+    id: spec
+    attributes:
+      label: Verification manifest path
+      description: Required for Verify manifest. Path must stay inside the repository.
+      placeholder: agnxiv.json
+
+  - type: checkboxes
+    id: acknowledgement
+    attributes:
+      label: Acknowledgement
+      options:
+        - label: I understand that a public repository manifest may execute code inside AgnXiv's isolated no-network verification sandbox.
+          required: true
