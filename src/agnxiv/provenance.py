@@ -24,6 +24,12 @@ class FileFingerprint(BaseModel):
     size_bytes: int = Field(ge=0)
 
 
+class DocumentFingerprint(BaseModel):
+    name: str
+    sha256: str
+    size_bytes: int = Field(ge=0)
+
+
 class ProvenanceManifest(BaseModel):
     algorithm: str = "sha256"
     tree_digest: str
@@ -43,6 +49,18 @@ def sha256_file(path: str | Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def fingerprint_document(path: str | Path) -> DocumentFingerprint:
+    """Fingerprint an exact manuscript or supplementary document."""
+    file_path = Path(path)
+    if not file_path.is_file():
+        raise ValueError(f"document path is not a file: {file_path}")
+    return DocumentFingerprint(
+        name=file_path.name,
+        sha256=sha256_file(file_path),
+        size_bytes=file_path.stat().st_size,
+    )
 
 
 def fingerprint_tree(
