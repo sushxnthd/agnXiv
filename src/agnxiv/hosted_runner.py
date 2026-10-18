@@ -198,45 +198,6 @@ def execute_job(
         raise HostedRunnerError(f"unsupported hosted job mode: {mode}")
 
 
-def post_callback(
-    *,
-    callback_url: str,
-    callback_token: str,
-    status: str,
-    result: dict | None,
-    error: str | None,
-) -> None:
-    if not callback_url.startswith("https://"):
-        raise HostedRunnerError("hosted callback URL must use HTTPS")
-
-    body = json.dumps(
-        {
-            "status": status,
-            "result": result,
-            "error": error,
-        }
-    ).encode("utf-8")
-    request = urllib.request.Request(
-        callback_url,
-        data=body,
-        method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "X-AgnXiv-Callback-Token": callback_token,
-            "User-Agent": "AgnXiv-Hosted-Runner",
-        },
-    )
-
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            if response.status not in {200, 201, 204}:
-                raise HostedRunnerError(
-                    f"callback returned HTTP {response.status}"
-                )
-    except urllib.error.URLError as exc:
-        raise HostedRunnerError(f"callback delivery failed: {exc}") from exc
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", required=True)
@@ -244,8 +205,7 @@ def main() -> None:
     parser.add_argument("--repository-ref", required=True)
     parser.add_argument("--arxiv-id", default="")
     parser.add_argument("--spec-path", default="")
-    parser.add_argument("--callback-url", required=True)
-    parser.add_argument("--callback-token", required=True)
+    parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
     status = "failed"
@@ -265,16 +225,18 @@ def main() -> None:
     except Exception as exc:
         error = f"unexpected runner failure: {type(exc).__name__}: {exc}"
 
-    post_callback(
-        callback_url=args.callback_url,
-        callback_token=args.callback_token,
-        status=status,
-        result=result,
-        error=error,
+    output = Path(args.output)
+    output.write_text(
+        json.dumps(
+            {
+                "status": status,
+                "result": result,
+                "error": error,
+            },
+            separators=(",", ":"),
+        ),
+        encoding="utf-8",
     )
-
-    if status == "failed":
-        raise SystemExit(1)
 
 
 if __name__ == "__main__":
