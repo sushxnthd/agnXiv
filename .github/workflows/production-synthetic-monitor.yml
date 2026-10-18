@@ -1,0 +1,33 @@
+name: production-synthetic-monitor
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-product:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify public AgnXiv product is reachable
+        run: |
+          set -euo pipefail
+          curl             --fail             --silent             --show-error             --location             --retry 2             --retry-delay 3             --max-time 20             https://sushxnthd.github.io/agnXiv/verify.html             | grep -qi "AgnXiv"
+
+  hosted-control-plane:
+    if: ${{ vars.AGNXIV_PRODUCTION_URL != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      AGNXIV_PRODUCTION_URL: ${{ vars.AGNXIV_PRODUCTION_URL }}
+    steps:
+      - name: Require live and ready production control plane
+        run: |
+          set -euo pipefail
+          BASE="${AGNXIV_PRODUCTION_URL%/}"
+          curl             --fail             --silent             --show-error             --retry 2             --retry-delay 3             --max-time 15             "$BASE/healthz"             | grep -q '"status":"ok"'
+          curl             --fail             --silent             --show-error             --retry 2             --retry-delay 3             --max-time 15             "$BASE/readyz"             | grep -q '"status":"ready"'
