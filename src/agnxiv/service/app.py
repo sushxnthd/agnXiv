@@ -14,7 +14,11 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from ..pipeline import VerificationBundle
-from ..statement import build_verification_statement, sign_statement_ed25519
+from ..statement import (
+    build_verification_statement,
+    public_key_pem_from_private,
+    sign_statement_ed25519,
+)
 from .config import ServiceConfig
 from .db import Job, JobStore, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
@@ -181,6 +185,30 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             )
         return {"status": "ready"}
 
+    @app.get("/v1/issuer")
+    def issuer() -> dict:
+        if not active_config.issuer_private_key_b64:
+            raise HTTPException(
+                status_code=503,
+                detail="hosted issuer key is not configured",
+            )
+        try:
+            private_key = base64.b64decode(
+                active_config.issuer_private_key_b64,
+                validate=True,
+            )
+            public_pem, key_id = public_key_pem_from_private(private_key)
+        except (ValueError, binascii.Error) as exc:
+            raise HTTPException(
+                status_code=503,
+                detail="hosted issuer key is invalid",
+            ) from exc
+        return {
+            "key_id": key_id,
+            "algorithm": "Ed25519",
+            "public_key_pem": public_pem.decode("ascii"),
+        }
+
     @app.post("/v1/jobs", response_model=JobView, status_code=202)
     def create_job(
         body: JobCreate,
@@ -284,6 +312,11 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         job = store.get_job(job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="job not found")
+        if job.status not in {"queued", "running"}:
+            raise HTTPException(
+                status_code=409,
+                detail="job is already finalized",
+            )
         if not x_agnxiv_callback_token:
             raise HTTPException(status_code=401, detail="missing callback token")
         if not _verify_callback_token(
