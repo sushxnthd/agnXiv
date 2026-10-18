@@ -36,6 +36,8 @@ def discover_commands(repository: str | Path, *, limit: int = 10) -> list[Comman
 
     for name, score in _COMMON_SCRIPTS:
         for path in root.rglob(name):
+            if path.is_symlink() or not path.is_file():
+                continue
             rel_parts = path.relative_to(root).parts
             if any(part.startswith(".") for part in rel_parts):
                 continue
@@ -50,7 +52,7 @@ def discover_commands(repository: str | Path, *, limit: int = 10) -> list[Comman
             )
 
     makefile = root / "Makefile"
-    if makefile.exists():
+    if makefile.exists() and not makefile.is_symlink():
         try:
             text = makefile.read_text(encoding="utf-8", errors="ignore")
         except OSError:
@@ -70,7 +72,7 @@ def discover_commands(repository: str | Path, *, limit: int = 10) -> list[Comman
 
     for readme_name in ("README.md", "README.rst", "README.txt"):
         readme = root / readme_name
-        if not readme.exists():
+        if not readme.exists() or readme.is_symlink():
             continue
         try:
             text = readme.read_text(encoding="utf-8", errors="ignore")
@@ -78,7 +80,7 @@ def discover_commands(repository: str | Path, *, limit: int = 10) -> list[Comman
             continue
 
         for match in re.finditer(
-            r"(?m)^\s*(python(?:3)?\s+[^\n`]+|make\s+[A-Za-z0-9_.-]+)\s*$",
+            r"(?m)^\s*(python(?:3)?\s+[^\n\x60]+|make\s+[A-Za-z0-9_.-]+)\s*$",
             text,
         ):
             raw = match.group(1).strip()
