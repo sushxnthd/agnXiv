@@ -27,6 +27,26 @@ Direct verifier: https://sushxnthd.github.io/agnXiv/verify.html
 
 The repository Issue Form remains available as a fallback submission route.
 
+## Evidence network beta
+
+AgnXiv now treats verification as a living evidence network rather than a one-shot badge:
+
+- **Lookup** — search an arXiv paper before trusting, citing, or reproducing it.
+- **Attempt** (`agnxiv.attempt/1`) — one durable reproduction or verification attempt, including blocked and inconclusive attempts.
+- **Record** (`agnxiv.record/1`) — the aggregate evidence state of one paper across attempts and challenges.
+- **Challenge** (`agnxiv.challenge/1`) — an evidence-specific result divergence with a public response thread and machine-readable provenance.
+
+Public evidence states intentionally differ from low-level verifier verdicts:
+
+- **REPRODUCED** — an executed observation satisfied the declared claim policy.
+- **PARTIALLY_REPRODUCED** — only a declared subset was supported.
+- **RESULT_DIVERGENCE** — an executed observation differed under the declared test; this is not an allegation of misconduct or universal falsity.
+- **EVIDENCE_INCOMPLETE** — AgnXiv could not safely proceed because the evidence chain or execution semantics remained ambiguous.
+- **EXECUTION_BLOCKED** — the declared attempt could not execute reliably.
+- **INCONCLUSIVE** — available evidence does not support a stronger state.
+
+Raw verifier verdicts remain preserved in provenance. AgnXiv does not collapse a paper into a universal truth score.
+
 ## What is implemented
 
 AgnXiv currently supports:
