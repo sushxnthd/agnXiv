@@ -44,3 +44,32 @@ def test_auto_plan_detects_historical_dependency_warning(tmp_path: Path) -> None
     assert any("historical dependency" in blocker for blocker in plan.blockers)
     assert plan.warnings
     assert plan.safe_to_execute is False
+
+
+def test_auto_plan_orders_generated_intermediate(tmp_path: Path) -> None:
+    paper = tmp_path / "paper.txt"
+    paper.write_text(
+        "The method achieves Micro-F1 of 42.4%.",
+        encoding="utf-8",
+    )
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+    (repo / "README.md").write_text(
+        "trainer --input data.mat --output learned.embeddings\n"
+        "python scoring.py --emb learned.embeddings --network data.mat\n",
+        encoding="utf-8",
+    )
+    (repo / "data.mat").write_bytes(b"fixture")
+    (repo / "scoring.py").write_text("print('Micro-F1: 42.4%')\n", encoding="utf-8")
+
+    plan = build_auto_plan(paper, repo)
+
+    assert plan.draft_spec is not None
+    assert plan.draft_spec.runtime.commands is not None
+    assert len(plan.draft_spec.runtime.commands) == 2
+    assert not any("missing local inputs" in blocker for blocker in plan.blockers)
+    workflow_stage = next(
+        stage for stage in plan.stages if stage.name == "workflow_ordering"
+    )
+    assert workflow_stage.complete is True
