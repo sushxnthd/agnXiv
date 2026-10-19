@@ -297,6 +297,44 @@ def _rank_claim(
     )
 
 
+def rank_claim_indices_with_statement_diversity(
+    claims: list[Claim],
+    scores: list[float],
+) -> list[int]:
+    """Rank claim statements first, then additional numbers from each statement.
+
+    A scientific sentence can contain several quantitative values. Treating
+    every value as a separate centrality candidate lets one sentence occupy
+    several top ranks and suppress unrelated headline findings. The verifier
+    still retains every numeric claim; this function only diversifies discovery
+    order by normalized statement text.
+    """
+    if len(claims) != len(scores):
+        raise ValueError("claims and scores must have the same length")
+
+    ordered = sorted(
+        range(len(claims)),
+        key=lambda index: (-scores[index], index),
+    )
+    seen: set[tuple[int | None, str]] = set()
+    representatives: list[int] = []
+    deferred: list[int] = []
+
+    for index in ordered:
+        claim = claims[index]
+        key = (
+            claim.source.page,
+            " ".join(claim.text.lower().split()),
+        )
+        if key in seen:
+            deferred.append(index)
+        else:
+            seen.add(key)
+            representatives.append(index)
+
+    return representatives + deferred
+
+
 def _historical_environment_warnings(readme: str) -> list[str]:
     warnings: list[str] = []
     lower = readme.lower()
@@ -519,7 +557,11 @@ def build_auto_plan(
                 evidence=evidence,
             )
         )
-    ranked.sort(key=lambda item: item.score, reverse=True)
+    order = rank_claim_indices_with_statement_diversity(
+        [item.claim for item in ranked],
+        [item.score for item in ranked],
+    )
+    ranked = [ranked[index] for index in order]
 
     blockers: list[str] = []
     warnings = _historical_environment_warnings(readme)
