@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import io
 import json
 
 import pytest
@@ -53,7 +52,7 @@ def test_dispatch_requires_and_returns_exact_workflow_run_id(monkeypatch) -> Non
     def fake_open(request, timeout):
         captured["url"] = request.full_url
         captured["body"] = json.loads(request.data)
-        captured["version"] = request.headers["X-github-api-version"]
+        captured["version"] = request.get_header("X-github-api-version")
         return _Response(
             {
                 "workflow_run_id": 987654321,
