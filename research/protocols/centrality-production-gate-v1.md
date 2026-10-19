@@ -52,3 +52,31 @@ Passing this gate establishes abstract-level quantitative central-claim
 routing under external author metadata. It does not establish semantic
 centrality for every claim in a full paper, and it cannot affect numeric
 verification verdicts.
+
+
+## Frozen external-source extension
+
+The ReproRepo metadata source was exhausted after development exclusions: the
+remaining unseen eligible slice contained 22 papers, which achieved Recall@3
+= 1.00 and Recall@5 = 1.00 but cannot satisfy the frozen minimum sample size.
+
+Before evaluating another source, the release protocol is therefore extended
+to an untouched deterministic partition of SciTLDR-AIC. This is not model
+training: AgnXiv has no learned centrality parameters and has never used the
+selected rows for development.
+
+The production SciTLDR holdout is frozen as:
+
+- repository: `allenai/scitldr`
+- commit: `5ccad9c00a60ad75c9e04abf7f27d0f53f983b20`
+- file: `SciTLDR-Data/SciTLDR-AIC/train.jsonl`
+- hash seed: `agnxiv-centrality-production-v1`
+- partition: `uint64(sha256(seed + "|" + paper_id)[:8]) mod 4 == 0`
+- gold: quantitative claims located directly inside SciTLDR oracle sentences;
+  qualitative-only oracle cases are excluded
+- nearest-sentence fallback: disabled
+
+The same frozen release thresholds apply unchanged: at least 75 eligible
+papers, Recall@3 >= 0.90, and Recall@5 >= 0.95. Recall@1 remains diagnostic.
+If this partition fails, bucket 0 becomes development evidence and cannot be
+reused for certification after any tuning.
