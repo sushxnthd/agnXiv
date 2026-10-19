@@ -151,3 +151,19 @@ def test_ignores_pdf_section_heading_number_before_result_prose() -> None:
     )
 
     assert claims == []
+
+
+def test_ignores_plural_section_references_inside_result_sentence() -> None:
+    claims = extract_quantitative_claims(
+        "Our method performs significantly better in Sections 4.1 and 4.2 "
+        "while achieving accuracy of 91.4% on the held-out test set."
+    )
+
+    assert not any(
+        claim.reported_value in {4.1, 4.2}
+        for claim in claims
+    )
+    assert any(
+        abs((claim.reported_value or 0) - 0.914) < 1e-9
+        for claim in claims
+    )
