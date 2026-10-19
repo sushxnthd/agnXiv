@@ -104,3 +104,46 @@ def test_dispatch_rejects_legacy_empty_response(monkeypatch) -> None:
     )
     with pytest.raises(DispatchError, match="did not return run details"):
         _dispatcher().dispatch(_request())
+
+
+def test_release_posture_requires_protected_default_branch(monkeypatch) -> None:
+    responses = iter([
+        _Response({"default_branch": "main"}),
+        _Response({"name": "main", "protected": True}),
+    ])
+    monkeypatch.setattr(
+        "agnxiv.service.dispatcher._NO_REDIRECT_OPENER.open",
+        lambda *args, **kwargs: next(responses),
+    )
+
+    posture = _dispatcher().repository_release_posture()
+
+    assert posture == {
+        "default_branch": "main",
+        "default_branch_protected": True,
+    }
+
+
+def test_release_posture_treats_missing_protection_as_unprotected(monkeypatch) -> None:
+    responses = iter([
+        _Response({"default_branch": "main"}),
+        _Response({"name": "main"}),
+    ])
+    monkeypatch.setattr(
+        "agnxiv.service.dispatcher._NO_REDIRECT_OPENER.open",
+        lambda *args, **kwargs: next(responses),
+    )
+
+    posture = _dispatcher().repository_release_posture()
+
+    assert posture["default_branch_protected"] is False
+
+
+def test_release_posture_rejects_missing_default_branch(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "agnxiv.service.dispatcher._NO_REDIRECT_OPENER.open",
+        lambda *args, **kwargs: _Response({}),
+    )
+
+    with pytest.raises(DispatchError, match="default branch"):
+        _dispatcher().repository_release_posture()
