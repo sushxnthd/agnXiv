@@ -17,6 +17,8 @@ class GitHubOIDCPolicy:
     ref: str
     workflow: str
     workflow_sha: str | None = None
+    run_id: int | None = None
+    run_attempt: int = 1
 
 
 _JWKS_URL = "https://token.actions.githubusercontent.com/.well-known/jwks"
@@ -67,6 +69,8 @@ def verify_github_actions_token(
                     "ref",
                     "workflow_ref",
                     "workflow_sha",
+                    "run_id",
+                    "run_attempt",
                 ]
             },
         )
@@ -89,6 +93,11 @@ def verify_github_actions_token(
             policy.workflow_sha is None
             or claims.get("workflow_sha") == policy.workflow_sha
         ),
+        "run_id": (
+            policy.run_id is None
+            or str(claims.get("run_id")) == str(policy.run_id)
+        ),
+        "run_attempt": str(claims.get("run_attempt")) == str(policy.run_attempt),
         "runner_environment": claims.get("runner_environment") == "github-hosted",
     }
     failed = [name for name, ok in checks.items() if not ok]
