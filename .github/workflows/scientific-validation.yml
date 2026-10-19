@@ -274,7 +274,7 @@ jobs:
       - name: Run SciTLDR development centrality benchmark
         run: |
           python research/scripts/run_scitldr_centrality_validation.py \
-            --input external/scitldr/SciTLDR-Data/SciTLDR-FullText/dev.jsonl \
+            --input external/scitldr/SciTLDR-Data/SciTLDR-AIC/dev.jsonl \
             --role development \
             --minimum-cases 75 \
             --min-recall-at-1 0.60 \
