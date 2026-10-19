@@ -64,6 +64,69 @@ def _published_date(message: dict) -> str | None:
     return None
 
 
+def publication_binding_from_datacite_payload(
+    requested_doi: str,
+    payload: dict,
+    *,
+    retrieved_at: str | None = None,
+) -> PublicationBinding:
+    data = payload.get("data")
+    if not isinstance(data, dict):
+        raise RegistryLookupError("DataCite response is missing a work record")
+    attributes = data.get("attributes")
+    if not isinstance(attributes, dict):
+        raise RegistryLookupError("DataCite work record is missing attributes")
+    returned = attributes.get("doi")
+    if not isinstance(returned, str):
+        raise RegistryLookupError("DataCite work record is missing DOI")
+    normalized = normalize_doi(requested_doi)
+    if normalize_doi(returned) != normalized:
+        raise RegistryLookupError("DataCite returned a different DOI")
+
+    titles = attributes.get("titles")
+    title = None
+    if isinstance(titles, list) and titles and isinstance(titles[0], dict):
+        raw_title = titles[0].get("title")
+        if isinstance(raw_title, str):
+            title = raw_title.strip() or None
+
+    publisher = attributes.get("publisher")
+    if isinstance(publisher, dict):
+        publisher = publisher.get("name")
+    if not isinstance(publisher, str):
+        publisher = None
+
+    canonical = json.dumps(attributes, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    from hashlib import sha256
+
+    published = attributes.get("published")
+    if not isinstance(published, str):
+        published = None
+    canonical_url = attributes.get("url")
+    if not isinstance(canonical_url, str):
+        canonical_url = f"https://doi.org/{normalized}"
+
+    work_type = None
+    types = attributes.get("types")
+    if isinstance(types, dict):
+        candidate = types.get("resourceTypeGeneral") or types.get("resourceType")
+        if isinstance(candidate, str):
+            work_type = candidate
+
+    return PublicationBinding(
+        registry="datacite",
+        doi=normalized,
+        title=title,
+        publisher=publisher,
+        work_type=work_type,
+        published=published,
+        canonical_url=canonical_url,
+        member=None,
+        retrieved_at=retrieved_at or datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        registry_record_sha256=sha256(canonical.encode("utf-8")).hexdigest(),
+    )
+
+
 def publication_binding_from_crossref_payload(
     requested_doi: str,
     payload: dict,
@@ -103,6 +166,28 @@ def publication_binding_from_crossref_payload(
     )
 
 
+def resolve_datacite_doi(doi: str, *, timeout: int = 15) -> PublicationBinding:
+    normalized = normalize_doi(doi)
+    encoded = urllib.parse.quote(normalized, safe="")
+    request = urllib.request.Request(
+        f"https://api.datacite.org/dois/{encoded}",
+        headers={
+            "Accept": "application/vnd.api+json",
+            "User-Agent": "AgnXiv/1.0 (publication-registry-verification)",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            payload = json.load(response)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            raise RegistryLookupError("DOI is not present in DataCite") from exc
+        raise RegistryLookupError(f"DataCite lookup failed with HTTP {exc.code}") from exc
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+        raise RegistryLookupError("DataCite lookup could not be completed") from exc
+    return publication_binding_from_datacite_payload(normalized, payload)
+
+
 def resolve_crossref_doi(doi: str, *, timeout: int = 15) -> PublicationBinding:
     normalized = normalize_doi(doi)
     encoded = urllib.parse.quote(normalized, safe="")
@@ -123,3 +208,20 @@ def resolve_crossref_doi(doi: str, *, timeout: int = 15) -> PublicationBinding:
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         raise RegistryLookupError("Crossref lookup could not be completed") from exc
     return publication_binding_from_crossref_payload(normalized, payload)
+
+
+def resolve_doi_registry(doi: str, *, timeout: int = 15) -> PublicationBinding:
+    normalized = normalize_doi(doi)
+    crossref_error: RegistryLookupError | None = None
+    try:
+        return resolve_crossref_doi(normalized, timeout=timeout)
+    except RegistryLookupError as exc:
+        crossref_error = exc
+
+    try:
+        return resolve_datacite_doi(normalized, timeout=timeout)
+    except RegistryLookupError as datacite_error:
+        raise RegistryLookupError(
+            "DOI could not be resolved through Crossref or DataCite: "
+            f"Crossref={crossref_error}; DataCite={datacite_error}"
+        ) from datacite_error
