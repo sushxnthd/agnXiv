@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from typing import Annotated, Literal
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
@@ -22,8 +22,9 @@ from ..statement import (
     public_key_pem_from_private,
     sign_statement_ed25519,
 )
+from ..transparency import GENESIS_HASH, TRANSPARENCY_SCHEMA
 from .config import ServiceConfig
-from .db import Job, JobStore, job_result
+from .db import Job, JobStore, TransparencyEntry, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
 from .oidc import GitHubOIDCPolicy, OIDCVerificationError, verify_github_actions_token
 from .security import (
@@ -50,6 +51,20 @@ class WorkerCallback(BaseModel):
     status: Literal["succeeded", "needs_review", "failed"]
     result: dict | None = None
     error: str | None = Field(default=None, max_length=8000)
+
+
+class TransparencyEntryView(BaseModel):
+    sequence: int
+    job_id: str
+    status: str
+    mode: str
+    repository: str
+    repository_ref: str
+    arxiv_id: str | None
+    result_sha256: str
+    previous_hash: str
+    entry_hash: str
+    created_at: str
 
 
 class JobView(BaseModel):
@@ -79,6 +94,22 @@ def _job_view(job: Job) -> JobView:
         error=job.error,
         created_at=job.created_at.isoformat(),
         updated_at=job.updated_at.isoformat(),
+    )
+
+
+def _transparency_view(entry: TransparencyEntry) -> TransparencyEntryView:
+    return TransparencyEntryView(
+        sequence=entry.sequence,
+        job_id=entry.job_id,
+        status=entry.status,
+        mode=entry.mode,
+        repository=entry.repository,
+        repository_ref=entry.repository_ref,
+        arxiv_id=entry.arxiv_id,
+        result_sha256=entry.result_sha256,
+        previous_hash=entry.previous_hash,
+        entry_hash=entry.entry_hash,
+        created_at=entry.created_at,
     )
 
 
@@ -354,6 +385,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "scientific_contract": "claim-level execution evidence; no paper truth score",
             "zero_manifest": True,
             "signed_statements": bool(active_config.issuer_private_key_b64),
+            "transparency_log": True,
         }
 
     @app.get("/v1/metrics")
@@ -366,6 +398,45 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "schema_version": "agnxiv.metrics/1",
             **store.metrics(),
         }
+
+    @app.get("/v1/transparency/head")
+    def transparency_head() -> dict:
+        sequence, head_hash = store.transparency_head()
+        return {
+            "schema_version": TRANSPARENCY_SCHEMA,
+            "sequence": sequence,
+            "head_hash": head_hash,
+            "genesis_hash": GENESIS_HASH,
+        }
+
+    @app.get("/v1/transparency")
+    def transparency_entries(
+        after: int = Query(default=0, ge=0),
+        limit: int = Query(default=100, ge=1, le=1000),
+    ) -> dict:
+        entries = store.list_transparency_entries(
+            after_sequence=after,
+            limit=limit,
+        )
+        return {
+            "schema_version": TRANSPARENCY_SCHEMA,
+            "entries": [
+                _transparency_view(entry).model_dump(mode="json")
+                for entry in entries
+            ],
+        }
+
+    @app.get(
+        "/v1/transparency/{sequence}",
+        response_model=TransparencyEntryView,
+    )
+    def transparency_entry(sequence: int) -> TransparencyEntryView:
+        if sequence < 1:
+            raise HTTPException(status_code=404, detail="transparency entry not found")
+        entry = store.get_transparency_entry(sequence)
+        if entry is None:
+            raise HTTPException(status_code=404, detail="transparency entry not found")
+        return _transparency_view(entry)
 
     @app.get("/v1/issuer")
     def issuer() -> dict:
