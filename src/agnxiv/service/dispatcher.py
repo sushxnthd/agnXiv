@@ -72,6 +72,48 @@ class GitHubActionsDispatcher:
         self.workflow = workflow
 
 
+    def repository_release_posture(self) -> dict[str, object]:
+        """Read public release-governance state without mutating repository settings."""
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {self.token}",
+            "X-GitHub-Api-Version": "2026-03-10",
+            "User-Agent": "AgnXiv-Service",
+        }
+
+        def get_json(url: str) -> dict:
+            request = urllib.request.Request(url, headers=headers)
+            try:
+                with _NO_REDIRECT_OPENER.open(  # nosec B310 - fixed api.github.com origin
+                    request,
+                    timeout=20,
+                ) as response:
+                    return _read_json_response(response)
+            except urllib.error.HTTPError as exc:
+                raise DispatchError(
+                    f"GitHub release-posture query failed with HTTP {exc.code}"
+                ) from exc
+            except urllib.error.URLError as exc:
+                raise DispatchError(
+                    f"GitHub release-posture query failed: {exc}"
+                ) from exc
+
+        repository = get_json(
+            f"https://api.github.com/repos/{self.repository}"
+        )
+        default_branch = repository.get("default_branch")
+        if not isinstance(default_branch, str) or not default_branch:
+            raise DispatchError("GitHub repository has no valid default branch")
+
+        branch_name = urllib.parse.quote(default_branch, safe="")
+        branch = get_json(
+            f"https://api.github.com/repos/{self.repository}/branches/{branch_name}"
+        )
+        return {
+            "default_branch": default_branch,
+            "default_branch_protected": branch.get("protected") is True,
+        }
+
     def resolve_commit(self, repository: str, ref: str) -> str:
         encoded_ref = urllib.parse.quote(ref, safe="")
         url = (
