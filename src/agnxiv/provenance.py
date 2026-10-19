@@ -153,18 +153,28 @@ def fingerprint_tree(
         if path.is_symlink():
             try:
                 files.append(_fingerprint_symlink(path, rel))
-            except OSError:
-                continue
+            except OSError as exc:
+                raise ValueError(
+                    f"could not fingerprint repository symlink: {rel.as_posix()}"
+                ) from exc
             continue
 
-        if not path.is_file():
+        try:
+            is_file = path.is_file()
+        except OSError as exc:
+            raise ValueError(
+                f"could not inspect repository path: {rel.as_posix()}"
+            ) from exc
+        if not is_file:
             continue
 
         try:
             size = path.stat().st_size
             digest = sha256_file(path)
-        except OSError:
-            continue
+        except OSError as exc:
+            raise ValueError(
+                f"could not fingerprint repository file: {rel.as_posix()}"
+            ) from exc
 
         files.append(
             FileFingerprint(
