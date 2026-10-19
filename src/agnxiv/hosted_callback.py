@@ -130,7 +130,11 @@ def send_result(
                     f"callback returned HTTP {response.status}"
                 )
     except urllib.error.HTTPError as exc:
-        body = exc.read(2000).decode("utf-8", errors="replace")
+        body = (
+            exc.read(2000).decode("utf-8", errors="replace")
+            if exc.fp is not None
+            else ""
+        )
         raise CallbackError(
             f"callback failed with HTTP {exc.code}: {body}"
         ) from exc
