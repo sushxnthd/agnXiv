@@ -34,7 +34,8 @@ jobs:
             tests/test_oidc.py \
             tests/test_hosted_runner.py \
             tests/test_network.py \
-            tests/test_site_contract.py
+            tests/test_site_contract.py \
+            tests/test_supply_chain_contract.py
 
       - name: Run frozen safety benchmarks
         run: |
