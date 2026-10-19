@@ -158,6 +158,16 @@ def _gold_abstract_indices(
     return set(), None
 
 
+def _load_exclusions(path: Path | None) -> set[str]:
+    if path is None:
+        return set()
+    return {
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+
+
 def _load_rows(paths: list[Path]) -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     seen: set[str] = set()
@@ -181,7 +191,7 @@ def _eligible_case(row: dict[str, str]) -> dict | None:
 
     abstract_claims = extract_quantitative_claims(abstract)
     tldr_claims = extract_quantitative_claims(tldr)
-    if len(abstract_claims) < 2 or not tldr_claims:
+    if len(abstract_claims) < 2:
         # A one-candidate abstract does not meaningfully test ranking.
         return None
 
@@ -282,6 +292,7 @@ def _balanced_sample(cases: list[dict], *, maximum: int) -> list[dict]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", action="append", required=True)
+    parser.add_argument("--exclude")
     parser.add_argument("--max-cases", type=int, default=120)
     parser.add_argument("--minimum-cases", type=int, default=75)
     parser.add_argument("--min-recall-at-1", type=float, default=0.60)
@@ -290,10 +301,12 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
+    exclusions = _load_exclusions(Path(args.exclude) if args.exclude else None)
     rows = _load_rows([Path(value) for value in args.input])
     eligible = [
         case
         for row in rows
+        if _paper_key(row) not in exclusions
         if (case := _eligible_case(row)) is not None
     ]
     cases = _balanced_sample(eligible, maximum=args.max_cases)
@@ -365,6 +378,7 @@ def main() -> None:
         ),
         "cases": total,
         "eligible_before_sampling": len(eligible),
+        "excluded_development_papers": len(exclusions),
         "strata": dict(sorted(strata.items())),
         "gold_methods": dict(sorted(gold_methods.items())),
         "recall_at_1": recall_at_1,
