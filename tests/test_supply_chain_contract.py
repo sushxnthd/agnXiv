@@ -108,3 +108,15 @@ def test_untrusted_research_runs_only_on_fresh_github_hosted_vm() -> None:
     assert "contents: read" in permissions
     assert "id-token: write" not in permissions
     assert "actions: write" not in permissions
+
+
+def test_hosted_callback_trust_roots_are_not_dispatch_inputs() -> None:
+    text = _read(".github/workflows/hosted-verify.yml")
+    input_block = text.split("inputs:", 1)[1].split("\npermissions:", 1)[0]
+    assert "callback_url:" not in input_block
+    assert "oidc_audience:" not in input_block
+    callback = text.split("\n  callback:\n", 1)[1]
+    assert "vars.AGNXIV_PRODUCTION_URL" in callback
+    assert "vars.AGNXIV_OIDC_AUDIENCE_BASE" in callback
+    assert "--callback-url "$CALLBACK_URL"" in callback
+    assert "--audience "$OIDC_AUDIENCE"" in callback
