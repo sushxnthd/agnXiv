@@ -14,6 +14,7 @@ from pathlib import Path
 from .auto import build_auto_plan
 from .build import build_python_environment
 from .models import Claim
+from .pipeline import RuntimeBuildEvidence, VerificationBundle
 from .preprint import parse_arxiv_reference
 from .provenance import detect_git_identity
 from .service.security import validate_git_ref, validate_github_slug
@@ -339,6 +340,27 @@ def _validate_hosted_image(image: str) -> str:
 
 def _pull_image(image: str) -> None:
     _run(["docker", "pull", image], timeout=600)
+
+
+def _runtime_build_evidence(build) -> RuntimeBuildEvidence:
+    return RuntimeBuildEvidence(
+        builder=build.plan.builder,
+        plan_id=build.plan.plan_id,
+        dependency_file=build.plan.dependency_file,
+        dependency_sha256=build.plan.dependency_sha256,
+        dependency_precision=build.plan.dependency_precision,
+        base_image_id=build.base_image_id,
+        image_id=build.image_id,
+    )
+
+
+def _bind_runtime_build(
+    bundle: VerificationBundle,
+    build,
+) -> VerificationBundle:
+    return bundle.model_copy(
+        update={"runtime_build": _runtime_build_evidence(build)}
+    )
 
 
 def execute_job(
