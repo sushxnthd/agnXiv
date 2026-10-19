@@ -85,6 +85,7 @@ jobs:
           if-no-files-found: error
 
   callback:
+    if: ${{ always() }}
     needs: execute
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -104,10 +105,38 @@ jobs:
           cache: pip
 
       - name: Download isolated result
+        id: download-result
+        continue-on-error: true
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: agnxiv-result-${{ inputs.job_id }}
           path: /tmp/agnxiv-result
+
+      - name: Synthesize terminal failure when worker produced no result
+        if: ${{ steps.download-result.outcome != 'success' }}
+        env:
+          EXECUTE_RESULT: ${{ needs.execute.result }}
+        run: |
+          mkdir -p /tmp/agnxiv-result
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          outcome = os.environ.get("EXECUTE_RESULT", "unknown")
+          payload = {
+              "status": "failed",
+              "result": None,
+              "error": (
+                  "trusted hosted worker did not produce a callback artifact; "
+                  f"execute_job={outcome}"
+              ),
+          }
+          Path("/tmp/agnxiv-result/agnxiv-hosted-result.json").write_text(
+              json.dumps(payload, separators=(",", ":")),
+              encoding="utf-8",
+          )
+          PY
 
       - name: Authenticate with GitHub OIDC and deliver result
         env:
