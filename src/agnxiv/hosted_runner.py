@@ -181,7 +181,7 @@ def extract_pdf_claims_isolated(
     output = workspace / "paper-claims.json"
     command = [
         sys.executable,
-        "-I",
+        "-s",
         "-m",
         "agnxiv.pdf_extract_worker",
         "--input",
