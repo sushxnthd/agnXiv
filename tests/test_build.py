@@ -119,3 +119,46 @@ def test_symlinked_requirements_are_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="symlinks are not allowed"):
         plan_python_environment(tmp_path)
+
+
+def test_runtime_build_uses_selected_nested_requirements_only(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    scoped = tmp_path / "examples" / "eval"
+    scoped.mkdir(parents=True)
+    (scoped / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+    (tmp_path / "secret_research.py").write_text("SECRET = True\n", encoding="utf-8")
+
+    seen_requirements: list[str] = []
+
+    def fake_resolve(image: str) -> str:
+        return "sha256:built" if image.startswith("agnxiv-env:") else "sha256:base"
+
+    def fake_run(command, **kwargs):
+        context = Path(command[-1])
+        assert sorted(path.name for path in context.iterdir()) == [
+            "Dockerfile",
+            "requirements.txt",
+        ]
+        assert not (context / "secret_research.py").exists()
+        seen_requirements.append(
+            (context / "requirements.txt").read_text(encoding="utf-8")
+        )
+        return SimpleNamespace(returncode=0, stdout="built", stderr="")
+
+    monkeypatch.setattr("agnxiv.build.resolve_local_image_id", fake_resolve)
+    monkeypatch.setattr("agnxiv.build.subprocess.run", fake_run)
+
+    result = build_python_environment(
+        tmp_path,
+        dependency_file="examples/eval/requirements.txt",
+    )
+
+    assert result.plan.dependency_file == "examples/eval/requirements.txt"
+    assert seen_requirements == ["numpy==2.1.0\n"]
+
+
+def test_nested_dependency_manifest_must_stay_inside_workspace(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="workspace-relative"):
+        plan_python_environment(tmp_path, dependency_file="../requirements.txt")
