@@ -26,6 +26,8 @@ _MAX_REPOSITORY_FILES = 20_000
 _HOSTED_IMAGE_RE = re.compile(
     r"^python:3\.(?:10|11|12)(?:\.\d+)?-slim(?:-bookworm)?$"
 )
+_PDF_PARSER_IMAGE = "agnxiv-pdf-parser:trusted"
+_MAX_PDF_PARSER_OUTPUT_BYTES = 16 * 1024 * 1024
 
 
 class HostedRunnerError(RuntimeError):
@@ -186,11 +188,28 @@ def _limit_pdf_parser_process() -> None:
     resource.setrlimit(resource.RLIMIT_NOFILE, (128, 128))
 
 
-def extract_pdf_claims_isolated(
+def _load_pdf_claim_payload(output: Path) -> list[Claim]:
+    try:
+        if output.stat().st_size > _MAX_PDF_PARSER_OUTPUT_BYTES:
+            raise ValueError("parser output exceeds hosted size limit")
+        payload = json.loads(output.read_text(encoding="utf-8"))
+        raw_claims = payload.get("claims")
+        if payload.get("ok") is not True or not isinstance(raw_claims, list):
+            raise ValueError("parser output schema is invalid")
+        if len(raw_claims) > 2_000:
+            raise ValueError("parser returned too many claims")
+        return [Claim.model_validate(item) for item in raw_claims]
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        raise HostedRunnerError(
+            "isolated PDF parser returned invalid claim data"
+        ) from exc
+
+
+def _extract_pdf_claims_host_fallback(
     paper: Path,
     workspace: Path,
 ) -> list[Claim]:
-    """Parse a downloaded PDF outside the trusted hosted worker process."""
+    """Local/test fallback. Hosted production execution uses the Docker path."""
     if os.name != "posix":
         raise HostedRunnerError(
             "hosted PDF parsing requires POSIX resource-limit isolation"
@@ -233,19 +252,80 @@ def extract_pdf_claims_isolated(
             except (OSError, json.JSONDecodeError):
                 pass
         raise HostedRunnerError(f"could not safely parse arXiv PDF: {reason}")
+    return _load_pdf_claim_payload(output)
 
+
+def extract_pdf_claims_isolated(
+    paper: Path,
+    workspace: Path,
+    *,
+    parser_image: str | None = None,
+) -> list[Claim]:
+    """Parse a PDF in a no-network unprivileged container for hosted runs."""
+    if parser_image is None:
+        return _extract_pdf_claims_host_fallback(paper, workspace)
+
+    paper = paper.resolve()
+    if not paper.is_file() or paper.is_symlink():
+        raise HostedRunnerError("PDF input must be a regular non-symlink file")
+
+    output_dir = workspace / "pdf-parser-output"
+    output_dir.mkdir(mode=0o777)
+    output_dir.chmod(0o777)
+    output = output_dir / "claims.json"
+
+    command = [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--ipc",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "64",
+        "--memory",
+        "1024m",
+        "--cpus",
+        "1",
+        "--user",
+        "65534:65534",
+        "--ulimit",
+        "nofile=128:128",
+        "--ulimit",
+        "core=0:0",
+        "--tmpfs",
+        "/tmp:rw,noexec,nosuid,nodev,size=64m",
+        "--mount",
+        f"type=bind,src={paper},dst=/input/paper.pdf,readonly",
+        "--mount",
+        f"type=bind,src={output_dir.resolve()},dst=/output",
+        parser_image,
+        "--input",
+        "/input/paper.pdf",
+        "--output",
+        "/output/claims.json",
+    ]
     try:
-        payload = json.loads(output.read_text(encoding="utf-8"))
-        raw_claims = payload.get("claims")
-        if payload.get("ok") is not True or not isinstance(raw_claims, list):
-            raise ValueError("parser output schema is invalid")
-        if len(raw_claims) > 2_000:
-            raise ValueError("parser returned too many claims")
-        return [Claim.model_validate(item) for item in raw_claims]
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        completed = subprocess.run(
+            command,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=45,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
         raise HostedRunnerError(
-            "isolated PDF parser returned invalid claim data"
+            f"containerized PDF extraction failed: {type(exc).__name__}"
         ) from exc
+    if completed.returncode != 0 or not output.is_file():
+        raise HostedRunnerError("could not safely parse arXiv PDF in parser container")
+    return _load_pdf_claim_payload(output)
 
 
 def _validate_hosted_image(image: str) -> str:
@@ -279,7 +359,11 @@ def execute_job(
                 raise HostedRunnerError("AUTO mode requires an arXiv identifier")
             paper = workspace / "paper.pdf"
             download_arxiv_pdf(arxiv_id, paper)
-            paper_claims = extract_pdf_claims_isolated(paper, workspace)
+            paper_claims = extract_pdf_claims_isolated(
+                paper,
+                workspace,
+                parser_image=_PDF_PARSER_IMAGE,
+            )
             identity = detect_git_identity(repo)
             if identity is None:
                 raise HostedRunnerError("checked-out repository has no Git identity")
