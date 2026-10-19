@@ -15,6 +15,8 @@ COPY migrations ./migrations
 
 RUN python -m pip install "pip==26.2.1" && \
     python -m pip install -c constraints-service.txt ".[service,sign,pdf]" && \
+    python -m pip install -c constraints-service.txt \
+      "jaraco.context" "msgpack" "setuptools" "urllib3" "wheel" && \
     python -m pip check
 
 USER agnxiv
