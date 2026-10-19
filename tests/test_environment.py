@@ -40,3 +40,15 @@ def test_version_pinned_requirements_are_historically_constrained(tmp_path: Path
     assert spec.dependency_source == "manifest"
     assert spec.dependency_precision == "version-pinned"
     assert spec.historical_fidelity == "constrained"
+
+
+def test_lockfile_precedence_survives_conda_manifest(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text("[tool.poetry]\nname='x'\n", encoding="utf-8")
+    (tmp_path / "poetry.lock").write_text("# frozen lock\n", encoding="utf-8")
+    (tmp_path / "environment.yml").write_text("name: x\n", encoding="utf-8")
+
+    spec = infer_python_environment(tmp_path)
+
+    assert spec.dependency_source == "lockfile"
+    assert spec.dependency_precision == "locked"
+    assert spec.historical_fidelity == "constrained"

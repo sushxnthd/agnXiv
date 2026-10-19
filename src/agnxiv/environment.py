@@ -184,7 +184,8 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         dependency_files.append(conda_file.name)
         notes.append("Conda environment detected; a Conda-capable builder is required.")
         confidence = max(confidence, 0.8)
-        dependency_source = "manifest"
+        if dependency_source != "lockfile":
+            dependency_source = "manifest"
         if dependency_precision == "none":
             dependency_precision = "floating"
             historical_fidelity = "approximate"

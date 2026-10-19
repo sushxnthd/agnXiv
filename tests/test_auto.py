@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from agnxiv.auto import build_auto_plan, score_claim_centrality
+from agnxiv.auto import (
+    build_auto_plan,
+    rank_claim_indices_with_statement_diversity,
+    score_claim_centrality,
+)
 from agnxiv.models import Claim, ClaimSource
 
 
@@ -196,3 +200,18 @@ def test_centrality_score_is_discovery_only_and_bounded() -> None:
     score = score_claim_centrality(claim, evidence_score=1.0)
 
     assert 0.0 <= score <= 1.0
+
+
+def test_statement_diversity_prevents_one_sentence_from_filling_top_ranks() -> None:
+    claims = [
+        Claim(id="a", text="Our method improves accuracy by 10% and latency by 20%."),
+        Claim(id="b", text="Our method improves accuracy by 10% and latency by 20%."),
+        Claim(id="c", text="A separate central result reduces memory by 3x."),
+    ]
+    order = rank_claim_indices_with_statement_diversity(
+        claims,
+        [0.90, 0.88, 0.80],
+    )
+
+    assert order[:2] == [0, 2]
+    assert order[2] == 1

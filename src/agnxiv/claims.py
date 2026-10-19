@@ -65,7 +65,7 @@ _CLAIM_SIGNALS = (
 )
 
 _LABEL_RE = re.compile(
-    r"(?:figure|fig|table|algorithm|alg|equation|eq|section|sec|lines?|appendix)"
+    r"(?:figures?|figs?|tables?|algorithms?|algs?|equations?|eqs?|sections?|secs?|lines?|appendices?|appendix)"
     r"\s*$",
     flags=re.IGNORECASE,
 )
@@ -73,7 +73,21 @@ _LABEL_RE = re.compile(
 
 _HYPHENS = "-‐‑‒–—"
 _DIMENSION_RE = re.compile(
-    r"(?<!\d)\d{2,5}\s*(?:x|×|\^|ˆ)\s*\d{2,5}(?!\d)",
+    r"(?<!\d)\d{1,5}\s*(?:x|×|\^|ˆ)\s*\d{1,5}(?!\d)",
+    flags=re.IGNORECASE,
+)
+
+_VARIABLE_ASSIGNMENT_RE = re.compile(
+    r"(?:^|[\s(])(?P<name>[A-Za-z])\s*=\s*$"
+)
+_TOP_INDEX_RE = re.compile(r"\btop\s*-\s*$", flags=re.IGNORECASE)
+_STRUCTURAL_PREFIX_RE = re.compile(
+    r"(?:§|(?:sections?|secs?\.?|figures?|figs?\.?|tables?|equations?|eqs?\.?))\s*$",
+    flags=re.IGNORECASE,
+)
+_STRUCTURAL_SEQUENCE_PREFIX_RE = re.compile(
+    r"(?:sections?|secs?\.?|figures?|figs?\.?|tables?|equations?|eqs?\.?)"
+    r"\s+(?:\d+(?:\.\d+)?\s*(?:,|and|or|[-–—])\s*)*$",
     flags=re.IGNORECASE,
 )
 
@@ -206,6 +220,12 @@ def _sentence_context(
             right = position + 1
             break
 
+    sentence = text[left:right].strip()
+    # Keep one stable statement string for all numeric values in a normal
+    # scientific sentence. This prevents a multi-number headline result from
+    # being fragmented into several slightly shifted pseudo-claims.
+    if len(sentence) <= 1200:
+        return sentence
     return text[max(left, start - radius) : min(right, end + radius)].strip()
 
 
@@ -239,7 +259,71 @@ def _looks_like_label_or_citation(
 
     start = match.start("value")
     prefix = normalized[max(0, start - 40) : start]
-    return bool(_LABEL_RE.search(prefix))
+    return bool(
+        _LABEL_RE.search(prefix)
+        or _STRUCTURAL_PREFIX_RE.search(prefix)
+        or _STRUCTURAL_SEQUENCE_PREFIX_RE.search(prefix)
+        or _TOP_INDEX_RE.search(prefix)
+    )
+
+
+def _looks_like_structural_quantity(
+    normalized: str,
+    match: re.Match[str],
+    *,
+    value: float,
+    unit: str | None,
+    uncertainty_raw: str | None,
+    metric: str | None,
+    local_context: str,
+) -> bool:
+    """Reject equation/list/section numerals that are not measured outcomes."""
+    start = match.start("value")
+    end = match.end("value")
+    prefix = normalized[max(0, start - 24) : start]
+    suffix = normalized[end : min(len(normalized), end + 4)]
+    lower_context = local_context.lower()
+
+    # Enumerated list labels such as "1) robust accuracy" are structural even
+    # when the remainder of the sentence contains a metric name.
+    if (
+        not unit
+        and not uncertainty_raw
+        and value.is_integer()
+        and abs(value) <= 50
+        and suffix.startswith((")", ":"))
+    ):
+        return True
+
+    variable = _VARIABLE_ASSIGNMENT_RE.search(prefix)
+    if (
+        variable is not None
+        and not unit
+        and not uncertainty_raw
+        and any(
+            phrase in lower_context
+            for phrase in ("we set", "we use", "let ", "where ", "denote", "defined as")
+        )
+    ):
+        # Procedural symbolic assignments such as k=2, B=1.2 or t=2 are
+        # configuration/equation values. Do not blanket-reject statistical
+        # assignments such as a reported p=0.05.
+        return True
+
+    if unit or uncertainty_raw or metric:
+        return False
+
+    if value.is_integer() and abs(value) <= 50:
+        stripped = local_context.lstrip()
+        literal = str(int(value))
+        if re.match(
+            rf"^{re.escape(literal)}\s+(?:we|our|the|in|results?|experiments?)\b",
+            stripped,
+            flags=re.IGNORECASE,
+        ):
+            return True
+
+    return False
 
 
 def extract_quantitative_claims(
@@ -290,6 +374,17 @@ def extract_quantitative_claims(
         metric = _metric_from_context(preceding) or _metric_from_context(local_context)
 
         if not unit and not uncertainty_raw and value.is_integer() and 1900 <= value <= 2100:
+            continue
+
+        if _looks_like_structural_quantity(
+            normalized,
+            match,
+            value=value,
+            unit=unit,
+            uncertainty_raw=uncertainty_raw,
+            metric=metric,
+            local_context=local_context,
+        ):
             continue
 
         if not _looks_material(
