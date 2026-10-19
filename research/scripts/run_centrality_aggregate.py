@@ -25,7 +25,7 @@ def main() -> None:
     for report in reports:
         details = report.get("cases_detail")
         if not isinstance(details, list):
-            raise ValueError("centrality report is missing cases_detail")
+            raise TypeError("centrality report is missing cases_detail")
         cases.extend(details)
         sources.append(
             {
@@ -39,7 +39,7 @@ def main() -> None:
         )
 
     ids = [
-        str(case.get("paper_id") or case.get("paper_key") or case.get("case_id") or "")
+        str(case.get("paper_id") or case.get("paper_cluster") or case.get("paper_key") or case.get("case_id") or "")
         for case in cases
     ]
     if any(not value for value in ids):
