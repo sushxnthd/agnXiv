@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
 import math
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Literal
 
@@ -43,7 +43,6 @@ class Claim(BaseModel):
     unit: str | None = None
     source: ClaimSource = Field(default_factory=ClaimSource)
     evidence: list[EvidenceRef] = Field(default_factory=list)
-
 
     @model_validator(mode="after")
     def validate_finite_claim_values(self) -> Claim:
