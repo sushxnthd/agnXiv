@@ -3,148 +3,158 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="AgnXiv independently tests computational research claims against executable evidence.">
-  <title>AgnXiv — verification for computational research</title>
+  <meta name="description" content="AgnXiv turns computational research claims into executable, evidence-bound verification records.">
+  <meta name="theme-color" content="#090b0a">
+  <title>AgnXiv — executable verification for computational research</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body data-page="home">
   <header class="topbar">
     <div class="shell nav-shell">
-      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>by Kernellum Labs</small></span></a>
+      <a class="brand brand-lockup" href="./">
+        <span class="brand-mark">aX</span>
+        <span class="brand-stack"><strong>agnXiv</strong><small>Kernellum Labs</small></span>
+      </a>
       <nav class="nav-links">
-        <a href="./lookup.html">Lookup</a>
+        <a href="./lookup.html">Evidence</a>
         <a href="./verify.html">Verify</a>
-        <a href="#runs">Registry</a>
-        <a href="#method">Method</a>
-        <a href="#for-whom">For teams</a>
+        <a href="#protocol">Protocol</a>
+        <a href="#validation">Validation</a>
       </nav>
-      <a class="button compact" href="./verify.html">New verification</a>
+      <a class="release-pill" href="https://github.com/sushxnthd/agnXiv/releases/tag/v0.1.0"><span class="pulse"></span>v0.1.0</a>
     </div>
   </header>
 
   <main>
-    <section class="shell hero">
-      <div class="hero-copy">
-        <div class="eyebrow">Kernellum Labs · Scientific verification infrastructure</div>
-        <h1>Does the result actually reproduce?</h1>
-        <p class="lede">AgnXiv turns claims in computational papers into executable tests, reconstructs the evidence chain, and returns a replayable verdict instead of another AI review.</p>
+    <section class="hero-grid shell">
+      <div class="hero-main">
+        <div class="kicker"><span>COMPUTATIONAL VERIFICATION INFRASTRUCTURE</span><span>PUBLIC BETA</span></div>
+        <h1>Claims should<br>survive execution.</h1>
+        <p class="lede">AgnXiv converts quantitative claims from computational papers into executable tests, runs them against pinned evidence, and publishes a replayable record of what held, what diverged, and where verification had to stop.</p>
         <div class="hero-actions">
-          <a class="button primary" href="./lookup.html">Check a paper</a>
-          <a class="button ghost" href="./verify.html">Verify your work</a>
+          <a class="button primary" href="./lookup.html">Search evidence <span>↗</span></a>
+          <a class="button ghost" href="./verify.html">Verify a paper</a>
         </div>
-        <a class="hero-proof-link" href="./result.html?issue=26">See the DeepWalk verification record →</a>
-        <div class="signal-row">
-          <div><strong>78+</strong><span>core tests</span></div>
-          <div><strong>88.9%</strong><span>DeepWalk auto-planning</span></div>
-          <div><strong>0</strong><span>verdicts from model opinion</span></div>
+        <div class="hero-meta mono">
+          <span>DISCOVERY MAY BE PROBABILISTIC.</span>
+          <span>VERDICTS ARE EVIDENCE-BOUND.</span>
         </div>
       </div>
 
-      <aside class="verification-card">
-        <div class="card-head">
-          <div>
-            <span class="dot"></span>
-            <span class="mono subtle">verification record</span>
-          </div>
-          <span class="badge review">EVIDENCE INCOMPLETE</span>
+      <aside class="evidence-terminal" aria-label="AgnXiv verification trace">
+        <div class="terminal-head">
+          <span class="mono">AX / TRACE</span>
+          <span class="terminal-status"><i></i> RECORD SEALED</span>
         </div>
-        <h3>DeepWalk</h3>
-        <p class="card-sub">Perozzi, Al-Rfou & Skiena · arXiv:1403.6652</p>
-        <div class="metric-block">
-          <div class="metric-label">Automation</div>
-          <div class="metric-value">88.9%</div>
-          <div class="progress"><span style="width:88.9%"></span></div>
-          <div class="metric-foot">8 / 9 verification stages completed automatically</div>
+        <div class="trace-title">
+          <span class="trace-id">AX-EVIDENCE-0417</span>
+          <strong>verification/claim-02</strong>
         </div>
-        <dl class="record-list">
-          <div><dt>Repository</dt><dd>phanein/deepwalk</dd></div>
-          <div><dt>Workflow</dt><dd>2-stage pipeline discovered</dd></div>
-          <div><dt>Environment</dt><dd>historical dependency flagged</dd></div>
-          <div><dt>Verdict</dt><dd>abstained safely</dd></div>
-        </dl>
-        <a class="record-link" href="./result.html?issue=26">Open verification record →</a>
+        <div class="trace-grid">
+          <div><span>SOURCE</span><b>arXiv + Git</b></div>
+          <div><span>COMMIT</span><b>2f83d0fa…</b></div>
+          <div><span>LOCATOR</span><b>frozen before compare</b></div>
+          <div><span>NETWORK</span><b>disabled</b></div>
+        </div>
+        <div class="claim-box">
+          <span class="mono">CLAIM / SPLIT-HALF RELIABILITY</span>
+          <div class="claim-values"><span>reported <b>0.510</b></span><span>observed <b>0.504</b></span></div>
+          <div class="delta-line"><span></span></div>
+          <p>Outcome is computed from declared evidence and an explicit comparison policy. No model opinion enters the verdict.</p>
+        </div>
+        <div class="trace-footer">
+          <span>PROVENANCE</span>
+          <code>sha256:7c4a…91e2</code>
+          <span class="sealed">DSSE / SEALED</span>
+        </div>
       </aside>
     </section>
 
-    <section class="band">
-      <div class="shell band-inner">
-        <span>REPRODUCED</span>
-        <span>RESULT DIVERGENCE</span>
-        <span>EVIDENCE INCOMPLETE</span>
-        <span>INCONCLUSIVE</span>
-        <span>ROBUSTNESS TESTED</span>
+    <section class="proof-strip" id="validation">
+      <div class="shell proof-grid">
+        <article><span class="proof-label">FALSE-PASS SAFETY</span><strong>0 / 308</strong><p>external negative-control paper clusters</p></article>
+        <article><span class="proof-label">CLAIM ROUTING</span><strong>98.84%</strong><p>Recall@3 across 86 held-out papers</p></article>
+        <article><span class="proof-label">ENV RECOVERY</span><strong>7 / 8</strong><p>held-out dependency-only builds</p></article>
+        <article><span class="proof-label">RELEASE</span><strong>v0.1.0</strong><p>reproducible artifacts + SBOM + provenance</p></article>
       </div>
     </section>
 
-    <section class="shell method" id="method">
-      <div class="section-intro">
-        <div class="eyebrow">How AgnXiv works</div>
-        <h2>Verification, not vibes.</h2>
-        <p>Discovery can be probabilistic. A final computational verdict must be tied to exact executable evidence.</p>
-      </div>
-      <div class="method-grid">
-        <article><span>01</span><h3>Compile claims</h3><p>Extract material quantitative claims and map each one to the paper, code, data, figures, and reported value.</p></article>
-        <article><span>02</span><h3>Reconstruct evidence</h3><p>Pin the repository commit, infer dependencies, identify the experiment workflow, and bind every declared artifact.</p></article>
-        <article><span>03</span><h3>Execute in isolation</h3><p>Run research code inside a hardened, no-network sandbox with immutable host evidence and bounded resources.</p></article>
-        <article><span>04</span><h3>Issue a record</h3><p>Compare observed output against an explicit policy and publish the provenance needed to inspect or replay the result.</p></article>
-      </div>
-    </section>
-
-    <section class="shell audience" id="for-whom">
-      <div class="section-intro audience-intro">
+    <section class="shell protocol-section" id="protocol">
+      <div class="section-number mono">01 / VERIFICATION CONTRACT</div>
+      <div class="section-split">
         <div>
-          <div class="eyebrow">Built for scientific workflows</div>
-          <h2>One verification layer, three audiences.</h2>
+          <h2>From paper to<br>evidence record.</h2>
+          <p>AgnXiv separates discovery from verification. It can use heuristics to find a claim or workflow, but it cannot issue a positive numeric verdict until the tested claim, source, runtime, locator, and comparison policy are explicitly bound.</p>
         </div>
-        <p>AgnXiv is designed to make executable evidence legible to the people who create, review, and depend on computational research.</p>
-      </div>
-      <div class="audience-grid">
-        <article>
-          <span class="audience-kicker">Researchers</span>
-          <h3>Prove what actually reproduces.</h3>
-          <p>Turn a paper and repository into a claim-by-claim verification record without asking readers to rebuild the experiment themselves.</p>
-        </article>
-        <article>
-          <span class="audience-kicker">Reviewers</span>
-          <h3>Audit evidence, not screenshots.</h3>
-          <p>See the exact commit, environment, workflow, observed output, blockers, and abstentions behind every computational verdict.</p>
-        </article>
-        <article>
-          <span class="audience-kicker">Labs & publishers</span>
-          <h3>Add a verification layer before trust.</h3>
-          <p>Use a common evidence format for reproducibility checks, robustness tests, and eventually private editorial workflows.</p>
-        </article>
+        <div class="protocol-flow">
+          <div class="flow-step"><span>01</span><div><b>Compile claims</b><p>Extract quantitative claims and identify candidate evidence.</p></div><em>DISCOVERY</em></div>
+          <div class="flow-step"><span>02</span><div><b>Pin source</b><p>Bind versioned paper, Git commit, artifacts, and environment inputs.</p></div><em>BOUND</em></div>
+          <div class="flow-step"><span>03</span><div><b>Freeze locator</b><p>Select the observed metric before any reported numeric value can influence comparison.</p></div><em>BLIND</em></div>
+          <div class="flow-step"><span>04</span><div><b>Execute isolated</b><p>Run inside a no-network container on an ephemeral hosted VM.</p></div><em>SANDBOXED</em></div>
+          <div class="flow-step"><span>05</span><div><b>Seal record</b><p>Publish verdict, provenance, evidence capsule, transparency entry, and signature.</p></div><em>REPLAYABLE</em></div>
+        </div>
       </div>
     </section>
 
-    <section class="shell runs" id="runs">
-      <div class="section-head">
-        <div>
-          <div class="eyebrow">Public verification registry</div>
-          <h2>Recent runs</h2>
+    <section class="binding-section">
+      <div class="shell">
+        <div class="section-number mono">02 / WHAT A RECORD BINDS</div>
+        <div class="binding-grid">
+          <article><span class="binding-glyph">01</span><h3>Source identity</h3><p>Versioned arXiv reference, pinned repository commit, optional exact-match DOI metadata.</p><code>source → immutable ref</code></article>
+          <article><span class="binding-glyph">02</span><h3>Execution state</h3><p>Dependency precision, runtime, sandbox policy, stdout locator, and observed output.</p><code>runtime → observed value</code></article>
+          <article><span class="binding-glyph">03</span><h3>Decision policy</h3><p>Expected value, tolerance, verdict class, evidence grade, and explicit abstention boundary.</p><code>policy → verdict</code></article>
+          <article><span class="binding-glyph">04</span><h3>Durable provenance</h3><p>Content-addressed evidence capsule, append-only transparency entry, in-toto statement, DSSE signature.</p><code>record → sha256</code></article>
         </div>
-        <a class="text-link" href="./verify.html">Start a run →</a>
       </div>
-      <div id="jobs" class="run-list"><div class="loading">Loading public runs…</div></div>
     </section>
 
-    <section class="cta-wrap">
-      <div class="shell cta">
-        <div>
-          <div class="eyebrow light">Start with public research</div>
-          <h2>Paste an arXiv paper and its code repository.</h2>
-          <p>AgnXiv will determine how far the evidence can be verified automatically and stop where scientific judgment is still required.</p>
+    <section class="shell validation-section">
+      <div class="section-number mono">03 / VALIDATED BEFORE TRUST</div>
+      <div class="validation-layout">
+        <div class="validation-copy">
+          <h2>The verifier is tested like the thing it verifies.</h2>
+          <p>Production gates are frozen before evaluation. Failed holdouts become development evidence and cannot be reused as held-out certification data.</p>
+          <a class="text-link" href="https://github.com/sushxnthd/agnXiv/blob/main/docs/PRODUCTION_READINESS.md">Read the production evidence ↗</a>
         </div>
-        <a class="button light-button" href="./verify.html">Open verifier</a>
+        <div class="validation-ledger">
+          <div class="ledger-row"><span>False-pass upper bound</span><strong>0.9679%</strong><em>PASS ≤ 1%</em></div>
+          <div class="ledger-row"><span>Central claim routing R@5</span><strong>100%</strong><em>PASS ≥ 95%</em></div>
+          <div class="ledger-row"><span>Environment classification</span><strong>96.77%</strong><em>PASS ≥ 95%</em></div>
+          <div class="ledger-row"><span>Environment build recovery</span><strong>87.5%</strong><em>PASS ≥ 75%</em></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="registry-section" id="runs">
+      <div class="shell">
+        <div class="registry-head">
+          <div>
+            <div class="section-number mono">04 / PUBLIC EVIDENCE REGISTRY</div>
+            <h2>Every attempt remains inspectable.</h2>
+          </div>
+          <a class="button ghost inverse" href="./verify.html">Start a verification</a>
+        </div>
+        <div id="jobs" class="run-list"><div class="loading">QUERYING PUBLIC RECORDS…</div></div>
+      </div>
+    </section>
+
+    <section class="shell final-cta">
+      <div>
+        <span class="mono section-number">NEW VERIFICATION</span>
+        <h2>Bring the paper.<br>AgnXiv brings the evidence chain.</h2>
+      </div>
+      <div>
+        <p>Start with a versioned arXiv paper and public Git repository. AgnXiv will execute only what it can bind safely—and abstain everywhere else.</p>
+        <a class="button primary" href="./verify.html">Open verifier <span>↗</span></a>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="shell footer-inner">
-      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>by Kernellum Labs</small></span></a>
-      <span>Evidence-bound verification for computational research.</span>
-      <a href="https://github.com/sushxnthd/agnXiv">Source & technical docs</a>
+      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>Kernellum Labs</small></span></a>
+      <span class="mono">EVIDENCE-BOUND COMPUTATIONAL VERIFICATION</span>
+      <div class="footer-links"><a href="https://github.com/sushxnthd/agnXiv">GitHub</a><a href="https://github.com/sushxnthd/agnXiv/releases/tag/v0.1.0">v0.1.0</a></div>
     </div>
   </footer>
   <script src="./app.js"></script>

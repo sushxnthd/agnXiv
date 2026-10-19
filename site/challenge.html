@@ -1,117 +1,23 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Submit an evidence-specific challenge to an AgnXiv verification attempt.">
-  <title>Challenge evidence — AgnXiv</title>
-  <link rel="stylesheet" href="./styles.css">
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0a"><meta name="description" content="Submit an evidence-specific challenge to an AgnXiv verification attempt."><title>Challenge evidence — AgnXiv</title><link rel="stylesheet" href="./styles.css"></head>
 <body data-page="challenge">
-  <header class="topbar">
-    <div class="shell nav-shell">
-      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>by Kernellum Labs</small></span></a>
-      <nav class="nav-links">
-        <a href="./lookup.html">Lookup</a>
-        <a href="./verify.html">Verify</a>
-        <a href="./#runs">Registry</a>
-        <a href="./#method">Method</a>
-      </nav>
-      <span class="product-state"><span class="dot"></span> Evidence protocol</span>
-    </div>
-  </header>
-
-  <main class="shell workspace">
-    <section class="workspace-head">
-      <div class="eyebrow">AgnXiv Challenge</div>
-      <h1>Challenge evidence, not people.</h1>
-      <p>Report a specific result divergence with enough evidence for another researcher or the original authors to inspect and respond.</p>
-    </section>
-
-    <section class="verify-layout">
-      <form id="challenge-form" class="form-panel">
-        <div id="challenge-target" class="challenge-target">
-          <div class="spinner"></div>
-          <span>Loading target attempt…</span>
-        </div>
-
-        <label class="field">
-          <span>Your evidence repository</span>
-          <small>Public GitHub repository</small>
-          <input id="challenge-repository" autocomplete="off" placeholder="owner/repository" required>
-        </label>
-
-        <div class="two-col">
-          <label class="field">
-            <span>Git ref</span>
-            <small>Commit preferred</small>
-            <input id="challenge-ref" autocomplete="off" placeholder="commit, tag, or branch" required>
-          </label>
-          <label class="field">
-            <span>Observed result</span>
-            <small>Metric/value or concise outcome</small>
-            <input id="challenge-observed" autocomplete="off" placeholder="73.4 ± 0.3%" required>
-          </label>
-        </div>
-
-        <label class="field">
-          <span>Evidence URL</span>
-          <small>Optional logs, artifact, notebook, or run</small>
-          <input id="challenge-evidence-url" autocomplete="off" placeholder="https://…">
-        </label>
-
-        <label class="field">
-          <span>What diverged?</span>
-          <small>Be specific and reproducible</small>
-          <textarea id="challenge-rationale" class="field-textarea" placeholder="Describe the exact claim tested, what you matched, what differed, and any remaining uncertainty." required></textarea>
-        </label>
-
-        <div class="challenge-principle">
-          <strong>Evidence-neutral protocol</strong>
-          <p>A challenge records a divergence under a declared setup. It does not allege misconduct and does not by itself establish that a paper is universally false.</p>
-        </div>
-
-        <div class="submit-block">
-          <button class="button primary large" type="submit">Prepare challenge</button>
-          <p>The public beta uses GitHub for the final authenticated submission and author-response thread.</p>
-        </div>
-      </form>
-
-      <aside class="side-panel">
-        <div class="side-card">
-          <div class="eyebrow">Challenge lifecycle</div>
-          <ol class="steps">
-            <li><span>1</span><div><strong>Divergence</strong><p>You document a specific mismatched result.</p></div></li>
-            <li><span>2</span><div><strong>Inspect</strong><p>Evidence, environment, and target attempt remain public and attributable.</p></div></li>
-            <li><span>3</span><div><strong>Respond</strong><p>Authors or other researchers can identify missing details or corrections.</p></div></li>
-            <li><span>4</span><div><strong>Resolve</strong><p>Future reruns can resolve the discrepancy or confirm persistent divergence.</p></div></li>
-          </ol>
-        </div>
-      </aside>
-    </section>
-  </main>
-
-  <div class="modal-backdrop hidden" id="challenge-modal" role="dialog" aria-modal="true">
-    <div class="modal">
-      <button class="modal-close" id="challenge-modal-close" aria-label="Close">×</button>
-      <div class="eyebrow">Evidence package ready</div>
-      <h2>Your challenge is structured for review.</h2>
-      <p>The GitHub step creates the attributable public response thread. Your evidence fields are already populated.</p>
-      <div class="request-summary" id="challenge-summary"></div>
-      <div class="modal-actions">
-        <a class="button primary" id="challenge-submit" href="#">Continue to authenticated submit</a>
-        <button class="button ghost" type="button" id="challenge-cancel">Edit challenge</button>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    <div class="shell footer-inner">
-      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>by Kernellum Labs</small></span></a>
-      <span>Challenges are evidence-specific and preserve a right of response.</span>
-      <a href="https://github.com/sushxnthd/agnXiv">Source & technical docs</a>
-    </div>
-  </footer>
-  <script src="./challenge.js"></script>
-</body>
-</html>
+<header class="topbar"><div class="shell nav-shell"><a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>Kernellum Labs</small></span></a><nav class="nav-links"><a href="./lookup.html">Evidence</a><a href="./verify.html">Verify</a><a href="./#protocol">Protocol</a><a href="./#validation">Validation</a></nav><span class="product-state"><span class="dot"></span>CHALLENGE PROTOCOL</span></div></header>
+<main class="shell workspace">
+<section class="workspace-head"><div class="eyebrow">EVIDENCE CHALLENGE</div><h1>Challenge the record.<br>Not the researcher.</h1><p>Document a specific result divergence with enough reproducible evidence for the original authors or another researcher to inspect, respond, and rerun.</p></section>
+<section class="verify-layout">
+<form id="challenge-form" class="form-panel">
+<div id="challenge-target" class="challenge-target"><div class="spinner"></div><span>RESOLVING TARGET…</span></div>
+<label class="field"><span>01 / EVIDENCE REPOSITORY</span><small>public GitHub repository</small><input id="challenge-repository" autocomplete="off" placeholder="owner/repository" required></label>
+<div class="two-col"><label class="field"><span>02 / GIT REF</span><small>commit preferred</small><input id="challenge-ref" autocomplete="off" placeholder="commit / tag / branch" required></label><label class="field"><span>03 / OBSERVED RESULT</span><small>metric / value / outcome</small><input id="challenge-observed" autocomplete="off" placeholder="73.4 ± 0.3%" required></label></div>
+<label class="field"><span>04 / EVIDENCE URL</span><small>optional artifact / logs / notebook</small><input id="challenge-evidence-url" autocomplete="off" placeholder="https://…"></label>
+<label class="field"><span>05 / DIVERGENCE</span><small>specific and reproducible</small><textarea id="challenge-rationale" class="field-textarea" placeholder="State the tested claim, matched conditions, observed difference, and remaining uncertainty." required></textarea></label>
+<div class="challenge-principle"><strong>EVIDENCE-NEUTRAL PROTOCOL</strong><p>A challenge records a divergence under a declared setup. It does not allege misconduct and does not establish universal falsity.</p></div>
+<div class="submit-block"><button class="button primary large" type="submit">Prepare challenge ↗</button><p>The public beta uses GitHub for authenticated submission and the attributable response thread.</p></div>
+</form>
+<aside class="side-panel"><div class="side-card"><div class="eyebrow">CHALLENGE LIFECYCLE</div><ol class="steps"><li><span>1</span><div><strong>DIVERGENCE</strong><p>Document the specific mismatch.</p></div></li><li><span>2</span><div><strong>INSPECT</strong><p>Keep evidence, environment and target record attributable.</p></div></li><li><span>3</span><div><strong>RESPOND</strong><p>Authors or researchers can identify missing conditions or corrections.</p></div></li><li><span>4</span><div><strong>RERUN</strong><p>New attempts can resolve or preserve the divergence.</p></div></li></ol></div></aside>
+</section></main>
+<div class="modal-backdrop hidden" id="challenge-modal" role="dialog" aria-modal="true"><div class="modal"><button class="modal-close" id="challenge-modal-close" aria-label="Close">×</button><div class="eyebrow">CHALLENGE PACKAGE READY</div><h2>Structured for inspection.</h2><p>The next step creates the attributable GitHub response thread with your evidence fields prefilled.</p><div class="request-summary" id="challenge-summary"></div><div class="modal-actions"><a class="button primary" id="challenge-submit" href="#">Continue to GitHub ↗</a><button class="button ghost" type="button" id="challenge-cancel">Edit challenge</button></div></div></div>
+<footer><div class="shell footer-inner"><a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>Kernellum Labs</small></span></a><span class="mono">CHALLENGE EVIDENCE, NOT PEOPLE</span><div class="footer-links"><a href="https://github.com/sushxnthd/agnXiv">GitHub</a><a href="./lookup.html">Evidence</a></div></div></footer>
+<script src="./challenge.js"></script>
+</body></html>
