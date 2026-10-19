@@ -268,3 +268,23 @@ def test_explicit_regex_locator_stops_after_second_match() -> None:
         )
         is None
     )
+
+
+def test_explicit_json_locator_rejects_nan_and_infinity() -> None:
+    from agnxiv.outputs import extract_json_observation
+
+    assert extract_json_observation('{"x": NaN}', "x") is None
+    assert extract_json_observation('{"x": Infinity}', "x") is None
+    assert extract_json_observation('{"x": 1e308}', "x", scale=1e308) is None
+
+
+def test_explicit_regex_locator_rejects_overflowed_numeric_value() -> None:
+    from agnxiv.outputs import extract_regex_observation
+
+    assert (
+        extract_regex_observation(
+            "metric=1e999",
+            r"metric=(?P<value>\d+e\d+)",
+        )
+        is None
+    )
