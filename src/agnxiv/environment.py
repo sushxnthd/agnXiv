@@ -170,6 +170,21 @@ def _infer_exact_python_version(
     return None, None
 
 
+def _merge_manifest_precision(
+    current: Literal["none", "inferred", "floating", "version-pinned", "locked"],
+    new: Literal["floating", "version-pinned"],
+) -> Literal["none", "inferred", "floating", "version-pinned", "locked"]:
+    if current == "none":
+        return new
+    if current == "locked":
+        return current
+    if current == "inferred":
+        return new
+    if current == "floating" or new == "floating":
+        return "floating"
+    return "version-pinned"
+
+
 def _requirements_precision(path: Path) -> Literal["floating", "version-pinned"]:
     package_lines = [
         raw.strip()
@@ -252,7 +267,10 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         install_commands.append(["python", "-m", "pip", "install", "-r", "requirements.txt"])
         confidence = max(confidence, 0.8)
         dependency_source = "manifest"
-        dependency_precision = _requirements_precision(requirements)
+        dependency_precision = _merge_manifest_precision(
+            dependency_precision,
+            _requirements_precision(requirements),
+        )
         historical_fidelity = (
             "constrained"
             if dependency_precision == "version-pinned"
@@ -265,13 +283,15 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         confidence = max(confidence, 0.75)
         dependency_source = "manifest"
         pyproject_precision = _pyproject_precision(pyproject)
-        if dependency_precision in {"none", "floating"}:
-            dependency_precision = pyproject_precision
-            historical_fidelity = (
-                "constrained"
-                if pyproject_precision == "version-pinned"
-                else "approximate"
-            )
+        dependency_precision = _merge_manifest_precision(
+            dependency_precision,
+            pyproject_precision,
+        )
+        historical_fidelity = (
+            "constrained"
+            if dependency_precision == "version-pinned"
+            else "approximate"
+        )
 
     if setup_py.exists():
         dependency_files.append("setup.py")
@@ -279,22 +299,26 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
             install_commands.append(["python", "-m", "pip", "install", "."])
         confidence = max(confidence, 0.65)
         dependency_source = "manifest"
-        if dependency_precision == "none":
-            dependency_precision = "floating"
-            historical_fidelity = "approximate"
+        dependency_precision = _merge_manifest_precision(
+            dependency_precision,
+            "floating",
+        )
+        historical_fidelity = "approximate"
 
     if setup_cfg.exists():
         dependency_files.append("setup.cfg")
         confidence = max(confidence, 0.55)
         dependency_source = "manifest"
         setup_precision = _setup_cfg_precision(setup_cfg)
-        if dependency_precision in {"none", "floating"}:
-            dependency_precision = setup_precision
-            historical_fidelity = (
-                "constrained"
-                if setup_precision == "version-pinned"
-                else "approximate"
-            )
+        dependency_precision = _merge_manifest_precision(
+            dependency_precision,
+            setup_precision,
+        )
+        historical_fidelity = (
+            "constrained"
+            if dependency_precision == "version-pinned"
+            else "approximate"
+        )
 
     if poetry_lock.exists():
         dependency_files.append("poetry.lock")
@@ -327,13 +351,15 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         confidence = max(confidence, 0.8)
         dependency_source = "manifest"
         conda_precision = _conda_precision(conda_file)
-        if dependency_precision in {"none", "floating"}:
-            dependency_precision = conda_precision
-            historical_fidelity = (
-                "constrained"
-                if conda_precision == "version-pinned"
-                else "approximate"
-            )
+        dependency_precision = _merge_manifest_precision(
+            dependency_precision,
+            conda_precision,
+        )
+        historical_fidelity = (
+            "constrained"
+            if dependency_precision == "version-pinned"
+            else "approximate"
+        )
 
     exact_python, python_source = _infer_exact_python_version(
         root,
