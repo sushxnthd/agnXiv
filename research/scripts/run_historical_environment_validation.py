@@ -141,6 +141,7 @@ def _small_safe_requirements(root: Path) -> bool:
 def _attempt_build(root: Path) -> tuple[bool, str | None, str | None]:
     errors: list[str] = []
     for image in (
+        "python:3.7-slim",
         "python:3.9-slim",
         "python:3.8-slim",
         "python:3.10-slim",

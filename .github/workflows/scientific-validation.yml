@@ -324,6 +324,7 @@ jobs:
 
       - name: Pull approved archaeology runtimes
         run: |
+          docker pull python:3.7-slim
           docker pull python:3.8-slim
           docker pull python:3.9-slim
           docker pull python:3.10-slim
@@ -346,7 +347,7 @@ jobs:
           import json
           with open("/tmp/agnxiv-historical-environment.json", encoding="utf-8") as handle:
               report = json.load(handle)
-          assert report["excluded_development_repositories"] == 30
+          assert report["excluded_development_repositories"] == 60
           assert report["classification_cases"] >= 20
           assert report["classification_accuracy"] >= 0.95
           assert report["build_attempts"] >= 8
