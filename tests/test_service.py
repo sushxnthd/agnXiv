@@ -33,6 +33,7 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
 
     def fake_dispatch(self, request):
         dispatched.append(request)
+        return 12345
 
     monkeypatch.setattr(GitHubActionsDispatcher, "dispatch", fake_dispatch)
     monkeypatch.setattr(
@@ -48,6 +49,7 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
             "workflow_ref": (
                 "sushxnthd/agnXiv/.github/workflows/hosted-verify.yml@refs/heads/main"
             ),
+            "run_id": "12345",
         },
     )
 
@@ -134,7 +136,7 @@ def test_hosted_callback_rejects_untrusted_oidc(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -177,7 +179,7 @@ def test_hosted_api_rejects_unsafe_inputs(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -262,7 +264,7 @@ def test_hosted_callback_rejects_wrong_pinned_commit(tmp_path, monkeypatch) -> N
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -271,7 +273,7 @@ def test_hosted_callback_rejects_wrong_pinned_commit(tmp_path, monkeypatch) -> N
     )
     monkeypatch.setattr(
         "agnxiv.service.app.verify_github_actions_token",
-        lambda token, policy: {"repository": policy.repository},
+        lambda token, policy: {"repository": policy.repository, "run_id": "12345"},
     )
     app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
 
@@ -317,7 +319,7 @@ def test_hourly_quota_counts_finished_jobs(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -326,7 +328,7 @@ def test_hourly_quota_counts_finished_jobs(tmp_path, monkeypatch) -> None:
     )
     monkeypatch.setattr(
         "agnxiv.service.app.verify_github_actions_token",
-        lambda token, policy: {"repository": policy.repository},
+        lambda token, policy: {"repository": policy.repository, "run_id": "12345"},
     )
     config = replace(
         _config(f"sqlite:///{tmp_path / 'service.db'}"),
@@ -374,7 +376,7 @@ def test_hosted_api_rejects_invalid_arxiv_id(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -403,7 +405,7 @@ def test_auto_verify_api_dispatches_and_rejects_fake_plan_success(
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: sent.append(request),
+        lambda self, request: (sent.append(request) or 12345),
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -412,7 +414,7 @@ def test_auto_verify_api_dispatches_and_rejects_fake_plan_success(
     )
     monkeypatch.setattr(
         "agnxiv.service.app.verify_github_actions_token",
-        lambda token, policy: {"repository": policy.repository},
+        lambda token, policy: {"repository": policy.repository, "run_id": "12345"},
     )
     app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
     with TestClient(app) as client:
