@@ -3,12 +3,23 @@ name: release
 on:
   push:
     branches: ["main"]
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "constraints-service.txt"
+      - "Dockerfile.service"
+      - "CHANGELOG.md"
+      - "docs/releases/**"
+      - "scripts/check_release_contract.py"
+      - ".github/workflows/release.yml"
   workflow_dispatch:
 
 permissions: {}
 
 concurrency:
-  group: release-main
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -19,7 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     outputs:
-      should_release: ${{ steps.plan.outputs.should_release }}
+      validate_release: ${{ steps.plan.outputs.validate_release }}
+      should_publish: ${{ steps.plan.outputs.should_publish }}
       version: ${{ steps.plan.outputs.version }}
       tag: ${{ steps.plan.outputs.tag }}
       notes: ${{ steps.plan.outputs.notes }}
@@ -28,60 +40,76 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
+
       - name: Validate release contract
         run: python scripts/check_release_contract.py
-      - name: Require verified PR-merged mainline commit
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          verified="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA" --jq '.commit.verification.verified')"
-          test "$verified" = "true"
-          count="$(gh api             -H "Accept: application/vnd.github+json"             "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls"             --jq '[.[] | select(.merged_at != null and .base.ref == "main")] | length')"
-          test "$count" -ge 1
+
       - id: plan
-        name: Plan versioned release
+        name: Plan release validation and publication
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="$(python - <<'PY'
           import tomllib
           from pathlib import Path
+
           data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
           print(data["project"]["version"])
           PY
           )"
           tag="v$version"
           notes="docs/releases/$tag.md"
+
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "notes=$notes" >> "$GITHUB_OUTPUT"
 
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            echo "validate_release=true" >> "$GITHUB_OUTPUT"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
+          verified="$(gh api             "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA"             --jq '.commit.verification.verified')"
+          if [ "$verified" != "true" ]; then
+            echo "::error::Release commit is not cryptographically verified."
+            exit 1
+          fi
+
+          count="$(gh api             -H "Accept: application/vnd.github+json"             "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls"             --jq '[.[] | select(.merged_at != null and .base.ref == "main")] | length')"
+          if [ "$count" -lt 1 ]; then
+            echo "::error::Release commit is not associated with a merged PR into main."
+            exit 1
+          fi
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "validate_release=false" >> "$GITHUB_OUTPUT"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
             echo "::error::Tag $tag exists without a GitHub Release; refusing partial release recovery."
             exit 1
           fi
-          echo "should_release=true" >> "$GITHUB_OUTPUT"
 
-  build-and-release:
+          echo "validate_release=true" >> "$GITHUB_OUTPUT"
+          echo "should_publish=true" >> "$GITHUB_OUTPUT"
+
+  build:
     permissions:
-      contents: write
-      attestations: write
-      id-token: write
+      contents: read
     needs: plan
-    if: needs.plan.outputs.should_release == 'true'
+    if: needs.plan.outputs.validate_release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
       VERSION: ${{ needs.plan.outputs.version }}
       TAG: ${{ needs.plan.outputs.tag }}
-      NOTES: ${{ needs.plan.outputs.notes }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -107,6 +135,7 @@ jobs:
           python research/scripts/run_aggregation_benchmark.py --output /tmp/aggregation.json
           python - <<'PY'
           import json
+
           from agnxiv.benchmark import load_jsonl_cases, run_recorded_benchmark
 
           red = run_recorded_benchmark(
@@ -120,6 +149,7 @@ jobs:
               locator = json.load(handle)
           with open("/tmp/aggregation.json", encoding="utf-8") as handle:
               aggregation = json.load(handle)
+
           assert locator["false_selections"] == 0
           assert locator["missed_selections"] == 0
           assert locator["correct"] == locator["cases"]
@@ -140,10 +170,11 @@ jobs:
           left = {path.name: path for path in Path("/tmp/build-a").iterdir()}
           right = {path.name: path for path in Path("/tmp/build-b").iterdir()}
           assert left.keys() == right.keys(), (left.keys(), right.keys())
+
           for name in sorted(left):
-              a = left[name].read_bytes()
-              b = right[name].read_bytes()
-              assert sha256(a).digest() == sha256(b).digest(), name
+              first = left[name].read_bytes()
+              second = right[name].read_bytes()
+              assert sha256(first).digest() == sha256(second).digest(), name
               shutil.copy2(left[name], Path("dist") / name)
           PY
           python -m twine check dist/*
@@ -152,11 +183,12 @@ jobs:
         run: |
           python - <<'PY'
           import email
+          import os
           import tarfile
           import zipfile
           from pathlib import Path
 
-          version = __import__("os").environ["VERSION"]
+          version = os.environ["VERSION"]
           wheels = list(Path("dist").glob("*.whl"))
           sdists = list(Path("dist").glob("*.tar.gz"))
           assert len(wheels) == 1
@@ -166,10 +198,12 @@ jobs:
 
           with zipfile.ZipFile(wheels[0]) as archive:
               metadata_name = next(
-                  name for name in archive.namelist()
+                  name
+                  for name in archive.namelist()
                   if name.endswith(".dist-info/METADATA")
               )
               metadata = email.message_from_bytes(archive.read(metadata_name))
+
           assert metadata["Name"] == "agnxiv"
           assert metadata["Version"] == version
 
@@ -202,25 +236,31 @@ jobs:
           import hashlib
           import json
           import os
+          import subprocess
           from pathlib import Path
 
           dockerfile = Path("Dockerfile.service").read_text(encoding="utf-8")
-          base = dockerfile.splitlines()[0].removeprefix("FROM ").strip()
+          base_image = dockerfile.splitlines()[0].removeprefix("FROM ").strip()
           constraints = Path("constraints-service.txt").read_bytes()
+          source_date_epoch = int(
+              subprocess.check_output(
+                  ["git", "show", "-s", "--format=%ct", os.environ["GITHUB_SHA"]],
+                  text=True,
+              ).strip()
+          )
           manifest = {
               "schema_version": "agnxiv.release/1",
               "version": os.environ["VERSION"],
               "tag": os.environ["TAG"],
               "git_commit": os.environ["GITHUB_SHA"],
-              "source_date_epoch": int(
-                  __import__("subprocess").check_output(
-                      ["git", "show", "-s", "--format=%ct", os.environ["GITHUB_SHA"]],
-                      text=True,
-                  ).strip()
+              "source_date_epoch": source_date_epoch,
+              "python_artifacts": sorted(
+                  path.name for path in Path("dist").iterdir()
               ),
-              "python_artifacts": sorted(path.name for path in Path("dist").iterdir()),
-              "service_base_image": base,
-              "service_constraints_sha256": hashlib.sha256(constraints).hexdigest(),
+              "service_base_image": base_image,
+              "service_constraints_sha256": hashlib.sha256(
+                  constraints
+              ).hexdigest(),
               "release_gates": {
                   "full_tests": "passed",
                   "redbench": "passed",
@@ -235,7 +275,57 @@ jobs:
               encoding="utf-8",
           )
           PY
-          sha256sum dist/* release/agnxiv-service-sbom.json release/release-manifest.json             > release/SHA256SUMS
+          sha256sum             dist/*             release/agnxiv-service-sbom.json             release/release-manifest.json             > release/SHA256SUMS
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: agnxiv-${{ env.TAG }}-${{ github.sha }}
+          path: |
+            dist/*
+            release/*
+          retention-days: 90
+          if-no-files-found: error
+
+  publish:
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
+    needs: [plan, build]
+    if: needs.plan.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERSION: ${{ needs.plan.outputs.version }}
+      TAG: ${{ needs.plan.outputs.tag }}
+      NOTES: ${{ needs.plan.outputs.notes }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: agnxiv-${{ env.TAG }}-${{ github.sha }}
+          path: .
+
+      - name: Revalidate publication point
+        run: |
+          main_sha="$(gh api             "repos/$GITHUB_REPOSITORY/git/ref/heads/main"             --jq '.object.sha')"
+          if [ "$main_sha" != "$GITHUB_SHA" ]; then
+            echo "::error::main advanced after release validation; refusing stale publication."
+            exit 1
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release $TAG appeared during this run."
+            exit 1
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG appeared during this run."
+            exit 1
+          fi
 
       - name: Attest release artifacts
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
@@ -246,24 +336,11 @@ jobs:
             release/release-manifest.json
             release/SHA256SUMS
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: agnxiv-${{ env.TAG }}-release-candidate
-          path: |
-            dist/*
-            release/*
-          retention-days: 90
-          if-no-files-found: error
-
       - name: Create annotated tag
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           tag_object="$(gh api             --method POST             "repos/$GITHUB_REPOSITORY/git/tags"             -f tag="$TAG"             -f message="AgnXiv $TAG"             -f object="$GITHUB_SHA"             -f type="commit"             --jq '.sha')"
           gh api             --method POST             "repos/$GITHUB_REPOSITORY/git/refs"             -f ref="refs/tags/$TAG"             -f sha="$tag_object"             >/dev/null
 
       - name: Publish GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$TAG"             dist/*             release/agnxiv-service-sbom.json             release/release-manifest.json             release/SHA256SUMS             --verify-tag             --title "AgnXiv $TAG"             --notes-file "$NOTES"
