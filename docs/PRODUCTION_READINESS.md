@@ -17,7 +17,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Multiple claim bundles from one run are preserved.
 - [x] Repeated attempts sharing the same evidence cluster are not counted as independent votes.
 - [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.
-- [ ] Central-claim selection is validated beyond the small v0 diagnostic set.
+- [ ] Central-claim selection is validated beyond the small v0 diagnostic set. The known 3-case non-blind regression now reaches 3/3 R@1, but held-out scale validation is still required.
 - [ ] Historical environment recovery benchmark reaches a predeclared production threshold.
 
 ### Execution security
