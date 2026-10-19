@@ -1,131 +1,55 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090b0a">
   <meta name="description" content="Submit a computational paper to AgnXiv for independent verification.">
-  <title>Verify a paper — AgnXiv</title>
-  <link rel="stylesheet" href="./styles.css">
+  <title>Verify — AgnXiv</title><link rel="stylesheet" href="./styles.css">
 </head>
 <body data-page="verify">
-  <header class="topbar">
-    <div class="shell nav-shell">
-      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>by Kernellum Labs</small></span></a>
-      <nav class="nav-links">
-        <a href="./lookup.html">Lookup</a>
-        <a class="active" href="./verify.html">Verify</a>
-        <a href="./#runs">Registry</a>
-        <a href="./#method">Method</a>
-        <a href="./#for-whom">For teams</a>
-      </nav>
-      <span class="product-state"><span class="dot"></span> Public beta</span>
-    </div>
-  </header>
-
+  <header class="topbar"><div class="shell nav-shell">
+    <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>Kernellum Labs</small></span></a>
+    <nav class="nav-links"><a href="./lookup.html">Evidence</a><a class="active" href="./verify.html">Verify</a><a href="./#protocol">Protocol</a><a href="./#validation">Validation</a></nav>
+    <span class="product-state"><span class="dot"></span>PUBLIC BETA</span>
+  </div></header>
   <main class="shell workspace">
-    <section class="workspace-head">
-      <div class="eyebrow">New verification</div>
-      <h1>Test a computational paper.</h1>
-      <p>Give AgnXiv the paper and source repository. We will pin the exact code revision, compile quantitative claims, reconstruct the workflow, and determine what can be verified safely.</p>
-    </section>
-
+    <section class="workspace-head"><div class="eyebrow">NEW VERIFICATION / AX REQUEST</div><h1>Bind the claim.<br>Run the evidence.</h1><p>Submit the exact paper and source repository. AgnXiv pins the code revision, discovers quantitative claims, reconstructs the workflow, and executes only where the evidence chain is explicit enough to support a scientific verdict.</p></section>
     <section class="verify-layout">
       <form id="verify-form" class="form-panel">
         <div class="mode-switch" role="group" aria-label="Verification mode">
-          <button class="mode-option active" type="button" data-mode="auto">
-            <strong>Auto-verify</strong>
-            <span>Execute when evidence is unambiguous; otherwise abstain</span>
-          </button>
-          <button class="mode-option" type="button" data-mode="manifest">
-            <strong>Verify manifest</strong>
-            <span>Run an existing agnxiv.json</span>
-          </button>
+          <button class="mode-option active" type="button" data-mode="auto"><strong>AUTO-VERIFY</strong><span>Discover + execute when evidence is unambiguous.</span></button>
+          <button class="mode-option" type="button" data-mode="manifest"><strong>MANIFEST</strong><span>Execute an existing agnxiv.json contract.</span></button>
         </div>
         <input type="hidden" id="mode" value="auto">
-
-        <label class="field auto-field">
-          <span>Paper</span>
-          <small>arXiv URL or identifier</small>
-          <input id="arxiv" autocomplete="off" placeholder="https://arxiv.org/abs/1403.6652" required>
-        </label>
-
-        <label class="field">
-          <span>Code repository</span>
-          <small>Public GitHub repository</small>
-          <input id="repository" autocomplete="off" placeholder="phanein/deepwalk" required>
-        </label>
-
+        <label class="field auto-field"><span>01 / PAPER</span><small>versioned arXiv preferred</small><input id="arxiv" autocomplete="off" placeholder="https://arxiv.org/abs/1403.6652v1" required></label>
+        <label class="field"><span>02 / SOURCE REPOSITORY</span><small>public GitHub repository</small><input id="repository" autocomplete="off" placeholder="owner/repository" required></label>
         <div class="two-col">
-          <label class="field">
-            <span>Git ref</span>
-            <small>Branch, tag, or commit</small>
-            <input id="git-ref" autocomplete="off" value="main" required>
-          </label>
-
-          <label class="field manifest-field hidden">
-            <span>Manifest path</span>
-            <small>Relative path in repository</small>
-            <input id="spec-path" autocomplete="off" placeholder="agnxiv.json">
-          </label>
+          <label class="field"><span>03 / GIT REF</span><small>commit strongly preferred</small><input id="git-ref" autocomplete="off" value="main" required></label>
+          <label class="field manifest-field hidden"><span>04 / MANIFEST</span><small>repository-relative path</small><input id="spec-path" autocomplete="off" placeholder="agnxiv.json"></label>
         </div>
-
         <div class="preflight" id="preflight">
-          <div class="preflight-row"><span class="check neutral" id="paper-check">○</span><span>Paper identifier</span><b id="paper-status">Waiting</b></div>
-          <div class="preflight-row"><span class="check neutral" id="repo-check">○</span><span>Public repository</span><b id="repo-status">Waiting</b></div>
-          <div class="preflight-row"><span class="check neutral">○</span><span>Exact commit</span><b>Pinned during run</b></div>
-          <div class="preflight-row"><span class="check neutral">○</span><span>Execution</span><b>Isolated verification worker</b></div>
+          <div class="preflight-row"><span class="check neutral" id="paper-check">○</span><span>Paper identity</span><b id="paper-status">Waiting</b></div>
+          <div class="preflight-row"><span class="check neutral" id="repo-check">○</span><span>Repository identity</span><b id="repo-status">Waiting</b></div>
+          <div class="preflight-row"><span class="check good">●</span><span>Execution network</span><b>Disabled</b></div>
+          <div class="preflight-row"><span class="check good">●</span><span>Worker boundary</span><b>Ephemeral VM</b></div>
         </div>
-
-        <div class="submit-block">
-          <button class="button primary large" type="submit">Prepare verification</button>
-          <p>For the GitHub-hosted beta, the final confirmation opens GitHub so the request is authenticated to a real account. No fields need to be re-entered.</p>
-        </div>
+        <div class="submit-block"><button class="button primary large" type="submit">Prepare verification ↗</button><p>Public beta requests are authenticated through GitHub. The issue is the attributable request record; AgnXiv renders the resulting evidence back into the product.</p></div>
       </form>
-
       <aside class="side-panel">
-        <div class="side-card">
-          <div class="eyebrow">What happens next</div>
-          <ol class="steps">
-            <li><span>1</span><div><strong>Ingest</strong><p>Read the exact paper and repository revision.</p></div></li>
-            <li><span>2</span><div><strong>Plan</strong><p>Extract claims, map evidence, infer environment and experiment graph.</p></div></li>
-            <li><span>3</span><div><strong>Verify</strong><p>Execute only where the evidence chain is explicit enough.</p></div></li>
-            <li><span>4</span><div><strong>Record</strong><p>Publish the result and immutable execution trail.</p></div></li>
-          </ol>
-        </div>
-        <div class="side-card demo-card">
-          <div>
-            <span class="badge verified">DEMO</span>
-            <h3>Try DeepWalk</h3>
-            <p>Use our zero-manifest benchmark to see the full planning flow.</p>
-          </div>
-          <button type="button" class="text-button" id="load-demo">Load benchmark →</button>
-        </div>
+        <div class="side-card"><div class="eyebrow">EXECUTION CONTRACT</div><ol class="steps">
+          <li><span>1</span><div><strong>PIN</strong><p>Resolve paper and source to immutable identities.</p></div></li>
+          <li><span>2</span><div><strong>DISCOVER</strong><p>Compile claims, command candidates, environment and metric locator.</p></div></li>
+          <li><span>3</span><div><strong>FREEZE</strong><p>Lock the observation path before comparing against the reported value.</p></div></li>
+          <li><span>4</span><div><strong>EXECUTE</strong><p>Run credential-free, no-network, bounded compute.</p></div></li>
+          <li><span>5</span><div><strong>SEAL</strong><p>Emit verdict, evidence grade and replayable provenance.</p></div></li>
+        </ol></div>
+        <div class="side-card demo-card"><div><span class="badge verified">BENCHMARK</span><h3>Load DeepWalk</h3><p>Populate the frozen public benchmark inputs.</p></div><button type="button" class="text-button" id="load-demo">LOAD →</button></div>
       </aside>
     </section>
   </main>
-
-  <div class="modal-backdrop hidden" id="submit-modal" role="dialog" aria-modal="true">
-    <div class="modal">
-      <button class="modal-close" id="modal-close" aria-label="Close">×</button>
-      <div class="eyebrow">Ready to run</div>
-      <h2>Your verification request is prepared.</h2>
-      <p>AgnXiv will use GitHub only for identity confirmation and compute. The request body is already populated; you only need to press <strong>Submit new issue</strong> once GitHub opens.</p>
-      <div class="request-summary" id="request-summary"></div>
-      <div class="modal-actions">
-        <a class="button primary" id="github-submit" href="#">Continue to authenticated submit</a>
-        <button class="button ghost" type="button" id="modal-cancel">Edit request</button>
-      </div>
-      <p class="modal-note">Results are rendered back inside AgnXiv; the underlying GitHub issue remains the public provenance record.</p>
-    </div>
-  </div>
-
-  <footer>
-    <div class="shell footer-inner">
-      <a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>by Kernellum Labs</small></span></a>
-      <span>Evidence-bound verification for computational research.</span>
-      <a href="https://github.com/sushxnthd/agnXiv">Source & technical docs</a>
-    </div>
-  </footer>
+  <div class="modal-backdrop hidden" id="submit-modal" role="dialog" aria-modal="true"><div class="modal">
+    <button class="modal-close" id="modal-close" aria-label="Close">×</button><div class="eyebrow">REQUEST COMPILED</div><h2>Ready for authenticated submit.</h2><p>Your request is structured and prefilled. GitHub provides identity confirmation; AgnXiv performs the verification and returns the evidence record.</p><div class="request-summary" id="request-summary"></div><div class="modal-actions"><a class="button primary" id="github-submit" href="#">Continue to GitHub ↗</a><button class="button ghost" type="button" id="modal-cancel">Edit request</button></div><p class="modal-note">The underlying issue remains the public request/provenance thread.</p>
+  </div></div>
+  <footer><div class="shell footer-inner"><a class="brand brand-lockup" href="./"><span class="brand-mark">aX</span><span class="brand-stack"><strong>agnXiv</strong><small>Kernellum Labs</small></span></a><span class="mono">DISCOVERY ≠ VERDICT</span><div class="footer-links"><a href="https://github.com/sushxnthd/agnXiv">GitHub</a><a href="./lookup.html">Evidence</a></div></div></footer>
   <script src="./verify.js"></script>
-</body>
-</html>
+</body></html>
