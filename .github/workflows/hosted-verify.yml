@@ -52,6 +52,13 @@ jobs:
       - name: Install exact trusted worker runtime
         run: python -m pip install --disable-pip-version-check -c constraints-service.txt "pydantic==2.14.1" "pypdf==6.21.1"
 
+      - name: Build trusted no-network manuscript parser
+        run: |
+          docker build \
+            --file Dockerfile.pdf-parser \
+            --tag agnxiv-pdf-parser:trusted \
+            .
+
       - name: Execute untrusted research analysis without service credentials
         env:
           JOB_MODE: ${{ inputs.mode }}
