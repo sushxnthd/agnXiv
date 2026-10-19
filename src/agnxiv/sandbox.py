@@ -162,7 +162,7 @@ def docker_command(
         "--cpus",
         str(active_limits.cpus),
         "--tmpfs",
-        "/tmp:rw,noexec,nosuid,nodev,size=1g,uid=65534,gid=65534,mode=1777",
+        "/tmp:rw,noexec,nosuid,nodev,size=1g,uid=65534,gid=65534,mode=1777",  # nosec B108 - isolated container tmpfs
         *_artifact_mount_args(mounts),
     ]
 
