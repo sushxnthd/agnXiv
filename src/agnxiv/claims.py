@@ -85,6 +85,11 @@ _STRUCTURAL_PREFIX_RE = re.compile(
     r"(?:§|(?:sections?|secs?\.?|figures?|figs?\.?|tables?|equations?|eqs?\.?))\s*$",
     flags=re.IGNORECASE,
 )
+_STRUCTURAL_SEQUENCE_PREFIX_RE = re.compile(
+    r"(?:sections?|secs?\.?|figures?|figs?\.?|tables?|equations?|eqs?\.?)"
+    r"\s+(?:\d+(?:\.\d+)?\s*(?:,|and|or|[-–—])\s*)*$",
+    flags=re.IGNORECASE,
+)
 
 
 def _inside_numeric_citation(normalized: str, match: re.Match[str]) -> bool:
@@ -257,6 +262,7 @@ def _looks_like_label_or_citation(
     return bool(
         _LABEL_RE.search(prefix)
         or _STRUCTURAL_PREFIX_RE.search(prefix)
+        or _STRUCTURAL_SEQUENCE_PREFIX_RE.search(prefix)
         or _TOP_INDEX_RE.search(prefix)
     )
 
