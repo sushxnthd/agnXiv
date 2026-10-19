@@ -76,7 +76,7 @@ def _validated_mount_source(value: str | Path, *, label: str) -> Path:
     path = Path(value).resolve()
     raw = str(path)
     if "," in raw or "\n" in raw or "\r" in raw:
-        raise ValueError(`${label} path may not contain commas or newlines`)
+        raise ValueError(f"{label} path may not contain commas or newlines")
     return path
 
 
