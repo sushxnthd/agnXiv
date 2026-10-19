@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any
 
@@ -321,8 +322,11 @@ def extract_json_observation(
 
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
+    normalized = float(value) * scale
+    if not math.isfinite(normalized):
+        return None
 
-    return Observation(value=float(value) * scale)
+    return Observation(value=normalized)
 
 
 def extract_regex_observation(
@@ -358,8 +362,11 @@ def extract_regex_observation(
         value = float(raw.replace(",", "").strip())
     except ValueError:
         return None
+    normalized = value * scale
+    if not math.isfinite(normalized):
+        return None
 
-    return Observation(value=value * scale)
+    return Observation(value=normalized)
 
 
 def extract_observation_candidates(
@@ -384,6 +391,8 @@ def extract_observation_candidates(
 
         for index, match in enumerate(numbers):
             raw = float(match.group(0).replace(",", ""))
+            if not math.isfinite(raw):
+                continue
             normalized = raw
             percent_window = line[max(0, match.end() - 2) : match.end() + 2]
             percent_like = "%" in percent_window
