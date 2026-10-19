@@ -25,6 +25,8 @@ class EnvironmentSpec(BaseModel):
     historical_fidelity: Literal["unknown", "approximate", "constrained"] = "unknown"
     inferred_packages: list[str] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
+    reconstruction_supported: bool = False
+    reconstruction_reason: str = "environment has not been matched to an available builder"
 
 
 _IMPORT_PACKAGE_MAP = {
@@ -388,6 +390,47 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         else:
             confidence = max(confidence, 0.4)
 
+    from .build import plan_python_environment
+
+    build_plan = plan_python_environment(
+        root,
+        base_image=f"python:{python_version}-slim",
+    )
+    unsupported_exact_sources = [
+        name
+        for name in ("poetry.lock", "uv.lock", "Pipfile.lock")
+        if (root / name).exists()
+    ]
+    if conda_file.exists():
+        reconstruction_supported = False
+        reconstruction_reason = (
+            "Conda metadata was detected but the hosted dependency builder "
+            "does not replay Conda environments."
+        )
+    elif unsupported_exact_sources:
+        reconstruction_supported = False
+        reconstruction_reason = (
+            "Exact lock metadata is present but is not replayed by the active "
+            "hosted dependency builder: " + ", ".join(unsupported_exact_sources)
+        )
+    elif dependency_source == "import_scan":
+        reconstruction_supported = False
+        reconstruction_reason = (
+            "Dependencies were inferred from imports but exact install metadata "
+            "is unavailable."
+        )
+    elif build_plan.safe_manifest_only:
+        reconstruction_supported = True
+        reconstruction_reason = (
+            "The active dependency-only builder can reconstruct the detected "
+            f"metadata via {build_plan.builder}."
+        )
+    else:
+        reconstruction_supported = False
+        reconstruction_reason = "; ".join(build_plan.rejected_reasons) or (
+            "The detected dependency metadata is unsupported by the active builder."
+        )
+
     return EnvironmentSpec(
         python_version=python_version,
         base_image=f"python:{python_version}-slim",
@@ -399,4 +442,6 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         historical_fidelity=historical_fidelity,
         inferred_packages=inferred_packages,
         notes=notes,
+        reconstruction_supported=reconstruction_supported,
+        reconstruction_reason=reconstruction_reason,
     )
