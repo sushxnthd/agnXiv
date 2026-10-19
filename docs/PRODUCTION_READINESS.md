@@ -23,7 +23,7 @@ All P0 items must be true before calling the hosted service production-grade.
 ### Execution security
 
 - [x] Research execution is separated from the control plane.
-- [x] Research containers run without network, added Linux capabilities, or write access to host evidence.
+- [x] Research containers run non-root with private IPC, without network, added Linux capabilities, or write access to host evidence.
 - [x] GitHub credentials are not persisted into research execution.
 - [x] Worker callbacks require GitHub Actions OIDC.
 - [x] Returned Git commit must match the control-plane pinned commit.
