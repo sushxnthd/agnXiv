@@ -749,13 +749,6 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             repository_ref=job.repository_ref,
             arxiv_id=job.arxiv_id,
             spec_path=job.spec_path,
-            callback_url=(
-                f"{active_config.public_base_url}/internal/jobs/{job.id}/complete"
-            ),
-            oidc_audience=_job_oidc_audience(
-                active_config.oidc_audience,
-                job.id,
-            ),
         )
 
         store.mark_running(job.id)
