@@ -22,6 +22,7 @@ class ServiceConfig:
     min_api_key_length: int = 32
     issuer_previous_public_keys_b64: tuple[str, ...] = ()
     github_workflow_sha: str | None = None
+    max_request_bytes: int = 5 * 1024 * 1024
 
     @classmethod
     def from_env(cls) -> ServiceConfig:
@@ -81,6 +82,18 @@ class ServiceConfig:
             min_api_key_length=max(
                 16,
                 int(os.getenv("AGNXIV_MIN_API_KEY_LENGTH", "32")),
+            ),
+            max_request_bytes=min(
+                16 * 1024 * 1024,
+                max(
+                    64 * 1024,
+                    int(
+                        os.getenv(
+                            "AGNXIV_MAX_REQUEST_BYTES",
+                            str(5 * 1024 * 1024),
+                        )
+                    ),
+                ),
             ),
         )
 
