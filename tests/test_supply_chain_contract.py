@@ -1,14 +1,16 @@
-from pathlib import Path
-
-
 _TRUSTED_WORKFLOWS = (
-    Path(".github/workflows/hosted-verify.yml"),
-    Path(".github/workflows/verify-request.yml"),
+    ".github/workflows/hosted-verify.yml",
+    ".github/workflows/verify-request.yml",
 )
 
 
+def _read(path: str) -> str:
+    with open(path, encoding="utf-8") as handle:
+        return handle.read()
+
+
 def test_production_service_does_not_execute_project_build_backend() -> None:
-    dockerfile = Path("Dockerfile.service").read_text(encoding="utf-8")
+    dockerfile = _read("Dockerfile.service")
     assert "PYTHONPATH=/app/src" in dockerfile
     assert "pip install -e" not in dockerfile
     assert '".[service' not in dockerfile
@@ -18,7 +20,7 @@ def test_production_service_does_not_execute_project_build_backend() -> None:
 
 def test_trusted_hosted_workflows_do_not_build_agnxiv_package() -> None:
     for path in _TRUSTED_WORKFLOWS:
-        text = path.read_text(encoding="utf-8")
+        text = _read(path)
         assert "pip install -e" not in text, path
         assert "pip install --upgrade pip" not in text, path
         assert "constraints-service.txt" in text, path
@@ -28,9 +30,7 @@ def test_trusted_hosted_workflows_do_not_build_agnxiv_package() -> None:
 def test_service_constraints_are_exact_pins() -> None:
     lines = [
         line.strip()
-        for line in Path("constraints-service.txt")
-        .read_text(encoding="utf-8")
-        .splitlines()
+        for line in _read("constraints-service.txt").splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     ]
     assert lines
