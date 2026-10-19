@@ -59,6 +59,8 @@ def _repository(row: dict[str, str]) -> str:
     return (
         row.get("github_repo")
         or row.get("GitHubRepo")
+        or row.get("github_repos")
+        or row.get("github_links_raw")
         or ""
     ).strip()
 
