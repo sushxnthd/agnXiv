@@ -62,7 +62,7 @@ def test_dispatch_requires_and_returns_exact_workflow_run_id(monkeypatch) -> Non
         )
 
     monkeypatch.setattr(
-        "agnxiv.service.dispatcher.urllib.request.urlopen",
+        "agnxiv.service.dispatcher._NO_REDIRECT_OPENER.open",
         fake_open,
     )
 
@@ -81,7 +81,7 @@ def test_dispatch_requires_and_returns_exact_workflow_run_id(monkeypatch) -> Non
 )
 def test_dispatch_rejects_missing_or_invalid_run_identity(monkeypatch, payload) -> None:
     monkeypatch.setattr(
-        "agnxiv.service.dispatcher.urllib.request.urlopen",
+        "agnxiv.service.dispatcher._NO_REDIRECT_OPENER.open",
         lambda *args, **kwargs: _Response(payload),
     )
     with pytest.raises(DispatchError, match="valid run ID"):
@@ -99,7 +99,7 @@ def test_dispatch_rejects_legacy_empty_response(monkeypatch) -> None:
             return False
 
     monkeypatch.setattr(
-        "agnxiv.service.dispatcher.urllib.request.urlopen",
+        "agnxiv.service.dispatcher._NO_REDIRECT_OPENER.open",
         lambda *args, **kwargs: _Legacy(),
     )
     with pytest.raises(DispatchError, match="did not return run details"):
