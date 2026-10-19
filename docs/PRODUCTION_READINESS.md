@@ -17,8 +17,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Multiple claim bundles from one run are preserved.
 - [x] Repeated attempts sharing the same evidence cluster are not counted as independent votes.
 - [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.
-- [ ] Central-claim selection is validated beyond the small v0 diagnostic set.
-- [ ] Historical environment recovery benchmark reaches a predeclared production threshold.
+- [x] Central-claim selection is validated beyond v0 on five manually anchored public real-paper development cases: recall@1 0.40, recall@3 1.00, recall@5 1.00. This is development evidence, not the held-out false-pass estimate.
+- [ ] Historical environment recovery reaches the frozen v2 threshold of >=50% constrained, builder-supported recovery on the fixed eight-paper suite. Current strong recovery is 25%; safe builder support is tracked separately.
 
 ### Execution security
 
