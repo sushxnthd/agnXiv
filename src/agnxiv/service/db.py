@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import (
     DateTime,
+    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -16,6 +17,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+
+from ..transparency import GENESIS_HASH, compute_entry_hash, digest_json
 
 
 class Base(DeclarativeBase):
@@ -59,6 +62,34 @@ class Job(Base):
     )
 
 
+class TransparencyHead(Base):
+    __tablename__ = "agnxiv_transparency_head"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    head_hash: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default=GENESIS_HASH,
+    )
+
+
+class TransparencyEntry(Base):
+    __tablename__ = "agnxiv_transparency_entries"
+
+    sequence: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[str] = mapped_column(String(36), unique=True, index=True)
+    status: Mapped[str] = mapped_column(String(32))
+    mode: Mapped[str] = mapped_column(String(32))
+    repository: Mapped[str] = mapped_column(String(255))
+    repository_ref: Mapped[str] = mapped_column(String(255))
+    arxiv_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    result_sha256: Mapped[str] = mapped_column(String(64))
+    previous_hash: Mapped[str] = mapped_column(String(64))
+    entry_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    created_at: Mapped[str] = mapped_column(String(40))
+
+
 class JobStore:
     def __init__(self, database_url: str) -> None:
         normalized_url = (
@@ -85,6 +116,42 @@ class JobStore:
     def initialize(self) -> None:
         if self.database_url.startswith("sqlite"):
             Base.metadata.create_all(self.engine)
+            with self.engine.begin() as connection:
+                connection.execute(
+                    text(
+                        "INSERT OR IGNORE INTO agnxiv_transparency_head "
+                        "(id, sequence, head_hash) VALUES (1, 0, :genesis)"
+                    ),
+                    {"genesis": GENESIS_HASH},
+                )
+                connection.execute(
+                    text(
+                        """
+                        CREATE TRIGGER IF NOT EXISTS agnxiv_transparency_no_update
+                        BEFORE UPDATE ON agnxiv_transparency_entries
+                        BEGIN
+                            SELECT RAISE(
+                                ABORT,
+                                'agnxiv transparency ledger is append-only'
+                            );
+                        END
+                        """
+                    )
+                )
+                connection.execute(
+                    text(
+                        """
+                        CREATE TRIGGER IF NOT EXISTS agnxiv_transparency_no_delete
+                        BEFORE DELETE ON agnxiv_transparency_entries
+                        BEGIN
+                            SELECT RAISE(
+                                ABORT,
+                                'agnxiv transparency ledger is append-only'
+                            );
+                        END
+                        """
+                    )
+                )
 
     def ping(self) -> bool:
         try:
@@ -263,11 +330,139 @@ class JobStore:
         result: dict | None,
         error: str | None,
     ) -> None:
-        self._update(
-            job_id,
+        with self.session_factory() as session:
+            job = session.get(Job, job_id)
+            if job is None:
+                raise KeyError(job_id)
+            job.status = status
+            job.result_json = (
+                json.dumps(result, separators=(",", ":"))
+                if result is not None
+                else None
+            )
+            job.error = error
+            job.updated_at = datetime.now(UTC)
+            if result is not None and result.get("kind") == "verification":
+                self._append_transparency_entry(
+                    session,
+                    job=job,
+                    status=status,
+                    result=result,
+                )
+            session.commit()
+
+    def _append_transparency_entry(
+        self,
+        session,
+        *,
+        job: Job,
+        status: str,
+        result: dict,
+    ) -> TransparencyEntry:
+        # SQLite has no SELECT ... FOR UPDATE; a harmless write obtains its
+        # database write lock before the head is read.
+        if self.database_url.startswith("sqlite"):
+            session.execute(
+                text(
+                    "UPDATE agnxiv_transparency_head "
+                    "SET sequence = sequence WHERE id = 1"
+                )
+            )
+
+        statement = select(TransparencyHead).where(TransparencyHead.id == 1)
+        if not self.database_url.startswith("sqlite"):
+            statement = statement.with_for_update()
+        head = session.scalar(statement)
+        if head is None:
+            raise RuntimeError("transparency ledger head is not initialized")
+
+        sequence = head.sequence + 1
+        created_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        result_sha256 = digest_json(result)
+        entry_hash = compute_entry_hash(
+            sequence=sequence,
+            job_id=job.id,
             status=status,
-            result_json=json.dumps(result, separators=(",", ":")) if result else None,
-            error=error,
+            mode=job.mode,
+            repository=job.repository,
+            repository_ref=job.repository_ref,
+            arxiv_id=job.arxiv_id,
+            result_sha256=result_sha256,
+            previous_hash=head.head_hash,
+            created_at=created_at,
+        )
+        entry = TransparencyEntry(
+            sequence=sequence,
+            job_id=job.id,
+            status=status,
+            mode=job.mode,
+            repository=job.repository,
+            repository_ref=job.repository_ref,
+            arxiv_id=job.arxiv_id,
+            result_sha256=result_sha256,
+            previous_hash=head.head_hash,
+            entry_hash=entry_hash,
+            created_at=created_at,
+        )
+        session.add(entry)
+        head.sequence = sequence
+        head.head_hash = entry_hash
+        return entry
+
+    def transparency_head(self) -> tuple[int, str]:
+        with self.session_factory() as session:
+            head = session.get(TransparencyHead, 1)
+            if head is None:
+                raise RuntimeError("transparency ledger head is not initialized")
+            return head.sequence, head.head_hash
+
+    def get_transparency_entry(self, sequence: int) -> TransparencyEntry | None:
+        with self.session_factory() as session:
+            return session.get(TransparencyEntry, sequence)
+
+    def list_transparency_entries(
+        self,
+        *,
+        after_sequence: int = 0,
+        limit: int = 100,
+    ) -> list[TransparencyEntry]:
+        with self.session_factory() as session:
+            statement = (
+                select(TransparencyEntry)
+                .where(TransparencyEntry.sequence > after_sequence)
+                .order_by(TransparencyEntry.sequence)
+                .limit(max(1, min(limit, 1000)))
+            )
+            return list(session.scalars(statement))
+
+    def verify_transparency_chain(self) -> bool:
+        previous_hash = GENESIS_HASH
+        expected_sequence = 1
+        for entry in self.list_transparency_entries(limit=1000):
+            if entry.sequence != expected_sequence:
+                return False
+            if entry.previous_hash != previous_hash:
+                return False
+            expected_hash = compute_entry_hash(
+                sequence=entry.sequence,
+                job_id=entry.job_id,
+                status=entry.status,
+                mode=entry.mode,
+                repository=entry.repository,
+                repository_ref=entry.repository_ref,
+                arxiv_id=entry.arxiv_id,
+                result_sha256=entry.result_sha256,
+                previous_hash=entry.previous_hash,
+                created_at=entry.created_at,
+            )
+            if entry.entry_hash != expected_hash:
+                return False
+            previous_hash = entry.entry_hash
+            expected_sequence += 1
+        head_sequence, head_hash = self.transparency_head()
+        return (
+            head_sequence == expected_sequence - 1
+            and head_hash == previous_hash
         )
 
     def _update(self, job_id: str, **values: object) -> None:
