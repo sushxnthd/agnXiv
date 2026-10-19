@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import tempfile
@@ -15,6 +16,7 @@ from .preprint import parse_arxiv_reference
 from .provenance import detect_git_identity
 from .service.security import validate_git_ref, validate_github_slug
 from .spec import execute_verification_spec, load_verification_spec
+from .worker_boundary import WorkerBoundaryError, attest_worker_boundary
 from .zero_manifest import run_zero_manifest
 
 _MAX_PAPER_BYTES = 50 * 1024 * 1024
@@ -310,7 +312,9 @@ def main() -> None:
     result: dict | None = None
     error: str | None = None
 
+    strict_boundary = os.getenv("AGNXIV_REQUIRE_EPHEMERAL_VM", "") == "1"
     try:
+        boundary = attest_worker_boundary(strict=strict_boundary)
         status, result = execute_job(
             mode=args.mode,
             repository=args.repository,
@@ -318,7 +322,12 @@ def main() -> None:
             arxiv_id=args.arxiv_id or None,
             spec_path=args.spec_path or None,
         )
-    except HostedRunnerError as exc:
+        if result is not None:
+            result = {
+                **result,
+                "worker_boundary": boundary.as_dict(),
+            }
+    except (HostedRunnerError, WorkerBoundaryError) as exc:
         error = str(exc)
     except Exception as exc:  # noqa: BLE001 - top-level worker crash boundary
         error = f"unexpected runner failure: {type(exc).__name__}: {exc}"

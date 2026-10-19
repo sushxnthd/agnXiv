@@ -23,6 +23,8 @@ def test_docker_command_is_locked_down(tmp_path: Path) -> None:
     assert "--pids-limit 64" in joined
     assert "--memory 2g" in joined
     assert "--cpus 1.0" in joined
+    assert "--env" not in command
+    assert "--env-file" not in command
     assert "nodev" in joined
     assert "uid=65534" in joined
     assert "gid=65534" in joined

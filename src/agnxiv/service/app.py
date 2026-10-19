@@ -28,6 +28,7 @@ from .config import ServiceConfig
 from .db import Job, JobStore, TransparencyEntry, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
 from .oidc import GitHubOIDCPolicy, OIDCVerificationError, verify_github_actions_token
+from .ops import OperationalSLOPolicy, evaluate_operational_status
 from .security import (
     constant_time_equal,
     fingerprint_job_request,
@@ -433,6 +434,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "signed_statements": bool(active_config.issuer_private_key_b64),
             "transparency_log": True,
             "issuer_key_rollover": True,
+            "operational_slo_status": True,
         }
 
     @app.get("/v1/metrics")
@@ -445,6 +447,25 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "schema_version": "agnxiv.metrics/1",
             **store.metrics(),
         }
+
+    @app.get("/v1/ops/status")
+    def operational_status(
+        x_api_key: Annotated[str | None, Header()] = None,
+    ):
+        authenticate(x_api_key)
+        store.reap_stale(minutes=active_config.job_stale_minutes)
+        snapshot = store.metrics()
+        report = evaluate_operational_status(
+            snapshot,
+            database_connected=store.ping(),
+            transparency_valid=store.verify_transparency_chain(),
+            policy=OperationalSLOPolicy(
+                max_oldest_active_seconds=active_config.job_stale_minutes * 60,
+            ),
+        )
+        if not report["passed"]:
+            return JSONResponse(status_code=503, content=report)
+        return report
 
     @app.get("/v1/transparency/head")
     def transparency_head() -> dict:

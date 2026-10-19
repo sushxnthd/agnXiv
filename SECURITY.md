@@ -30,6 +30,19 @@ A verification run should:
 9. record stdout/stderr hashes and command provenance;
 10. verify that source and declared artifact fingerprints did not change.
 
+## Outer worker boundary
+
+The hosted path uses two isolation layers. Every research execution job runs on
+a fresh GitHub-hosted VM, and the untrusted research process runs inside the
+Docker sandbox described below. The execution job has no `id-token: write`
+permission, receives no AgnXiv database/API/signing credentials, and does not
+propagate host environment variables into the research container.
+
+The callback is a separate job. It receives the short-lived OIDC capability
+only after the execution job has completed and emitted a bounded result
+artifact. `agnxiv.worker_boundary` fails closed when the hosted execution job
+is not on a GitHub-hosted runner or when OIDC/service credentials are exposed.
+
 ## Workspace confinement
 
 A declarative `agnxiv.json` may reference only relative paths that resolve inside the manifest's workspace. Absolute paths and parent-directory escapes are rejected.
