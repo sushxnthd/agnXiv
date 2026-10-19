@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from dataclasses import replace
 
 from fastapi.testclient import TestClient
 
@@ -121,11 +122,9 @@ def test_malformed_historical_key_fails_closed_without_leaking_value(tmp_path) -
         f"sqlite:///{tmp_path / 'malformed.db'}",
         active_private=active_private,
     )
-    config = ServiceConfig(
-        **{
-            **config.__dict__,
-            "issuer_previous_public_keys_b64": (malformed,),
-        }
+    config = replace(
+        config,
+        issuer_previous_public_keys_b64=(malformed,),
     )
     app = create_app(config)
 
