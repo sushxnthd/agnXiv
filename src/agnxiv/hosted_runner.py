@@ -136,7 +136,10 @@ def download_arxiv_pdf(arxiv_id: str, destination: Path) -> None:
     )
 
     try:
-        with urllib.request.urlopen(request, timeout=45) as response:
+        with urllib.request.urlopen(  # nosec B310 - fixed HTTPS arXiv origin
+            request,
+            timeout=45,
+        ) as response:
             content_type = response.headers.get("Content-Type", "")
             if "pdf" not in content_type.lower() and "octet-stream" not in content_type.lower():
                 raise HostedRunnerError(
