@@ -128,7 +128,7 @@ def test_hosted_job_submission_is_idempotent(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: dispatched.append(request),
+        lambda self, request: (dispatched.append(request) or 12345),
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -168,7 +168,7 @@ def test_idempotency_key_reuse_for_different_request_is_rejected(
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -246,7 +246,7 @@ def test_metrics_endpoint_requires_auth_and_reports_job_counts(
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
