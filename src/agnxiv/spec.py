@@ -141,7 +141,10 @@ def _resolve_workspace_path(base: Path, value: str, *, label: str) -> Path:
     if candidate.is_absolute():
         raise ValueError(f"{label} path must be relative to the verification workspace")
 
-    resolved = (base / candidate).resolve()
+    unresolved = base / candidate
+    if unresolved.is_symlink():
+        raise ValueError(f"{label} symlinks are not allowed: {value}")
+    resolved = unresolved.resolve()
     try:
         resolved.relative_to(base)
     except ValueError as exc:
