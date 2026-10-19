@@ -124,6 +124,7 @@ def score_claim_centrality(
     claim: Claim,
     *,
     evidence_score: float | None = None,
+    document_position: float | None = None,
 ) -> float:
     """Score whether a quantitative claim is scientifically central.
 
@@ -142,6 +143,22 @@ def score_claim_centrality(
         score += 0.05
     if claim.reported_uncertainty is not None:
         score += 0.05
+
+    if document_position is not None:
+        position = min(max(document_position, 0.0), 1.0)
+        # Scientific abstracts/results tend to state headline findings near the
+        # beginning or conclusion. This is a discovery prior only; it never
+        # contributes to a verifier verdict.
+        if position <= 0.15:
+            score += 0.12
+        elif position <= 0.30:
+            score += 0.05
+        elif position >= 0.80:
+            score += 0.10
+        elif position >= 0.65:
+            score += 0.04
+        else:
+            score -= 0.02
 
     page = claim.source.page
     if page is not None:
@@ -183,7 +200,13 @@ def score_claim_centrality(
             "accelerat",
             "outperform",
             "experiments demonstrate",
+            "experiments show",
+            "results show",
+            "results demonstrate",
             "we demonstrate",
+            "we show",
+            "we find",
+            "we observe",
         )
     ):
         score += 0.12
@@ -218,6 +241,27 @@ def score_claim_centrality(
     if any(
         phrase in lower
         for phrase in (
+            "learning rate",
+            "batch size",
+            "batch-size",
+            "epochs",
+            "epoch",
+            "random seed",
+            "hidden size",
+            "hidden dimension",
+            "embedding dimension",
+            "number of layers",
+            "we set",
+            "we use a",
+            "we use an",
+            "we train for",
+        )
+    ):
+        score -= 0.16
+
+    if any(
+        phrase in lower
+        for phrase in (
             "our model",
             "our method",
             "our approach",
@@ -239,11 +283,17 @@ def score_claim_centrality(
     return min(max(score, 0.0), 1.0)
 
 
-def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
+def _rank_claim(
+    claim: Claim,
+    evidence: list[EvidenceCandidate],
+    *,
+    document_position: float | None = None,
+) -> float:
     evidence_score = evidence[0].score if evidence else None
     return score_claim_centrality(
         claim,
         evidence_score=evidence_score,
+        document_position=document_position,
     )
 
 
@@ -454,12 +504,18 @@ def build_auto_plan(
 
     evidence_index = build_repository_evidence_index(repo)
     ranked: list[RankedClaim] = []
-    for claim in raw_claims[:120]:
+    bounded_claims = raw_claims[:120]
+    denominator = max(1, len(bounded_claims) - 1)
+    for index, claim in enumerate(bounded_claims):
         evidence = map_claim_to_index(claim, evidence_index, limit=5)
         ranked.append(
             RankedClaim(
                 claim=claim,
-                score=_rank_claim(claim, evidence),
+                score=_rank_claim(
+                    claim,
+                    evidence,
+                    document_position=index / denominator,
+                ),
                 evidence=evidence,
             )
         )
