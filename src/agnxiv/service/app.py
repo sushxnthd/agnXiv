@@ -657,11 +657,8 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         if body.doi:
             try:
                 doi = normalize_doi(body.doi)
-                publication = resolve_doi_registry(doi).model_dump(mode="json")
             except ValueError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
-            except RegistryLookupError as exc:
-                raise HTTPException(status_code=502, detail=str(exc)) from exc
 
         idempotency_key_hash: str | None = None
         request_fingerprint: str | None = None
@@ -690,6 +687,12 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                         detail="Idempotency-Key was already used for a different request",
                     )
                 return _job_view(existing)
+
+        if doi is not None:
+            try:
+                publication = resolve_doi_registry(doi).model_dump(mode="json")
+            except RegistryLookupError as exc:
+                raise HTTPException(status_code=502, detail=str(exc)) from exc
 
         if store.count_active(api_hash) >= active_config.max_active_jobs_per_key:
             raise HTTPException(
