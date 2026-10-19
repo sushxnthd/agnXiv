@@ -252,6 +252,21 @@ def _audit_conda_environment(path: Path) -> list[str]:
                 reasons.append(
                     f"line {number}: unsupported Conda/Pip dependency source"
                 )
+                continue
+            if "==" in value:
+                if not _EXACT_REQUIREMENT_RE.fullmatch(value):
+                    reasons.append(
+                        f"line {number}: Pip dependency is not exactly pinned"
+                    )
+                continue
+            if not re.fullmatch(
+                r"[A-Za-z0-9_.-]+=\d+(?:\.\d+){0,4}(?:[A-Za-z0-9_.+-]*)"
+                r"(?:=[A-Za-z0-9_.+-]+)?",
+                value,
+            ):
+                reasons.append(
+                    f"line {number}: Conda dependency is not exactly pinned"
+                )
     return reasons
 
 
