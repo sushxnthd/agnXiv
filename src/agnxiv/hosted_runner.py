@@ -429,6 +429,7 @@ def execute_job(
                 "kind": "verification",
                 "zero_manifest": True,
                 "build": build.model_dump(mode="json"),
+                "environment": plan.environment.model_dump(mode="json"),
                 "discovery": outcome.frozen_locator.model_dump(mode="json"),
                 "bundle": outcome.bundle.model_dump(mode="json"),
                 "additional_verifications": [
