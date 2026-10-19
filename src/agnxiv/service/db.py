@@ -438,27 +438,38 @@ class JobStore:
     def verify_transparency_chain(self) -> bool:
         previous_hash = GENESIS_HASH
         expected_sequence = 1
-        for entry in self.list_transparency_entries(limit=1000):
-            if entry.sequence != expected_sequence:
-                return False
-            if entry.previous_hash != previous_hash:
-                return False
-            expected_hash = compute_entry_hash(
-                sequence=entry.sequence,
-                job_id=entry.job_id,
-                status=entry.status,
-                mode=entry.mode,
-                repository=entry.repository,
-                repository_ref=entry.repository_ref,
-                arxiv_id=entry.arxiv_id,
-                result_sha256=entry.result_sha256,
-                previous_hash=entry.previous_hash,
-                created_at=entry.created_at,
+        after_sequence = 0
+        while True:
+            page = self.list_transparency_entries(
+                after_sequence=after_sequence,
+                limit=1000,
             )
-            if entry.entry_hash != expected_hash:
-                return False
-            previous_hash = entry.entry_hash
-            expected_sequence += 1
+            if not page:
+                break
+            for entry in page:
+                if entry.sequence != expected_sequence:
+                    return False
+                if entry.previous_hash != previous_hash:
+                    return False
+                expected_hash = compute_entry_hash(
+                    sequence=entry.sequence,
+                    job_id=entry.job_id,
+                    status=entry.status,
+                    mode=entry.mode,
+                    repository=entry.repository,
+                    repository_ref=entry.repository_ref,
+                    arxiv_id=entry.arxiv_id,
+                    result_sha256=entry.result_sha256,
+                    previous_hash=entry.previous_hash,
+                    created_at=entry.created_at,
+                )
+                if entry.entry_hash != expected_hash:
+                    return False
+                previous_hash = entry.entry_hash
+                expected_sequence += 1
+                after_sequence = entry.sequence
+            if len(page) < 1000:
+                break
         head_sequence, head_hash = self.transparency_head()
         return (
             head_sequence == expected_sequence - 1
