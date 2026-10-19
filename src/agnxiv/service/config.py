@@ -119,6 +119,8 @@ class ServiceConfig:
             )
         ):
             issues.append("trusted_workflow_sha_invalid")
+        if not self.github_ref.startswith("refs/tags/"):
+            issues.append("trusted_workflow_ref_not_immutable_tag")
         public = urlparse(self.public_base_url)
         if (
             public.scheme != "https"
