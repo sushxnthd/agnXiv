@@ -15,6 +15,7 @@ class EnvironmentSpec(BaseModel):
     dependency_files: list[str] = Field(default_factory=list)
     preferred_dependency_file: str | None = None
     environment_scope: list[str] = Field(default_factory=list)
+    scope_resolution: Literal["none", "resolved", "ambiguous"] = "none"
     base_image: str = "python:3.11-slim"
     install_commands: list[list[str]] = Field(default_factory=list)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -173,9 +174,11 @@ def infer_python_environment(
     historical_fidelity: Literal["unknown", "approximate", "constrained"] = "unknown"
     preferred_dependency_file: str | None = None
     environment_scope = list(dict.fromkeys(scope_paths or []))
+    scope_resolution: Literal["none", "resolved", "ambiguous"] = "none"
 
     scoped_manifests = _scoped_dependency_manifests(root, environment_scope)
     if len(scoped_manifests) == 1:
+        scope_resolution = "resolved"
         scoped = scoped_manifests[0]
         preferred_dependency_file = scoped.relative_to(root).as_posix()
         dependency_files.append(preferred_dependency_file)
@@ -221,6 +224,7 @@ def infer_python_environment(
             dependency_precision = "floating"
             historical_fidelity = "approximate"
     elif len(scoped_manifests) > 1:
+        scope_resolution = "ambiguous"
         dependency_files.extend(
             path.relative_to(root).as_posix()
             for path in scoped_manifests
@@ -325,6 +329,7 @@ def infer_python_environment(
         dependency_files=list(dict.fromkeys(dependency_files)),
         preferred_dependency_file=preferred_dependency_file,
         environment_scope=environment_scope,
+        scope_resolution=scope_resolution,
         install_commands=install_commands,
         confidence=confidence,
         dependency_source=dependency_source,
