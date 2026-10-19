@@ -448,9 +448,19 @@ def build_auto_plan(
         raise ValueError(f"repository path is not a directory: {repo}")
 
     raw_claims = _read_manuscript(manuscript_path)
-    environment = infer_python_environment(repo)
     commands = discover_commands(repo)
     readme = _read_readme(repo)
+    workflow, missing_inputs, workflow_order_confident, ambiguous_inputs = (
+        _workflow_commands(commands, repo)
+    )
+    environment = infer_python_environment(
+        repo,
+        scope_paths=[
+            candidate.source
+            for candidate in workflow
+            if candidate.source
+        ],
+    )
 
     evidence_index = build_repository_evidence_index(repo)
     ranked: list[RankedClaim] = []
@@ -491,15 +501,25 @@ def build_auto_plan(
             "and historical fidelity remain unresolved."
         )
 
+    if environment.scope_resolution == "ambiguous":
+        blockers.append(
+            "Multiple workflow-scoped dependency manifests were discovered; "
+            "the runtime cannot be selected safely."
+        )
+    elif (
+        environment.preferred_dependency_file
+        and not environment.preferred_dependency_file.lower().endswith(".txt")
+    ):
+        blockers.append(
+            "The selected workflow uses a dependency manifest that the hosted "
+            "Python builder does not support safely."
+        )
+
     if warnings:
         blockers.append(
             "The repository documents historical dependency/version sensitivity; "
             "exact reproduction requires environment archaeology."
         )
-
-    workflow, missing_inputs, workflow_order_confident, ambiguous_inputs = (
-        _workflow_commands(commands, repo)
-    )
 
     if missing_inputs:
         blockers.append(

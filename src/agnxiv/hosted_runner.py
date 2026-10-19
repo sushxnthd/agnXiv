@@ -209,7 +209,11 @@ def execute_job(
 
             base_image = _validate_hosted_image(plan.environment.base_image)
             _pull_image(base_image)
-            build = build_python_environment(repo, base_image=base_image)
+            build = build_python_environment(
+                repo,
+                base_image=base_image,
+                dependency_file=plan.environment.preferred_dependency_file,
+            )
             outcome = run_zero_manifest(paper, repo, image=build.image_ref)
 
             if outcome.bundle is None:
