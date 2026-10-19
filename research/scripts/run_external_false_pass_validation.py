@@ -26,6 +26,13 @@ _SUPPORTED_METRICS = {
     "runtime",
     "throughput",
     "p_value",
+    "precision",
+    "recall",
+    "loss",
+    "speedup",
+    "split_half_r",
+    "spearman_brown",
+    "cohens_d",
 }
 
 _METRIC_LABELS = {
