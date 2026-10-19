@@ -173,6 +173,18 @@ def public_key_pem_from_private(private_key_pem: bytes) -> tuple[bytes, str]:
     return public_pem, _key_id(public_key)
 
 
+def public_key_pem_metadata(public_key_pem: bytes) -> tuple[bytes, str]:
+    """Normalize an Ed25519 public key and return its stable key identifier."""
+    from cryptography.hazmat.primitives import serialization
+
+    public_key = _load_ed25519_public_key(public_key_pem)
+    canonical_pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return canonical_pem, _key_id(public_key)
+
+
 def _load_ed25519_private_key(private_key_pem: bytes):
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
