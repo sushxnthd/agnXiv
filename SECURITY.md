@@ -99,3 +99,24 @@ Production CI rejects changes that move the untrusted execute job to
 `ubuntu-slim`, a self-hosted runner, or a job with callback/write privileges.
 Custom GPU/private workloads must provide an isolation boundary at least as
 strong; they are not covered by the hosted public execution contract.
+
+
+## Hosted callback identity binding
+
+A hosted callback is authorized by more than a trusted workflow filename. The
+control plane dispatches GitHub Actions with run-details enabled, records the
+returned `workflow_run_id`, and accepts completion only when the GitHub OIDC
+token has all of the expected properties:
+
+- per-job audience;
+- trusted repository and immutable release-tag ref;
+- exact `hosted-verify.yml` workflow ref and trusted workflow commit SHA;
+- GitHub-hosted runner environment;
+- `run_attempt=1`;
+- `run_id` equal to the exact run created by the control-plane dispatch.
+
+This prevents a separately triggered or manually dispatched trusted workflow
+from substituting results into an active job. The accepted run ID is included
+in durable orchestration metadata and in the signed in-toto/DSSE predicate.
+Callback URLs and OIDC audience roots come from protected repository
+configuration rather than workflow-dispatch inputs.
