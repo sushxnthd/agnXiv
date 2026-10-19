@@ -173,6 +173,11 @@ def public_key_pem_from_private(private_key_pem: bytes) -> tuple[bytes, str]:
     return public_pem, _key_id(public_key)
 
 
+def public_key_id(public_key_pem: bytes) -> str:
+    """Return the stable AgnXiv key identifier for an Ed25519 public key."""
+    return _key_id(_load_ed25519_public_key(public_key_pem))
+
+
 def _load_ed25519_private_key(private_key_pem: bytes):
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
