@@ -27,7 +27,6 @@ from ..statement import (
 from ..transparency import GENESIS_HASH, TRANSPARENCY_SCHEMA
 from .config import ServiceConfig
 from .db import (
-    EvidenceArchive,
     Job,
     JobStore,
     TransparencyEntry,
