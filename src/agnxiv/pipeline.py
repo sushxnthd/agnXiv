@@ -49,14 +49,27 @@ class ExecutionSummary(BaseModel):
     artifacts_unchanged: bool
 
 
+class RuntimeBuildEvidence(BaseModel):
+    """Content-bound description of the runtime construction used for execution."""
+
+    builder: str
+    plan_id: str
+    dependency_file: str | None = None
+    dependency_sha256: str | None = None
+    dependency_precision: str
+    base_image_id: str
+    image_id: str
+
+
 class VerificationBundle(BaseModel):
-    schema_version: str = "agnxiv.bundle/0.6"
+    schema_version: str = "agnxiv.bundle/0.7"
     verification_spec_sha256: str | None = None
     claim: Claim
     manuscript: DocumentFingerprint | None = None
     provenance: ProvenanceManifest
     artifacts: list[ArtifactFingerprint] = Field(default_factory=list)
     environment: EnvironmentSpec
+    runtime_build: RuntimeBuildEvidence | None = None
     evidence_candidates: list[EvidenceCandidate] = Field(default_factory=list)
     command_candidates: list[CommandCandidate] = Field(default_factory=list)
     execution: ExecutionSummary | None = None
