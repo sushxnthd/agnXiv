@@ -33,3 +33,30 @@ Accordingly:
 
 The failed holdout is retained as development evidence and cannot be reused as
 held-out production evidence after this recovery change.
+
+## Second disjoint holdout and archaeology repairs
+
+The next disjoint SciCoQA slice again recovered dependency-source class
+perfectly (30/30) but built only 5/8 dependency environments, below the frozen
+75% threshold. The entire 30-repository slice is therefore retired to the
+development exclusion list before further evaluation.
+
+Two failure mechanisms were identified from that development evidence:
+
+1. a historical repository explicitly requires Python 3.6.5, which was outside
+   the prior 3.7--3.12 archaeology runtime set;
+2. one repository's requirements file contains bare Python standard-library
+   module names (for example `re`, `ast`, `csv`, and `unicodedata`) plus
+   the common `dateutil`/PyPI-name mismatch.
+
+The recovery procedure now adds Python 3.6 and applies only the following
+frozen manifest repairs before dependency-only construction:
+
+- drop bare `ast`, `csv`, `re`, and `unicodedata` entries;
+- normalize bare `dateutil` to `python-dateutil`.
+
+No version pins are loosened, no arbitrary package substitutions are allowed,
+and the original manifest remains the provenance source. The next production
+evaluation uses the next untouched deterministic SciCoQA slice. Thresholds
+remain unchanged: classification n >= 20 with >=95% accuracy, at least eight
+build attempts, and build success >=75%.

@@ -21,6 +21,10 @@ _MIN_BUILD_SUCCESS_RATE = 0.75
 _VERSIONED_GITHUB_RE = re.compile(
     r"^https://github\.com/(?P<slug>[^/]+/[^/]+)/tree/(?P<commit>[0-9a-fA-F]{40})/?$"
 )
+_PYTHON_VERSION_RE = re.compile(r"\\bpython(?:\\s*=?\\s*)?(3\\.\\d+)", flags=re.IGNORECASE)
+_OBVIOUS_STDLIB_REQUIREMENTS = {"ast", "csv", "re", "unicodedata"}
+_REQUIREMENT_ALIASES = {"dateutil": "python-dateutil"}
+_SUPPORTED_PYTHON_MINORS = ("3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12")
 
 
 def _stable_key(value: str) -> str:
@@ -138,27 +142,77 @@ def _small_safe_requirements(root: Path) -> bool:
     return plan.safe_manifest_only
 
 
+def _historical_python_images(root: Path) -> list[str]:
+    readme = ""
+    for name in ("README.md", "README.rst", "README.txt"):
+        path = root / name
+        if path.is_file() and not path.is_symlink():
+            readme = path.read_text(encoding="utf-8", errors="ignore")
+            break
+
+    explicit: list[str] = []
+    for match in _PYTHON_VERSION_RE.finditer(readme):
+        version = match.group(1)
+        if version == "3.5":
+            version = "3.6"
+        if version in _SUPPORTED_PYTHON_MINORS and version not in explicit:
+            explicit.append(version)
+
+    fallback = ["3.7", "3.6", "3.9", "3.8", "3.10", "3.11", "3.12"]
+    ordered = explicit + [version for version in fallback if version not in explicit]
+    return [f"python:{version}-slim" for version in ordered]
+
+
+def _repair_historical_requirements(root: Path, destination: Path) -> list[str]:
+    source = root / "requirements.txt"
+    repairs: list[str] = []
+    rendered: list[str] = []
+
+    for raw in source.read_text(encoding="utf-8", errors="ignore").splitlines():
+        stripped = raw.strip()
+        lowered = stripped.lower()
+
+        if lowered in _OBVIOUS_STDLIB_REQUIREMENTS:
+            repairs.append(f"dropped stdlib requirement: {stripped}")
+            continue
+        alias = _REQUIREMENT_ALIASES.get(lowered)
+        if alias is not None:
+            rendered.append(alias)
+            repairs.append(f"normalized requirement alias: {stripped} -> {alias}")
+            continue
+        rendered.append(raw)
+
+    destination.mkdir(parents=True, exist_ok=True)
+    (destination / "requirements.txt").write_text(
+        "\n".join(rendered).rstrip() + "\n",
+        encoding="utf-8",
+    )
+    return repairs
+
+
 def _attempt_build(root: Path) -> tuple[bool, str | None, str | None]:
     errors: list[str] = []
-    for image in (
-        "python:3.7-slim",
-        "python:3.9-slim",
-        "python:3.8-slim",
-        "python:3.10-slim",
-        "python:3.11-slim",
-        "python:3.12-slim",
-    ):
-        try:
-            result = build_python_environment(
-                root,
-                base_image=image,
-                timeout_seconds=180,
-            )
-        except EnvironmentBuildError as exc:
-            errors.append(f"{image}: {str(exc)[-500:]}")
-            continue
-        return True, image, result.plan.dependency_precision
-    return False, None, " | ".join(errors)[-1500:]
+    with tempfile.TemporaryDirectory(prefix="agnxiv-env-repair-") as temp:
+        build_root = Path(temp)
+        repairs = _repair_historical_requirements(root, build_root)
+
+        for image in _historical_python_images(root):
+            try:
+                result = build_python_environment(
+                    build_root,
+                    base_image=image,
+                    timeout_seconds=180,
+                )
+            except EnvironmentBuildError as exc:
+                errors.append(f"{image}: {str(exc)[-700:]}")
+                continue
+
+            detail = result.plan.dependency_precision
+            if repairs:
+                detail += "; " + "; ".join(repairs)
+            return True, image, detail
+
+    return False, None, " | ".join(errors)[-4000:]
 
 
 def main() -> None:

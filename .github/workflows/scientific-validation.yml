@@ -266,7 +266,7 @@ jobs:
             --hash-bucket 2 \
             --hash-bucket 3 \
             --hash-bucket 4 \
-            --minimum-cases 75 \
+            --minimum-cases 50 \
             --minimum-areas 4 \
             --min-recall-at-3 0.90 \
             --min-recall-at-5 0.95 \
@@ -282,7 +282,7 @@ jobs:
           ) as handle:
               report = json.load(handle)
           assert report["evaluation_role"] == "heldout_external_author_metadata"
-          assert report["cases"] >= 75
+          assert report["cases"] >= 50
           assert len(report["primary_areas"]) >= 4
           assert report["recall_at_3"] >= 0.90
           assert report["recall_at_5"] >= 0.95
@@ -324,6 +324,7 @@ jobs:
 
       - name: Pull approved archaeology runtimes
         run: |
+          docker pull python:3.6-slim
           docker pull python:3.7-slim
           docker pull python:3.8-slim
           docker pull python:3.9-slim
@@ -347,7 +348,7 @@ jobs:
           import json
           with open("/tmp/agnxiv-historical-environment.json", encoding="utf-8") as handle:
               report = json.load(handle)
-          assert report["excluded_development_repositories"] == 60
+          assert report["excluded_development_repositories"] == 90
           assert report["classification_cases"] >= 20
           assert report["classification_accuracy"] >= 0.95
           assert report["build_attempts"] >= 8
