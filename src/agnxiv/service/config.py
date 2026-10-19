@@ -21,6 +21,7 @@ class ServiceConfig:
     job_stale_minutes: int = 45
     min_api_key_length: int = 32
     issuer_previous_public_keys_b64: tuple[str, ...] = ()
+    github_workflow_sha: str | None = None
 
     @classmethod
     def from_env(cls) -> ServiceConfig:
@@ -72,6 +73,7 @@ class ServiceConfig:
             ),
             issuer_private_key_b64=os.getenv("AGNXIV_ISSUER_PRIVATE_KEY_B64") or None,
             issuer_previous_public_keys_b64=issuer_previous_public_keys_b64,
+            github_workflow_sha=os.getenv("AGNXIV_GITHUB_WORKFLOW_SHA") or None,
             job_stale_minutes=max(
                 5,
                 int(os.getenv("AGNXIV_JOB_STALE_MINUTES", "45")),
@@ -95,6 +97,15 @@ class ServiceConfig:
             issues.append("duplicate_api_keys")
         if not self.github_token:
             issues.append("github_dispatch_token_missing")
+        if (
+            not self.github_workflow_sha
+            or len(self.github_workflow_sha) != 40
+            or any(
+                char not in "0123456789abcdef"
+                for char in self.github_workflow_sha.lower()
+            )
+        ):
+            issues.append("trusted_workflow_sha_invalid")
         public = urlparse(self.public_base_url)
         if (
             public.scheme != "https"
