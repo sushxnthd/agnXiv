@@ -56,7 +56,10 @@ class GitHubActionsDispatcher:
             },
         )
         try:
-            with urllib.request.urlopen(request, timeout=20) as response:
+            with urllib.request.urlopen(  # nosec B310 - fixed HTTPS GitHub API origin
+                request,
+                timeout=20,
+            ) as response:
                 payload = json.load(response)
         except urllib.error.HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")[-2000:]
@@ -104,7 +107,10 @@ class GitHubActionsDispatcher:
             },
         )
         try:
-            with urllib.request.urlopen(http_request, timeout=20) as response:
+            with urllib.request.urlopen(  # nosec B310 - fixed HTTPS GitHub API origin
+                http_request,
+                timeout=20,
+            ) as response:
                 if response.status not in {204, 201, 200}:
                     raise DispatchError(
                         f"GitHub workflow dispatch returned HTTP {response.status}"
