@@ -13,6 +13,17 @@ on:
       - "src/agnxiv/environment.py"
       - "src/agnxiv/evidence.py"
       - ".github/workflows/research-diagnostic.yml"
+  pull_request:
+    paths:
+      - "research/**"
+      - "src/agnxiv/research.py"
+      - "src/agnxiv/alignment.py"
+      - "src/agnxiv/auto.py"
+      - "src/agnxiv/claims.py"
+      - "src/agnxiv/planner.py"
+      - "src/agnxiv/environment.py"
+      - "src/agnxiv/evidence.py"
+      - ".github/workflows/research-diagnostic.yml"
   workflow_dispatch:
     inputs:
       case_id:
@@ -109,10 +120,37 @@ jobs:
             --input-root /tmp/agnxiv-diagnostics \
             --output /tmp/agnxiv-diagnostic-summary.json
 
+      - name: Install centrality scoring dependencies
+        run: python -m pip install -e .
+
+      - name: Score frozen central-claim regression set
+        run: |
+          python research/scripts/run_centrality_diagnostic.py \
+            --input-root /tmp/agnxiv-diagnostics \
+            --gold research/benchmarks/centrality-gold-v0.jsonl \
+            --output /tmp/agnxiv-centrality-diagnostic.json
+          python - <<'PY'
+          import json
+
+          with open(
+              "/tmp/agnxiv-centrality-diagnostic.json",
+              encoding="utf-8",
+          ) as handle:
+              report = json.load(handle)
+
+          assert report["evaluation_role"] == "diagnostic_nonblind"
+          assert report["cases"] == 3
+          assert report["recall_at_1"] == 1.0
+          assert report["recall_at_3"] == 1.0
+          assert report["recall_at_5"] == 1.0
+          PY
+
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: research-diagnostic-summary
-          path: /tmp/agnxiv-diagnostic-summary.json
+          path: |
+            /tmp/agnxiv-diagnostic-summary.json
+            /tmp/agnxiv-centrality-diagnostic.json
           retention-days: 90
           if-no-files-found: error
 
