@@ -162,7 +162,18 @@ def _clone_pinned(repository: str, commit: str, destination: pathlib.Path) -> No
     )
 
 
-def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> dict:
+def run_case(
+    manifest: pathlib.Path,
+    case_id: str,
+    output_dir: pathlib.Path,
+    *,
+    centrality_gold_path: pathlib.Path = pathlib.Path(
+        "research/benchmarks/centrality-gold-v0.jsonl"
+    ),
+    localization_gold_path: pathlib.Path = pathlib.Path(
+        "research/benchmarks/localization-gold-v0.jsonl"
+    ),
+) -> dict:
     cases = {case.case_id: case for case in load_research_cases(manifest)}
     case = cases.get(case_id)
     if case is None:
@@ -202,11 +213,10 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
         plan = build_auto_plan(manuscript, repository)
 
         localization = None
-        localization_path = pathlib.Path(
-            "research/benchmarks/localization-gold-v0.jsonl"
-        )
-        if localization_path.exists():
-            localization_gold = load_localization_gold(localization_path).get(case.case_id)
+        if localization_gold_path.exists():
+            localization_gold = load_localization_gold(
+                localization_gold_path
+            ).get(case.case_id)
             if localization_gold is not None:
                 candidates = localize_paper_code(
                     _manuscript_text(manuscript),
@@ -223,10 +233,9 @@ def run_case(manifest: pathlib.Path, case_id: str, output_dir: pathlib.Path) -> 
                     for item in candidates[:10]
                 ]
 
-    gold_path = pathlib.Path("research/benchmarks/centrality-gold-v0.jsonl")
     centrality = None
-    if gold_path.exists():
-        gold = load_centrality_gold(gold_path).get(case.case_id)
+    if centrality_gold_path.exists():
+        gold = load_centrality_gold(centrality_gold_path).get(case.case_id)
         if gold is not None:
             centrality = score_centrality_ranking(
                 case.case_id,
@@ -291,12 +300,22 @@ def main() -> None:
     parser.add_argument("--manifest", default="research/benchmarks/scicoqa-pilot-v0.jsonl")
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument(
+        "--centrality-gold",
+        default="research/benchmarks/centrality-gold-v0.jsonl",
+    )
+    parser.add_argument(
+        "--localization-gold",
+        default="research/benchmarks/localization-gold-v0.jsonl",
+    )
     args = parser.parse_args()
 
     summary = run_case(
         pathlib.Path(args.manifest),
         args.case_id,
         pathlib.Path(args.output_dir),
+        centrality_gold_path=pathlib.Path(args.centrality_gold),
+        localization_gold_path=pathlib.Path(args.localization_gold),
     )
     print(json.dumps(summary, indent=2, sort_keys=True))
 
