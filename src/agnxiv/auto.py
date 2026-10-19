@@ -501,6 +501,20 @@ def build_auto_plan(
             "and historical fidelity remain unresolved."
         )
 
+    if environment.scope_resolution == "ambiguous":
+        blockers.append(
+            "Multiple workflow-scoped dependency manifests were discovered; "
+            "the runtime cannot be selected safely."
+        )
+    elif (
+        environment.preferred_dependency_file
+        and not environment.preferred_dependency_file.lower().endswith(".txt")
+    ):
+        blockers.append(
+            "The selected workflow uses a dependency manifest that the hosted "
+            "Python builder does not support safely."
+        )
+
     if warnings:
         blockers.append(
             "The repository documents historical dependency/version sensitivity; "
