@@ -13,6 +13,20 @@ class CallbackError(RuntimeError):
     """A hosted result callback could not be delivered."""
 
 
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(
+            req.full_url,
+            code,
+            "redirects are not allowed for authenticated callbacks",
+            headers,
+            fp,
+        )
+
+
+_NO_REDIRECT_OPENER = urllib.request.build_opener(_NoRedirectHandler())
+
+
 def _validated_https_url(
     value: str,
     *,
@@ -56,7 +70,7 @@ def request_github_oidc_token(audience: str) -> str:
     )
 
     try:
-        with urllib.request.urlopen(  # nosec B310 - validated HTTPS GitHub Actions URL
+        with _NO_REDIRECT_OPENER.open(
             request,
             timeout=20,
         ) as response:
@@ -91,7 +105,7 @@ def send_result(
     )
 
     try:
-        with urllib.request.urlopen(  # nosec B310 - validated HTTPS callback URL
+        with _NO_REDIRECT_OPENER.open(
             request,
             timeout=30,
         ) as response:
