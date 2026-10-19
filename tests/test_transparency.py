@@ -111,9 +111,11 @@ def test_transparency_rows_reject_update_and_delete(tmp_path) -> None:
         error=None,
     )
 
-    with pytest.raises(SQLAlchemyError, match="append-only"):
-        with store.engine.begin() as connection:
-            connection.execute(
+    with (
+        pytest.raises(SQLAlchemyError, match="append-only"),
+        store.engine.begin() as connection,
+    ):
+        connection.execute(
                 text(
                     "UPDATE agnxiv_transparency_entries "
                     "SET status = 'forged' WHERE sequence = 1"
