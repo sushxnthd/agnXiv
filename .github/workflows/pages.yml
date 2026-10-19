@@ -6,23 +6,23 @@ on:
     paths:
       - "site/**"
       - ".github/workflows/pages.yml"
+  pull_request:
+    paths:
+      - "site/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -35,6 +35,66 @@ jobs:
           node --check site/result.js
           node --check site/lookup.js
           node --check site/challenge.js
+
+      - name: Validate HTML structure and local links
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          site = Path("site")
+          pages = sorted(site.glob("*.html"))
+          assert pages, "no HTML pages found"
+
+          class Parser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.links = []
+                  self.ids = set()
+
+              def handle_starttag(self, tag, attrs):
+                  attrs = dict(attrs)
+                  if "id" in attrs:
+                      self.ids.add(attrs["id"])
+                  if tag in {"a", "script", "link"}:
+                      target = attrs.get("href") or attrs.get("src")
+                      if target:
+                          self.links.append(target)
+
+          parsed = {}
+          for page in pages:
+              parser = Parser()
+              parser.feed(page.read_text(encoding="utf-8"))
+              parsed[page.name] = parser
+
+          for page, parser in parsed.items():
+              for target in parser.links:
+                  url = urlparse(target)
+                  if url.scheme or target.startswith("#"):
+                      continue
+                  path = url.path
+                  if not path or path == "./":
+                      candidate = site / "index.html"
+                  else:
+                      candidate = (site / path).resolve()
+                  assert candidate.exists(), f"{page}: missing local target {target}"
+          PY
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
