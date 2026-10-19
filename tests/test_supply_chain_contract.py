@@ -120,3 +120,24 @@ def test_hosted_callback_trust_roots_are_not_dispatch_inputs() -> None:
     assert "vars.AGNXIV_OIDC_AUDIENCE_BASE" in callback
     assert "--callback-url "$CALLBACK_URL"" in callback
     assert "--audience "$OIDC_AUDIENCE"" in callback
+
+
+def test_pdf_parser_image_is_digest_pinned_and_source_only() -> None:
+    dockerfile = _read("Dockerfile.pdf-parser")
+    first = dockerfile.splitlines()[0]
+    assert "@sha256:" in first
+    assert "COPY src ./src" in dockerfile
+    assert "COPY constraints-service.txt" in dockerfile
+    assert "pypdf==6.21.1" in dockerfile
+    assert "pydantic==2.14.1" in dockerfile
+    assert "USER 65534:65534" in dockerfile
+    assert "pip install -e" not in dockerfile
+
+
+def test_hosted_workflow_builds_parser_before_untrusted_analysis() -> None:
+    workflow = _read(".github/workflows/hosted-verify.yml")
+    build = workflow.index("Build trusted no-network manuscript parser")
+    execute = workflow.index("Execute untrusted research analysis")
+    assert build < execute
+    assert "Dockerfile.pdf-parser" in workflow
+    assert "agnxiv-pdf-parser:trusted" in workflow
