@@ -65,7 +65,7 @@ _CLAIM_SIGNALS = (
 )
 
 _LABEL_RE = re.compile(
-    r"(?:figure|fig|table|algorithm|alg|equation|eq|section|sec|lines?|appendix)"
+    r"(?:figures?|figs?|tables?|algorithms?|algs?|equations?|eqs?|sections?|secs?|lines?|appendices?|appendix)"
     r"\s*$",
     flags=re.IGNORECASE,
 )
@@ -82,7 +82,7 @@ _VARIABLE_ASSIGNMENT_RE = re.compile(
 )
 _TOP_INDEX_RE = re.compile(r"\btop\s*-\s*$", flags=re.IGNORECASE)
 _STRUCTURAL_PREFIX_RE = re.compile(
-    r"(?:§|(?:section|sec\.?|figure|fig\.?|table|equation|eq\.?))\s*$",
+    r"(?:§|(?:sections?|secs?\.?|figures?|figs?\.?|tables?|equations?|eqs?\.?))\s*$",
     flags=re.IGNORECASE,
 )
 
