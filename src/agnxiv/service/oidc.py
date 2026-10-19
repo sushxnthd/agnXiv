@@ -21,7 +21,19 @@ class GitHubOIDCPolicy:
 
 _JWKS_URL = "https://token.actions.githubusercontent.com/.well-known/jwks"
 _ISSUER = "https://token.actions.githubusercontent.com"
-_JWK_CLIENT = PyJWKClient(_JWKS_URL, cache_keys=True, lifespan=3600)
+_JWK_CLIENT = PyJWKClient(_JWKS_URL, cache_keys=True, lifespan=300)
+
+
+def _cached_signing_key(kid: str):
+    """Resolve a GitHub signing key without refreshing JWKS on attacker-chosen misses."""
+    try:
+        keys = _JWK_CLIENT.get_signing_keys(refresh=False)
+    except Exception as exc:
+        raise OIDCVerificationError(f"GitHub JWKS is unavailable: {exc}") from exc
+    for key in keys:
+        if key.key_id == kid:
+            return key
+    raise OIDCVerificationError("GitHub OIDC signing key is not in the cached JWKS set")
 
 
 def verify_github_actions_token(
@@ -38,7 +50,7 @@ def verify_github_actions_token(
     if header.get("alg") != "RS256" or not isinstance(header.get("kid"), str):
         raise OIDCVerificationError("unsupported GitHub OIDC signing header")
     try:
-        signing_key = _JWK_CLIENT.get_signing_key_from_jwt(token)
+        signing_key = _cached_signing_key(header["kid"])
         claims = jwt.decode(
             token,
             signing_key.key,
