@@ -123,7 +123,7 @@ def _small_safe_requirements(root: Path) -> bool:
         return False
     try:
         plan = plan_python_environment(root, base_image="python:3.11-slim")
-    except Exception:
+    except (OSError, UnicodeError, ValueError):
         return False
     return plan.safe_manifest_only
 
