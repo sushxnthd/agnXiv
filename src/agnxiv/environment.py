@@ -396,16 +396,35 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         root,
         base_image=f"python:{python_version}-slim",
     )
+    if build_plan.builder == "conda-micromamba-metadata":
+        if build_plan.dependency_file and build_plan.dependency_file not in dependency_files:
+            dependency_files.append(build_plan.dependency_file)
+        dependency_source = "manifest"
+        dependency_precision = "version-pinned"
+        historical_fidelity = "constrained"
+        confidence = max(confidence, 0.9)
+        notes.append(
+            "A README-referenced, fully pinned Conda environment can be "
+            "replayed through the metadata-only micromamba builder."
+        )
     unsupported_exact_sources = [
         name
         for name in ("poetry.lock", "uv.lock", "Pipfile.lock")
         if (root / name).exists()
     ]
-    if conda_file.exists():
+    if build_plan.builder == "conda-micromamba-metadata":
+        reconstruction_supported = build_plan.safe_manifest_only
+        reconstruction_reason = (
+            "The active metadata-only micromamba builder can replay the "
+            "fully pinned Conda environment without exposing research source."
+            if build_plan.safe_manifest_only
+            else "; ".join(build_plan.rejected_reasons)
+        )
+    elif conda_file.exists():
         reconstruction_supported = False
         reconstruction_reason = (
             "Conda metadata was detected but the hosted dependency builder "
-            "does not replay Conda environments."
+            "could not safely replay this environment."
         )
     elif unsupported_exact_sources:
         reconstruction_supported = False
