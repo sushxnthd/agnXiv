@@ -731,6 +731,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                     repository=active_config.github_repository,
                     ref=active_config.github_ref,
                     workflow=active_config.github_workflow,
+                    workflow_sha=active_config.github_workflow_sha,
                 ),
             )
         except OIDCVerificationError as exc:
