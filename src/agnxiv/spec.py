@@ -157,8 +157,9 @@ def execute_verification_spec(
     image_override: str | None = None,
 ) -> VerificationBundle:
     """Resolve a manifest inside its own workspace and execute it."""
-    spec_path = Path(path).resolve()
-    spec = load_verification_spec(spec_path)
+    manifest_path = Path(path)
+    spec = load_verification_spec(manifest_path)
+    spec_path = manifest_path.resolve()
     base = spec_path.parent
 
     repository = _resolve_workspace_path(
