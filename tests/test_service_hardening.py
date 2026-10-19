@@ -1,14 +1,23 @@
 from __future__ import annotations
 
 import base64
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
+import pytest
 from fastapi.testclient import TestClient
 
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
-from agnxiv.service.db import Job, JobStore
-from agnxiv.service.dispatcher import GitHubActionsDispatcher
+from agnxiv.service.db import (
+    Job,
+    JobAlreadyFinalized,
+    JobQuotaExceeded,
+    JobStore,
+    TransparencyEntry,
+)
+from agnxiv.service.dispatcher import GitHubActionsDispatcher, workflow_dispatch_ref
+from agnxiv.statement import generate_ed25519_keypair
 
 
 def _productionish_config(database_url: str, *, issuer: str | None = None) -> ServiceConfig:
@@ -18,12 +27,13 @@ def _productionish_config(database_url: str, *, issuer: str | None = None) -> Se
         public_base_url="https://agnxiv.example",
         github_token="github-token",
         github_repository="sushxnthd/agnXiv",
-        github_ref="main",
+        github_ref="refs/tags/agnxiv-test-release",
         github_workflow="hosted-verify.yml",
         max_active_jobs_per_key=3,
         max_jobs_per_hour=20,
         oidc_audience="https://agnxiv.example/github-actions",
         issuer_private_key_b64=issuer,
+        github_workflow_sha="a" * 40,
     )
 
 
@@ -118,7 +128,7 @@ def test_hosted_job_submission_is_idempotent(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: dispatched.append(request),
+        lambda self, request: (dispatched.append(request) or 12345),
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -158,7 +168,7 @@ def test_idempotency_key_reuse_for_different_request_is_rejected(
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -236,7 +246,7 @@ def test_metrics_endpoint_requires_auth_and_reports_job_counts(
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -299,3 +309,391 @@ def test_request_id_is_echoed_and_untrusted_values_are_replaced(tmp_path) -> Non
     assert valid.headers["X-Request-ID"] == "trace-123"
     assert invalid.headers["X-Request-ID"] != "bad request id with spaces"
     assert len(invalid.headers["X-Request-ID"]) == 32
+
+
+def test_transparency_receipt_is_atomic_hash_chained_and_secret_free(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'transparency.db'}")
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000101",
+        api_key_hash="api-secret-hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="a" * 40,
+        arxiv_id="2601.00001",
+        spec_path=None,
+    )
+    store.mark_running(job.id)
+    store.complete(
+        job.id,
+        status="succeeded",
+        result={"kind": "verification", "private_marker": "must-not-leak"},
+        error=None,
+    )
+
+    receipt = store.transparency_for_job(job.id)
+    assert receipt is not None
+    assert receipt["sequence"] == 1
+    assert receipt["previous_hash"] == "0" * 64
+    assert len(str(receipt["entry_hash"])) == 64
+    assert len(str(receipt["payload_sha256"])) == 64
+    assert "must-not-leak" not in str(receipt)
+    assert store.transparency_head()["entry_hash"] == receipt["entry_hash"]
+    assert store.verify_transparency_chain()["valid"] is True
+
+
+def test_transparency_chain_detects_database_tampering(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'tamper.db'}")
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000102",
+        api_key_hash="hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="b" * 40,
+        arxiv_id="2601.00002",
+        spec_path=None,
+    )
+    store.complete(job.id, status="failed", result=None, error="controlled failure")
+    assert store.verify_transparency_chain()["valid"] is True
+
+    with store.session_factory() as session:
+        entry = session.get(TransparencyEntry, 1)
+        assert entry is not None
+        entry.payload_sha256 = "f" * 64
+        session.commit()
+
+    verification = store.verify_transparency_chain()
+    assert verification["valid"] is False
+    assert verification["reason"] == "entry_hash_mismatch"
+
+
+def test_transparency_api_publishes_receipts_but_full_verification_requires_auth(
+    tmp_path,
+) -> None:
+    database = f"sqlite:///{tmp_path / 'api-transparency.db'}"
+    store = JobStore(database)
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000103",
+        api_key_hash="hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="c" * 40,
+        arxiv_id="2601.00003",
+        spec_path=None,
+    )
+    store.complete(job.id, status="failed", result=None, error="test")
+
+    app = create_app(_productionish_config(database, issuer=None))
+    with TestClient(app) as client:
+        head = client.get("/v1/transparency/head")
+        page = client.get("/v1/transparency?after=0&limit=10")
+        receipt = client.get(f"/v1/transparency/jobs/{job.id}")
+        denied = client.get("/v1/transparency/verify")
+        verified = client.get(
+            "/v1/transparency/verify",
+            headers={"X-API-Key": "k" * 48},
+        )
+
+    assert head.status_code == 200
+    assert head.json()["sequence"] == 1
+    assert page.status_code == 200
+    assert len(page.json()["entries"]) == 1
+    assert receipt.status_code == 200
+    assert receipt.json()["job_id"] == job.id
+    assert denied.status_code == 401
+    assert verified.status_code == 200
+    assert verified.json()["valid"] is True
+
+
+def test_issuer_endpoint_keeps_previous_public_key_during_rotation(tmp_path) -> None:
+    current_private, current_public, current_id = generate_ed25519_keypair()
+    _, previous_public, previous_id = generate_ed25519_keypair()
+    base = _productionish_config(
+        f"sqlite:///{tmp_path / 'issuer-rotation.db'}",
+        issuer=base64.b64encode(current_private).decode("ascii"),
+    )
+    config = ServiceConfig(
+        database_url=base.database_url,
+        api_keys=base.api_keys,
+        public_base_url=base.public_base_url,
+        github_token=base.github_token,
+        github_repository=base.github_repository,
+        github_ref=base.github_ref,
+        github_workflow=base.github_workflow,
+        max_active_jobs_per_key=base.max_active_jobs_per_key,
+        max_jobs_per_hour=base.max_jobs_per_hour,
+        oidc_audience=base.oidc_audience,
+        issuer_private_key_b64=base.issuer_private_key_b64,
+        issuer_previous_public_keys_b64=(
+            base64.b64encode(previous_public).decode("ascii"),
+        ),
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        response = client.get("/v1/issuer")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema_version"] == "agnxiv.issuer-keyset/1"
+    assert body["current_key_id"] == current_id
+    assert body["key_id"] == current_id
+    assert body["public_key_pem"].encode("ascii") == current_public
+    assert [(row["key_id"], row["status"]) for row in body["keys"]] == [
+        (current_id, "current"),
+        (previous_id, "previous"),
+    ]
+
+
+def test_readiness_rejects_duplicate_issuer_rollover_key(tmp_path) -> None:
+    private_key, public_key, _ = generate_ed25519_keypair()
+    encoded_private = base64.b64encode(private_key).decode("ascii")
+    encoded_public = base64.b64encode(public_key).decode("ascii")
+    base = _productionish_config(
+        f"sqlite:///{tmp_path / 'issuer-duplicate.db'}",
+        issuer=encoded_private,
+    )
+    config = ServiceConfig(
+        database_url=base.database_url,
+        api_keys=base.api_keys,
+        public_base_url=base.public_base_url,
+        github_token=base.github_token,
+        github_repository=base.github_repository,
+        github_ref=base.github_ref,
+        github_workflow=base.github_workflow,
+        max_active_jobs_per_key=base.max_active_jobs_per_key,
+        max_jobs_per_hour=base.max_jobs_per_hour,
+        oidc_audience=base.oidc_audience,
+        issuer_private_key_b64=encoded_private,
+        issuer_previous_public_keys_b64=(encoded_public,),
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        response = client.get("/readyz")
+
+    assert response.status_code == 503
+    assert "issuer_key_invalid" in response.json()["detail"]["issues"]
+
+
+def test_database_guarded_quota_preserves_idempotent_retry(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'guarded-quota.db'}")
+    store.initialize()
+    common = {
+        "api_key_hash": "a" * 64,
+        "mode": "auto_verify",
+        "repository": "owner/repo",
+        "repository_ref": "d" * 40,
+        "arxiv_id": "2601.00100",
+        "spec_path": None,
+        "max_active": 1,
+        "max_recent": 20,
+        "idempotency_key_hash": "i" * 64,
+        "request_fingerprint": "r" * 64,
+    }
+    first, created = store.create_job_guarded(
+        job_id="00000000-0000-0000-0000-000000000201",
+        **common,
+    )
+    assert created is True
+
+    retry, retry_created = store.create_job_guarded(
+        job_id="00000000-0000-0000-0000-000000000202",
+        **common,
+    )
+    assert retry_created is False
+    assert retry.id == first.id
+
+    with pytest.raises(JobQuotaExceeded, match="active"):
+        store.create_job_guarded(
+            job_id="00000000-0000-0000-0000-000000000203",
+            api_key_hash="a" * 64,
+            mode="auto_verify",
+            repository="owner/other",
+            repository_ref="e" * 40,
+            arxiv_id="2601.00101",
+            spec_path=None,
+            max_active=1,
+            max_recent=20,
+        )
+
+
+def test_job_store_rejects_second_finalization_under_database_lock(tmp_path) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'single-finalizer.db'}")
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000301",
+        api_key_hash="hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="f" * 40,
+        arxiv_id="2601.00301",
+        spec_path=None,
+    )
+    store.complete(job.id, status="failed", result=None, error="first")
+    with pytest.raises(JobAlreadyFinalized):
+        store.complete(job.id, status="succeeded", result={"late": True}, error=None)
+
+    final = store.get_job(job.id)
+    assert final is not None
+    assert final.status == "failed"
+    assert final.error == "first"
+    assert store.transparency_head()["sequence"] == 1
+    assert store.verify_transparency_chain()["valid"] is True
+
+
+def test_stale_reaper_wins_over_late_callback_without_rewriting_receipt(
+    tmp_path,
+) -> None:
+    store = JobStore(f"sqlite:///{tmp_path / 'stale-vs-callback.db'}")
+    store.initialize()
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000302",
+        api_key_hash="hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="e" * 40,
+        arxiv_id="2601.00302",
+        spec_path=None,
+    )
+    store.mark_running(job.id)
+    with store.session_factory() as session:
+        stored = session.get(Job, job.id)
+        assert stored is not None
+        stored.updated_at = datetime.now(UTC) - timedelta(minutes=20)
+        session.commit()
+
+    assert store.reap_stale(minutes=5) == 1
+    with pytest.raises(JobAlreadyFinalized):
+        store.complete(job.id, status="succeeded", result={"late": True}, error=None)
+    assert store.transparency_head()["sequence"] == 1
+
+
+def test_production_readiness_requires_immutable_trusted_workflow_sha() -> None:
+    config = ServiceConfig(
+        database_url="postgresql://user:pass@example/db",
+        api_keys=("k" * 48,),
+        public_base_url="https://agnxiv.example",
+        github_token="token",
+        github_repository="sushxnthd/agnXiv",
+        github_ref="main",
+        github_workflow="hosted-verify.yml",
+        max_active_jobs_per_key=3,
+        max_jobs_per_hour=20,
+        oidc_audience="https://agnxiv.example/github-actions",
+        issuer_private_key_b64="configured",
+        github_workflow_sha=None,
+    )
+    assert "trusted_workflow_sha_invalid" in config.production_issues
+
+    invalid = ServiceConfig(
+        **{
+            **config.__dict__,
+            "github_workflow_sha": "not-a-commit",
+        }
+    )
+    assert "trusted_workflow_sha_invalid" in invalid.production_issues
+
+
+def test_streamed_request_body_limit_cannot_be_bypassed_without_content_length(
+    tmp_path,
+) -> None:
+    config = replace(
+        _productionish_config(
+            f"sqlite:///{tmp_path / 'body-limit.db'}",
+            issuer=None,
+        ),
+        max_request_bytes=1024,
+    )
+    app = create_app(config)
+
+    def oversized_chunks():
+        yield b'{"mode":"auto_verify","repository":"'
+        yield b"a" * 2048
+        yield b'","arxiv_id":"2601.00001"}'
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "k" * 48},
+            content=oversized_chunks(),
+        )
+
+    assert response.status_code == 413
+    assert response.json()["detail"] == "request body too large"
+
+
+def test_workflow_dispatch_ref_preserves_branch_or_tag_identity() -> None:
+    assert workflow_dispatch_ref("refs/tags/agnxiv-v1") == "agnxiv-v1"
+    assert workflow_dispatch_ref("refs/heads/release") == "release"
+    assert workflow_dispatch_ref("legacy-branch") == "legacy-branch"
+
+
+def test_production_readiness_requires_immutable_release_tag() -> None:
+    base = _productionish_config(
+        "postgresql://user:pass@example/db",
+        issuer="configured",
+    )
+    assert "trusted_workflow_ref_not_immutable_tag" not in base.production_issues
+
+    unsafe = replace(base, github_ref="main")
+    assert "trusted_workflow_ref_not_immutable_tag" in unsafe.production_issues
+
+
+def test_missing_api_keys_fail_closed_even_when_service_is_reachable(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    base = _productionish_config(
+        f"sqlite:///{tmp_path / 'no-auth.db'}",
+        issuer=None,
+    )
+    config = ServiceConfig(
+        **{
+            **base.__dict__,
+            "api_keys": (),
+            "allow_development_auth": False,
+        }
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        health = client.get("/healthz")
+        job = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "development"},
+            json={
+                "mode": "auto_verify",
+                "repository": "owner/repo",
+                "arxiv_id": "2601.00001",
+            },
+        )
+
+    assert health.status_code == 200
+    assert job.status_code == 503
+    assert "not configured" in job.json()["detail"]
+
+
+def test_development_auth_requires_explicit_opt_in_and_blocks_readiness(tmp_path) -> None:
+    base = _productionish_config(
+        f"sqlite:///{tmp_path / 'dev-auth.db'}",
+        issuer=None,
+    )
+    config = ServiceConfig(
+        **{
+            **base.__dict__,
+            "api_keys": (),
+            "allow_development_auth": True,
+        }
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        ready = client.get("/readyz")
+
+    assert ready.status_code == 503
+    issues = ready.json()["detail"]["issues"]
+    assert "api_keys_missing" in issues
+    assert "development_auth_enabled" in issues

@@ -45,6 +45,10 @@ def aggregate(root: Path) -> dict:
     )
 
     environments = [item.get("environment") or {} for item in summaries]
+    reconstruction_supported = sum(
+        bool(environment.get("reconstruction_supported"))
+        for environment in environments
+    )
     reproduction_ready = sum(
         bool(environment.get("reproduction_ready"))
         for environment in environments
@@ -76,6 +80,7 @@ def aggregate(root: Path) -> dict:
         "stage_success_rate": stage_success,
         "environment": {
             "inference_rate": stage_success.get("environment_inference", 0.0),
+            "safe_builder_support_rate": reconstruction_supported / len(summaries),
             "reproduction_ready_rate": reproduction_ready / len(summaries),
             "dependency_source_counts": dict(dependency_sources),
             "dependency_precision_counts": dict(dependency_precision),

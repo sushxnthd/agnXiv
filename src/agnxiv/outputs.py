@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any
 
@@ -12,6 +13,78 @@ _NUMBER_RE = re.compile(
     r"(?<![A-Za-z0-9_])[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
     r"(?:[eE][-+]?\d+)?(?![A-Za-z0-9_])"
 )
+
+_MAX_REGEX_PATTERN_CHARS = 1024
+_REPEAT_OPS = {
+    re._constants.MAX_REPEAT,
+    re._constants.MIN_REPEAT,
+    re._constants.POSSESSIVE_REPEAT,
+}
+_UNSAFE_REGEX_OPS = {
+    re._constants.ASSERT,
+    re._constants.ASSERT_NOT,
+    re._constants.GROUPREF,
+}
+
+
+def _regex_tree_contains(subpattern: Any, targets: set[Any]) -> bool:
+    for op, arg in subpattern:
+        if op in targets:
+            return True
+        if op is re._constants.SUBPATTERN:
+            if _regex_tree_contains(arg[-1], targets):
+                return True
+        elif op is re._constants.BRANCH:
+            if any(_regex_tree_contains(branch, targets) for branch in arg[1]):
+                return True
+        elif op in _REPEAT_OPS:
+            if _regex_tree_contains(arg[2], targets):
+                return True
+    return False
+
+
+def safe_regex_pattern(pattern: str) -> bool:
+    """Accept a conservative regex subset suitable for trusted output parsing."""
+    if not pattern or len(pattern) > _MAX_REGEX_PATTERN_CHARS or "\x00" in pattern:
+        return False
+    try:
+        parsed = re._parser.parse(pattern, re.MULTILINE)
+        compiled = re.compile(pattern, flags=re.MULTILINE)
+    except (re.error, OverflowError):
+        return False
+
+    if compiled.groups != 1:
+        return False
+    if compiled.groupindex and set(compiled.groupindex) != {"value"}:
+        return False
+
+    def validate(subpattern: Any) -> bool:
+        for op, arg in subpattern:
+            if op in _UNSAFE_REGEX_OPS:
+                return False
+            if op is re._constants.GROUPREF_EXISTS:
+                return False
+            if op is re._constants.SUBPATTERN:
+                if not validate(arg[-1]):
+                    return False
+            elif op is re._constants.BRANCH:
+                if not all(validate(branch) for branch in arg[1]):
+                    return False
+            elif op in _REPEAT_OPS:
+                minimum, maximum, child = arg
+                if maximum != re._constants.MAXREPEAT and maximum > 10_000:
+                    return False
+                if maximum == re._constants.MAXREPEAT and (
+                    _regex_tree_contains(child, _REPEAT_OPS)
+                    or _regex_tree_contains(child, {re._constants.BRANCH})
+                ):
+                    return False
+                if not validate(child):
+                    return False
+        return True
+
+    return validate(parsed)
+
 
 _METRIC_ALIASES: dict[str, set[str]] = {
     "accuracy": {
@@ -249,8 +322,11 @@ def extract_json_observation(
 
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
+    normalized = float(value) * scale
+    if not math.isfinite(normalized):
+        return None
 
-    return Observation(value=float(value) * scale)
+    return Observation(value=normalized)
 
 
 def extract_regex_observation(
@@ -264,22 +340,20 @@ def extract_regex_observation(
     The regex must either contain exactly one capture group or a named capture
     group called value. Multiple matches are rejected as ambiguous.
     """
-    try:
-        compiled = re.compile(pattern, flags=re.MULTILINE)
-    except re.error:
+    if not safe_regex_pattern(pattern):
+        return None
+    compiled = re.compile(pattern, flags=re.MULTILINE)
+
+    iterator = compiled.finditer(output)
+    match = next(iterator, None)
+    if match is None or next(iterator, None) is not None:
         return None
 
-    matches = list(compiled.finditer(output))
-    if len(matches) != 1:
-        return None
-
-    match = matches[0]
-    if "value" in compiled.groupindex:
-        raw = match.group("value")
-    elif compiled.groups == 1:
-        raw = match.group(1)
-    else:
-        return None
+    raw = (
+        match.group("value")
+        if "value" in compiled.groupindex
+        else match.group(1)
+    )
 
     if raw is None:
         return None
@@ -288,8 +362,11 @@ def extract_regex_observation(
         value = float(raw.replace(",", "").strip())
     except ValueError:
         return None
+    normalized = value * scale
+    if not math.isfinite(normalized):
+        return None
 
-    return Observation(value=value * scale)
+    return Observation(value=normalized)
 
 
 def extract_observation_candidates(
@@ -314,6 +391,8 @@ def extract_observation_candidates(
 
         for index, match in enumerate(numbers):
             raw = float(match.group(0).replace(",", ""))
+            if not math.isfinite(raw):
+                continue
             normalized = raw
             percent_window = line[max(0, match.end() - 2) : match.end() + 2]
             percent_like = "%" in percent_window

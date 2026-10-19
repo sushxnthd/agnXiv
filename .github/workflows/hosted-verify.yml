@@ -1,4 +1,5 @@
 name: hosted-verify
+run-name: agnxiv-${{ inputs.job_id }}
 
 on:
   workflow_dispatch:
@@ -27,14 +28,6 @@ on:
         description: Manifest path for verify-spec jobs
         required: false
         type: string
-      callback_url:
-        description: AgnXiv completion endpoint
-        required: true
-        type: string
-      oidc_audience:
-        description: Expected callback OIDC audience
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -56,8 +49,8 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e ".[pdf]"
+      - name: Install exact trusted worker runtime
+        run: python -m pip install --disable-pip-version-check -c constraints-service.txt "pydantic==2.14.1" "pypdf==6.21.1"
 
       - name: Execute untrusted research analysis without service credentials
         env:
@@ -66,6 +59,7 @@ jobs:
           RESEARCH_REF: ${{ inputs.repository_ref }}
           ARXIV_ID: ${{ inputs.arxiv_id }}
           SPEC_PATH: ${{ inputs.spec_path }}
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           python -m agnxiv.hosted_runner \
             --mode "$JOB_MODE" \
@@ -84,6 +78,7 @@ jobs:
           if-no-files-found: error
 
   callback:
+    if: ${{ always() }}
     needs: execute
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -102,20 +97,66 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e .
-
       - name: Download isolated result
+        id: download-result
+        continue-on-error: true
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: agnxiv-result-${{ inputs.job_id }}
           path: /tmp/agnxiv-result
 
+      - name: Synthesize terminal failure when worker produced no result
+        if: ${{ steps.download-result.outcome != 'success' }}
+        env:
+          EXECUTE_RESULT: ${{ needs.execute.result }}
+        run: |
+          mkdir -p /tmp/agnxiv-result
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          outcome = os.environ.get("EXECUTE_RESULT", "unknown")
+          payload = {
+              "status": "failed",
+              "result": None,
+              "error": (
+                  "trusted hosted worker did not produce a callback artifact; "
+                  f"execute_job={outcome}"
+              ),
+          }
+          Path("/tmp/agnxiv-result/agnxiv-hosted-result.json").write_text(
+              json.dumps(payload, separators=(",", ":")),
+              encoding="utf-8",
+          )
+          PY
+
       - name: Authenticate with GitHub OIDC and deliver result
         env:
-          CALLBACK_URL: ${{ inputs.callback_url }}
-          OIDC_AUDIENCE: ${{ inputs.oidc_audience }}
+          CALLBACK_BASE_URL: ${{ vars.AGNXIV_PRODUCTION_URL }}
+          OIDC_AUDIENCE_BASE: ${{ vars.AGNXIV_OIDC_AUDIENCE_BASE }}
+          JOB_ID: ${{ inputs.job_id }}
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
+          python - <<'PY'
+          import os
+          from urllib.parse import urlparse
+
+          for name in ("CALLBACK_BASE_URL", "OIDC_AUDIENCE_BASE"):
+              value = os.environ.get(name, "").rstrip("/")
+              parsed = urlparse(value)
+              if (
+                  parsed.scheme != "https"
+                  or not parsed.hostname
+                  or parsed.username
+                  or parsed.password
+                  or parsed.query
+                  or parsed.fragment
+              ):
+                  raise SystemExit(f"{name} must be a clean HTTPS origin")
+          PY
+          CALLBACK_URL="${CALLBACK_BASE_URL%/}/internal/jobs/$JOB_ID/complete"
+          OIDC_AUDIENCE="${OIDC_AUDIENCE_BASE%/}/jobs/$JOB_ID"
           python -m agnxiv.hosted_callback \
             --result /tmp/agnxiv-result/agnxiv-hosted-result.json \
             --callback-url "$CALLBACK_URL" \

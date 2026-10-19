@@ -69,3 +69,54 @@ Ambiguous explicit matches abstain.
 ## Reporting
 
 Do not publish exploit payloads or sensitive unpublished manuscripts in public issues. Use a private security channel when one is established.
+
+
+## Hosted evidence integrity
+
+Terminal hosted job state and its result/error payload digest are committed atomically with a PostgreSQL transparency receipt. Receipts form a sequence-numbered SHA-256 chain and are available independently of GitHub issue rendering. The public head check is part of readiness; authenticated operators can verify the complete chain.
+
+The chain is tamper-evident, not a substitute for an external witness: a database administrator able to rewrite the complete database could rewrite an unanchored chain. A future external transparency witness remains a production-hardening requirement. Signed DSSE verification statements are separately protected by the issuer key.
+
+## Supply-chain gates
+
+The hosted service uses immutable GitHub Action SHAs, a digest-pinned Python base image, frozen service dependency constraints, daily Python vulnerability auditing, CycloneDX SBOM generation, and a Trivy production-image scan. Fixed HIGH or CRITICAL OS/library vulnerabilities block the security workflow. Build-only packages that are not needed by the running service are removed from the final image.
+
+## Signing-key lifecycle
+
+Only the current Ed25519 private key may sign new evidence. Previous public keys can be retained through `AGNXIV_ISSUER_PREVIOUS_PUBLIC_KEYS_B64` and are published by `/v1/issuer` so historical DSSE statements remain verifiable after rotation. See `docs/KEY_ROTATION.md`.
+
+
+## Ephemeral VM execution boundary
+
+Hosted research execution is dispatched only to GitHub-hosted `ubuntu-latest`
+jobs. GitHub documents these standard public-repository jobs as fresh virtual
+machines that are decommissioned after the job. AgnXiv then applies the
+no-network, no-capabilities, no-new-privileges, resource-limited Docker sandbox
+inside that VM. The research-execution job receives no OIDC callback identity
+and no repository write permission.
+
+Production CI rejects changes that move the untrusted execute job to
+`ubuntu-slim`, a self-hosted runner, or a job with callback/write privileges.
+Custom GPU/private workloads must provide an isolation boundary at least as
+strong; they are not covered by the hosted public execution contract.
+
+
+## Hosted callback identity binding
+
+A hosted callback is authorized by more than a trusted workflow filename. The
+control plane dispatches GitHub Actions with run-details enabled, records the
+returned `workflow_run_id`, and accepts completion only when the GitHub OIDC
+token has all of the expected properties:
+
+- per-job audience;
+- trusted repository and immutable release-tag ref;
+- exact `hosted-verify.yml` workflow ref and trusted workflow commit SHA;
+- GitHub-hosted runner environment;
+- `run_attempt=1`;
+- `run_id` equal to the exact run created by the control-plane dispatch.
+
+This prevents a separately triggered or manually dispatched trusted workflow
+from substituting results into an active job. The accepted run ID is included
+in durable orchestration metadata and in the signed in-toto/DSSE predicate.
+Callback URLs and OIDC audience roots come from protected repository
+configuration rather than workflow-dispatch inputs.

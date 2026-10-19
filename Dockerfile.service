@@ -2,6 +2,7 @@ FROM python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c9
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
 
@@ -9,16 +10,32 @@ RUN groupadd --system agnxiv && useradd --system --gid agnxiv --create-home agnx
 
 WORKDIR /app
 
-COPY pyproject.toml README.md LICENSE alembic.ini constraints-service.txt ./
+COPY constraints-service.txt alembic.ini LICENSE ./
 COPY src ./src
 COPY migrations ./migrations
 
 RUN python -m pip install "pip==26.2.1" && \
-    python -m pip install -c constraints-service.txt ".[service,sign,pdf]" && \
-    python -m pip check
+    python -m pip install -c constraints-service.txt \
+      "pydantic==2.14.1" \
+      "fastapi==0.146.0" \
+      "uvicorn[standard]==0.54.0" \
+      "SQLAlchemy==2.1.5" \
+      "psycopg[binary]==3.3.6" \
+      "alembic==1.20.0" \
+      "PyJWT[crypto]==2.15.1" \
+      "cryptography==50.0.2" && \
+    python -m pip check && \
+    python -c "import agnxiv.service.app, alembic, cryptography, fastapi, jwt, psycopg, pydantic, sqlalchemy, uvicorn" && \
+    python -m pip uninstall -y \
+      setuptools \
+      wheel \
+      urllib3 \
+      jaraco.context \
+      msgpack \
+      pip
 
 USER agnxiv
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --forwarded-allow-ips=''"]
+CMD ["sh", "-c", "python -m agnxiv.service.migrate && uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --forwarded-allow-ips=''"]

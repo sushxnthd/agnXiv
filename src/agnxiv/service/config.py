@@ -20,6 +20,10 @@ class ServiceConfig:
     issuer_private_key_b64: str | None
     job_stale_minutes: int = 45
     min_api_key_length: int = 32
+    issuer_previous_public_keys_b64: tuple[str, ...] = ()
+    github_workflow_sha: str | None = None
+    max_request_bytes: int = 5 * 1024 * 1024
+    allow_development_auth: bool = False
 
     @classmethod
     def from_env(cls) -> ServiceConfig:
@@ -32,6 +36,14 @@ class ServiceConfig:
             "AGNXIV_PUBLIC_BASE_URL",
             "http://localhost:8000",
         ).rstrip("/")
+        issuer_previous_public_keys_b64 = tuple(
+            item.strip()
+            for item in os.getenv(
+                "AGNXIV_ISSUER_PREVIOUS_PUBLIC_KEYS_B64",
+                "",
+            ).split(",")
+            if item.strip()
+        )
         return cls(
             database_url=os.getenv(
                 "DATABASE_URL",
@@ -62,6 +74,8 @@ class ServiceConfig:
                 public_base_url + "/github-actions",
             ),
             issuer_private_key_b64=os.getenv("AGNXIV_ISSUER_PRIVATE_KEY_B64") or None,
+            issuer_previous_public_keys_b64=issuer_previous_public_keys_b64,
+            github_workflow_sha=os.getenv("AGNXIV_GITHUB_WORKFLOW_SHA") or None,
             job_stale_minutes=max(
                 5,
                 int(os.getenv("AGNXIV_JOB_STALE_MINUTES", "45")),
@@ -70,6 +84,21 @@ class ServiceConfig:
                 16,
                 int(os.getenv("AGNXIV_MIN_API_KEY_LENGTH", "32")),
             ),
+            max_request_bytes=min(
+                16 * 1024 * 1024,
+                max(
+                    64 * 1024,
+                    int(
+                        os.getenv(
+                            "AGNXIV_MAX_REQUEST_BYTES",
+                            str(5 * 1024 * 1024),
+                        )
+                    ),
+                ),
+            ),
+            allow_development_auth=os.getenv(
+                "AGNXIV_ALLOW_DEVELOPMENT_AUTH", ""
+            ).strip().lower() in {"1", "true", "yes"},
         )
 
     @property
@@ -79,12 +108,25 @@ class ServiceConfig:
             issues.append("database_not_postgresql")
         if not self.api_keys:
             issues.append("api_keys_missing")
+        if self.allow_development_auth:
+            issues.append("development_auth_enabled")
         elif any(len(key) < self.min_api_key_length for key in self.api_keys):
             issues.append("api_key_too_short")
         elif len(set(self.api_keys)) != len(self.api_keys):
             issues.append("duplicate_api_keys")
         if not self.github_token:
             issues.append("github_dispatch_token_missing")
+        if (
+            not self.github_workflow_sha
+            or len(self.github_workflow_sha) != 40
+            or any(
+                char not in "0123456789abcdef"
+                for char in self.github_workflow_sha.lower()
+            )
+        ):
+            issues.append("trusted_workflow_sha_invalid")
+        if not self.github_ref.startswith("refs/tags/"):
+            issues.append("trusted_workflow_ref_not_immutable_tag")
         public = urlparse(self.public_base_url)
         if (
             public.scheme != "https"

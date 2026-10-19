@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
+import sys
 import tempfile
 import urllib.error
 import urllib.request
@@ -11,6 +13,7 @@ from pathlib import Path
 
 from .auto import build_auto_plan
 from .build import build_python_environment
+from .models import Claim
 from .preprint import parse_arxiv_reference
 from .provenance import detect_git_identity
 from .service.security import validate_git_ref, validate_github_slug
@@ -97,6 +100,14 @@ def checkout_repository(slug: str, ref: str, destination: Path) -> None:
     _run(
         [
             "git",
+            "-c",
+            "filter.lfs.smudge=",
+            "-c",
+            "filter.lfs.process=",
+            "-c",
+            "filter.lfs.required=false",
+            "-c",
+            "submodule.recurse=false",
             "-C",
             str(destination),
             "checkout",
@@ -125,7 +136,10 @@ def download_arxiv_pdf(arxiv_id: str, destination: Path) -> None:
     )
 
     try:
-        with urllib.request.urlopen(request, timeout=45) as response:
+        with urllib.request.urlopen(  # nosec B310 - fixed HTTPS arXiv origin
+            request,
+            timeout=45,
+        ) as response:
             content_type = response.headers.get("Content-Type", "")
             if "pdf" not in content_type.lower() and "octet-stream" not in content_type.lower():
                 raise HostedRunnerError(
@@ -145,6 +159,79 @@ def download_arxiv_pdf(arxiv_id: str, destination: Path) -> None:
     except urllib.error.URLError as exc:
         raise HostedRunnerError(f"could not download arXiv PDF: {exc}") from exc
 
+
+
+def _limit_pdf_parser_process() -> None:
+    """Apply OS limits before the isolated PDF parser imports untrusted input."""
+    import resource
+
+    one_gib = 1024 * 1024 * 1024
+    resource.setrlimit(resource.RLIMIT_AS, (one_gib, one_gib))
+    resource.setrlimit(resource.RLIMIT_CPU, (30, 30))
+    resource.setrlimit(resource.RLIMIT_FSIZE, (16 * 1024 * 1024, 16 * 1024 * 1024))
+    resource.setrlimit(resource.RLIMIT_NOFILE, (128, 128))
+
+
+def extract_pdf_claims_isolated(
+    paper: Path,
+    workspace: Path,
+) -> list[Claim]:
+    """Parse a downloaded PDF outside the trusted hosted worker process."""
+    if os.name != "posix":
+        raise HostedRunnerError(
+            "hosted PDF parsing requires POSIX resource-limit isolation"
+        )
+    output = workspace / "paper-claims.json"
+    command = [
+        sys.executable,
+        "-s",
+        "-m",
+        "agnxiv.pdf_extract_worker",
+        "--input",
+        str(paper),
+        "--output",
+        str(output),
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=45,
+            check=False,
+            preexec_fn=_limit_pdf_parser_process,
+            env={
+                **os.environ,
+                "PYTHONNOUSERSITE": "1",
+                "PYTHONWARNINGS": "ignore",
+            },
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise HostedRunnerError(
+            f"isolated PDF claim extraction failed: {type(exc).__name__}"
+        ) from exc
+    if completed.returncode != 0 or not output.is_file():
+        reason = "parser process failed"
+        if output.is_file():
+            try:
+                payload = json.loads(output.read_text(encoding="utf-8"))
+                reason = str(payload.get("error") or reason)[:1200]
+            except (OSError, json.JSONDecodeError):
+                pass
+        raise HostedRunnerError(f"could not safely parse arXiv PDF: {reason}")
+
+    try:
+        payload = json.loads(output.read_text(encoding="utf-8"))
+        raw_claims = payload.get("claims")
+        if payload.get("ok") is not True or not isinstance(raw_claims, list):
+            raise ValueError("parser output schema is invalid")
+        if len(raw_claims) > 2_000:
+            raise ValueError("parser returned too many claims")
+        return [Claim.model_validate(item) for item in raw_claims]
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        raise HostedRunnerError(
+            "isolated PDF parser returned invalid claim data"
+        ) from exc
 
 
 def _validate_hosted_image(image: str) -> str:
@@ -178,19 +265,28 @@ def execute_job(
                 raise HostedRunnerError("AUTO mode requires an arXiv identifier")
             paper = workspace / "paper.pdf"
             download_arxiv_pdf(arxiv_id, paper)
+            paper_claims = extract_pdf_claims_isolated(paper, workspace)
             identity = detect_git_identity(repo)
             if identity is None:
                 raise HostedRunnerError("checked-out repository has no Git identity")
 
             if mode == "auto_plan":
-                plan = build_auto_plan(paper, repo)
+                plan = build_auto_plan(
+                    paper,
+                    repo,
+                    claims_override=paper_claims,
+                )
                 return "needs_review", {
                     "kind": "auto_plan",
                     "repository_commit": identity.commit,
                     "plan": plan.model_dump(mode="json"),
                 }
 
-            plan = build_auto_plan(paper, repo)
+            plan = build_auto_plan(
+                paper,
+                repo,
+                claims_override=paper_claims,
+            )
             # Do not create a network-capable or source-installing runtime.
             # Running the first execution requires safe plan prerequisites.
             required = {
@@ -210,7 +306,13 @@ def execute_job(
             base_image = _validate_hosted_image(plan.environment.base_image)
             _pull_image(base_image)
             build = build_python_environment(repo, base_image=base_image)
-            outcome = run_zero_manifest(paper, repo, image=build.image_ref)
+            outcome = run_zero_manifest(
+                paper,
+                repo,
+                image=build.image_ref,
+                claims_override=paper_claims,
+                plan_override=plan,
+            )
 
             if outcome.bundle is None:
                 return "needs_review", {
@@ -248,7 +350,10 @@ def execute_job(
             relative = Path(spec_path)
             if relative.is_absolute() or ".." in relative.parts:
                 raise HostedRunnerError("unsafe verification spec path")
-            manifest = (repo / relative).resolve()
+            manifest_candidate = repo / relative
+            if manifest_candidate.is_symlink():
+                raise HostedRunnerError("verification spec symlinks are not allowed")
+            manifest = manifest_candidate.resolve()
             try:
                 manifest.relative_to(repo.resolve())
             except ValueError as exc:
@@ -264,7 +369,12 @@ def execute_job(
                 raise HostedRunnerError(
                     "verification spec repository must be workspace-relative"
                 )
-            build_repository = (spec_base / candidate_repo).resolve()
+            build_candidate = spec_base / candidate_repo
+            if build_candidate.is_symlink():
+                raise HostedRunnerError(
+                    "verification spec repository symlinks are not allowed"
+                )
+            build_repository = build_candidate.resolve()
             try:
                 build_repository.relative_to(spec_base)
             except ValueError as exc:

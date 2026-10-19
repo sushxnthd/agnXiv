@@ -33,6 +33,7 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
 
     def fake_dispatch(self, request):
         dispatched.append(request)
+        return 12345
 
     monkeypatch.setattr(GitHubActionsDispatcher, "dispatch", fake_dispatch)
     monkeypatch.setattr(
@@ -48,6 +49,7 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
             "workflow_ref": (
                 "sushxnthd/agnXiv/.github/workflows/hosted-verify.yml@refs/heads/main"
             ),
+            "run_id": "12345",
         },
     )
 
@@ -73,7 +75,7 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
         assert len(dispatched) == 1
         assert dispatched[0].repository == "phanein/deepwalk"
         assert dispatched[0].arxiv_id == "1403.6652"
-        assert dispatched[0].oidc_audience == "https://agnxiv.example/github-actions"
+        assert dispatched[0].repository_ref == "a" * 40
 
         quota = client.post(
             "/v1/jobs",
@@ -127,14 +129,19 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
         assert fetched.status_code == 200
         final = fetched.json()
         assert final["status"] == "needs_review"
+        assert final["workflow_run_id"] == 12345
         assert final["result"]["plan"]["automation_score"] == 0.75
+        assert final["result"]["orchestration"] == {
+            "provider": "github-actions",
+            "workflow_run_id": 12345,
+        }
 
 
 def test_hosted_callback_rejects_untrusted_oidc(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -177,7 +184,7 @@ def test_hosted_api_rejects_unsafe_inputs(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -262,7 +269,7 @@ def test_hosted_callback_rejects_wrong_pinned_commit(tmp_path, monkeypatch) -> N
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -271,7 +278,7 @@ def test_hosted_callback_rejects_wrong_pinned_commit(tmp_path, monkeypatch) -> N
     )
     monkeypatch.setattr(
         "agnxiv.service.app.verify_github_actions_token",
-        lambda token, policy: {"repository": policy.repository},
+        lambda token, policy: {"repository": policy.repository, "run_id": "12345"},
     )
     app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
 
@@ -317,7 +324,7 @@ def test_hourly_quota_counts_finished_jobs(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -326,7 +333,7 @@ def test_hourly_quota_counts_finished_jobs(tmp_path, monkeypatch) -> None:
     )
     monkeypatch.setattr(
         "agnxiv.service.app.verify_github_actions_token",
-        lambda token, policy: {"repository": policy.repository},
+        lambda token, policy: {"repository": policy.repository, "run_id": "12345"},
     )
     config = replace(
         _config(f"sqlite:///{tmp_path / 'service.db'}"),
@@ -374,7 +381,7 @@ def test_hosted_api_rejects_invalid_arxiv_id(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: None,
+        lambda self, request: 12345,
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -403,7 +410,7 @@ def test_auto_verify_api_dispatches_and_rejects_fake_plan_success(
     monkeypatch.setattr(
         GitHubActionsDispatcher,
         "dispatch",
-        lambda self, request: sent.append(request),
+        lambda self, request: (sent.append(request) or 12345),
     )
     monkeypatch.setattr(
         GitHubActionsDispatcher,
@@ -412,7 +419,7 @@ def test_auto_verify_api_dispatches_and_rejects_fake_plan_success(
     )
     monkeypatch.setattr(
         "agnxiv.service.app.verify_github_actions_token",
-        lambda token, policy: {"repository": policy.repository},
+        lambda token, policy: {"repository": policy.repository, "run_id": "12345"},
     )
     app = create_app(_config(f"sqlite:///{tmp_path / 'service.db'}"))
     with TestClient(app) as client:
@@ -449,3 +456,56 @@ def test_auto_verify_api_dispatches_and_rejects_fake_plan_success(
             },
         )
         assert invalid.status_code == 422
+
+
+def test_hosted_callback_rejects_trusted_workflow_from_wrong_run(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: 12345,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "a" * 40,
+    )
+    monkeypatch.setattr(
+        "agnxiv.service.app.verify_github_actions_token",
+        lambda token, policy: {
+            "repository": policy.repository,
+            "run_id": "99999",
+        },
+    )
+    app = create_app(_config(f"sqlite:///{tmp_path / 'wrong-run.db'}"))
+
+    with TestClient(app) as client:
+        created = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={
+                "mode": "auto_plan",
+                "repository": "phanein/deepwalk",
+                "arxiv_id": "1403.6652",
+            },
+        )
+        assert created.status_code == 202
+        job_id = created.json()["id"]
+        assert created.json()["workflow_run_id"] == 12345
+
+        callback = client.post(
+            f"/internal/jobs/{job_id}/complete",
+            headers={"Authorization": "Bearer valid-other-run"},
+            json={"status": "failed", "error": "manual dispatch substitution"},
+        )
+        assert callback.status_code == 401
+        assert callback.json()["detail"] == "untrusted workflow run identity"
+
+        current = client.get(
+            f"/v1/jobs/{job_id}",
+            headers={"X-API-Key": "test-key"},
+        )
+        assert current.status_code == 200
+        assert current.json()["status"] == "running"

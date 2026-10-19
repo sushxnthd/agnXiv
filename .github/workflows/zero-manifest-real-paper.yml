@@ -17,6 +17,10 @@ on:
       - "constraints-service.txt"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -32,9 +36,12 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: python -m pip install -e ".[pdf,dev]"
+      - name: Install exact trusted worker runtime
+        run: python -m pip install --disable-pip-version-check -c constraints-service.txt "pydantic==2.14.1" "pypdf==6.21.1"
 
       - name: Download and automatically verify an external arXiv paper
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           python -m agnxiv.hosted_runner \
             --mode auto_verify \
@@ -130,9 +137,12 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: python -m pip install -e ".[pdf,dev]"
+      - name: Install exact trusted worker runtime
+        run: python -m pip install --disable-pip-version-check -c constraints-service.txt "pydantic==2.14.1" "pypdf==6.21.1"
 
       - name: Attempt zero-manifest DeepWalk scientific verification
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           python -m agnxiv.hosted_runner \
             --mode auto_verify \

@@ -17,20 +17,21 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Multiple claim bundles from one run are preserved.
 - [x] Repeated attempts sharing the same evidence cluster are not counted as independent votes.
 - [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.
-- [ ] Central-claim selection is validated beyond the small v0 diagnostic set.
-- [ ] Historical environment recovery benchmark reaches a predeclared production threshold.
+- [x] Central-claim selection is validated beyond v0 on five manually anchored public real-paper development cases: recall@1 0.40, recall@3 1.00, recall@5 1.00. This is development evidence, not the held-out false-pass estimate.
+- [ ] Historical environment recovery reaches the frozen v2 threshold of >=50% constrained, builder-supported recovery on the fixed eight-paper suite. Current strong recovery is 25%; safe builder support is tracked separately.
 
 ### Execution security
 
 - [x] Research execution is separated from the control plane.
 - [x] Research containers run without network, added Linux capabilities, or write access to host evidence.
 - [x] GitHub credentials are not persisted into research execution.
-- [x] Worker callbacks require GitHub Actions OIDC.
+- [x] Worker callbacks require GitHub Actions OIDC with a per-job audience, immutable release-tag ref, exact trusted workflow commit SHA, first-run-attempt requirement, and the exact control-plane-dispatched `workflow_run_id`; that run ID is persisted and bound into signed statements.
 - [x] Returned Git commit must match the control-plane pinned commit.
 - [x] Dependency installers do not receive the research source tree.
-- [ ] Dedicated sandbox provider / microVM boundary for workloads beyond public beta risk envelope.
+- [x] Hosted public research execution runs on a fresh GitHub-hosted VM per job, with a second locked-down Docker sandbox and no callback/write credentials in the untrusted execute job. Custom GPU/private execution must preserve an equivalent dedicated boundary before being enabled.
 - [x] Continuous Python dependency vulnerability scanning with a blocking `pip-audit` gate and CycloneDX SBOM output.
-- [ ] Container/OS package vulnerability scanning.
+- [x] Blocking Bandit static analysis for Python and zizmor analysis for GitHub Actions workflows.
+- [x] Container/OS and Python-library vulnerability scanning blocks fixed HIGH/CRITICAL findings in the production image.
 - [ ] External security review and threat-model review.
 
 ### Control-plane reliability
@@ -40,14 +41,20 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] HTTPS public URL and HTTPS OIDC audience are required.
 - [x] Signing key must be configured and cryptographically parseable.
 - [x] Stale jobs are failed automatically so lost callbacks cannot permanently consume quota.
+- [x] Hosted Actions always executes a terminal callback; worker/bootstrap failure synthesizes a fail-closed terminal result instead of waiting for the stale reaper.
 - [x] Active-job and hourly quotas exist.
 - [x] Liveness and strict readiness endpoints exist.
 - [x] Capability metadata endpoint exposes the supported API contract without secrets.
 - [x] Idempotency keys for job creation, with database uniqueness and conflicting-request rejection.
 - [x] Authenticated operator job metrics and request correlation IDs.
-- [ ] Alerting and error-budget SLOs.
-- [ ] Backup/restore drill for production PostgreSQL.
-- [ ] Key rotation procedure and issuer-key rollover metadata.
+- [x] HTTP request bodies are capped on actual streamed ASGI bytes, including chunked requests without `Content-Length`.
+- [x] Production release inputs are bound in a GitHub/Sigstore attested manifest containing commit, service image, base image, dependency lock, trusted workflows, and migrations.
+- [x] Fail-closed deployment and rollback runbook requires immutable release tags and matching trusted workflow SHA.
+- [x] Error-budget/SLO policy and scheduled synthetic probes exist for the public product and hosted readiness endpoint.
+- [ ] Production service URL plus operator notification routing are configured and tested after deployment.
+- [x] Scheduled PostgreSQL logical backup/clean-restore rehearsal verifies jobs plus the transparency chain in CI.
+- [ ] A restore drill against the actual production database provider and its backup mechanism has been completed.
+- [x] Key rotation procedure and issuer-key rollover metadata are implemented; current and retained previous public keys are published by `/v1/issuer`.
 - [ ] Multi-region execution strategy and disaster recovery.
 
 ### Evidence durability
@@ -56,9 +63,22 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Verification statements can be signed with DSSE/Ed25519.
 - [x] Living Attempt → Record → Challenge model exists.
 - [x] Independence-aware claim aggregation exists with regression coverage.
-- [ ] Append-only transparency log independent of GitHub issue availability.
-- [ ] Long-term artifact retention policy.
+- [x] Hosted job finalization atomically writes a hash-chained, tamper-evident PostgreSQL receipt independent of GitHub issue availability.
+- [ ] Transparency history is externally anchored/witnessed so a full database compromise cannot rewrite the entire chain undetectably.
+- [x] Long-term evidence and ephemeral execution-artifact retention policy is documented.
 - [ ] DOI/publisher registry integration.
+
+## Current launch blockers after production-hardening v2
+
+The repository can now enforce substantially stronger operational invariants, but the hosted service must **not** be called fully production-grade yet. Remaining blockers require evidence or infrastructure outside a code-only CI pass:
+
+1. held-out false-pass evidence at the predeclared confidence bound;
+2. historical-environment validation still fails the current real-paper diagnostic target;
+3. external security/threat-model review;
+4. an actual hosted control-plane deployment with alert routing, production-provider restore rehearsal, and disaster-recovery testing;
+5. a successfully exercised external transparency anchor against that production deployment.
+
+The connected Railway account currently has no AgnXiv project deployed, so deployment-specific gates cannot yet be truthfully marked complete. `docs/DEPLOYMENT.md` defines the exact release-tag, workflow-SHA, migration, canary, monitoring, backup/restore, and rollback sequence required when a production environment is provisioned.
 
 ## Evidence grades
 

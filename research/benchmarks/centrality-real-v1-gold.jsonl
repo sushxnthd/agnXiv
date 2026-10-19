@@ -1,0 +1,5 @@
+{"case_id":"CENTRALITY-KOOPA","required_substrings":["77.3","76.0"],"rationale":"Abstract-level efficiency claim: competitive forecasting with 77.3% training-time and 76.0% memory savings."}
+{"case_id":"CENTRALITY-LORA","required_substrings":["10000 times","3 times"],"rationale":"Abstract-level parameter and GPU-memory reduction claim."}
+{"case_id":"CENTRALITY-MASKGIT","required_substrings":["64x"],"rationale":"Abstract-level autoregressive decoding acceleration claim."}
+{"case_id":"CENTRALITY-GRAPHORMER","required_substrings":["11.5%"],"rationale":"Primary PCQM4M-LSC result: relative validation-MAE decline against the previous state of the art."}
+{"case_id":"CENTRALITY-DEEPWALK","required_substrings":["10%"],"rationale":"Abstract-level result: F1 scores up to 10% higher than competing methods under sparse labels."}

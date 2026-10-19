@@ -12,10 +12,13 @@ from agnxiv.provenance import (
     fingerprint_document,
     fingerprint_tree,
 )
+from agnxiv.service.app import _enrich_signed_result
+from agnxiv.service.config import ServiceConfig
 from agnxiv.statement import (
     PREDICATE_TYPE,
     STATEMENT_TYPE,
     AttestationSignatureError,
+    DSSEEnvelope,
     build_verification_statement,
     generate_ed25519_keypair,
     sign_statement_ed25519,
@@ -94,3 +97,45 @@ def test_tampered_payload_type_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(AttestationSignatureError):
         verify_statement_ed25519(envelope, public_key)
+
+
+def test_hosted_signature_binds_exact_actions_run_identity(tmp_path: Path) -> None:
+    private_key, public_key, _ = generate_ed25519_keypair()
+    config = ServiceConfig(
+        database_url="postgresql://user:pass@example/db",
+        api_keys=("k" * 48,),
+        public_base_url="https://agnxiv.example",
+        github_token="token",
+        github_repository="sushxnthd/agnXiv",
+        github_ref="refs/tags/agnxiv-test-release",
+        github_workflow="hosted-verify.yml",
+        max_active_jobs_per_key=3,
+        max_jobs_per_hour=20,
+        oidc_audience="https://agnxiv.example/github-actions",
+        issuer_private_key_b64=base64.b64encode(private_key).decode("ascii"),
+        github_workflow_sha="a" * 40,
+    )
+    result = {
+        "kind": "verification",
+        "bundle": _bundle(tmp_path).model_dump(mode="json"),
+    }
+
+    enriched = _enrich_signed_result(
+        config,
+        result,
+        workflow_run_id=12345,
+    )
+
+    assert enriched is not None
+    assert enriched["orchestration"] == {
+        "provider": "github-actions",
+        "workflow_run_id": 12345,
+    }
+    assert enriched["statement"]["predicate"]["orchestration"] == {
+        "provider": "github-actions",
+        "workflowRunId": 12345,
+    }
+
+    envelope = DSSEEnvelope.model_validate(enriched["dsseEnvelope"])
+    verified = verify_statement_ed25519(envelope, public_key)
+    assert verified["predicate"]["orchestration"]["workflowRunId"] == 12345

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import configparser
 import hashlib
 import re
 import shutil
 import subprocess
 import tempfile
+import tomllib
 from pathlib import Path
 from typing import Literal
 
@@ -33,6 +35,7 @@ class BuildPlan(BaseModel):
     network_required: bool
     safe_manifest_only: bool
     rejected_reasons: list[str] = Field(default_factory=list)
+    generated_requirements: list[str] = Field(default_factory=list)
 
     @property
     def plan_id(self) -> str:
@@ -44,6 +47,7 @@ class BuildPlan(BaseModel):
                 self.dependency_sha256 or "",
                 self.dependency_precision,
                 self.dockerfile,
+                "\n".join(self.generated_requirements),
             ]
         )
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
@@ -56,6 +60,45 @@ class BuildResult(BaseModel):
     base_image_id: str
     stdout_sha256: str
     stderr_sha256: str
+
+
+_MAX_DEPENDENCY_MANIFEST_BYTES = 2 * 1024 * 1024
+_MAX_REQUIREMENT_LINES = 10_000
+_MAX_REQUIREMENT_LINE_CHARS = 8192
+
+
+def _read_dependency_text(path: Path) -> str:
+    if path.is_symlink() or not path.is_file():
+        raise EnvironmentBuildError(
+            f"dependency metadata must be a regular non-symlink file: {path.name}"
+        )
+    try:
+        size = path.stat().st_size
+    except OSError as exc:
+        raise EnvironmentBuildError(
+            f"dependency metadata could not be inspected: {path.name}"
+        ) from exc
+    if size > _MAX_DEPENDENCY_MANIFEST_BYTES:
+        raise EnvironmentBuildError(
+            f"dependency metadata exceeds {_MAX_DEPENDENCY_MANIFEST_BYTES} byte limit: "
+            f"{path.name}"
+        )
+    try:
+        text = path.read_text(encoding="utf-8", errors="strict")
+    except (OSError, UnicodeError) as exc:
+        raise EnvironmentBuildError(
+            f"dependency metadata could not be read safely: {path.name}"
+        ) from exc
+    lines = text.splitlines()
+    if len(lines) > _MAX_REQUIREMENT_LINES:
+        raise EnvironmentBuildError(
+            f"dependency metadata exceeds {_MAX_REQUIREMENT_LINES} line limit: {path.name}"
+        )
+    if any(len(line) > _MAX_REQUIREMENT_LINE_CHARS for line in lines):
+        raise EnvironmentBuildError(
+            f"dependency metadata contains an oversized line: {path.name}"
+        )
+    return text
 
 
 _UNSAFE_REQUIREMENT_MARKERS = (
@@ -84,9 +127,174 @@ _EXACT_REQUIREMENT_RE = re.compile(
 def _active_requirement_lines(path: Path) -> list[str]:
     return [
         raw.strip()
-        for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        for raw in _read_dependency_text(path).splitlines()
         if raw.strip() and not raw.lstrip().startswith("#")
     ]
+
+
+def classify_requirement_lines(
+    lines: list[str],
+) -> Literal["floating", "version-pinned", "hash-pinned"]:
+    active = [
+        line.strip()
+        for line in lines
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    package_lines = [
+        line
+        for line in active
+        if not line.startswith("-") and not line.startswith("\\")
+    ]
+    if not package_lines:
+        return "floating"
+    if not all(_EXACT_REQUIREMENT_RE.match(line) for line in package_lines):
+        return "floating"
+    has_hashes = any("--hash=sha256:" in line for line in active)
+    return "hash-pinned" if has_hashes else "version-pinned"
+
+
+def audit_requirement_lines(lines: list[str]) -> list[str]:
+    reasons: list[str] = []
+    for line_number, raw in enumerate(lines, start=1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        lower = line.lower()
+        for marker in _UNSAFE_REQUIREMENT_MARKERS:
+            if marker in lower:
+                reasons.append(
+                    f"line {line_number}: unsupported dependency source or option: {marker}"
+                )
+                break
+    return reasons
+
+
+def _pyproject_runtime_requirements(
+    path: Path,
+) -> tuple[list[str] | None, list[str]]:
+    try:
+        payload = tomllib.loads(_read_dependency_text(path))
+    except (EnvironmentBuildError, tomllib.TOMLDecodeError) as exc:
+        return None, [f"pyproject.toml could not be parsed safely: {type(exc).__name__}"]
+
+    project = payload.get("project")
+    if isinstance(project, dict):
+        dynamic = project.get("dynamic")
+        if isinstance(dynamic, list) and "dependencies" in dynamic:
+            return None, ["dynamic PEP 621 dependencies are not supported"]
+        dependencies = project.get("dependencies")
+        if dependencies is not None:
+            if not isinstance(dependencies, list) or not all(
+                isinstance(item, str) for item in dependencies
+            ):
+                return None, ["PEP 621 dependencies must be a static string list"]
+            values = [item.strip() for item in dependencies if item.strip()]
+            if len(values) > _MAX_REQUIREMENT_LINES:
+                return None, ["pyproject dependency list is too large"]
+            if any(len(item) > _MAX_REQUIREMENT_LINE_CHARS for item in values):
+                return None, ["pyproject dependency entry is too long"]
+            return values, []
+
+    poetry = payload.get("tool", {}).get("poetry", {})
+    if isinstance(poetry, dict) and "dependencies" in poetry:
+        dependencies = poetry.get("dependencies")
+        if not isinstance(dependencies, dict):
+            return None, ["Poetry dependencies must be a static mapping"]
+        generated: list[str] = []
+        for name, constraint in dependencies.items():
+            if str(name).lower() == "python":
+                continue
+            if not isinstance(constraint, str) or not re.fullmatch(
+                r"\d+(?:\.\d+){1,3}",
+                constraint.strip(),
+            ):
+                return None, [
+                    (
+                        "only exact Poetry dependency versions can be converted "
+                        "without invoking project build code"
+                    )
+                ]
+            generated.append(f"{name}=={constraint.strip()}")
+        return generated, []
+
+    return [], []
+
+
+def _setup_cfg_runtime_requirements(
+    path: Path,
+) -> tuple[list[str] | None, list[str]]:
+    parser = configparser.ConfigParser()
+    try:
+        parser.read_string(_read_dependency_text(path))
+    except (EnvironmentBuildError, configparser.Error) as exc:
+        return None, [f"setup.cfg could not be parsed safely: {type(exc).__name__}"]
+    raw = parser.get("options", "install_requires", fallback="")
+    values = [line.strip() for line in raw.splitlines() if line.strip()]
+    if len(values) > _MAX_REQUIREMENT_LINES:
+        return None, ["setup.cfg dependency list is too large"]
+    if any(len(item) > _MAX_REQUIREMENT_LINE_CHARS for item in values):
+        return None, ["setup.cfg dependency entry is too long"]
+    return values, []
+
+
+def _generated_metadata_plan(
+    *,
+    source: Path,
+    requirements: list[str] | None,
+    parse_errors: list[str],
+    base_image: str,
+) -> BuildPlan:
+    if requirements is None:
+        return BuildPlan(
+            builder="python-generated-metadata",
+            base_image=base_image,
+            dependency_file=source.name,
+            dependency_sha256=sha256_file(source),
+            dependency_precision="floating",
+            dockerfile=(
+                f"FROM {base_image}\\n"
+                "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1\\n"
+                "WORKDIR /workspace\\n"
+            ),
+            network_required=False,
+            safe_manifest_only=False,
+            rejected_reasons=parse_errors,
+        )
+    if not requirements:
+        return BuildPlan(
+            builder="python-generated-metadata",
+            base_image=base_image,
+            dependency_file=source.name,
+            dependency_sha256=sha256_file(source),
+            dependency_precision="base-only",
+            dockerfile=(
+                f"FROM {base_image}\\n"
+                "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1\\n"
+                "WORKDIR /workspace\\n"
+            ),
+            network_required=False,
+            safe_manifest_only=True,
+        )
+
+    rejected = audit_requirement_lines(requirements)
+    return BuildPlan(
+        builder="python-generated-metadata",
+        base_image=base_image,
+        dependency_file=source.name,
+        dependency_sha256=sha256_file(source),
+        dependency_precision=classify_requirement_lines(requirements),
+        dockerfile=(
+            f"FROM {base_image}\\n"
+            "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1\\n"
+            "COPY agnxiv-generated-requirements.txt /tmp/requirements.txt\\n"
+            "RUN python -m pip install --no-cache-dir -r /tmp/requirements.txt\\n"
+            "WORKDIR /workspace\\n"
+        ),
+        network_required=True,
+        safe_manifest_only=not rejected,
+        rejected_reasons=rejected,
+        generated_requirements=requirements,
+    )
 
 
 def classify_dependency_precision(path: str | Path) -> Literal[
@@ -96,46 +304,12 @@ def classify_dependency_precision(path: str | Path) -> Literal[
 ]:
     """Classify how precisely a requirements file identifies dependencies."""
     requirement_path = Path(path)
-    lines = _active_requirement_lines(requirement_path)
-    package_lines = [
-        line
-        for line in lines
-        if not line.startswith("-") and not line.startswith("\\")
-    ]
-
-    if not package_lines:
-        return "floating"
-
-    all_exact = all(_EXACT_REQUIREMENT_RE.match(line) for line in package_lines)
-    if not all_exact:
-        return "floating"
-
-    has_hashes = any("--hash=sha256:" in line for line in lines)
-    return "hash-pinned" if has_hashes else "version-pinned"
+    return classify_requirement_lines(_active_requirement_lines(requirement_path))
 
 
 def audit_requirements(path: str | Path) -> list[str]:
     """Return reasons a requirements file needs stronger build isolation."""
-    requirement_path = Path(path)
-    reasons: list[str] = []
-
-    for line_number, raw in enumerate(
-        requirement_path.read_text(encoding="utf-8", errors="ignore").splitlines(),
-        start=1,
-    ):
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-
-        lower = line.lower()
-        for marker in _UNSAFE_REQUIREMENT_MARKERS:
-            if marker in lower:
-                reasons.append(
-                    f"line {line_number}: unsupported dependency source or option: {marker}"
-                )
-                break
-
-    return reasons
+    return audit_requirement_lines(_active_requirement_lines(Path(path)))
 
 
 def plan_python_environment(
@@ -158,6 +332,53 @@ def plan_python_environment(
         raise ValueError("requirements.txt symlinks are not allowed")
 
     if not requirements.exists():
+        pyproject = root / "pyproject.toml"
+        setup_cfg = root / "setup.cfg"
+        setup_py = root / "setup.py"
+
+        if pyproject.is_symlink() or setup_cfg.is_symlink() or setup_py.is_symlink():
+            raise ValueError("dependency metadata symlinks are not allowed")
+
+        if pyproject.exists():
+            generated, errors = _pyproject_runtime_requirements(pyproject)
+            return _generated_metadata_plan(
+                source=pyproject,
+                requirements=generated,
+                parse_errors=errors,
+                base_image=base_image,
+            )
+
+        if setup_cfg.exists():
+            generated, errors = _setup_cfg_runtime_requirements(setup_cfg)
+            return _generated_metadata_plan(
+                source=setup_cfg,
+                requirements=generated,
+                parse_errors=errors,
+                base_image=base_image,
+            )
+
+        if setup_py.exists():
+            return BuildPlan(
+                builder="python-generated-metadata",
+                base_image=base_image,
+                dependency_file="setup.py",
+                dependency_sha256=sha256_file(setup_py),
+                dependency_precision="floating",
+                dockerfile=(
+                    f"FROM {base_image}\n"
+                    "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1\n"
+                    "WORKDIR /workspace\n"
+                ),
+                network_required=False,
+                safe_manifest_only=False,
+                rejected_reasons=[
+                    (
+                        "setup.py cannot be executed or copied into the network-enabled "
+                        "dependency build context"
+                    )
+                ],
+            )
+
         return BuildPlan(
             base_image=base_image,
             dependency_file=None,
@@ -170,6 +391,24 @@ def plan_python_environment(
             ),
             network_required=False,
             safe_manifest_only=True,
+        )
+
+    try:
+        _read_dependency_text(requirements)
+    except EnvironmentBuildError as exc:
+        return BuildPlan(
+            base_image=base_image,
+            dependency_file="requirements.txt",
+            dependency_sha256=None,
+            dependency_precision="floating",
+            dockerfile=(
+                f"FROM {base_image}\n"
+                "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1\n"
+                "WORKDIR /workspace\n"
+            ),
+            network_required=False,
+            safe_manifest_only=False,
+            rejected_reasons=[str(exc)],
         )
 
     rejected = audit_requirements(requirements)
@@ -222,7 +461,12 @@ def build_python_environment(
         context = Path(temp)
         (context / "Dockerfile").write_text(plan.dockerfile, encoding="utf-8")
 
-        if plan.dependency_file is not None:
+        if plan.generated_requirements:
+            (context / "agnxiv-generated-requirements.txt").write_text(
+                "\n".join(plan.generated_requirements) + "\n",
+                encoding="utf-8",
+            )
+        elif plan.dependency_file is not None:
             shutil.copyfile(
                 root / plan.dependency_file,
                 context / plan.dependency_file,

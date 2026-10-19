@@ -76,7 +76,7 @@ function requestBody() {
     "### arXiv ID", "", mode === "auto" ? arxiv : "_No response_", "",
     "### Verification manifest path", "", mode === "manifest" ? spec : "_No response_", "",
     "### Acknowledgement", "",
-    "- [x] I understand that a public repository manifest may execute code inside AgnXiv's isolated no-network verification sandbox.", ""
+    "- [x] I understand that public research code may execute inside AgnXiv's isolated no-network verification sandbox.", ""
   ].join("\n");
 }
 
@@ -116,7 +116,7 @@ function openPreparedRequest() {
   githubSubmit.href = url.toString();
 
   const values = [
-    ["Mode", mode === "auto" ? "AUTO_PLAN" : "VERIFY_SPEC"],
+    ["Mode", mode === "auto" ? "AUTO_VERIFY" : "VERIFY_SPEC"],
     ["Repository", repo],
     ["Git ref", ref],
     [mode === "auto" ? "Paper" : "Manifest", mode === "auto" ? arxiv : spec]

@@ -174,6 +174,16 @@ def _looks_like_label_or_citation(
     ):
         return True
 
+    # Do not treat model/product version suffixes such as GPT-2 or GPT-3
+    # as scientific measurements. The numeric regex can otherwise restart
+    # immediately after the hyphen and see a standalone digit.
+    if (
+        start >= 2
+        and normalized[start - 1] == "-"
+        and normalized[start - 2].isalnum()
+    ):
+        return True
+
     prefix = normalized[max(0, start - 40) : start]
     return bool(_LABEL_RE.search(prefix))
 
@@ -255,8 +265,13 @@ def extract_quantitative_claims(
     return claims
 
 
-def extract_claims_from_pdf(path: str | Path) -> list[Claim]:
-    """Extract candidate quantitative claims from a PDF."""
+def extract_claims_from_pdf(
+    path: str | Path,
+    *,
+    max_pages: int | None = None,
+    max_text_chars: int | None = None,
+) -> list[Claim]:
+    """Extract candidate quantitative claims from a PDF with optional safety caps."""
     try:
         from pypdf import PdfReader
     except ImportError as exc:
@@ -266,10 +281,20 @@ def extract_claims_from_pdf(path: str | Path) -> list[Claim]:
 
     pdf_path = Path(path)
     reader = PdfReader(str(pdf_path))
+    if max_pages is not None and len(reader.pages) > max_pages:
+        raise RuntimeError(
+            f"PDF has {len(reader.pages)} pages; hosted limit is {max_pages}"
+        )
     claims: list[Claim] = []
+    extracted_chars = 0
 
     for page_number, page in enumerate(reader.pages, start=1):
         text = page.extract_text() or ""
+        extracted_chars += len(text)
+        if max_text_chars is not None and extracted_chars > max_text_chars:
+            raise RuntimeError(
+                "PDF extracted text exceeds hosted parser character limit"
+            )
         claims.extend(
             extract_quantitative_claims(
                 text,

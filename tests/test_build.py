@@ -119,3 +119,112 @@ def test_symlinked_requirements_are_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="symlinks are not allowed"):
         plan_python_environment(tmp_path)
+
+
+def test_pyproject_dependencies_are_materialized_without_research_source(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        'name = "paper"\n'
+        'version = "0.1.0"\n'
+        'dependencies = ["numpy==2.1.0", "scipy>=1.10"]\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "secret_research.py").write_text("SECRET = True\n", encoding="utf-8")
+    plan = plan_python_environment(tmp_path)
+    assert plan.builder == "python-generated-metadata"
+    assert plan.dependency_file == "pyproject.toml"
+    assert plan.generated_requirements == ["numpy==2.1.0", "scipy>=1.10"]
+    assert plan.dependency_precision == "floating"
+    assert "COPY agnxiv-generated-requirements.txt" in plan.dockerfile
+
+    seen: list[str] = []
+
+    def fake_resolve(image: str) -> str:
+        return "sha256:built" if image.startswith("agnxiv-env:") else "sha256:base"
+
+    def fake_run(command, **kwargs):
+        context = Path(command[-1])
+        seen.extend(sorted(path.name for path in context.iterdir() if path.is_file()))
+        generated = context / "agnxiv-generated-requirements.txt"
+        assert generated.read_text(encoding="utf-8") == "numpy==2.1.0\nscipy>=1.10\n"
+        assert not (context / "pyproject.toml").exists()
+        assert not (context / "secret_research.py").exists()
+        return SimpleNamespace(returncode=0, stdout="built", stderr="")
+
+    monkeypatch.setattr("agnxiv.build.resolve_local_image_id", fake_resolve)
+    monkeypatch.setattr("agnxiv.build.subprocess.run", fake_run)
+    build_python_environment(tmp_path)
+    assert seen == ["Dockerfile", "agnxiv-generated-requirements.txt"]
+
+
+def test_setup_cfg_dependencies_are_materialized_statically(tmp_path: Path) -> None:
+    (tmp_path / "setup.cfg").write_text(
+        "[metadata]\nname = paper\n"
+        "[options]\ninstall_requires =\n"
+        "    numpy==2.1.0\n"
+        "    scipy==1.14.1\n",
+        encoding="utf-8",
+    )
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is True
+    assert plan.dependency_precision == "version-pinned"
+    assert plan.generated_requirements == ["numpy==2.1.0", "scipy==1.14.1"]
+
+
+def test_dynamic_pyproject_dependencies_fail_closed(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        'name = "paper"\n'
+        'version = "0.1.0"\n'
+        'dynamic = ["dependencies"]\n',
+        encoding="utf-8",
+    )
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is False
+    assert any("dynamic PEP 621" in reason for reason in plan.rejected_reasons)
+
+
+def test_setup_py_without_static_manifest_is_not_executed_during_build(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "setup.py").write_text(
+        "from setuptools import setup\n"
+        "setup(install_requires=['numpy'])\n",
+        encoding="utf-8",
+    )
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is False
+    with pytest.raises(EnvironmentBuildError):
+        build_python_environment(tmp_path)
+
+
+def test_oversized_requirements_fail_closed_before_build(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_bytes(b"numpy==2.1.0\n" + b"#" * (2 * 1024 * 1024))
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is False
+    assert any("byte limit" in reason for reason in plan.rejected_reasons)
+    with pytest.raises(EnvironmentBuildError):
+        build_python_environment(tmp_path)
+
+
+def test_oversized_dependency_line_fails_closed(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("pkg==" + "1" * 9000 + "\n", encoding="utf-8")
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is False
+    assert any("oversized line" in reason for reason in plan.rejected_reasons)
+
+
+def test_oversized_pyproject_is_not_parsed_or_executed(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_bytes(
+        b'[project]\nname="paper"\nversion="0.1.0"\n'
+        + b"#" * (2 * 1024 * 1024)
+    )
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is False
+    assert any("EnvironmentBuildError" in reason for reason in plan.rejected_reasons)

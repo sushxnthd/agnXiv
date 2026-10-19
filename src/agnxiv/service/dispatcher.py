@@ -11,6 +11,42 @@ class DispatchError(RuntimeError):
     """A hosted execution job could not be dispatched."""
 
 
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(
+            req.full_url,
+            code,
+            "redirects are not allowed for authenticated GitHub API requests",
+            headers,
+            fp,
+        )
+
+
+_NO_REDIRECT_OPENER = urllib.request.build_opener(_NoRedirectHandler())
+_MAX_GITHUB_RESPONSE_BYTES = 64 * 1024
+
+
+def _read_json_response(response) -> dict:
+    raw = response.read(_MAX_GITHUB_RESPONSE_BYTES + 1)
+    if len(raw) > _MAX_GITHUB_RESPONSE_BYTES:
+        raise DispatchError("GitHub API response is too large")
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise DispatchError("GitHub API returned invalid JSON") from exc
+    if not isinstance(payload, dict):
+        raise DispatchError("GitHub API returned an invalid response schema")
+    return payload
+
+
+def workflow_dispatch_ref(ref: str) -> str:
+    """Convert a full Git ref into the branch/tag name required by GitHub."""
+    for prefix in ("refs/heads/", "refs/tags/"):
+        if ref.startswith(prefix):
+            return ref.removeprefix(prefix)
+    return ref
+
+
 @dataclass(frozen=True)
 class DispatchRequest:
     job_id: str
@@ -19,8 +55,6 @@ class DispatchRequest:
     repository_ref: str
     arxiv_id: str | None
     spec_path: str | None
-    callback_url: str
-    oidc_audience: str
 
 
 class GitHubActionsDispatcher:
@@ -51,15 +85,22 @@ class GitHubActionsDispatcher:
             headers={
                 "Accept": "application/vnd.github+json",
                 "Authorization": f"Bearer {self.token}",
-                "X-GitHub-Api-Version": "2022-11-28",
+                "X-GitHub-Api-Version": "2026-03-10",
                 "User-Agent": "AgnXiv-Service",
             },
         )
         try:
-            with urllib.request.urlopen(request, timeout=20) as response:
-                payload = json.load(response)
+            with _NO_REDIRECT_OPENER.open(  # nosec B310 - HTTPS origin validated above
+                request,
+                timeout=20,
+            ) as response:
+                payload = _read_json_response(response)
         except urllib.error.HTTPError as exc:
-            body = exc.read().decode("utf-8", errors="replace")[-2000:]
+            body = (
+            exc.read(2000).decode("utf-8", errors="replace")
+            if exc.fp is not None
+            else ""
+        )
             raise DispatchError(
                 f"could not resolve GitHub ref with HTTP {exc.code}: {body}"
             ) from exc
@@ -71,14 +112,15 @@ class GitHubActionsDispatcher:
             raise DispatchError("GitHub did not return a full commit SHA")
         return sha
 
-    def dispatch(self, request: DispatchRequest) -> None:
+    def dispatch(self, request: DispatchRequest) -> int:
         url = (
             "https://api.github.com/repos/"
             f"{self.repository}/actions/workflows/{self.workflow}/dispatches"
         )
         payload = json.dumps(
             {
-                "ref": self.ref,
+                "ref": workflow_dispatch_ref(self.ref),
+                "return_run_details": True,
                 "inputs": {
                     "job_id": request.job_id,
                     "mode": request.mode,
@@ -86,8 +128,6 @@ class GitHubActionsDispatcher:
                     "repository_ref": request.repository_ref,
                     "arxiv_id": request.arxiv_id or "",
                     "spec_path": request.spec_path or "",
-                    "callback_url": request.callback_url,
-                    "oidc_audience": request.oidc_audience,
                 },
             }
         ).encode("utf-8")
@@ -98,21 +138,34 @@ class GitHubActionsDispatcher:
             headers={
                 "Accept": "application/vnd.github+json",
                 "Authorization": f"Bearer {self.token}",
-                "X-GitHub-Api-Version": "2022-11-28",
+                "X-GitHub-Api-Version": "2026-03-10",
                 "Content-Type": "application/json",
                 "User-Agent": "AgnXiv-Service",
             },
         )
         try:
-            with urllib.request.urlopen(http_request, timeout=20) as response:
-                if response.status not in {204, 201, 200}:
+            with _NO_REDIRECT_OPENER.open(  # nosec B310 - HTTPS origin validated above
+                http_request,
+                timeout=20,
+            ) as response:
+                if response.status != 200:
                     raise DispatchError(
-                        f"GitHub workflow dispatch returned HTTP {response.status}"
+                        "GitHub workflow dispatch did not return run details "
+                        f"(HTTP {response.status})"
                     )
+                details = _read_json_response(response)
         except urllib.error.HTTPError as exc:
-            body = exc.read().decode("utf-8", errors="replace")[-2000:]
+            body = (
+            exc.read(2000).decode("utf-8", errors="replace")
+            if exc.fp is not None
+            else ""
+        )
             raise DispatchError(
                 f"GitHub workflow dispatch failed with HTTP {exc.code}: {body}"
             ) from exc
         except urllib.error.URLError as exc:
             raise DispatchError(f"GitHub workflow dispatch failed: {exc}") from exc
+        run_id = details.get("workflow_run_id") if isinstance(details, dict) else None
+        if not isinstance(run_id, int) or run_id <= 0:
+            raise DispatchError("GitHub workflow dispatch did not return a valid run ID")
+        return run_id

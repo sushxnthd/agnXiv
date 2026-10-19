@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -29,10 +33,16 @@ jobs:
           ruff check src tests research/scripts
           pytest \
             tests/test_service_hardening.py \
+            tests/test_safety_confidence.py \
             tests/test_zero_manifest.py \
             tests/test_sandbox.py \
             tests/test_oidc.py \
-            tests/test_network.py
+            tests/test_dispatcher.py \
+            tests/test_hosted_callback.py \
+            tests/test_hosted_runner.py \
+            tests/test_network.py \
+            tests/test_site_contract.py \
+            tests/test_supply_chain_contract.py
 
       - name: Run frozen safety benchmarks
         run: |

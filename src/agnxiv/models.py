@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Literal
@@ -43,6 +44,16 @@ class Claim(BaseModel):
     source: ClaimSource = Field(default_factory=ClaimSource)
     evidence: list[EvidenceRef] = Field(default_factory=list)
 
+    @model_validator(mode="after")
+    def validate_finite_claim_values(self) -> Claim:
+        for value, label in (
+            (self.reported_value, "reported value"),
+            (self.reported_uncertainty, "reported uncertainty"),
+        ):
+            if value is not None and not math.isfinite(value):
+                raise ValueError(f"claim {label} must be finite")
+        return self
+
 
 class VerificationPolicy(BaseModel):
     kind: Literal["absolute", "relative"] = "relative"
@@ -52,6 +63,8 @@ class VerificationPolicy(BaseModel):
 
     @model_validator(mode="after")
     def validate_relative_tolerance(self) -> VerificationPolicy:
+        if not math.isfinite(self.tolerance):
+            raise ValueError("verification tolerance must be finite")
         if self.kind == "relative" and self.tolerance > 1:
             raise ValueError("relative tolerance must be expressed as a fraction, e.g. 0.01")
         return self
@@ -62,6 +75,12 @@ class Observation(BaseModel):
     run_id: str | None = None
     seed: int | None = None
     output_digest: str | None = None
+
+    @model_validator(mode="after")
+    def validate_finite_value(self) -> Observation:
+        if not math.isfinite(self.value):
+            raise ValueError("observation value must be finite")
+        return self
 
 
 class VerificationRecord(BaseModel):

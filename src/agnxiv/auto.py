@@ -146,6 +146,7 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
         for token in (
             "achiev",
             "outperform",
+            "surpass",
             "improv",
             "reduc",
             "increase",
@@ -186,6 +187,18 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
         )
     ):
         score -= 0.14
+
+    if any(
+        phrase in lower
+        for phrase in (
+            "slightly worse",
+            "used for molpcba",
+            "used for molhiv",
+            "hyperparameter",
+            "ablation setting",
+        )
+    ):
+        score -= 0.10
 
     if any(
         phrase in lower
@@ -401,6 +414,8 @@ def _default_policy(claim: Claim) -> VerificationPolicy:
 def build_auto_plan(
     manuscript: str | Path,
     repository: str | Path,
+    *,
+    claims_override: list[Claim] | None = None,
 ) -> AutoPlan:
     """Build a conservative zero-manifest verification plan."""
     manuscript_path = Path(manuscript).resolve()
@@ -411,7 +426,11 @@ def build_auto_plan(
     if not repo.is_dir():
         raise ValueError(f"repository path is not a directory: {repo}")
 
-    raw_claims = _read_manuscript(manuscript_path)
+    raw_claims = (
+        list(claims_override)
+        if claims_override is not None
+        else _read_manuscript(manuscript_path)
+    )
     environment = infer_python_environment(repo)
     commands = discover_commands(repo)
     readme = _read_readme(repo)

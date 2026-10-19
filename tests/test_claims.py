@@ -79,3 +79,10 @@ def test_image_dimensions_are_not_multiplier_claims() -> None:
         claim.reported_value == 64 and claim.unit in {"×", "x"}
         for claim in claims
     )
+
+
+def test_model_version_suffixes_are_not_quantitative_claims() -> None:
+    claims = extract_quantitative_claims(
+        "LoRA performs on-par with fine-tuning on RoBERTa, DeBERTa, GPT-2, and GPT-3."
+    )
+    assert claims == []

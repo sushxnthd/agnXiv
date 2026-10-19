@@ -13,12 +13,27 @@ on:
       - "src/agnxiv/environment.py"
       - "src/agnxiv/evidence.py"
       - ".github/workflows/research-diagnostic.yml"
+  pull_request:
+    paths:
+      - "research/**"
+      - "src/agnxiv/research.py"
+      - "src/agnxiv/alignment.py"
+      - "src/agnxiv/auto.py"
+      - "src/agnxiv/claims.py"
+      - "src/agnxiv/planner.py"
+      - "src/agnxiv/environment.py"
+      - "src/agnxiv/evidence.py"
+      - ".github/workflows/research-diagnostic.yml"
   workflow_dispatch:
     inputs:
       case_id:
         description: Optional single registered case ID
         required: false
         type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

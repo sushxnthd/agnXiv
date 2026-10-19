@@ -240,3 +240,159 @@ def test_runtime_rejects_command_and_commands_together() -> None:
                 }
             }
         )
+
+
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        r"(?P<value>(a+)+)$",
+        r"(?P<value>(a|aa)+)$",
+        r"(?=(?P<value>\d+))",
+    ],
+)
+def test_manifest_rejects_unsafe_regex_locator(pattern: str) -> None:
+    with pytest.raises(ValueError, match="unsafe or unsupported"):
+        VerificationSpec.model_validate(
+            {
+                "schema_version": "agnxiv.spec/1",
+                "claim": {"id": "C1", "text": "Result", "reported_value": 1.0},
+                "policy": {
+                    "kind": "absolute",
+                    "operator": "approx",
+                    "tolerance": 0.01,
+                },
+                "runtime": {
+                    "image": "local:test",
+                    "command": ["python", "run.py"],
+                },
+                "observation": {"kind": "regex", "value": pattern},
+            }
+        )
+
+
+@pytest.mark.parametrize("scale", [float("inf"), float("-inf"), float("nan"), 1e12])
+def test_manifest_rejects_unbounded_observation_scale(scale: float) -> None:
+    with pytest.raises(ValueError, match="scale"):
+        VerificationSpec.model_validate(
+            {
+                "schema_version": "agnxiv.spec/1",
+                "claim": {"id": "C1", "text": "Result", "reported_value": 1.0},
+                "policy": {
+                    "kind": "absolute",
+                    "operator": "approx",
+                    "tolerance": 0.01,
+                },
+                "runtime": {
+                    "image": "local:test",
+                    "command": ["python", "run.py"],
+                },
+                "observation": {
+                    "kind": "json_path",
+                    "value": "result",
+                    "scale": scale,
+                },
+            }
+        )
+
+
+def test_manifest_rejects_oversized_file_before_json_parse(tmp_path: Path) -> None:
+    spec_path = tmp_path / "agnxiv.json"
+    spec_path.write_bytes(b" " * (1024 * 1024 + 1))
+    with pytest.raises(ValueError, match="byte limit"):
+        load_verification_spec(spec_path)
+
+
+def test_manifest_rejects_symlink_before_workspace_resolution(tmp_path: Path) -> None:
+    target = tmp_path / "target.json"
+    _write_minimal_spec(target, ".")
+    link = tmp_path / "agnxiv.json"
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("symlinks are unavailable on this platform")
+    with pytest.raises(ValueError, match="non-symlink"):
+        execute_verification_spec(link)
+
+
+def test_manifest_rejects_command_and_artifact_exhaustion() -> None:
+    base = {
+        "schema_version": "agnxiv.spec/1",
+        "claim": {"id": "C1", "text": "Result", "reported_value": 1.0},
+        "policy": {"kind": "absolute", "operator": "approx", "tolerance": 0.01},
+        "runtime": {"image": "local:test", "command": ["python", "run.py"]},
+    }
+
+    too_many_args = {
+        **base,
+        "runtime": {
+            "image": "local:test",
+            "command": ["python", *["x"] * 129],
+        },
+    }
+    with pytest.raises(ValueError, match="at most 128 arguments"):
+        VerificationSpec.model_validate(too_many_args)
+
+    too_many_commands = {
+        **base,
+        "runtime": {
+            "image": "local:test",
+            "commands": [["python", "run.py"]] * 17,
+        },
+    }
+    with pytest.raises(ValueError, match="at most 16 commands"):
+        VerificationSpec.model_validate(too_many_commands)
+
+    too_many_artifacts = {**base, "artifacts": [f"a{i}" for i in range(65)]}
+    with pytest.raises(ValueError):
+        VerificationSpec.model_validate(too_many_artifacts)
+
+
+def test_manifest_rejects_nonfinite_reported_value_and_tolerance() -> None:
+    common = {
+        "schema_version": "agnxiv.spec/1",
+        "runtime": {"image": "local:test", "command": ["python", "run.py"]},
+    }
+    with pytest.raises(ValueError, match="reported claim value must be finite"):
+        VerificationSpec.model_validate(
+            {
+                **common,
+                "claim": {"id": "C1", "text": "Result", "reported_value": float("inf")},
+                "policy": {"kind": "absolute", "operator": "approx", "tolerance": 0.01},
+            }
+        )
+    with pytest.raises(ValueError, match="tolerance must be finite"):
+        VerificationSpec.model_validate(
+            {
+                **common,
+                "claim": {"id": "C1", "text": "Result", "reported_value": 1.0},
+                "policy": {
+                    "kind": "absolute",
+                    "operator": "approx",
+                    "tolerance": float("inf"),
+                },
+            }
+        )
+
+
+def test_manifest_rejects_explicit_artifact_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "data.bin"
+    target.write_bytes(b"evidence")
+    link = tmp_path / "data-link.bin"
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("symlinks are unavailable on this platform")
+
+    spec_path = tmp_path / "agnxiv.json"
+    payload = {
+        "schema_version": "agnxiv.spec/1",
+        "repository": ".",
+        "claim": {"id": "C1", "text": "Result", "reported_value": 1.0},
+        "policy": {"kind": "absolute", "operator": "approx", "tolerance": 0.01},
+        "runtime": {"image": "local:test", "command": ["python", "run.py"]},
+        "artifacts": ["data-link.bin"],
+    }
+    spec_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="artifact symlinks are not allowed"):
+        execute_verification_spec(spec_path)
