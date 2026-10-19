@@ -451,3 +451,56 @@ def test_auto_verify_api_dispatches_and_rejects_fake_plan_success(
             },
         )
         assert invalid.status_code == 422
+
+
+def test_hosted_callback_rejects_trusted_workflow_from_wrong_run(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: 12345,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "a" * 40,
+    )
+    monkeypatch.setattr(
+        "agnxiv.service.app.verify_github_actions_token",
+        lambda token, policy: {
+            "repository": policy.repository,
+            "run_id": "99999",
+        },
+    )
+    app = create_app(_config(f"sqlite:///{tmp_path / 'wrong-run.db'}"))
+
+    with TestClient(app) as client:
+        created = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "test-key"},
+            json={
+                "mode": "auto_plan",
+                "repository": "phanein/deepwalk",
+                "arxiv_id": "1403.6652",
+            },
+        )
+        assert created.status_code == 202
+        job_id = created.json()["id"]
+        assert created.json()["workflow_run_id"] == 12345
+
+        callback = client.post(
+            f"/internal/jobs/{job_id}/complete",
+            headers={"Authorization": "Bearer valid-other-run"},
+            json={"status": "failed", "error": "manual dispatch substitution"},
+        )
+        assert callback.status_code == 401
+        assert callback.json()["detail"] == "untrusted workflow run identity"
+
+        current = client.get(
+            f"/v1/jobs/{job_id}",
+            headers={"X-API-Key": "test-key"},
+        )
+        assert current.status_code == 200
+        assert current.json()["status"] == "running"
