@@ -146,6 +146,7 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
         for token in (
             "achiev",
             "outperform",
+            "surpass",
             "improv",
             "reduc",
             "increase",
@@ -186,6 +187,18 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
         )
     ):
         score -= 0.14
+
+    if any(
+        phrase in lower
+        for phrase in (
+            "slightly worse",
+            "used for molpcba",
+            "used for molhiv",
+            "hyperparameter",
+            "ablation setting",
+        )
+    ):
+        score -= 0.10
 
     if any(
         phrase in lower
