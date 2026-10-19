@@ -470,7 +470,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "issuer_key_rollover": True,
             "operational_slo_status": True,
             "durable_evidence_archive": True,
-            "publication_registry": "crossref",
+            "publication_registries": ["crossref", "datacite"],
         }
 
     @app.get("/v1/metrics")
@@ -865,6 +865,7 @@ small{color:#777}
 <label>GitHub repository<input id="repo" placeholder="owner/repository"></label>
 <label>Git ref<input id="ref" value="main"></label>
 <label>arXiv ID<input id="arxiv" placeholder="1403.6652"></label>
+<label>DOI (optional)<input id="doi" placeholder="10.1145/1234.5678"></label>
 <label>Manifest path<input id="spec" placeholder="agnxiv.json"></label>
 <button id="go">Submit</button>
 <p><small>Auto-verify executes only safe workflows, and abstains when claim evidence is ambiguous.</small></p>
@@ -883,6 +884,7 @@ document.getElementById("go").onclick=async()=>{
     repository:document.getElementById("repo").value,
     repository_ref:document.getElementById("ref").value,
     arxiv_id:document.getElementById("arxiv").value||null,
+    doi:document.getElementById("doi").value||null,
     spec_path:document.getElementById("spec").value||null
   };
   out.textContent="Submitting...";
