@@ -500,7 +500,7 @@ class JobStore:
             transparency_sequence=transparency_entry.sequence,
             transparency_entry_hash=transparency_entry.entry_hash,
             created_at=created.isoformat().replace("+00:00", "Z"),
-            retain_until=(created + timedelta(days=3650)).isoformat().replace("+00:00", "Z"),
+            retain_until=(created + timedelta(days=3653)).isoformat().replace("+00:00", "Z"),
             retention_policy="public-verification-10y-minimum",
         )
         session.add(archive)
