@@ -29,7 +29,7 @@ def _load_rows(path: Path) -> list[dict]:
     return rows
 
 
-def _paper_case(row: dict) -> dict | None:
+def _paper_case(row: dict, *, oracle_window: int) -> dict | None:
     source = row.get("source")
     labels = row.get("source_labels")
     paper_id = str(row.get("paper_id") or "").strip()
@@ -44,7 +44,12 @@ def _paper_case(row: dict) -> dict | None:
         return None
 
     candidates: list[tuple[int, int, Claim]] = []
-    gold_candidate_ids: set[tuple[int, int]] = set()
+    direct_gold_ids: set[tuple[int, int]] = set()
+    oracle_sentence_indices = {
+        index
+        for index, label in enumerate(labels)
+        if int(label) == 1
+    }
 
     for sentence_index, (sentence, label) in enumerate(zip(source, labels)):
         if not isinstance(sentence, str):
@@ -54,10 +59,36 @@ def _paper_case(row: dict) -> dict | None:
             key = (sentence_index, local_index)
             candidates.append((sentence_index, local_index, claim))
             if int(label) == 1:
-                gold_candidate_ids.add(key)
+                direct_gold_ids.add(key)
 
-    if len(candidates) < 2 or not gold_candidate_ids:
+    if len(candidates) < 2 or not oracle_sentence_indices:
         return None
+
+    gold_candidate_ids = set(direct_gold_ids)
+    gold_method = "direct_oracle_sentence"
+
+    if not gold_candidate_ids:
+        nearest_distance: int | None = None
+        nearest_ids: set[tuple[int, int]] = set()
+        for sentence_index, local_index, _ in candidates:
+            distance = min(
+                abs(sentence_index - oracle_index)
+                for oracle_index in oracle_sentence_indices
+            )
+            if nearest_distance is None or distance < nearest_distance:
+                nearest_distance = distance
+                nearest_ids = {(sentence_index, local_index)}
+            elif distance == nearest_distance:
+                nearest_ids.add((sentence_index, local_index))
+
+        if (
+            nearest_distance is None
+            or nearest_distance > oracle_window
+            or not nearest_ids
+        ):
+            return None
+        gold_candidate_ids = nearest_ids
+        gold_method = f"nearest_within_{oracle_window}_sentences"
 
     ranked = sorted(
         candidates,
@@ -89,6 +120,7 @@ def _paper_case(row: dict) -> dict | None:
         "source_sentences": len(source),
         "candidate_claims": len(candidates),
         "gold_quantitative_claims": len(gold_ranks),
+        "gold_method": gold_method,
         "first_gold_rank": first_gold_rank,
         "recall_at_1": first_gold_rank <= 1,
         "recall_at_3": first_gold_rank <= 3,
@@ -123,6 +155,7 @@ def main() -> None:
         required=True,
     )
     parser.add_argument("--minimum-cases", type=int, default=75)
+    parser.add_argument("--oracle-window", type=int, default=2)
     parser.add_argument("--min-recall-at-1", type=float, default=0.60)
     parser.add_argument("--min-recall-at-3", type=float, default=0.90)
     parser.add_argument("--min-recall-at-5", type=float, default=0.95)
@@ -132,7 +165,7 @@ def main() -> None:
     cases = [
         case
         for row in _load_rows(Path(args.input))
-        if (case := _paper_case(row)) is not None
+        if (case := _paper_case(row, oracle_window=args.oracle_window)) is not None
     ]
     total = len(cases)
 
@@ -170,6 +203,11 @@ def main() -> None:
         else 0.0
     )
 
+    gold_methods: dict[str, int] = {}
+    for case in cases:
+        method = str(case["gold_method"])
+        gold_methods[method] = gold_methods.get(method, 0) + 1
+
     passed = (
         total >= args.minimum_cases
         and recall_at_1 >= args.min_recall_at_1
@@ -193,10 +231,13 @@ def main() -> None:
         },
         "eligibility": (
             "A paper must contain at least two AgnXiv-extracted quantitative "
-            "claims and at least one quantitative claim inside a SciTLDR "
-            "oracle-labeled source sentence."
+            "claims. Gold is any quantitative claim in a SciTLDR oracle sentence; "
+            "if the oracle is qualitative, gold falls back to the nearest "
+            f"quantitative sentence within +/-{args.oracle_window} source sentences."
         ),
         "cases": total,
+        "oracle_window": args.oracle_window,
+        "gold_methods": dict(sorted(gold_methods.items())),
         "recall_at_1": recall_at_1,
         "recall_at_3": recall_at_3,
         "recall_at_5": recall_at_5,
@@ -212,8 +253,10 @@ def main() -> None:
         "cases_detail": cases,
         "interpretation": (
             "SciTLDR oracle labels provide an external sentence-level summary "
-            "target. The benchmark measures whether AgnXiv ranks quantitative "
-            "claims from those summary-relevant sentences near the top. It does "
+            "target. Direct quantitative oracle sentences are preferred; otherwise "
+            "the nearest quantitative sentence within the frozen local window is "
+            "used. The benchmark measures whether AgnXiv ranks those externally "
+            "anchored quantitative claims near the top. It does "
             "not itself evaluate execution or numeric verification correctness."
         ),
     }
