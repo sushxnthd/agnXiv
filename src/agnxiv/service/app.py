@@ -547,6 +547,9 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         archive = store.get_evidence_archive(job_id)
         if archive is None:
             raise HTTPException(status_code=404, detail="evidence archive not found")
+        if not store.verify_evidence_archive(job_id):
+            raise HTTPException(status_code=503, detail="evidence archive integrity failure")
+        payload = json.loads(archive.payload_json)
         return {
             "schema_version": "agnxiv.evidence-commitment/1",
             "job_id": archive.job_id,
@@ -556,6 +559,8 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "created_at": archive.created_at,
             "retain_until": archive.retain_until,
             "retention_policy": archive.retention_policy,
+            "source": payload.get("job"),
+            "publication": payload.get("publication"),
         }
 
     @app.get("/v1/jobs/{job_id}/evidence")
