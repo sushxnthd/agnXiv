@@ -215,6 +215,12 @@ def _sentence_context(
             right = position + 1
             break
 
+    sentence = text[left:right].strip()
+    # Keep one stable statement string for all numeric values in a normal
+    # scientific sentence. This prevents a multi-number headline result from
+    # being fragmented into several slightly shifted pseudo-claims.
+    if len(sentence) <= 1200:
+        return sentence
     return text[max(left, start - radius) : min(right, end + radius)].strip()
 
 
