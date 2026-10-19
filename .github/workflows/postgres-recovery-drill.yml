@@ -96,6 +96,11 @@ jobs:
           )
           assert store.verify_transparency_chain() is True
           assert store.transparency_head()[0] == 1
+          archive = store.get_evidence_archive(job.id)
+          assert archive is not None
+          assert store.verify_evidence_archive(job.id) is True
+          with open("/tmp/agnxiv-evidence.sha256", "w", encoding="utf-8") as handle:
+              handle.write(archive.content_sha256 + "\n")
           PY
 
       - name: Create PostgreSQL custom-format backup
@@ -143,6 +148,11 @@ jobs:
           assert job.repository == "agnxiv/recovery-probe"
           assert store.transparency_head()[0] == 1
           assert store.verify_transparency_chain() is True
+          archive = store.get_evidence_archive(job.id)
+          assert archive is not None
+          assert store.verify_evidence_archive(job.id) is True
+          with open("/tmp/agnxiv-evidence.sha256", encoding="utf-8") as handle:
+              assert archive.content_sha256 == handle.read().strip()
 
           try:
               with store.engine.begin() as connection:
@@ -167,6 +177,7 @@ jobs:
           path: |
             /tmp/agnxiv-recovery.dump
             /tmp/agnxiv-recovery.dump.sha256
+            /tmp/agnxiv-evidence.sha256
           retention-days: 30
           if-no-files-found: warn
 

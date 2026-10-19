@@ -59,8 +59,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Living Attempt → Record → Challenge model exists.
 - [x] Independence-aware claim aggregation exists with regression coverage.
 - [x] Append-only database-backed transparency log independent of GitHub issue availability, with deterministic result commitments, hash chaining, public read endpoints, and database mutation guards.
-- [ ] Long-term artifact retention policy.
-- [ ] DOI/publisher registry integration.
+- [x] Completed verification evidence is archived transactionally in an append-only, content-addressed PostgreSQL evidence capsule with a minimum ten-year retention deadline, public commitment endpoint, authenticated full-capsule retrieval, and digest-preserving backup/restore plus cross-region failover tests (`docs/EVIDENCE_RETENTION.md`).
+- [x] DOI/publication identity can be bound before execution through exact-match Crossref resolution with DataCite fallback; the normalized DOI, registry metadata, and SHA-256 of the canonical registry record are injected into each verification bundle before in-toto/DSSE signing and retained in the durable evidence capsule (`docs/PUBLICATION_REGISTRY.md`).
 
 ## Evidence grades
 

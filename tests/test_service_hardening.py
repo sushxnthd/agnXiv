@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
+from agnxiv.registry import PublicationBinding
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
 from agnxiv.service.db import Job, JobStore
@@ -299,3 +300,109 @@ def test_request_id_is_echoed_and_untrusted_values_are_replaced(tmp_path) -> Non
     assert valid.headers["X-Request-ID"] == "trace-123"
     assert invalid.headers["X-Request-ID"] != "bad request id with spaces"
     assert len(invalid.headers["X-Request-ID"]) == 32
+
+
+def test_job_submission_binds_resolved_doi_metadata(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "dispatch",
+        lambda self, request: None,
+    )
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "a" * 40,
+    )
+    monkeypatch.setattr(
+        "agnxiv.service.app.resolve_doi_registry",
+        lambda doi: PublicationBinding(
+            registry="crossref",
+            doi="10.1145/1234.5678",
+            title="A reproducible result",
+            publisher="Example Publisher",
+            work_type="journal-article",
+            published="2026-10-01",
+            canonical_url="https://doi.org/10.1145/1234.5678",
+            member="123",
+            retrieved_at="2026-10-19T00:00:00Z",
+            registry_record_sha256="b" * 64,
+        ),
+    )
+
+    app = create_app(
+        _productionish_config(
+            f"sqlite:///{tmp_path / 'doi.db'}",
+            issuer=None,
+        )
+    )
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "k" * 48},
+            json={
+                "mode": "auto_plan",
+                "repository": "owner/repo",
+                "arxiv_id": "2601.00001",
+                "doi": "https://doi.org/10.1145/1234.5678",
+            },
+        )
+
+    assert response.status_code == 202
+    body = response.json()
+    assert body["doi"] == "10.1145/1234.5678"
+    assert body["publication"]["registry"] == "crossref"
+    assert body["publication"]["publisher"] == "Example Publisher"
+
+
+def test_idempotent_doi_retry_uses_existing_registry_binding(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(GitHubActionsDispatcher, "dispatch", lambda self, request: None)
+    monkeypatch.setattr(
+        GitHubActionsDispatcher,
+        "resolve_commit",
+        lambda self, repository, ref: "a" * 40,
+    )
+    calls = {"count": 0}
+
+    def resolve(doi: str):
+        calls["count"] += 1
+        if calls["count"] != 1:
+            raise RuntimeError("unexpected registry retry")
+        return PublicationBinding(
+            registry="crossref",
+            doi=doi,
+            title="A reproducible result",
+            publisher="Example Publisher",
+            work_type="journal-article",
+            published="2026-10-01",
+            canonical_url=f"https://doi.org/{doi}",
+            member="123",
+            retrieved_at="2026-10-19T00:00:00Z",
+            registry_record_sha256="d" * 64,
+        )
+
+    monkeypatch.setattr("agnxiv.service.app.resolve_doi_registry", resolve)
+    app = create_app(
+        _productionish_config(
+            f"sqlite:///{tmp_path / 'doi-idempotent.db'}",
+            issuer=None,
+        )
+    )
+    headers = {
+        "X-API-Key": "k" * 48,
+        "Idempotency-Key": "doi-bound-repeat-request",
+    }
+    body = {
+        "mode": "auto_plan",
+        "repository": "owner/repo",
+        "arxiv_id": "2601.00001",
+        "doi": "10.1145/1234.5678",
+    }
+
+    with TestClient(app) as client:
+        first = client.post("/v1/jobs", headers=headers, json=body)
+        second = client.post("/v1/jobs", headers=headers, json=body)
+
+    assert first.status_code == 202
+    assert second.status_code == 202
+    assert first.json()["id"] == second.json()["id"]
+    assert calls["count"] == 1

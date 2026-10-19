@@ -73,6 +73,9 @@ AgnXiv currently supports:
 - adversarial false-pass benchmarks;
 - in-toto Statement v1 output;
 - DSSE + Ed25519 signing and offline signature verification;
+- append-only, content-addressed evidence capsules with a minimum ten-year retention policy;
+- public evidence commitments plus authenticated full-capsule retrieval;
+- DOI publisher/research-object binding through Crossref with DataCite fallback;
 - declarative versioned verification manifests.
 
 ## Verdicts
@@ -157,6 +160,7 @@ The signed in-toto statement can bind:
 - stdout/stderr digests;
 - verification policy;
 - observation method and locator;
+- normalized DOI and hashed Crossref/DataCite registry binding when supplied;
 - final verdict.
 
 ## Verification levels

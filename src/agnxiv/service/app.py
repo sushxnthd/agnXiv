@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from ..pipeline import VerificationBundle
 from ..preprint import parse_arxiv_reference
+from ..registry import RegistryLookupError, normalize_doi, resolve_doi_registry
 from ..statement import (
     build_verification_statement,
     public_key_id,
@@ -25,7 +26,13 @@ from ..statement import (
 )
 from ..transparency import GENESIS_HASH, TRANSPARENCY_SCHEMA
 from .config import ServiceConfig
-from .db import Job, JobStore, TransparencyEntry, job_result
+from .db import (
+    Job,
+    JobStore,
+    TransparencyEntry,
+    job_publication,
+    job_result,
+)
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
 from .oidc import GitHubOIDCPolicy, OIDCVerificationError, verify_github_actions_token
 from .ops import OperationalSLOPolicy, evaluate_operational_status
@@ -46,6 +53,7 @@ class JobCreate(BaseModel):
     repository: str
     repository_ref: str = "main"
     arxiv_id: str | None = None
+    doi: str | None = None
     spec_path: str | None = None
 
 
@@ -76,6 +84,8 @@ class JobView(BaseModel):
     repository: str
     repository_ref: str
     arxiv_id: str | None
+    doi: str | None
+    publication: dict | None
     spec_path: str | None
     result: dict | None
     error: str | None
@@ -91,6 +101,8 @@ def _job_view(job: Job) -> JobView:
         repository=job.repository,
         repository_ref=job.repository_ref,
         arxiv_id=job.arxiv_id,
+        doi=job.doi,
+        publication=job_publication(job),
         spec_path=job.spec_path,
         result=job_result(job),
         error=job.error,
@@ -180,6 +192,28 @@ def _validate_worker_result(
     if status != expected:
         raise ValueError("verification status is inconsistent with verdicts")
     return bundles[0]
+
+
+def _bind_publication_result(job: Job, result: dict | None) -> dict | None:
+    publication = job_publication(job)
+    if not result or result.get("kind") != "verification" or publication is None:
+        return result
+
+    enriched = dict(result)
+    primary = dict(enriched["bundle"])
+    primary["publication"] = publication
+    enriched["bundle"] = primary
+
+    if enriched.get("zero_manifest") is True:
+        extras = []
+        for item in enriched.get("additional_verifications", []):
+            updated = dict(item)
+            bundle = dict(updated["bundle"])
+            bundle["publication"] = publication
+            updated["bundle"] = bundle
+            extras.append(updated)
+        enriched["additional_verifications"] = extras
+    return enriched
 
 
 def _enrich_signed_result(config: ServiceConfig, result: dict | None) -> dict | None:
@@ -435,6 +469,8 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "transparency_log": True,
             "issuer_key_rollover": True,
             "operational_slo_status": True,
+            "durable_evidence_archive": True,
+            "publication_registries": ["crossref", "datacite"],
         }
 
     @app.get("/v1/metrics")
@@ -505,6 +541,43 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         if entry is None:
             raise HTTPException(status_code=404, detail="transparency entry not found")
         return _transparency_view(entry)
+
+    @app.get("/v1/evidence/{job_id}/commitment")
+    def evidence_commitment(job_id: str) -> dict:
+        archive = store.get_evidence_archive(job_id)
+        if archive is None:
+            raise HTTPException(status_code=404, detail="evidence archive not found")
+        if not store.verify_evidence_archive(job_id):
+            raise HTTPException(status_code=503, detail="evidence archive integrity failure")
+        payload = json.loads(archive.payload_json)
+        return {
+            "schema_version": "agnxiv.evidence-commitment/1",
+            "job_id": archive.job_id,
+            "content_sha256": archive.content_sha256,
+            "transparency_sequence": archive.transparency_sequence,
+            "transparency_entry_hash": archive.transparency_entry_hash,
+            "created_at": archive.created_at,
+            "retain_until": archive.retain_until,
+            "retention_policy": archive.retention_policy,
+            "source": payload.get("job"),
+            "publication": payload.get("publication"),
+        }
+
+    @app.get("/v1/jobs/{job_id}/evidence")
+    def evidence_capsule(
+        job_id: str,
+        x_api_key: Annotated[str | None, Header()] = None,
+    ) -> dict:
+        _, api_hash = authenticate(x_api_key)
+        job = store.get_job(job_id)
+        if job is None or job.api_key_hash != api_hash:
+            raise HTTPException(status_code=404, detail="job not found")
+        archive = store.get_evidence_archive(job_id)
+        if archive is None:
+            raise HTTPException(status_code=404, detail="evidence archive not found")
+        if not store.verify_evidence_archive(job_id):
+            raise HTTPException(status_code=503, detail="evidence archive integrity failure")
+        return json.loads(archive.payload_json)
 
     @app.get("/v1/issuer")
     def issuer() -> dict:
@@ -579,6 +652,14 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         ):
             raise HTTPException(status_code=422, detail="unsafe spec_path")
 
+        doi: str | None = None
+        publication: dict | None = None
+        if body.doi:
+            try:
+                doi = normalize_doi(body.doi)
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+
         idempotency_key_hash: str | None = None
         request_fingerprint: str | None = None
         if idempotency_key is not None:
@@ -592,6 +673,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 repository=repository,
                 repository_ref=repository_ref,
                 arxiv_id=arxiv_id,
+                doi=doi,
                 spec_path=body.spec_path,
             )
             existing = store.get_by_idempotency(
@@ -605,6 +687,12 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                         detail="Idempotency-Key was already used for a different request",
                     )
                 return _job_view(existing)
+
+        if doi is not None:
+            try:
+                publication = resolve_doi_registry(doi).model_dump(mode="json")
+            except RegistryLookupError as exc:
+                raise HTTPException(status_code=502, detail=str(exc)) from exc
 
         if store.count_active(api_hash) >= active_config.max_active_jobs_per_key:
             raise HTTPException(
@@ -636,6 +724,8 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 repository_ref=pinned_ref,
                 arxiv_id=arxiv_id,
                 spec_path=body.spec_path,
+                doi=doi,
+                publication=publication,
                 idempotency_key_hash=idempotency_key_hash,
                 request_fingerprint=request_fingerprint,
             )
@@ -655,6 +745,8 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 repository_ref=pinned_ref,
                 arxiv_id=arxiv_id,
                 spec_path=body.spec_path,
+                doi=doi,
+                publication=publication,
             )
 
         request = DispatchRequest(
@@ -730,8 +822,9 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             raise HTTPException(status_code=401, detail="untrusted workflow identity") from exc
 
         try:
-            _validate_worker_result(job, body.status, body.result)
-            result = _enrich_signed_result(active_config, body.result)
+            bound_result = _bind_publication_result(job, body.result)
+            _validate_worker_result(job, body.status, bound_result)
+            result = _enrich_signed_result(active_config, bound_result)
         except (ValueError, TypeError, binascii.Error) as exc:
             store.complete(
                 job_id,
@@ -775,6 +868,7 @@ small{color:#777}
 <label>GitHub repository<input id="repo" placeholder="owner/repository"></label>
 <label>Git ref<input id="ref" value="main"></label>
 <label>arXiv ID<input id="arxiv" placeholder="1403.6652"></label>
+<label>DOI (optional)<input id="doi" placeholder="10.1145/1234.5678"></label>
 <label>Manifest path<input id="spec" placeholder="agnxiv.json"></label>
 <button id="go">Submit</button>
 <p><small>Auto-verify executes only safe workflows, and abstains when claim evidence is ambiguous.</small></p>
@@ -793,6 +887,7 @@ document.getElementById("go").onclick=async()=>{
     repository:document.getElementById("repo").value,
     repository_ref:document.getElementById("ref").value,
     arxiv_id:document.getElementById("arxiv").value||null,
+    doi:document.getElementById("doi").value||null,
     spec_path:document.getElementById("spec").value||null
   };
   out.textContent="Submitting...";

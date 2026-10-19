@@ -33,7 +33,8 @@ def fingerprint_job_request(
     repository: str,
     repository_ref: str,
     arxiv_id: str | None,
-    spec_path: str | None,
+    doi: str | None = None,
+    spec_path: str | None = None,
 ) -> str:
     payload = json.dumps(
         {
@@ -41,6 +42,7 @@ def fingerprint_job_request(
             "repository": repository,
             "repository_ref": repository_ref,
             "arxiv_id": arxiv_id,
+            "doi": doi,
             "spec_path": spec_path,
         },
         sort_keys=True,

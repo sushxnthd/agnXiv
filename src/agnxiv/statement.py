@@ -101,6 +101,11 @@ def build_verification_statement(bundle: Any) -> dict[str, Any]:
             "schemaVersion": "agnxiv.verification/v1",
             "bundleSha256": canonical_json_sha256(bundle.model_dump(mode="json")),
             "source": source,
+            "publication": (
+                bundle.publication.model_dump(mode="json")
+                if bundle.publication is not None
+                else None
+            ),
             "claim": bundle.claim.model_dump(mode="json"),
             "verificationPolicy": record.policy.model_dump(mode="json"),
             "result": {

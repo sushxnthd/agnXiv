@@ -30,6 +30,7 @@ from .provenance import (
     fingerprint_document,
     fingerprint_tree,
 )
+from .registry import PublicationBinding
 from .sandbox import ExecutionResult, SandboxError, SandboxLimits, execute_in_docker
 from .verify import verify_numeric_claim
 
@@ -54,6 +55,7 @@ class VerificationBundle(BaseModel):
     verification_spec_sha256: str | None = None
     claim: Claim
     manuscript: DocumentFingerprint | None = None
+    publication: PublicationBinding | None = None
     provenance: ProvenanceManifest
     artifacts: list[ArtifactFingerprint] = Field(default_factory=list)
     environment: EnvironmentSpec
