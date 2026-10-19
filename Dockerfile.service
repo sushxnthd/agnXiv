@@ -38,4 +38,4 @@ USER agnxiv
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --forwarded-allow-ips=''"]
+CMD ["sh", "-c", "python -m agnxiv.service.migrate && uvicorn agnxiv.service.app:app --host 0.0.0.0 --port ${PORT:-8000} --forwarded-allow-ips=''"]
