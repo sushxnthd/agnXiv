@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import configparser
 import hashlib
+import os
 import re
 import shutil
 import subprocess
@@ -65,6 +66,7 @@ class BuildResult(BaseModel):
 _MAX_DEPENDENCY_MANIFEST_BYTES = 2 * 1024 * 1024
 _MAX_REQUIREMENT_LINES = 10_000
 _MAX_REQUIREMENT_LINE_CHARS = 8192
+_MAX_BUILD_OUTPUT_BYTES = 8 * 1024 * 1024
 
 
 _MICROMAMBA_VERSION = "2.9.0-0"
@@ -685,6 +687,7 @@ def build_python_environment(
         command = [
             "docker",
             "build",
+            "--quiet",
             "--pull=false",
             "--network",
             "default" if plan.network_required else "none",
@@ -693,19 +696,43 @@ def build_python_environment(
             str(context),
         ]
 
-        try:
-            completed = subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                timeout=timeout_seconds,
-                check=False,
+        def limit_build_output() -> None:
+            if os.name != "posix":
+                return
+            import resource
+
+            resource.setrlimit(
+                resource.RLIMIT_FSIZE,
+                (_MAX_BUILD_OUTPUT_BYTES, _MAX_BUILD_OUTPUT_BYTES),
             )
+
+        try:
+            with tempfile.TemporaryFile() as stdout_file, tempfile.TemporaryFile() as stderr_file:
+                completed = subprocess.run(
+                    command,
+                    stdout=stdout_file,
+                    stderr=stderr_file,
+                    timeout=timeout_seconds,
+                    check=False,
+                    preexec_fn=limit_build_output if os.name == "posix" else None,
+                )
+                stdout_file.seek(0)
+                stderr_file.seek(0)
+                stdout_bytes = stdout_file.read(_MAX_BUILD_OUTPUT_BYTES + 1)
+                stderr_bytes = stderr_file.read(_MAX_BUILD_OUTPUT_BYTES + 1)
         except (OSError, subprocess.SubprocessError) as exc:
             raise EnvironmentBuildError(f"environment build failed: {exc}") from exc
 
+    if (
+        len(stdout_bytes) > _MAX_BUILD_OUTPUT_BYTES
+        or len(stderr_bytes) > _MAX_BUILD_OUTPUT_BYTES
+    ):
+        raise EnvironmentBuildError("environment build exceeded output limit")
+
+    stdout = stdout_bytes.decode("utf-8", errors="replace")
+    stderr = stderr_bytes.decode("utf-8", errors="replace")
     if completed.returncode != 0:
-        message = completed.stderr[-4000:] or completed.stdout[-4000:]
+        message = stderr[-4000:] or stdout[-4000:]
         raise EnvironmentBuildError(
             f"environment build exited with {completed.returncode}: {message}"
         )
@@ -722,6 +749,6 @@ def build_python_environment(
         image_ref=image_ref,
         image_id=image_id,
         base_image_id=base_image_id_before,
-        stdout_sha256=hashlib.sha256(completed.stdout.encode("utf-8")).hexdigest(),
-        stderr_sha256=hashlib.sha256(completed.stderr.encode("utf-8")).hexdigest(),
+        stdout_sha256=hashlib.sha256(stdout_bytes).hexdigest(),
+        stderr_sha256=hashlib.sha256(stderr_bytes).hexdigest(),
     )
