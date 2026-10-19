@@ -182,6 +182,42 @@ def _is_sha256_hex(value: object) -> bool:
     )
 
 
+def _validate_runtime_build_binding(bundle: VerificationBundle) -> None:
+    build = bundle.runtime_build
+    if build is None:
+        raise ValueError("verification bundle is missing runtime build evidence")
+    if not _is_sha256_hex(build.plan_id):
+        raise ValueError("runtime build plan ID is invalid")
+    if build.dependency_sha256 is not None and not _is_sha256_hex(
+        build.dependency_sha256
+    ):
+        raise ValueError("runtime dependency digest is invalid")
+    if not build.image_id.startswith("sha256:"):
+        raise ValueError("runtime build image is not content-addressed")
+    if not build.base_image_id.startswith("sha256:"):
+        raise ValueError("runtime base image is not content-addressed")
+    if build.dependency_precision not in {
+        "base-only",
+        "floating",
+        "version-pinned",
+        "hash-pinned",
+        "locked",
+    }:
+        raise ValueError("runtime dependency precision is invalid")
+
+    execution = bundle.execution
+    if execution is not None and execution.image_id != build.image_id:
+        raise ValueError(
+            "runtime build image does not match executed image"
+        )
+    if bundle.record.verdict.value in {
+        "VERIFIED",
+        "CONTRADICTED",
+        "PARTIALLY_VERIFIED",
+    } and execution is None:
+        raise ValueError("decided verification lacks execution evidence")
+
+
 def _validate_zero_manifest_binding(
     locator: object,
     bundle: VerificationBundle,
@@ -279,6 +315,7 @@ def _validate_worker_result(
             raise ValueError("verification Git commit does not match pinned job")
         if git.dirty:
             raise ValueError("verification repository is dirty")
+        _validate_runtime_build_binding(bundle)
         if job.mode == "auto_verify":
             _validate_zero_manifest_binding(locators[index], bundle)
 
