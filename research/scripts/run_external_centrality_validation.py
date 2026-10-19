@@ -9,7 +9,7 @@ import re
 from collections import Counter, defaultdict, deque
 from pathlib import Path
 
-from agnxiv.auto import score_claim_centrality
+from agnxiv.auto import rank_claim_indices_with_statement_diversity, score_claim_centrality
 from agnxiv.claims import extract_quantitative_claims
 from agnxiv.models import Claim
 
@@ -194,13 +194,12 @@ def _eligible_case(row: dict[str, str]) -> dict | None:
     if not gold_indices or gold_method is None:
         return None
 
-    scored = sorted(
-        enumerate(abstract_claims),
-        key=lambda item: (
-            -score_claim_centrality(item[1]),
-            item[0],
-        ),
+    scores = [score_claim_centrality(claim) for claim in abstract_claims]
+    order = rank_claim_indices_with_statement_diversity(
+        abstract_claims,
+        scores,
     )
+    scored = [(index, abstract_claims[index]) for index in order]
     ranks = {
         abstract_index: rank
         for rank, (abstract_index, _) in enumerate(scored, start=1)
