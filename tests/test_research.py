@@ -90,19 +90,21 @@ def test_zero_false_passes_report_uncertainty_not_zero_risk() -> None:
     assert 0.22 < upper < 0.23
 
 
-def test_no_support_predictions_provide_no_false_pass_safety_evidence() -> None:
+def test_gold_negative_abstentions_still_count_as_false_pass_opportunities() -> None:
     metrics = score_selective_verification(
         [
             SelectiveOutcome(
-                case_id="a",
+                case_id=f"n-{index}",
                 gold_supports_claim=False,
                 predicted="ABSTAIN",
             )
+            for index in range(299)
         ]
     )
     assert metrics.support_predictions == 0
+    assert metrics.false_pass_eligible == 299
     assert metrics.false_pass_rate == 0.0
-    assert metrics.false_pass_upper_95 == 1.0
+    assert metrics.false_pass_upper_95 <= 0.01
 
 
 def test_sample_size_for_one_percent_zero_false_pass_claim() -> None:
