@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import ast
+import configparser
 import re
 import sys
+import tomllib
 from pathlib import Path
 from typing import Literal
 
@@ -47,17 +49,136 @@ _IMPORT_PACKAGE_MAP = {
 _EXACT_REQUIREMENT_RE = re.compile(
     r"^[A-Za-z0-9_.-]+(?:\[[A-Za-z0-9_.,-]+\])?==[^\s;\\]+"
 )
+_EXACT_PYTHON_RE = re.compile(r"^(?:python-)?(?P<version>3\.\d+)(?:\.\d+)?$")
+_CONDA_PYTHON_RE = re.compile(
+    r"^\s*-\s*python\s*=\s*(?P<version>3\.\d+)(?:\.\d+)?(?:\s|$)"
+)
+
+
+def _exact_requirement_set(requirements: list[str]) -> bool:
+    cleaned = [
+        item.strip()
+        for item in requirements
+        if item.strip() and not item.lstrip().startswith("#")
+    ]
+    return bool(cleaned) and all(_EXACT_REQUIREMENT_RE.match(item) for item in cleaned)
+
+
+def _pyproject_precision(path: Path) -> Literal["floating", "version-pinned"]:
+    try:
+        payload = tomllib.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, tomllib.TOMLDecodeError):
+        return "floating"
+
+    project = payload.get("project")
+    if isinstance(project, dict):
+        dependencies = project.get("dependencies")
+        if isinstance(dependencies, list) and dependencies:
+            values = [item for item in dependencies if isinstance(item, str)]
+            if len(values) == len(dependencies) and _exact_requirement_set(values):
+                return "version-pinned"
+
+    poetry = payload.get("tool", {}).get("poetry", {})
+    if isinstance(poetry, dict):
+        dependencies = poetry.get("dependencies")
+        if isinstance(dependencies, dict):
+            values = []
+            for name, constraint in dependencies.items():
+                if str(name).lower() == "python":
+                    continue
+                if not isinstance(constraint, str) or not re.fullmatch(
+                    r"\d+(?:\.\d+){1,3}", constraint
+                ):
+                    return "floating"
+                values.append(f"{name}=={constraint}")
+            if values and _exact_requirement_set(values):
+                return "version-pinned"
+    return "floating"
+
+
+def _setup_cfg_precision(path: Path) -> Literal["floating", "version-pinned"]:
+    parser = configparser.ConfigParser()
+    try:
+        parser.read(path, encoding="utf-8")
+    except (OSError, configparser.Error):
+        return "floating"
+    raw = parser.get("options", "install_requires", fallback="")
+    values = [line.strip() for line in raw.splitlines() if line.strip()]
+    return "version-pinned" if _exact_requirement_set(values) else "floating"
+
+
+def _conda_precision(path: Path) -> Literal["floating", "version-pinned"]:
+    """Conservatively recognize only fully pinned simple Conda/Pip dependency rows."""
+    try:
+        lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    except OSError:
+        return "floating"
+
+    in_dependencies = False
+    saw_dependency = False
+    for raw in lines:
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if raw == stripped and stripped == "dependencies:":
+            in_dependencies = True
+            continue
+        if raw == stripped and stripped.endswith(":") and stripped != "dependencies:":
+            if in_dependencies:
+                break
+            continue
+        if not in_dependencies:
+            continue
+        if stripped == "- pip:":
+            continue
+        if not stripped.startswith("- "):
+            continue
+        value = stripped[2:].strip()
+        saw_dependency = True
+        if "==" in value:
+            if not _EXACT_REQUIREMENT_RE.match(value):
+                return "floating"
+        elif not re.fullmatch(
+            r"[A-Za-z0-9_.-]+=\d+(?:\.\d+){0,3}(?:=[A-Za-z0-9_.-]+)?",
+            value,
+        ):
+            return "floating"
+    return "version-pinned" if saw_dependency else "floating"
+
+
+def _infer_exact_python_version(
+    root: Path,
+    conda_file: Path | None,
+) -> tuple[str | None, str | None]:
+    for filename in (".python-version", "runtime.txt"):
+        path = root / filename
+        if not path.is_file() or path.is_symlink():
+            continue
+        try:
+            value = path.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        match = _EXACT_PYTHON_RE.fullmatch(value)
+        if match:
+            return match.group("version"), filename
+
+    if conda_file is not None and conda_file.is_file() and not conda_file.is_symlink():
+        for raw in conda_file.read_text(encoding="utf-8", errors="ignore").splitlines():
+            match = _CONDA_PYTHON_RE.match(raw)
+            if match:
+                return match.group("version"), conda_file.name
+    return None, None
 
 
 def _requirements_precision(path: Path) -> Literal["floating", "version-pinned"]:
     package_lines = [
         raw.strip()
         for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines()
-        if raw.strip() and not raw.lstrip().startswith("#") and not raw.lstrip().startswith("-")
+        if raw.strip()
+        and not raw.lstrip().startswith("#")
+        and not raw.lstrip().startswith("-")
     ]
-    if package_lines and all(_EXACT_REQUIREMENT_RE.match(line) for line in package_lines):
-        return "version-pinned"
-    return "floating"
+    return "version-pinned" if _exact_requirement_set(package_lines) else "floating"
 
 
 def _local_module_names(root: Path) -> set[str]:
@@ -114,6 +235,7 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         "none", "inferred", "floating", "version-pinned", "locked"
     ] = "none"
     historical_fidelity: Literal["unknown", "approximate", "constrained"] = "unknown"
+    python_version = "3.11"
 
     pyproject = root / "pyproject.toml"
     requirements = root / "requirements.txt"
@@ -121,6 +243,7 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
     setup_cfg = root / "setup.cfg"
     poetry_lock = root / "poetry.lock"
     uv_lock = root / "uv.lock"
+    pipfile_lock = root / "Pipfile.lock"
     environment_yml = root / "environment.yml"
     environment_yaml = root / "environment.yaml"
 
@@ -141,9 +264,14 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         install_commands.append(["python", "-m", "pip", "install", "."])
         confidence = max(confidence, 0.75)
         dependency_source = "manifest"
-        if dependency_precision == "none":
-            dependency_precision = "floating"
-            historical_fidelity = "approximate"
+        pyproject_precision = _pyproject_precision(pyproject)
+        if dependency_precision in {"none", "floating"}:
+            dependency_precision = pyproject_precision
+            historical_fidelity = (
+                "constrained"
+                if pyproject_precision == "version-pinned"
+                else "approximate"
+            )
 
     if setup_py.exists():
         dependency_files.append("setup.py")
@@ -159,9 +287,14 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         dependency_files.append("setup.cfg")
         confidence = max(confidence, 0.55)
         dependency_source = "manifest"
-        if dependency_precision == "none":
-            dependency_precision = "floating"
-            historical_fidelity = "approximate"
+        setup_precision = _setup_cfg_precision(setup_cfg)
+        if dependency_precision in {"none", "floating"}:
+            dependency_precision = setup_precision
+            historical_fidelity = (
+                "constrained"
+                if setup_precision == "version-pinned"
+                else "approximate"
+            )
 
     if poetry_lock.exists():
         dependency_files.append("poetry.lock")
@@ -179,15 +312,39 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         dependency_precision = "locked"
         historical_fidelity = "constrained"
 
+    if pipfile_lock.exists():
+        dependency_files.append("Pipfile.lock")
+        notes.append("Pipfile.lock detected; prefer the exact locked dependency set.")
+        confidence = max(confidence, 0.85)
+        dependency_source = "lockfile"
+        dependency_precision = "locked"
+        historical_fidelity = "constrained"
+
     conda_file = environment_yml if environment_yml.exists() else environment_yaml
     if conda_file.exists():
         dependency_files.append(conda_file.name)
         notes.append("Conda environment detected; a Conda-capable builder is required.")
         confidence = max(confidence, 0.8)
         dependency_source = "manifest"
-        if dependency_precision == "none":
-            dependency_precision = "floating"
-            historical_fidelity = "approximate"
+        conda_precision = _conda_precision(conda_file)
+        if dependency_precision in {"none", "floating"}:
+            dependency_precision = conda_precision
+            historical_fidelity = (
+                "constrained"
+                if conda_precision == "version-pinned"
+                else "approximate"
+            )
+
+    exact_python, python_source = _infer_exact_python_version(
+        root,
+        conda_file if conda_file.exists() else None,
+    )
+    if exact_python is not None:
+        python_version = exact_python
+        notes.append(
+            f"Exact Python {python_version} inferred from {python_source}; "
+            "hosted execution may abstain if that runtime is outside the supported set."
+        )
 
     python_files = list(root.rglob("*.py"))
     inferred_packages = _infer_import_packages(root) if python_files else []
@@ -206,6 +363,8 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
             confidence = max(confidence, 0.4)
 
     return EnvironmentSpec(
+        python_version=python_version,
+        base_image=f"python:{python_version}-slim",
         dependency_files=dependency_files,
         install_commands=install_commands,
         confidence=confidence,
