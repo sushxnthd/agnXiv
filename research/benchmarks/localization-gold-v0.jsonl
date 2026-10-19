@@ -1,8 +1,0 @@
-{"case_id":"SCICOQA-3f098eb0","target_paths":["models/Koopa.py"],"target_line_terms":["time_var_backcast","residual"],"detector_visible":false}
-{"case_id":"SCICOQA-25ee1fd2","target_paths":["graphormer/model.py","graphormer/layers.py"],"target_line_terms":["EdgeEncoding","edge"],"detector_visible":false}
-{"case_id":"SCICOQA-183bd763","target_paths":["code/train/tune.py","code/train/tune_ml.py","code/train/core/solver_s2l.py","code/train/core/solver_f2l.py","code/train/core/utils.py"],"target_line_terms":["test/sbp_mae","validation"],"detector_visible":false}
-{"case_id":"SCICOQA-9a6bc557","target_paths":["nets.py","train.py","train_GAN.py"],"target_line_terms":["concat","prior"],"detector_visible":false}
-{"case_id":"SCICOQA-63197a77","target_paths":["loralib/layers.py"],"target_line_terms":["lora_A","lora_B","zeros_","normal_"],"detector_visible":false}
-{"case_id":"SCICOQA-61926641","target_paths":["models/saint_i.py","models/transformer.py","models/saint.py"],"target_line_terms":["intersample","reshape"],"detector_visible":false}
-{"case_id":"SCICOQA-7cd4b3d7","target_paths":["model.py"],"target_line_terms":["jinc","cutoff"],"detector_visible":false}
-{"case_id":"SCICOQA-7c8468c8","target_paths":["training_transformer.py","transformer.py"],"target_line_terms":["cross_entropy","logits","target"],"detector_visible":false}

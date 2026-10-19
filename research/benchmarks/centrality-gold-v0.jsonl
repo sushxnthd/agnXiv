@@ -1,3 +1,0 @@
-{"case_id":"SCICOQA-63197a77","required_substrings":["10000 times","3 times"],"rationale":"LoRA abstract-level parameter and GPU-memory reduction claim."}
-{"case_id":"SCICOQA-3f098eb0","required_substrings":["77.3","76.0"],"rationale":"Koopa abstract-level training-time and memory savings claim."}
-{"case_id":"SCICOQA-7c8468c8","required_substrings":["64x"],"rationale":"MaskGIT abstract-level autoregressive decoding speedup claim."}
