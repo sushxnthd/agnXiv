@@ -104,3 +104,31 @@ The centrality score is never consulted while constructing gold. The frozen
 release thresholds remain unchanged: n >= 75, Recall@3 >= 0.90, Recall@5 >=
 0.95, with Recall@1 diagnostic only. If bucket 1 fails, it becomes development
 evidence and cannot be reused after tuning.
+
+
+## Frozen ICLR 2024 OpenReview production holdout
+
+The SciTLDR author-TLDR bucket 1 produced only 37 eligible cases and failed the
+frozen recall thresholds, so it is development evidence and is not reused.
+
+Before any evaluation on the following source, the final large external
+holdout is frozen as:
+
+- repository: `astenuz/iclr2024-openreview`
+- commit: `740c3112f479019d9902780fd627b0b7c19eac7c`
+- file: `data/iclr2024_papers.csv`
+- fields: OpenReview paper id, title, abstract, primary area, author TLDR
+- hash seed: `agnxiv-openreview-centrality-v1`
+- partition: `uint64(sha256(seed + "|" + paper_id)[:8]) mod 5 == 0`
+- eligibility: non-empty author TLDR and at least two quantitative abstract
+  candidates
+- gold preference: unique quantitative TLDR-to-abstract value match with
+  compatible metric/unit semantics
+- fallback gold: title + author-TLDR lexical F1 with >=2 shared content
+  tokens, F1 >=0.08, and >=0.015 margin over the runner-up
+- ambiguous gold mappings are excluded
+
+The centrality rank is never consulted while constructing gold. Release
+thresholds remain unchanged: at least 75 eligible papers, Recall@3 >= 0.90,
+Recall@5 >= 0.95; Recall@1 is diagnostic only. This partition has not been
+evaluated before this protocol entry.
