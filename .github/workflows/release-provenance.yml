@@ -49,19 +49,38 @@ jobs:
           ).strip()
           dockerfile = Path("Dockerfile.service").read_text(encoding="utf-8")
           base_image = dockerfile.splitlines()[0].removeprefix("FROM ").strip()
+          trusted_workflows = [
+              ".github/workflows/hosted-verify.yml",
+              ".github/workflows/production-gate.yml",
+              ".github/workflows/static-security.yml",
+              ".github/workflows/security-audit.yml",
+              ".github/workflows/codeql-security.yml",
+              ".github/workflows/service-image.yml",
+              ".github/workflows/postgres-restore-drill.yml",
+              ".github/workflows/zero-manifest-real-paper.yml",
+              ".github/workflows/external-benchmark.yml",
+              ".github/workflows/deepwalk-auto.yml",
+              ".github/workflows/research-centrality-real.yml",
+              ".github/workflows/transparency-anchor.yml",
+          ]
+          scientific_protocols = [
+              "research/protocols/redbench.md",
+              "research/protocols/environment-archaeology.md",
+              "research/protocols/centrality-locator-dag.md",
+          ]
           payload = {
-              "schema_version": "agnxiv.release/1",
+              "schema_version": "agnxiv.release/2",
               "commit_sha": os.environ["RELEASE_SHA"],
               "service_image_id": image_id,
               "service_base_image": base_image,
               "dockerfile_sha256": digest("Dockerfile.service"),
               "constraints_sha256": digest("constraints-service.txt"),
-              "hosted_workflow_sha256": digest(
-                  ".github/workflows/hosted-verify.yml"
-              ),
-              "production_gate_sha256": digest(
-                  ".github/workflows/production-gate.yml"
-              ),
+              "trusted_workflows": {
+                  item: digest(item) for item in trusted_workflows
+              },
+              "scientific_protocols": {
+                  item: digest(item) for item in scientific_protocols
+              },
               "migration_files": {
                   str(path): hashlib.sha256(path.read_bytes()).hexdigest()
                   for path in sorted(Path("migrations/versions").glob("*.py"))
