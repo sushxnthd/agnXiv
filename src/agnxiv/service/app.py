@@ -14,6 +14,7 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from ..pipeline import VerificationBundle
 from ..preprint import parse_arxiv_reference
@@ -37,6 +38,78 @@ from .security import (
 )
 
 _LOGGER = logging.getLogger("agnxiv.service")
+
+
+class _RequestBodyTooLarge(RuntimeError):
+    pass
+
+
+class RequestBodyLimitMiddleware:
+    """Enforce a hard byte limit on the actual ASGI request body stream."""
+
+    def __init__(self, app: ASGIApp, *, max_bytes: int) -> None:
+        self.app = app
+        self.max_bytes = max(1, max_bytes)
+
+    async def __call__(
+        self,
+        scope: Scope,
+        receive: Receive,
+        send: Send,
+    ) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        headers = {
+            key.lower(): value
+            for key, value in scope.get("headers", [])
+        }
+        raw_length = headers.get(b"content-length")
+        if raw_length is not None:
+            try:
+                content_length = int(raw_length.decode("ascii"))
+            except (ValueError, UnicodeDecodeError):
+                response = JSONResponse(
+                    status_code=400,
+                    content={"detail": "invalid content-length header"},
+                )
+                await response(scope, receive, send)
+                return
+            if content_length < 0:
+                response = JSONResponse(
+                    status_code=400,
+                    content={"detail": "invalid content-length header"},
+                )
+                await response(scope, receive, send)
+                return
+            if content_length > self.max_bytes:
+                response = JSONResponse(
+                    status_code=413,
+                    content={"detail": "request body too large"},
+                )
+                await response(scope, receive, send)
+                return
+
+        total = 0
+
+        async def limited_receive():
+            nonlocal total
+            message = await receive()
+            if message["type"] == "http.request":
+                total += len(message.get("body", b""))
+                if total > self.max_bytes:
+                    raise _RequestBodyTooLarge
+            return message
+
+        try:
+            await self.app(scope, limited_receive, send)
+        except _RequestBodyTooLarge:
+            response = JSONResponse(
+                status_code=413,
+                content={"detail": "request body too large"},
+            )
+            await response(scope, receive, send)
 
 
 class JobCreate(BaseModel):
@@ -285,6 +358,10 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         TrustedHostMiddleware,
         allowed_hosts=allowed_hosts,
     )
+    app.add_middleware(
+        RequestBodyLimitMiddleware,
+        max_bytes=active_config.max_request_bytes,
+    )
 
     def issuer_keyset() -> dict:
         if not active_config.issuer_private_key_b64:
@@ -363,20 +440,6 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             else uuid.uuid4().hex
         )
         started = time.perf_counter()
-        content_length = request.headers.get("content-length")
-        if content_length:
-            try:
-                request_bytes = int(content_length)
-            except ValueError:
-                return JSONResponse(
-                    status_code=400,
-                    content={"detail": "invalid content-length header"},
-                )
-            if request_bytes > 5 * 1024 * 1024:
-                return JSONResponse(
-                    status_code=413,
-                    content={"detail": "request body too large"},
-                )
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
