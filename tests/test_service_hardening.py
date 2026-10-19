@@ -5,10 +5,10 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
+from agnxiv.registry import PublicationBinding
 from agnxiv.service.app import create_app
 from agnxiv.service.config import ServiceConfig
 from agnxiv.service.db import Job, JobStore
-from agnxiv.registry import PublicationBinding
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
 
 
