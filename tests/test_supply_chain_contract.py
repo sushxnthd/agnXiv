@@ -95,3 +95,16 @@ def test_codeql_security_workflow_is_pinned_and_extended() -> None:
     assert f"github/codeql-action/analyze@{pinned}" in text
     assert "queries: security-extended" in text
     assert "security-events: write" in text
+
+
+def test_untrusted_research_runs_only_on_fresh_github_hosted_vm() -> None:
+    text = _read(".github/workflows/hosted-verify.yml")
+    execute = text.split("\n  execute:\n", 1)[1].split("\n  callback:\n", 1)[0]
+    assert "runs-on: ubuntu-latest" in execute
+    assert "runs-on: ubuntu-slim" not in execute
+    assert "self-hosted" not in execute
+    # The execute job must not be given callback identity or repository-write powers.
+    permissions = execute.split("permissions:", 1)[1].split("steps:", 1)[0]
+    assert "contents: read" in permissions
+    assert "id-token: write" not in permissions
+    assert "actions: write" not in permissions
