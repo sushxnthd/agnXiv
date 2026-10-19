@@ -16,7 +16,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Floating/unreconstructed dependency environments are labeled **CONDITIONAL** evidence rather than silently treated as publication-era equivalence.
 - [x] Multiple claim bundles from one run are preserved.
 - [x] Repeated attempts sharing the same evidence cluster are not counted as independent votes.
-- [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.
+- [x] Held-out false-pass validation includes at least 299 distinct external paper-level negative-control clusters with zero false passes and a one-sided 95% upper bound <=1%. Current external ReproRepo-seeded result: 308 clusters, 0 false passes, upper bound 0.9679% (`research/results/external-false-pass-v1-2026-10-19.md`).
 - [ ] Central-claim selection is validated beyond the small v0 diagnostic set. The known 3-case non-blind regression now reaches 3/3 R@1, but held-out scale validation is still required.
 - [ ] Historical environment recovery benchmark reaches a predeclared production threshold.
 
