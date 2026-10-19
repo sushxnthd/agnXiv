@@ -272,21 +272,36 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         }
         keys = [active]
         seen = {active_key_id}
-        for encoded in active_config.issuer_previous_public_keys_b64:
-            public_pem = base64.b64decode(encoded, validate=True)
-            retired_key_id = public_key_id(public_pem)
-            if retired_key_id in seen:
-                raise ValueError("issuer keyring contains a duplicate key")
-            seen.add(retired_key_id)
-            keys.append(
-                {
-                    "key_id": retired_key_id,
-                    "algorithm": "Ed25519",
-                    "public_key_pem": public_pem.decode("ascii"),
-                    "status": "retired",
-                    "signs_new_records": False,
-                }
-            )
+        configured_public_keys = (
+            (
+                "retired",
+                True,
+                active_config.issuer_previous_public_keys_b64,
+            ),
+            (
+                "revoked",
+                False,
+                active_config.issuer_revoked_public_keys_b64,
+            ),
+        )
+        for status, trusted, encoded_keys in configured_public_keys:
+            for encoded in encoded_keys:
+                public_pem = base64.b64decode(encoded, validate=True)
+                key_id = public_key_id(public_pem)
+                if key_id in seen:
+                    raise ValueError("issuer keyring contains a duplicate key")
+                seen.add(key_id)
+                keys.append(
+                    {
+                        "key_id": key_id,
+                        "algorithm": "Ed25519",
+                        "public_key_pem": public_pem.decode("ascii"),
+                        "status": status,
+                        "trusted_for_historical_records": trusted,
+                        "signs_new_records": False,
+                    }
+                )
+        active["trusted_for_historical_records"] = True
         return active, keys
 
     def issuer_key_valid() -> bool:
@@ -491,8 +506,9 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "public_key_pem": active["public_key_pem"],
             "keys": keys,
             "rotation_policy": (
-                "active key signs new records; retired public keys verify "
-                "historical records"
+                "active key signs new records; retired keys remain trusted "
+                "for historical records; revoked keys remain discoverable but "
+                "must not be trusted"
             ),
         }
 
