@@ -40,12 +40,13 @@ from .security import (
 _LOGGER = logging.getLogger("agnxiv.service")
 
 
-class _RequestBodyTooLarge(RuntimeError):
-    pass
-
-
 class RequestBodyLimitMiddleware:
-    """Enforce a hard byte limit on the actual ASGI request body stream."""
+    """Reject oversized bodies before framework request parsing.
+
+    The middleware buffers at most max_bytes plus one ASGI chunk and then
+    replays the exact message sequence to the application. This makes the
+    limit independent of Content-Length and Transfer-Encoding semantics.
+    """
 
     def __init__(self, app: ASGIApp, *, max_bytes: int) -> None:
         self.app = app
@@ -91,25 +92,36 @@ class RequestBodyLimitMiddleware:
                 await response(scope, receive, send)
                 return
 
+        messages: list[dict] = []
         total = 0
-
-        async def limited_receive():
-            nonlocal total
+        while True:
             message = await receive()
+            messages.append(message)
             if message["type"] == "http.request":
                 total += len(message.get("body", b""))
                 if total > self.max_bytes:
-                    raise _RequestBodyTooLarge
-            return message
+                    response = JSONResponse(
+                        status_code=413,
+                        content={"detail": "request body too large"},
+                    )
+                    await response(scope, receive, send)
+                    return
+                if not message.get("more_body", False):
+                    break
+            elif message["type"] == "http.disconnect":
+                break
 
-        try:
-            await self.app(scope, limited_receive, send)
-        except _RequestBodyTooLarge:
-            response = JSONResponse(
-                status_code=413,
-                content={"detail": "request body too large"},
-            )
-            await response(scope, receive, send)
+        index = 0
+
+        async def replay_receive():
+            nonlocal index
+            if index < len(messages):
+                message = messages[index]
+                index += 1
+                return message
+            return {"type": "http.disconnect"}
+
+        await self.app(scope, replay_receive, send)
 
 
 class JobCreate(BaseModel):
