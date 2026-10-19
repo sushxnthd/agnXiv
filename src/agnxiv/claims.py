@@ -266,25 +266,42 @@ def _looks_like_structural_quantity(
     local_context: str,
 ) -> bool:
     """Reject equation/list/section numerals that are not measured outcomes."""
-    if unit or uncertainty_raw or metric:
-        return False
-
     start = match.start("value")
     end = match.end("value")
     prefix = normalized[max(0, start - 24) : start]
     suffix = normalized[end : min(len(normalized), end + 4)]
+    lower_context = local_context.lower()
 
-    variable = _VARIABLE_ASSIGNMENT_RE.search(prefix)
-    if variable is not None:
-        # A bare symbolic assignment such as k=2, B=1.2 or t=2 is a model
-        # parameter/equation value, not a paper result. Explicit metrics/units
-        # were already exempted above.
+    # Enumerated list labels such as "1) robust accuracy" are structural even
+    # when the remainder of the sentence contains a metric name.
+    if (
+        not unit
+        and not uncertainty_raw
+        and value.is_integer()
+        and abs(value) <= 50
+        and suffix.startswith((")", ":"))
+    ):
         return True
 
-    if value.is_integer() and abs(value) <= 50:
-        if suffix.startswith((")", ":")):
-            return True
+    variable = _VARIABLE_ASSIGNMENT_RE.search(prefix)
+    if (
+        variable is not None
+        and not unit
+        and not uncertainty_raw
+        and any(
+            phrase in lower_context
+            for phrase in ("we set", "we use", "let ", "where ", "denote", "defined as")
+        )
+    ):
+        # Procedural symbolic assignments such as k=2, B=1.2 or t=2 are
+        # configuration/equation values. Do not blanket-reject statistical
+        # assignments such as a reported p=0.05.
+        return True
 
+    if unit or uncertainty_raw or metric:
+        return False
+
+    if value.is_integer() and abs(value) <= 50:
         stripped = local_context.lstrip()
         literal = str(int(value))
         if re.match(
