@@ -350,7 +350,10 @@ def execute_job(
             relative = Path(spec_path)
             if relative.is_absolute() or ".." in relative.parts:
                 raise HostedRunnerError("unsafe verification spec path")
-            manifest = (repo / relative).resolve()
+            manifest_candidate = repo / relative
+            if manifest_candidate.is_symlink():
+                raise HostedRunnerError("verification spec symlinks are not allowed")
+            manifest = manifest_candidate.resolve()
             try:
                 manifest.relative_to(repo.resolve())
             except ValueError as exc:
@@ -366,7 +369,12 @@ def execute_job(
                 raise HostedRunnerError(
                     "verification spec repository must be workspace-relative"
                 )
-            build_repository = (spec_base / candidate_repo).resolve()
+            build_candidate = spec_base / candidate_repo
+            if build_candidate.is_symlink():
+                raise HostedRunnerError(
+                    "verification spec repository symlinks are not allowed"
+                )
+            build_repository = build_candidate.resolve()
             try:
                 build_repository.relative_to(spec_base)
             except ValueError as exc:
