@@ -12,6 +12,7 @@ from agnxiv.provenance import (
     fingerprint_document,
     fingerprint_tree,
 )
+from agnxiv.registry import PublicationBinding
 from agnxiv.statement import (
     PREDICATE_TYPE,
     STATEMENT_TYPE,
@@ -129,3 +130,24 @@ def test_keyring_verifier_accepts_retired_key_and_rejects_revoked(
     }
     with pytest.raises(AttestationSignatureError, match="revoked"):
         verify_statement_with_keyring(envelope, revoked_keyring)
+
+
+def test_statement_binds_publication_registry_metadata(tmp_path: Path) -> None:
+    bundle = _bundle(tmp_path)
+    bundle.publication = PublicationBinding(
+        registry="crossref",
+        doi="10.1145/1234.5678",
+        title="A reproducible result",
+        publisher="Example Publisher",
+        work_type="journal-article",
+        published="2026-10-01",
+        canonical_url="https://doi.org/10.1145/1234.5678",
+        member="123",
+        retrieved_at="2026-10-19T00:00:00Z",
+        registry_record_sha256="a" * 64,
+    )
+    statement = build_verification_statement(bundle)
+    publication = statement["predicate"]["publication"]
+    assert publication["doi"] == "10.1145/1234.5678"
+    assert publication["registry"] == "crossref"
+    assert publication["registry_record_sha256"] == "a" * 64
