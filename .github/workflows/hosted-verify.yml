@@ -56,8 +56,8 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e ".[pdf]"
+      - name: Install exact trusted worker runtime
+        run: python -m pip install --disable-pip-version-check -c constraints-service.txt "pydantic==2.14.1" "pypdf==6.21.1"
 
       - name: Execute untrusted research analysis without service credentials
         env:
@@ -66,6 +66,7 @@ jobs:
           RESEARCH_REF: ${{ inputs.repository_ref }}
           ARXIV_ID: ${{ inputs.arxiv_id }}
           SPEC_PATH: ${{ inputs.spec_path }}
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           python -m agnxiv.hosted_runner \
             --mode "$JOB_MODE" \
@@ -102,9 +103,6 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e .
-
       - name: Download isolated result
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
@@ -115,6 +113,7 @@ jobs:
         env:
           CALLBACK_URL: ${{ inputs.callback_url }}
           OIDC_AUDIENCE: ${{ inputs.oidc_audience }}
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           python -m agnxiv.hosted_callback \
             --result /tmp/agnxiv-result/agnxiv-hosted-result.json \
