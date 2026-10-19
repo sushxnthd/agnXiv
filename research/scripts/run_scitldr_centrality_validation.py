@@ -196,7 +196,7 @@ def main() -> None:
             if not paper_id:
                 return False
             digest = hashlib.sha256(
-                f"{args.hash_seed}|{paper_id}".encode("utf-8")
+                f"{args.hash_seed}|{paper_id}".encode()
             ).digest()
             return (
                 int.from_bytes(digest[:8], "big") % args.hash_modulus
