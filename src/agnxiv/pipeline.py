@@ -22,6 +22,7 @@ from .outputs import (
     select_unambiguous_observation,
 )
 from .planner import CommandCandidate, discover_commands
+from .registry import PublicationBinding
 from .provenance import (
     ArtifactFingerprint,
     DocumentFingerprint,
@@ -54,6 +55,7 @@ class VerificationBundle(BaseModel):
     verification_spec_sha256: str | None = None
     claim: Claim
     manuscript: DocumentFingerprint | None = None
+    publication: PublicationBinding | None = None
     provenance: ProvenanceManifest
     artifacts: list[ArtifactFingerprint] = Field(default_factory=list)
     environment: EnvironmentSpec

@@ -42,6 +42,8 @@ class Job(Base):
     repository: Mapped[str] = mapped_column(String(255))
     repository_ref: Mapped[str] = mapped_column(String(255))
     arxiv_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    doi: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    publication_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     spec_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     idempotency_key_hash: Mapped[str | None] = mapped_column(
         String(64),
@@ -88,6 +90,19 @@ class TransparencyEntry(Base):
     previous_hash: Mapped[str] = mapped_column(String(64))
     entry_hash: Mapped[str] = mapped_column(String(64), unique=True)
     created_at: Mapped[str] = mapped_column(String(40))
+
+
+class EvidenceArchive(Base):
+    __tablename__ = "agnxiv_evidence_archives"
+
+    job_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_sha256: Mapped[str] = mapped_column(String(64), unique=True)
+    payload_json: Mapped[str] = mapped_column(Text)
+    transparency_sequence: Mapped[int] = mapped_column(Integer)
+    transparency_entry_hash: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[str] = mapped_column(String(40))
+    retain_until: Mapped[str] = mapped_column(String(40))
+    retention_policy: Mapped[str] = mapped_column(String(64))
 
 
 class JobStore:
@@ -152,6 +167,34 @@ class JobStore:
                         """
                     )
                 )
+                connection.execute(
+                    text(
+                        """
+                        CREATE TRIGGER IF NOT EXISTS agnxiv_evidence_no_update
+                        BEFORE UPDATE ON agnxiv_evidence_archives
+                        BEGIN
+                            SELECT RAISE(
+                                ABORT,
+                                'agnxiv evidence archive is append-only'
+                            );
+                        END
+                        """
+                    )
+                )
+                connection.execute(
+                    text(
+                        """
+                        CREATE TRIGGER IF NOT EXISTS agnxiv_evidence_no_delete
+                        BEFORE DELETE ON agnxiv_evidence_archives
+                        BEGIN
+                            SELECT RAISE(
+                                ABORT,
+                                'agnxiv evidence archive is append-only'
+                            );
+                        END
+                        """
+                    )
+                )
 
     def ping(self) -> bool:
         try:
@@ -171,6 +214,8 @@ class JobStore:
         repository_ref: str,
         arxiv_id: str | None,
         spec_path: str | None,
+        doi: str | None = None,
+        publication: dict | None = None,
         idempotency_key_hash: str | None = None,
         request_fingerprint: str | None = None,
     ) -> Job:
@@ -182,6 +227,12 @@ class JobStore:
             repository=repository,
             repository_ref=repository_ref,
             arxiv_id=arxiv_id,
+            doi=doi,
+            publication_json=(
+                json.dumps(publication, sort_keys=True, separators=(",", ":"))
+                if publication is not None
+                else None
+            ),
             spec_path=spec_path,
             idempotency_key_hash=idempotency_key_hash,
             request_fingerprint=request_fingerprint,
@@ -204,6 +255,8 @@ class JobStore:
         spec_path: str | None,
         idempotency_key_hash: str,
         request_fingerprint: str,
+        doi: str | None = None,
+        publication: dict | None = None,
     ) -> tuple[Job, bool]:
         """Create exactly one job for an API-key/idempotency-key pair."""
         job = Job(
@@ -214,6 +267,12 @@ class JobStore:
             repository=repository,
             repository_ref=repository_ref,
             arxiv_id=arxiv_id,
+            doi=doi,
+            publication_json=(
+                json.dumps(publication, sort_keys=True, separators=(",", ":"))
+                if publication is not None
+                else None
+            ),
             spec_path=spec_path,
             idempotency_key_hash=idempotency_key_hash,
             request_fingerprint=request_fingerprint,
@@ -382,13 +441,90 @@ class JobStore:
             job.error = error
             job.updated_at = datetime.now(UTC)
             if result is not None and result.get("kind") == "verification":
-                self._append_transparency_entry(
+                entry = self._append_transparency_entry(
                     session,
                     job=job,
                     status=status,
                     result=result,
                 )
+                self._append_evidence_archive(
+                    session,
+                    job=job,
+                    result=result,
+                    transparency_entry=entry,
+                )
             session.commit()
+
+    def _append_evidence_archive(
+        self,
+        session,
+        *,
+        job: Job,
+        result: dict,
+        transparency_entry: TransparencyEntry,
+    ) -> EvidenceArchive:
+        created = datetime.now(UTC)
+        publication = (
+            json.loads(job.publication_json)
+            if job.publication_json
+            else None
+        )
+        capsule = {
+            "schema_version": "agnxiv.evidence-capsule/1",
+            "job": {
+                "id": job.id,
+                "mode": job.mode,
+                "repository": job.repository,
+                "repository_ref": job.repository_ref,
+                "arxiv_id": job.arxiv_id,
+                "doi": job.doi,
+            },
+            "publication": publication,
+            "transparency": {
+                "sequence": transparency_entry.sequence,
+                "entry_hash": transparency_entry.entry_hash,
+                "result_sha256": transparency_entry.result_sha256,
+            },
+            "result": result,
+        }
+        payload_json = json.dumps(
+            capsule,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        )
+        archive = EvidenceArchive(
+            job_id=job.id,
+            content_sha256=digest_json(capsule),
+            payload_json=payload_json,
+            transparency_sequence=transparency_entry.sequence,
+            transparency_entry_hash=transparency_entry.entry_hash,
+            created_at=created.isoformat().replace("+00:00", "Z"),
+            retain_until=(created + timedelta(days=3650)).isoformat().replace("+00:00", "Z"),
+            retention_policy="public-verification-10y-minimum",
+        )
+        session.add(archive)
+        return archive
+
+    def get_evidence_archive(self, job_id: str) -> EvidenceArchive | None:
+        with self.session_factory() as session:
+            return session.get(EvidenceArchive, job_id)
+
+    def verify_evidence_archive(self, job_id: str) -> bool:
+        archive = self.get_evidence_archive(job_id)
+        if archive is None:
+            return False
+        try:
+            payload = json.loads(archive.payload_json)
+        except json.JSONDecodeError:
+            return False
+        return (
+            digest_json(payload) == archive.content_sha256
+            and payload.get("transparency", {}).get("entry_hash")
+            == archive.transparency_entry_hash
+            and payload.get("transparency", {}).get("sequence")
+            == archive.transparency_sequence
+        )
 
     def _append_transparency_entry(
         self,
@@ -524,6 +660,12 @@ class JobStore:
                 setattr(job, key, value)
             job.updated_at = datetime.now(UTC)
             session.commit()
+
+
+def job_publication(job: Job) -> dict | None:
+    if not job.publication_json:
+        return None
+    return json.loads(job.publication_json)
 
 
 def job_result(job: Job) -> dict | None:
