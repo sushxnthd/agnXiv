@@ -9,6 +9,8 @@ on:
       - "src/agnxiv/verify.py"
       - "src/agnxiv/validation.py"
       - "research/scripts/run_external_false_pass_validation.py"
+      - "research/scripts/run_external_centrality_validation.py"
+      - "src/agnxiv/auto.py"
       - "tests/test_validation.py"
       - ".github/workflows/scientific-validation.yml"
   pull_request:
@@ -19,6 +21,8 @@ on:
       - "src/agnxiv/verify.py"
       - "src/agnxiv/validation.py"
       - "research/scripts/run_external_false_pass_validation.py"
+      - "research/scripts/run_external_centrality_validation.py"
+      - "src/agnxiv/auto.py"
       - "tests/test_validation.py"
       - ".github/workflows/scientific-validation.yml"
   schedule:
@@ -94,5 +98,73 @@ jobs:
         with:
           name: scientific-validation-external-false-pass
           path: /tmp/agnxiv-external-false-pass.json
+          retention-days: 90
+          if-no-files-found: warn
+
+
+  external-centrality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout AgnXiv
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout pinned ReproRepo validation source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: LithiumDA/ReproRepo
+          ref: 470a4c69d9f11df15526464e0a5bb66d95a12f55
+          path: external/reprorepo
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install verifier
+        run: python -m pip install -e .
+
+      - name: Run held-out author-TLDR centrality validation
+        run: |
+          python research/scripts/run_external_centrality_validation.py \
+            --input external/reprorepo/paper_lists/neurips_main-2022.csv \
+            --input external/reprorepo/paper_lists/neurips_db-2022.csv \
+            --input external/reprorepo/paper_lists/neurips_main-2024.csv \
+            --input external/reprorepo/paper_lists/neurips_db-2024.csv \
+            --input external/reprorepo/paper_lists/iclr-2026.csv \
+            --max-cases 120 \
+            --minimum-cases 75 \
+            --min-recall-at-1 0.60 \
+            --min-recall-at-3 0.90 \
+            --min-recall-at-5 0.95 \
+            --output /tmp/agnxiv-external-centrality.json
+
+      - name: Assert centrality release threshold
+        run: |
+          python - <<'PY'
+          import json
+
+          with open(
+              "/tmp/agnxiv-external-centrality.json",
+              encoding="utf-8",
+          ) as handle:
+              report = json.load(handle)
+
+          assert report["cases"] >= 75
+          assert len(report["strata"]) >= 3
+          assert report["recall_at_1"] >= 0.60
+          assert report["recall_at_3"] >= 0.90
+          assert report["recall_at_5"] >= 0.95
+          assert report["passed"] is True
+          PY
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: scientific-validation-external-centrality
+          path: /tmp/agnxiv-external-centrality.json
           retention-days: 90
           if-no-files-found: warn
