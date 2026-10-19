@@ -20,6 +20,7 @@ def _policy() -> GitHubOIDCPolicy:
         repository="sushxnthd/agnXiv",
         ref="main",
         workflow="hosted-verify.yml",
+        workflow_sha="a" * 40,
     )
 
 
@@ -31,6 +32,7 @@ def _claims() -> dict:
         "workflow_ref": (
             "sushxnthd/agnXiv/.github/workflows/hosted-verify.yml@refs/heads/main"
         ),
+        "workflow_sha": "a" * 40,
         "runner_environment": "github-hosted",
     }
 
@@ -60,6 +62,7 @@ def test_oidc_policy_accepts_only_expected_workflow(monkeypatch) -> None:
             "workflow_ref",
             "sushxnthd/agnXiv/.github/workflows/other.yml@refs/heads/main",
         ),
+        ("workflow_sha", "b" * 40),
         ("runner_environment", "self-hosted"),
     ],
 )
