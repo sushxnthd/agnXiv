@@ -4,9 +4,12 @@ import json
 from datetime import datetime
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from agnxiv.service.app import create_app
+from agnxiv.service.config import ServiceConfig
 from agnxiv.service.db import JobStore
 
 
@@ -85,3 +88,52 @@ def test_evidence_archive_rejects_update_and_delete(tmp_path) -> None:
             connection.execute(text(sql), {"job": job.id})
 
     assert store.verify_evidence_archive(job.id) is True
+
+
+def test_evidence_commitment_is_public_but_capsule_requires_owner_key(tmp_path) -> None:
+    database_url = f"sqlite:///{tmp_path / 'api-archive.db'}"
+    store = JobStore(database_url)
+    store.initialize()
+    publication = {
+        "schema_version": "agnxiv.publication/1",
+        "registry": "crossref",
+        "doi": "10.1145/1234.5678",
+        "publisher": "Example Publisher",
+        "retrieved_at": "2026-10-19T00:00:00Z",
+        "registry_record_sha256": "c" * 64,
+    }
+    job = store.create_job(
+        job_id="00000000-0000-0000-0000-000000000779",
+        api_key_hash="owner-hash",
+        mode="auto_verify",
+        repository="owner/repo",
+        repository_ref="c" * 40,
+        arxiv_id="2601.00079",
+        doi="10.1145/1234.5678",
+        publication=publication,
+        spec_path=None,
+    )
+    store.complete(job.id, status="succeeded", result=_result(), error=None)
+
+    config = ServiceConfig(
+        database_url=database_url,
+        api_keys=("owner-key",),
+        public_base_url="https://agnxiv.example",
+        github_token="token",
+        github_repository="sushxnthd/agnXiv",
+        github_ref="main",
+        github_workflow="hosted-verify.yml",
+        max_active_jobs_per_key=3,
+        max_jobs_per_hour=20,
+        oidc_audience="https://agnxiv.example/github-actions",
+        issuer_private_key_b64=None,
+    )
+    app = create_app(config)
+    with TestClient(app) as client:
+        commitment = client.get(f"/v1/evidence/{job.id}/commitment")
+        denied = client.get(f"/v1/jobs/{job.id}/evidence")
+
+    assert commitment.status_code == 200
+    assert commitment.json()["publication"]["doi"] == "10.1145/1234.5678"
+    assert commitment.json()["source"]["repository_ref"] == "c" * 40
+    assert denied.status_code == 401
