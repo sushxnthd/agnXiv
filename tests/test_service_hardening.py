@@ -640,3 +640,60 @@ def test_production_readiness_requires_immutable_release_tag() -> None:
 
     unsafe = replace(base, github_ref="main")
     assert "trusted_workflow_ref_not_immutable_tag" in unsafe.production_issues
+
+
+def test_missing_api_keys_fail_closed_even_when_service_is_reachable(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    base = _productionish_config(
+        f"sqlite:///{tmp_path / 'no-auth.db'}",
+        issuer=None,
+    )
+    config = ServiceConfig(
+        **{
+            **base.__dict__,
+            "api_keys": (),
+            "allow_development_auth": False,
+        }
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        health = client.get("/healthz")
+        job = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "development"},
+            json={
+                "mode": "auto_verify",
+                "repository": "owner/repo",
+                "arxiv_id": "2601.00001",
+            },
+        )
+
+    assert health.status_code == 200
+    assert job.status_code == 503
+    assert "not configured" in job.json()["detail"]
+
+
+def test_development_auth_requires_explicit_opt_in_and_blocks_readiness(tmp_path) -> None:
+    base = _productionish_config(
+        f"sqlite:///{tmp_path / 'dev-auth.db'}",
+        issuer=None,
+    )
+    config = ServiceConfig(
+        **{
+            **base.__dict__,
+            "api_keys": (),
+            "allow_development_auth": True,
+        }
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        ready = client.get("/readyz")
+
+    assert ready.status_code == 503
+    issues = ready.json()["detail"]["issues"]
+    assert "api_keys_missing" in issues
+    assert "development_auth_enabled" in issues
