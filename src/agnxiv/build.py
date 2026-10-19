@@ -62,6 +62,45 @@ class BuildResult(BaseModel):
     stderr_sha256: str
 
 
+_MAX_DEPENDENCY_MANIFEST_BYTES = 2 * 1024 * 1024
+_MAX_REQUIREMENT_LINES = 10_000
+_MAX_REQUIREMENT_LINE_CHARS = 8192
+
+
+def _read_dependency_text(path: Path) -> str:
+    if path.is_symlink() or not path.is_file():
+        raise EnvironmentBuildError(
+            f"dependency metadata must be a regular non-symlink file: {path.name}"
+        )
+    try:
+        size = path.stat().st_size
+    except OSError as exc:
+        raise EnvironmentBuildError(
+            f"dependency metadata could not be inspected: {path.name}"
+        ) from exc
+    if size > _MAX_DEPENDENCY_MANIFEST_BYTES:
+        raise EnvironmentBuildError(
+            f"dependency metadata exceeds {_MAX_DEPENDENCY_MANIFEST_BYTES} byte limit: "
+            f"{path.name}"
+        )
+    try:
+        text = path.read_text(encoding="utf-8", errors="strict")
+    except (OSError, UnicodeError) as exc:
+        raise EnvironmentBuildError(
+            f"dependency metadata could not be read safely: {path.name}"
+        ) from exc
+    lines = text.splitlines()
+    if len(lines) > _MAX_REQUIREMENT_LINES:
+        raise EnvironmentBuildError(
+            f"dependency metadata exceeds {_MAX_REQUIREMENT_LINES} line limit: {path.name}"
+        )
+    if any(len(line) > _MAX_REQUIREMENT_LINE_CHARS for line in lines):
+        raise EnvironmentBuildError(
+            f"dependency metadata contains an oversized line: {path.name}"
+        )
+    return text
+
+
 _UNSAFE_REQUIREMENT_MARKERS = (
     "-e ",
     "--editable",
@@ -88,7 +127,7 @@ _EXACT_REQUIREMENT_RE = re.compile(
 def _active_requirement_lines(path: Path) -> list[str]:
     return [
         raw.strip()
-        for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        for raw in _read_dependency_text(path).splitlines()
         if raw.strip() and not raw.lstrip().startswith("#")
     ]
 
@@ -134,8 +173,8 @@ def _pyproject_runtime_requirements(
     path: Path,
 ) -> tuple[list[str] | None, list[str]]:
     try:
-        payload = tomllib.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
+        payload = tomllib.loads(_read_dependency_text(path))
+    except (EnvironmentBuildError, tomllib.TOMLDecodeError) as exc:
         return None, [f"pyproject.toml could not be parsed safely: {type(exc).__name__}"]
 
     project = payload.get("project")
@@ -149,7 +188,12 @@ def _pyproject_runtime_requirements(
                 isinstance(item, str) for item in dependencies
             ):
                 return None, ["PEP 621 dependencies must be a static string list"]
-            return [item.strip() for item in dependencies if item.strip()], []
+            values = [item.strip() for item in dependencies if item.strip()]
+            if len(values) > _MAX_REQUIREMENT_LINES:
+                return None, ["pyproject dependency list is too large"]
+            if any(len(item) > _MAX_REQUIREMENT_LINE_CHARS for item in values):
+                return None, ["pyproject dependency entry is too long"]
+            return values, []
 
     poetry = payload.get("tool", {}).get("poetry", {})
     if isinstance(poetry, dict) and "dependencies" in poetry:
@@ -181,11 +225,16 @@ def _setup_cfg_runtime_requirements(
 ) -> tuple[list[str] | None, list[str]]:
     parser = configparser.ConfigParser()
     try:
-        parser.read(path, encoding="utf-8")
-    except (OSError, configparser.Error) as exc:
+        parser.read_string(_read_dependency_text(path))
+    except (EnvironmentBuildError, configparser.Error) as exc:
         return None, [f"setup.cfg could not be parsed safely: {type(exc).__name__}"]
     raw = parser.get("options", "install_requires", fallback="")
-    return [line.strip() for line in raw.splitlines() if line.strip()], []
+    values = [line.strip() for line in raw.splitlines() if line.strip()]
+    if len(values) > _MAX_REQUIREMENT_LINES:
+        return None, ["setup.cfg dependency list is too large"]
+    if any(len(item) > _MAX_REQUIREMENT_LINE_CHARS for item in values):
+        return None, ["setup.cfg dependency entry is too long"]
+    return values, []
 
 
 def _generated_metadata_plan(
@@ -342,6 +391,24 @@ def plan_python_environment(
             ),
             network_required=False,
             safe_manifest_only=True,
+        )
+
+    try:
+        _read_dependency_text(requirements)
+    except EnvironmentBuildError as exc:
+        return BuildPlan(
+            base_image=base_image,
+            dependency_file="requirements.txt",
+            dependency_sha256=None,
+            dependency_precision="floating",
+            dockerfile=(
+                f"FROM {base_image}\n"
+                "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1\n"
+                "WORKDIR /workspace\n"
+            ),
+            network_required=False,
+            safe_manifest_only=False,
+            rejected_reasons=[str(exc)],
         )
 
     rejected = audit_requirements(requirements)
