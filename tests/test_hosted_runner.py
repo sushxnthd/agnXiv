@@ -1,4 +1,5 @@
 from pathlib import Path
+import urllib.error
 
 import pytest
 from pypdf import PdfWriter
@@ -7,6 +8,7 @@ from agnxiv.hosted_runner import (
     HostedRunnerError,
     _validate_hosted_image,
     checkout_repository,
+    download_arxiv_pdf,
     execute_job,
     extract_pdf_claims_isolated,
 )
@@ -145,3 +147,19 @@ def test_hosted_verify_spec_rejects_manifest_link(
             arxiv_id=None,
             spec_path="agnxiv.json",
         )
+
+
+def test_arxiv_download_rejects_redirects(tmp_path: Path, monkeypatch) -> None:
+    def redirect(*args, **kwargs):
+        raise urllib.error.HTTPError(
+            "https://arxiv.org/pdf/2601.00001v1",
+            302,
+            "redirect",
+            {"Location": "https://attacker.invalid/paper.pdf"},
+            None,
+        )
+
+    monkeypatch.setattr("agnxiv.hosted_runner._ARXIV_OPENER.open", redirect)
+
+    with pytest.raises(HostedRunnerError, match="could not download arXiv PDF"):
+        download_arxiv_pdf("2601.00001v1", tmp_path / "paper.pdf")
