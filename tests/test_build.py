@@ -228,3 +228,74 @@ def test_oversized_pyproject_is_not_parsed_or_executed(tmp_path: Path) -> None:
     plan = plan_python_environment(tmp_path)
     assert plan.safe_manifest_only is False
     assert any("EnvironmentBuildError" in reason for reason in plan.rejected_reasons)
+
+
+def test_readme_referenced_nested_pinned_conda_uses_metadata_only_builder(
+    tmp_path: Path,
+) -> None:
+    nested = tmp_path / "examples" / "NLU"
+    nested.mkdir(parents=True)
+    (tmp_path / "README.md").write_text(
+        "Use examples/NLU/ to reproduce the paper.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "setup.py").write_text(
+        "from setuptools import setup\nsetup(name='paper')\n",
+        encoding="utf-8",
+    )
+    (nested / "environment.yml").write_text(
+        "name: paper\n"
+        "channels:\n"
+        "  - pytorch\n"
+        "  - defaults\n"
+        "dependencies:\n"
+        "  - python=3.7.10=h12debd9_4\n"
+        "  - numpy=1.20.2=py37h2d18471_0\n"
+        "  - pip=21.1.3=py37h06a4308_0\n"
+        "  - pip:\n"
+        "    - datasets==1.9.0\n"
+        "prefix: /old/machine/path\n",
+        encoding="utf-8",
+    )
+
+    plan = plan_python_environment(tmp_path, base_image="python:3.7-slim")
+
+    assert plan.builder == "conda-micromamba-metadata"
+    assert plan.safe_manifest_only is True
+    assert plan.dependency_precision == "version-pinned"
+    assert plan.dependency_file == "examples/NLU/environment.yml"
+    assert "micromamba digest mismatch" in plan.dockerfile
+    assert "COPY agnxiv-generated-environment.yml" in plan.dockerfile
+    assert all(not line.startswith("prefix:") for line in plan.generated_requirements)
+
+
+def test_nested_conda_requires_explicit_readme_reference(tmp_path: Path) -> None:
+    nested = tmp_path / "examples" / "NLU"
+    nested.mkdir(parents=True)
+    (tmp_path / "README.md").write_text("No environment path here.\n", encoding="utf-8")
+    (nested / "environment.yml").write_text(
+        "channels:\n  - defaults\ndependencies:\n  - python=3.10.14\n",
+        encoding="utf-8",
+    )
+
+    plan = plan_python_environment(tmp_path)
+
+    assert plan.builder != "conda-micromamba-metadata"
+
+
+def test_conda_builder_rejects_floating_or_untrusted_metadata(tmp_path: Path) -> None:
+    (tmp_path / "environment.yml").write_text(
+        "channels:\n"
+        "  - attacker.example\n"
+        "dependencies:\n"
+        "  - python=3.11\n"
+        "  - numpy>=1.20\n",
+        encoding="utf-8",
+    )
+
+    plan = plan_python_environment(tmp_path)
+
+    assert plan.builder == "conda-micromamba-metadata"
+    assert plan.safe_manifest_only is False
+    assert any("untrusted Conda channel" in x for x in plan.rejected_reasons)
+    assert any("not exactly pinned" in x for x in plan.rejected_reasons)
