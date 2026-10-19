@@ -13,11 +13,37 @@ class CallbackError(RuntimeError):
     """A hosted result callback could not be delivered."""
 
 
+def _validated_https_url(
+    value: str,
+    *,
+    required_host_suffix: str | None = None,
+) -> str:
+    parsed = urllib.parse.urlparse(value)
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.fragment
+    ):
+        raise CallbackError("URL must be credential-free HTTPS")
+    if required_host_suffix is not None:
+        host = parsed.hostname.lower().rstrip(".")
+        suffix = required_host_suffix.lower().lstrip(".")
+        if host != suffix and not host.endswith("." + suffix):
+            raise CallbackError("URL host is outside the trusted GitHub Actions origin")
+    return value
+
+
 def request_github_oidc_token(audience: str) -> str:
     request_url = os.getenv("ACTIONS_ID_TOKEN_REQUEST_URL")
     request_token = os.getenv("ACTIONS_ID_TOKEN_REQUEST_TOKEN")
     if not request_url or not request_token:
         raise CallbackError("GitHub Actions OIDC environment is unavailable")
+    request_url = _validated_https_url(
+        request_url,
+        required_host_suffix="actions.githubusercontent.com",
+    )
 
     separator = "&" if "?" in request_url else "?"
     url = request_url + separator + urllib.parse.urlencode({"audience": audience})
@@ -30,7 +56,10 @@ def request_github_oidc_token(audience: str) -> str:
     )
 
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with urllib.request.urlopen(  # nosec B310 - validated HTTPS GitHub Actions URL
+            request,
+            timeout=20,
+        ) as response:
             payload = json.load(response)
     except urllib.error.URLError as exc:
         raise CallbackError(f"could not obtain GitHub OIDC token: {exc}") from exc
@@ -47,8 +76,7 @@ def send_result(
     callback_url: str,
     oidc_token: str,
 ) -> None:
-    if not callback_url.startswith("https://"):
-        raise CallbackError("callback URL must use HTTPS")
+    callback_url = _validated_https_url(callback_url)
 
     payload = Path(result_path).read_bytes()
     request = urllib.request.Request(
@@ -63,7 +91,10 @@ def send_result(
     )
 
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(  # nosec B310 - validated HTTPS callback URL
+            request,
+            timeout=30,
+        ) as response:
             if response.status not in {200, 201, 204}:
                 raise CallbackError(
                     f"callback returned HTTP {response.status}"
