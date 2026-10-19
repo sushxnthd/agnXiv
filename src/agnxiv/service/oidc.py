@@ -16,6 +16,7 @@ class GitHubOIDCPolicy:
     repository: str
     ref: str
     workflow: str
+    workflow_sha: str | None = None
 
 
 _JWKS_URL = "https://token.actions.githubusercontent.com/.well-known/jwks"
@@ -44,7 +45,18 @@ def verify_github_actions_token(
             algorithms=["RS256"],
             audience=policy.audience,
             issuer=_ISSUER,
-            options={"require": ["exp", "iat", "nbf", "jti", "repository", "ref"]},
+            options={
+                "require": [
+                    "exp",
+                    "iat",
+                    "nbf",
+                    "jti",
+                    "repository",
+                    "ref",
+                    "workflow_ref",
+                    "workflow_sha",
+                ]
+            },
         )
     except Exception as exc:
         raise OIDCVerificationError(f"invalid GitHub OIDC token: {exc}") from exc
@@ -61,6 +73,10 @@ def verify_github_actions_token(
         "ref": claims.get("ref") == expected_ref,
         "event_name": claims.get("event_name") == "workflow_dispatch",
         "workflow_ref": claims.get("workflow_ref") == expected_workflow_ref,
+        "workflow_sha": (
+            policy.workflow_sha is None
+            or claims.get("workflow_sha") == policy.workflow_sha
+        ),
         "runner_environment": claims.get("runner_environment") == "github-hosted",
     }
     failed = [name for name, ok in checks.items() if not ok]
