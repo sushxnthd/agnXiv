@@ -71,6 +71,70 @@ _LABEL_RE = re.compile(
 )
 
 
+_HYPHENS = "-‐‑‒–—"
+_DIMENSION_RE = re.compile(
+    r"(?<!\\d)\\d{2,5}\\s*(?:x|×|\\^|ˆ)\\s*\\d{2,5}(?!\\d)",
+    flags=re.IGNORECASE,
+)
+
+
+def _inside_numeric_citation(normalized: str, match: re.Match[str]) -> bool:
+    """Reject citation labels such as [23] and [26, 54] as observations."""
+    start = match.start("value")
+    end = match.end("value")
+    left = normalized.rfind("[", max(0, start - 24), start + 1)
+    if left < 0:
+        return False
+    if normalized.rfind("]", left, start) > left:
+        return False
+    right = normalized.find("]", end, min(len(normalized), end + 24))
+    if right < 0:
+        return False
+    contents = normalized[left + 1 : right]
+    return bool(
+        re.fullmatch(
+            r"\\s*\\d+(?:\\s*[-,]\\s*\\d+)*\\s*",
+            contents,
+        )
+    )
+
+
+def _looks_like_hyphenated_identifier(
+    normalized: str,
+    match: re.Match[str],
+) -> bool:
+    """Reject model/configuration identifiers such as GPT-3 and ResNet-50."""
+    start = match.start("value")
+    if start < 2 or normalized[start - 1] not in _HYPHENS:
+        return False
+
+    prefix = normalized[max(0, start - 32) : start - 1]
+    token_match = re.search(r"([A-Za-z][A-Za-z0-9_. ]{0,24})$", prefix)
+    if token_match is None:
+        return False
+    token = token_match.group(1).strip()
+    return any(character.isupper() for character in token)
+
+
+def _looks_like_image_dimension(
+    normalized: str,
+    match: re.Match[str],
+) -> bool:
+    """Reject PDF-rendered image dimensions such as 512×512 or 512ˆ512."""
+    start = match.start("value")
+    end = match.end("value")
+    window_start = max(0, start - 16)
+    window_end = min(len(normalized), end + 16)
+    window = normalized[window_start:window_end]
+
+    for dimension in _DIMENSION_RE.finditer(window):
+        absolute_start = window_start + dimension.start()
+        absolute_end = window_start + dimension.end()
+        if absolute_start <= start < absolute_end:
+            return True
+    return False
+
+
 def _clean_number(raw: str) -> float:
     return float(raw.replace(",", ""))
 
@@ -163,17 +227,14 @@ def _looks_like_label_or_citation(
     normalized: str,
     match: re.Match[str],
 ) -> bool:
-    start = match.start("value")
-    end = match.end("value")
-
-    if (
-        start > 0
-        and end < len(normalized)
-        and normalized[start - 1] == "["
-        and normalized[end] == "]"
-    ):
+    if _inside_numeric_citation(normalized, match):
+        return True
+    if _looks_like_hyphenated_identifier(normalized, match):
+        return True
+    if _looks_like_image_dimension(normalized, match):
         return True
 
+    start = match.start("value")
     prefix = normalized[max(0, start - 40) : start]
     return bool(_LABEL_RE.search(prefix))
 
