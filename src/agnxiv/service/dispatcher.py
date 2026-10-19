@@ -90,7 +90,7 @@ class GitHubActionsDispatcher:
             },
         )
         try:
-            with _NO_REDIRECT_OPENER.open(
+            with _NO_REDIRECT_OPENER.open(  # nosec B310 - HTTPS origin validated above
                 request,
                 timeout=20,
             ) as response:
@@ -144,7 +144,7 @@ class GitHubActionsDispatcher:
             },
         )
         try:
-            with _NO_REDIRECT_OPENER.open(
+            with _NO_REDIRECT_OPENER.open(  # nosec B310 - HTTPS origin validated above
                 http_request,
                 timeout=20,
             ) as response:
