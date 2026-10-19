@@ -16,7 +16,7 @@ from agnxiv.service.db import (
     JobStore,
     TransparencyEntry,
 )
-from agnxiv.service.dispatcher import GitHubActionsDispatcher
+from agnxiv.service.dispatcher import GitHubActionsDispatcher, workflow_dispatch_ref
 from agnxiv.statement import generate_ed25519_keypair
 
 
@@ -27,7 +27,7 @@ def _productionish_config(database_url: str, *, issuer: str | None = None) -> Se
         public_base_url="https://agnxiv.example",
         github_token="github-token",
         github_repository="sushxnthd/agnXiv",
-        github_ref="main",
+        github_ref="refs/tags/agnxiv-test-release",
         github_workflow="hosted-verify.yml",
         max_active_jobs_per_key=3,
         max_jobs_per_hour=20,
@@ -623,3 +623,20 @@ def test_streamed_request_body_limit_cannot_be_bypassed_without_content_length(
 
     assert response.status_code == 413
     assert response.json()["detail"] == "request body too large"
+
+
+def test_workflow_dispatch_ref_preserves_branch_or_tag_identity() -> None:
+    assert workflow_dispatch_ref("refs/tags/agnxiv-v1") == "agnxiv-v1"
+    assert workflow_dispatch_ref("refs/heads/release") == "release"
+    assert workflow_dispatch_ref("legacy-branch") == "legacy-branch"
+
+
+def test_production_readiness_requires_immutable_release_tag() -> None:
+    base = _productionish_config(
+        "postgresql://user:pass@example/db",
+        issuer="configured",
+    )
+    assert "trusted_workflow_ref_not_immutable_tag" not in base.production_issues
+
+    unsafe = replace(base, github_ref="main")
+    assert "trusted_workflow_ref_not_immutable_tag" in unsafe.production_issues
