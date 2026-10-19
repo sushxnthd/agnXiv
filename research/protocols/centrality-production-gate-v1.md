@@ -132,3 +132,30 @@ The centrality rank is never consulted while constructing gold. Release
 thresholds remain unchanged: at least 75 eligible papers, Recall@3 >= 0.90,
 Recall@5 >= 0.95; Recall@1 is diagnostic only. This partition has not been
 evaluated before this protocol entry.
+
+
+## Frozen disjoint OpenReview extension after undersized pilot
+
+The predeclared OpenReview bucket 0 was evaluated once and produced only 20
+eligible cases. Its ranking quality cleared the accuracy thresholds
+(Recall@3 = 1.00, Recall@5 = 1.00), but it failed the unchanged minimum sample
+size of 75. Bucket 0 is therefore retained as pilot evidence and is excluded
+from the production certification set.
+
+Before evaluating any additional OpenReview rows, the production extension is
+frozen to the previously untouched buckets 1, 2, 3, and 4 under the same hash
+seed and modulus:
+
+- repository: `astenuz/iclr2024-openreview`
+- commit: `740c3112f479019d9902780fd627b0b7c19eac7c`
+- file: `data/iclr2024_papers.csv`
+- hash seed: `agnxiv-openreview-centrality-v1`
+- partition: hash modulus 5, buckets `{1,2,3,4}`; bucket 0 is excluded
+- gold construction: unchanged from the frozen ICLR protocol above
+- production ranking function: unchanged
+- thresholds: unchanged at n >= 75, Recall@3 >= 0.90, Recall@5 >= 0.95,
+  with Recall@1 diagnostic only
+
+This extension increases sample size only by consuming disjoint, previously
+unevaluated rows. It does not lower a threshold, alter the ranking function,
+or reuse the failed bucket as held-out evidence.

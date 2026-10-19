@@ -262,7 +262,10 @@ jobs:
             --input external/iclr2024-openreview/data/iclr2024_papers.csv \
             --hash-seed agnxiv-openreview-centrality-v1 \
             --hash-modulus 5 \
-            --hash-bucket 0 \
+            --hash-bucket 1 \
+            --hash-bucket 2 \
+            --hash-bucket 3 \
+            --hash-bucket 4 \
             --minimum-cases 75 \
             --minimum-areas 4 \
             --min-recall-at-3 0.90 \

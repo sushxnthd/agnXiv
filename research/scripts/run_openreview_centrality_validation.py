@@ -169,7 +169,7 @@ def main() -> None:
     parser.add_argument("--input", required=True)
     parser.add_argument("--hash-seed", required=True)
     parser.add_argument("--hash-modulus", type=int, required=True)
-    parser.add_argument("--hash-bucket", type=int, required=True)
+    parser.add_argument("--hash-bucket", action="append", type=int, required=True)
     parser.add_argument("--minimum-cases", type=int, default=75)
     parser.add_argument("--minimum-areas", type=int, default=4)
     parser.add_argument("--min-recall-at-3", type=float, default=0.90)
@@ -179,18 +179,22 @@ def main() -> None:
 
     if args.hash_modulus < 1:
         raise ValueError("hash-modulus must be >= 1")
-    if not 0 <= args.hash_bucket < args.hash_modulus:
-        raise ValueError("hash-bucket must be in [0, hash-modulus)")
+    hash_buckets = sorted(set(args.hash_bucket))
+    if any(not 0 <= bucket < args.hash_modulus for bucket in hash_buckets):
+        raise ValueError("each hash-bucket must be in [0, hash-modulus)")
 
     rows: list[dict[str, str]] = []
     with Path(args.input).open(encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
             paper_id = _row_value(row, "id", "paper_id")
-            if paper_id and _selected(
-                paper_id,
-                seed=args.hash_seed,
-                modulus=args.hash_modulus,
-                bucket=args.hash_bucket,
+            if paper_id and any(
+                _selected(
+                    paper_id,
+                    seed=args.hash_seed,
+                    modulus=args.hash_modulus,
+                    bucket=bucket,
+                )
+                for bucket in hash_buckets
             ):
                 rows.append(row)
 
@@ -242,7 +246,7 @@ def main() -> None:
             "gold_signal": "author title + author TLDR",
             "hash_seed": args.hash_seed,
             "hash_modulus": args.hash_modulus,
-            "hash_bucket": args.hash_bucket,
+            "hash_buckets": hash_buckets,
         },
         "eligibility": (
             "Non-empty author TLDR and at least two quantitative abstract claims. "
