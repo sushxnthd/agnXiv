@@ -173,7 +173,7 @@ def test_multi_claim_payload_preserves_all_verification_attempts() -> None:
     assert attempts[0].independence_key == attempts[1].independence_key
 
 
-def test_version_pinned_explicit_execution_is_strong_evidence() -> None:
+def test_version_pinned_explicit_execution_remains_conditional() -> None:
     payload = {
         "request": {
             "repository": "owner/repo",
@@ -184,6 +184,7 @@ def test_version_pinned_explicit_execution_is_strong_evidence() -> None:
         "result": {
             "kind": "verification",
             "build": {"plan": {"dependency_precision": "version-pinned"}},
+            "environment": {"historical_fidelity": "constrained"},
             "bundle": _verification_bundle(
                 claim_id="C1",
                 verdict="VERIFIED",
@@ -196,9 +197,63 @@ def test_version_pinned_explicit_execution_is_strong_evidence() -> None:
 
     attempt = attempt_from_github_payload(payload, attempt_id="AX-1")
 
-    assert attempt.evidence_grade == EvidenceGrade.STRONG
+    assert attempt.evidence_grade == EvidenceGrade.CONDITIONAL
     assert attempt.observation_method == "explicit_regex"
     assert attempt.dependency_precision == "version-pinned"
+
+
+def test_hash_pinned_historically_constrained_execution_is_strong() -> None:
+    payload = {
+        "request": {
+            "repository": "owner/repo",
+            "repository_ref": "deadbeef",
+            "arxiv_id": "2601.00001",
+        },
+        "status": "succeeded",
+        "result": {
+            "kind": "verification",
+            "build": {"plan": {"dependency_precision": "hash-pinned"}},
+            "environment": {"historical_fidelity": "constrained"},
+            "bundle": _verification_bundle(
+                claim_id="C1",
+                verdict="VERIFIED",
+                expected=0.9,
+                observed=0.9,
+            ),
+        },
+        "error": None,
+    }
+
+    attempt = attempt_from_github_payload(payload, attempt_id="AX-2")
+
+    assert attempt.evidence_grade == EvidenceGrade.STRONG
+    assert attempt.dependency_precision == "hash-pinned"
+
+
+def test_hash_pinned_without_historical_fidelity_is_conditional() -> None:
+    payload = {
+        "request": {
+            "repository": "owner/repo",
+            "repository_ref": "deadbeef",
+            "arxiv_id": "2601.00001",
+        },
+        "status": "succeeded",
+        "result": {
+            "kind": "verification",
+            "build": {"plan": {"dependency_precision": "hash-pinned"}},
+            "bundle": _verification_bundle(
+                claim_id="C1",
+                verdict="VERIFIED",
+                expected=0.9,
+                observed=0.9,
+            ),
+        },
+        "error": None,
+    }
+
+    attempt = attempt_from_github_payload(payload, attempt_id="AX-3")
+
+    assert attempt.evidence_grade == EvidenceGrade.CONDITIONAL
 
 
 def test_floating_dependency_divergence_remains_conditional_at_record_level() -> None:
