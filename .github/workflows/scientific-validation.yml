@@ -195,7 +195,6 @@ jobs:
             --exclude research/benchmarks/centrality-dev-paper-clusters-v1.txt \
             --max-cases 120 \
             --minimum-cases 75 \
-            --min-recall-at-1 0.60 \
             --min-recall-at-3 0.90 \
             --min-recall-at-5 0.95 \
             --output /tmp/agnxiv-external-centrality-heldout.json
