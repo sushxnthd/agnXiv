@@ -281,6 +281,86 @@ class JobStore:
             "jobs_active": statuses.get("queued", 0) + statuses.get("running", 0),
         }
 
+    def slo_snapshot(
+        self,
+        *,
+        window_days: int = 30,
+        target_success_fraction: float = 0.995,
+    ) -> dict[str, object]:
+        """Return a conservative hosted-control-plane error-budget snapshot."""
+        days = max(1, window_days)
+        cutoff = datetime.now(UTC) - timedelta(days=days)
+        terminal_statuses = ("succeeded", "needs_review", "failed")
+        with self.session_factory() as session:
+            finalized = int(
+                session.scalar(
+                    select(func.count())
+                    .select_from(Job)
+                    .where(
+                        Job.status.in_(terminal_statuses),
+                        Job.updated_at >= cutoff,
+                    )
+                )
+                or 0
+            )
+            failed = int(
+                session.scalar(
+                    select(func.count())
+                    .select_from(Job)
+                    .where(
+                        Job.status == "failed",
+                        Job.updated_at >= cutoff,
+                    )
+                )
+                or 0
+            )
+            stale_callbacks = int(
+                session.scalar(
+                    select(func.count())
+                    .select_from(Job)
+                    .where(
+                        Job.status == "failed",
+                        Job.updated_at >= cutoff,
+                        Job.error
+                        == "hosted verification exceeded its callback deadline",
+                    )
+                )
+                or 0
+            )
+
+        allowed_error_fraction = 1.0 - target_success_fraction
+        if finalized:
+            observed_error_fraction = failed / finalized
+            success_fraction = 1.0 - observed_error_fraction
+            budget_consumed = (
+                observed_error_fraction / allowed_error_fraction
+                if allowed_error_fraction > 0
+                else None
+            )
+            within_budget = (
+                success_fraction >= target_success_fraction
+                if allowed_error_fraction >= 0
+                else None
+            )
+        else:
+            observed_error_fraction = None
+            success_fraction = None
+            budget_consumed = None
+            within_budget = None
+
+        return {
+            "window_days": days,
+            "target_success_fraction": target_success_fraction,
+            "allowed_error_fraction": allowed_error_fraction,
+            "finalized_jobs": finalized,
+            "failed_jobs": failed,
+            "stale_callback_failures": stale_callbacks,
+            "observed_error_fraction": observed_error_fraction,
+            "success_fraction": success_fraction,
+            "error_budget_fraction_consumed": budget_consumed,
+            "within_error_budget": within_budget,
+        }
+
     def count_active(self, api_key_hash: str) -> int:
         with self.session_factory() as session:
             statement = select(func.count()).select_from(Job).where(
