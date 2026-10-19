@@ -259,11 +259,15 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         store.initialize()
         yield
 
+    production_mode = active_config.production_ready
     app = FastAPI(
         title="AgnXiv",
         version="1.0.0-beta",
         description="Executable verification for computational research claims.",
         lifespan=lifespan,
+        docs_url=None if production_mode else "/docs",
+        redoc_url=None if production_mode else "/redoc",
+        openapi_url=None if production_mode else "/openapi.json",
     )
     public_host = urlparse(active_config.public_base_url).hostname
     allowed_hosts = [
@@ -384,14 +388,23 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "max-age=31536000; includeSubDomains"
         )
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "base-uri 'none'; "
-            "frame-ancestors 'none'; "
-            "form-action 'none'; "
-            "img-src 'self' data:; "
-            "style-src 'self' 'unsafe-inline'; "
-            "script-src 'self' 'unsafe-inline'; "
-            "connect-src 'self'"
+            (
+                "default-src 'none'; "
+                "base-uri 'none'; "
+                "frame-ancestors 'none'; "
+                "form-action 'none'"
+            )
+            if production_mode
+            else (
+                "default-src 'self'; "
+                "base-uri 'none'; "
+                "frame-ancestors 'none'; "
+                "form-action 'none'; "
+                "img-src 'self' data:; "
+                "style-src 'self' 'unsafe-inline'; "
+                "script-src 'self' 'unsafe-inline'; "
+                "connect-src 'self'"
+            )
         )
         if request.url.path == "/" or request.url.path.startswith(("/v1/", "/internal/")):
             response.headers["Cache-Control"] = "no-store"
@@ -770,6 +783,20 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
 
     @app.get("/", response_class=HTMLResponse)
     def console() -> str:
+        if production_mode:
+            return """<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgnXiv Control Plane</title>
+</head>
+<body>
+<h1>AgnXiv control plane</h1>
+<p>This endpoint serves the hosted verification API.</p>
+<p>The public product is available at https://sushxnthd.github.io/agnXiv/</p>
+</body>
+</html>"""
         return """<!doctype html>
 <html>
 <head>
@@ -822,6 +849,7 @@ document.getElementById("go").onclick=async()=>{
 </script>
 </body>
 </html>"""
+
 
     return app
 
