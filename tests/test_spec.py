@@ -240,3 +240,56 @@ def test_runtime_rejects_command_and_commands_together() -> None:
                 }
             }
         )
+
+
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        r"(?P<value>(a+)+)$",
+        r"(?P<value>(a|aa)+)$",
+        r"(?=(?P<value>\d+))",
+    ],
+)
+def test_manifest_rejects_unsafe_regex_locator(pattern: str) -> None:
+    with pytest.raises(ValueError, match="unsafe or unsupported"):
+        VerificationSpec.model_validate(
+            {
+                "schema_version": "agnxiv.spec/1",
+                "claim": {"id": "C1", "text": "Result", "reported_value": 1.0},
+                "policy": {
+                    "kind": "absolute",
+                    "operator": "approx",
+                    "tolerance": 0.01,
+                },
+                "runtime": {
+                    "image": "local:test",
+                    "command": ["python", "run.py"],
+                },
+                "observation": {"kind": "regex", "value": pattern},
+            }
+        )
+
+
+@pytest.mark.parametrize("scale", [float("inf"), float("-inf"), float("nan"), 1e12])
+def test_manifest_rejects_unbounded_observation_scale(scale: float) -> None:
+    with pytest.raises(ValueError, match="scale"):
+        VerificationSpec.model_validate(
+            {
+                "schema_version": "agnxiv.spec/1",
+                "claim": {"id": "C1", "text": "Result", "reported_value": 1.0},
+                "policy": {
+                    "kind": "absolute",
+                    "operator": "approx",
+                    "tolerance": 0.01,
+                },
+                "runtime": {
+                    "image": "local:test",
+                    "command": ["python", "run.py"],
+                },
+                "observation": {
+                    "kind": "json_path",
+                    "value": "result",
+                    "scale": scale,
+                },
+            }
+        )
