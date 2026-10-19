@@ -71,3 +71,18 @@ def test_example_production_config_requires_immutable_workflow_commit() -> None:
     text = _read(".env.example")
     assert "AGNXIV_GITHUB_WORKFLOW_SHA=" in text
     assert "AGNXIV_MAX_REQUEST_BYTES=" in text
+
+
+def test_transparency_anchor_is_external_sigstore_witness() -> None:
+    text = _read(".github/workflows/transparency-anchor.yml")
+    assert "schedule:" in text
+    assert "AGNXIV_PRODUCTION_URL" in text
+    assert "v1/transparency/head" in text
+    assert "attestations: write" in text
+    assert "id-token: write" in text
+    assert (
+        "actions/attest-build-provenance@"
+        "4d101475d8b20a2381f78447822ac1eab6504dd8"
+    ) in text
+    assert "gh attestation verify" in text
+    assert "--proto '=https'" in text
