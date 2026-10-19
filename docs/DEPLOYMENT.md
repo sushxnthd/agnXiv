@@ -61,6 +61,19 @@ readiness failure and must never be used on an Internet-facing deployment.
 
  The service rejects callbacks whose GitHub OIDC `workflow_sha` does not exactly match this value. `AGNXIV_GITHUB_REF` must be the matching `refs/tags/...` release ref; the dispatcher converts it to GitHub's tag-name form while callback authentication requires the full OIDC tag ref.
 
+## 3a. Run the fail-closed production preflight
+
+Before migrations or traffic, run:
+
+```bash
+PYTHONPATH=/app/src python -m agnxiv.service.preflight
+```
+
+The command exits non-zero if production configuration is incomplete, the
+configured immutable release ref no longer resolves to
+`AGNXIV_GITHUB_WORKFLOW_SHA`, or GitHub reports the repository default branch
+as unprotected. This is a release gate, not a healthcheck substitute.
+
 ## 4. Apply schema migrations before traffic
 
 Run:
