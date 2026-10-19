@@ -1,0 +1,116 @@
+name: transparency-anchor
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  anchor:
+    if: ${{ vars.AGNXIV_PRODUCTION_URL != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Fetch public transparency head over strict HTTPS
+        env:
+          PRODUCTION_URL: ${{ vars.AGNXIV_PRODUCTION_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          from urllib.parse import urlparse
+
+          value = os.environ["PRODUCTION_URL"].rstrip("/")
+          parsed = urlparse(value)
+          if (
+              parsed.scheme != "https"
+              or not parsed.hostname
+              or parsed.username
+              or parsed.password
+              or parsed.query
+              or parsed.fragment
+          ):
+              raise SystemExit("AGNXIV_PRODUCTION_URL must be a clean HTTPS origin")
+          with open("/tmp/production-url.txt", "w", encoding="utf-8") as handle:
+              handle.write(value)
+          PY
+          BASE_URL="$(cat /tmp/production-url.txt)"
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --proto '=https' \
+            --tlsv1.2 \
+            --max-time 20 \
+            "$BASE_URL/v1/transparency/head" \
+            --output /tmp/transparency-head.json
+
+      - name: Validate and wrap transparency checkpoint
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import datetime
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          head = json.loads(
+              Path("/tmp/transparency-head.json").read_text(encoding="utf-8")
+          )
+          if head.get("schema_version") != "agnxiv.transparency-head/1":
+              raise SystemExit("unexpected transparency-head schema")
+          sequence = head.get("sequence")
+          digest = head.get("entry_hash")
+          if not isinstance(sequence, int) or sequence < 0:
+              raise SystemExit("invalid transparency sequence")
+          if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+              raise SystemExit("invalid transparency head hash")
+
+          base = Path("/tmp/production-url.txt").read_text(encoding="utf-8")
+          anchor = {
+              "schema_version": "agnxiv.transparency-anchor/1",
+              "source": base + "/v1/transparency/head",
+              "observed_at": datetime.datetime.now(
+                  datetime.UTC
+              ).isoformat().replace("+00:00", "Z"),
+              "anchor_workflow_commit": os.environ["RELEASE_SHA"],
+              "head": head,
+          }
+          Path("agnxiv-transparency-anchor.json").write_text(
+              json.dumps(anchor, sort_keys=True, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(anchor, indent=2))
+          PY
+
+      - name: Attest checkpoint outside the AgnXiv database
+        id: attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: agnxiv-transparency-anchor.json
+
+      - name: Verify witness attestation immediately
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh attestation verify agnxiv-transparency-anchor.json \
+            --repo "$GITHUB_REPOSITORY"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: transparency-anchor-${{ github.run_id }}
+          path: |
+            agnxiv-transparency-anchor.json
+            ${{ steps.attest.outputs.bundle-path }}
+          retention-days: 90
+          if-no-files-found: error
