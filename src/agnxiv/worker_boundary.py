@@ -3,8 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
-from typing import Mapping
 
 
 class WorkerBoundaryError(RuntimeError):
