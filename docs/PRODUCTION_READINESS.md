@@ -57,7 +57,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Verification statements can be signed with DSSE/Ed25519.
 - [x] Living Attempt → Record → Challenge model exists.
 - [x] Independence-aware claim aggregation exists with regression coverage.
-- [ ] Append-only transparency log independent of GitHub issue availability.
+- [x] Append-only database-backed transparency log independent of GitHub issue availability, with deterministic result commitments, hash chaining, public read endpoints, and database mutation guards.
 - [ ] Long-term artifact retention policy.
 - [ ] DOI/publisher registry integration.
 
