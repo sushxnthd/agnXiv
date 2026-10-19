@@ -4,7 +4,6 @@ import argparse
 import json
 import math
 from pathlib import Path
-from typing import Literal
 
 from agnxiv.auto import score_claim_centrality
 from agnxiv.claims import extract_quantitative_claims
