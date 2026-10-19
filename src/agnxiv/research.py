@@ -40,6 +40,8 @@ class SelectiveMetrics(BaseModel):
     coverage: float
     support_predictions: int
     divergence_predictions: int
+    false_pass_eligible: int
+    false_divergence_eligible: int
     false_passes: int
     false_divergences: int
     false_pass_rate: float
@@ -111,27 +113,37 @@ def score_selective_verification(outcomes: list[SelectiveOutcome]) -> SelectiveM
     support_predictions = sum(row.predicted == "SUPPORTS" for row in decided_rows)
     divergence_predictions = sum(row.predicted == "DIVERGES" for row in decided_rows)
 
+    # A false pass is a positive verifier decision on a case whose gold label
+    # does not support the claim. The statistical denominator must therefore
+    # be the number of gold-negative opportunities, not the number of positive
+    # predictions. Otherwise a conservative verifier that correctly abstains
+    # or diverges on every negative case would have zero statistical evidence.
+    false_pass_eligible = sum(not row.gold_supports_claim for row in outcomes)
+    false_divergence_eligible = sum(row.gold_supports_claim for row in outcomes)
+
     return SelectiveMetrics(
         cases=cases,
         decided=decided,
         coverage=(decided / cases) if cases else 0.0,
         support_predictions=support_predictions,
         divergence_predictions=divergence_predictions,
+        false_pass_eligible=false_pass_eligible,
+        false_divergence_eligible=false_divergence_eligible,
         false_passes=false_passes,
         false_divergences=false_divergences,
-        false_pass_rate=(false_passes / support_predictions)
-        if support_predictions
+        false_pass_rate=(false_passes / false_pass_eligible)
+        if false_pass_eligible
         else 0.0,
-        false_divergence_rate=(false_divergences / divergence_predictions)
-        if divergence_predictions
+        false_divergence_rate=(false_divergences / false_divergence_eligible)
+        if false_divergence_eligible
         else 0.0,
         false_pass_upper_95=binomial_upper_bound_95(
             false_passes,
-            support_predictions,
+            false_pass_eligible,
         ),
         false_divergence_upper_95=binomial_upper_bound_95(
             false_divergences,
-            divergence_predictions,
+            false_divergence_eligible,
         ),
         selective_error_rate=(errors / decided) if decided else 0.0,
     )
