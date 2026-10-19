@@ -32,6 +32,20 @@ class HostedRunnerError(RuntimeError):
     """A hosted verification runner failed safely."""
 
 
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(
+            req.full_url,
+            code,
+            "redirects are not allowed for arXiv paper downloads",
+            headers,
+            fp,
+        )
+
+
+_ARXIV_OPENER = urllib.request.build_opener(_NoRedirectHandler())
+
+
 def _run(command: list[str], *, timeout: int = 300) -> subprocess.CompletedProcess[str]:
     try:
         completed = subprocess.run(
@@ -136,7 +150,7 @@ def download_arxiv_pdf(arxiv_id: str, destination: Path) -> None:
     )
 
     try:
-        with urllib.request.urlopen(  # nosec B310 - fixed HTTPS arXiv origin
+        with _ARXIV_OPENER.open(  # nosec B310 - fixed HTTPS arXiv origin, no redirects
             request,
             timeout=45,
         ) as response:
