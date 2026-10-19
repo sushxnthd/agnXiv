@@ -57,7 +57,7 @@ class GitHubActionsDispatcher:
             headers={
                 "Accept": "application/vnd.github+json",
                 "Authorization": f"Bearer {self.token}",
-                "X-GitHub-Api-Version": "2022-11-28",
+                "X-GitHub-Api-Version": "2026-03-10",
                 "User-Agent": "AgnXiv-Service",
             },
         )
@@ -80,7 +80,7 @@ class GitHubActionsDispatcher:
             raise DispatchError("GitHub did not return a full commit SHA")
         return sha
 
-    def dispatch(self, request: DispatchRequest) -> None:
+    def dispatch(self, request: DispatchRequest) -> int:
         url = (
             "https://api.github.com/repos/"
             f"{self.repository}/actions/workflows/{self.workflow}/dispatches"
@@ -88,6 +88,7 @@ class GitHubActionsDispatcher:
         payload = json.dumps(
             {
                 "ref": workflow_dispatch_ref(self.ref),
+                "return_run_details": True,
                 "inputs": {
                     "job_id": request.job_id,
                     "mode": request.mode,
@@ -105,7 +106,7 @@ class GitHubActionsDispatcher:
             headers={
                 "Accept": "application/vnd.github+json",
                 "Authorization": f"Bearer {self.token}",
-                "X-GitHub-Api-Version": "2022-11-28",
+                "X-GitHub-Api-Version": "2026-03-10",
                 "Content-Type": "application/json",
                 "User-Agent": "AgnXiv-Service",
             },
@@ -115,10 +116,15 @@ class GitHubActionsDispatcher:
                 http_request,
                 timeout=20,
             ) as response:
-                if response.status not in {204, 201, 200}:
+                if response.status != 200:
                     raise DispatchError(
-                        f"GitHub workflow dispatch returned HTTP {response.status}"
+                        "GitHub workflow dispatch did not return run details "
+                        f"(HTTP {response.status})"
                     )
+                raw = response.read(64 * 1024 + 1)
+                if len(raw) > 64 * 1024:
+                    raise DispatchError("GitHub workflow dispatch response is too large")
+                details = json.loads(raw)
         except urllib.error.HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")[-2000:]
             raise DispatchError(
@@ -126,3 +132,10 @@ class GitHubActionsDispatcher:
             ) from exc
         except urllib.error.URLError as exc:
             raise DispatchError(f"GitHub workflow dispatch failed: {exc}") from exc
+        except json.JSONDecodeError as exc:
+            raise DispatchError("GitHub workflow dispatch returned invalid JSON") from exc
+
+        run_id = details.get("workflow_run_id") if isinstance(details, dict) else None
+        if not isinstance(run_id, int) or run_id <= 0:
+            raise DispatchError("GitHub workflow dispatch did not return a valid run ID")
+        return run_id
