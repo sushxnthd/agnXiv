@@ -27,6 +27,10 @@ class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
 _NO_REDIRECT_OPENER = urllib.request.build_opener(_NoRedirectHandler())
 
 
+_MAX_OIDC_RESPONSE_BYTES = 64 * 1024
+_MAX_CALLBACK_PAYLOAD_BYTES = 5 * 1024 * 1024
+
+
 def _validated_https_url(
     value: str,
     *,
@@ -74,7 +78,10 @@ def request_github_oidc_token(audience: str) -> str:
             request,
             timeout=20,
         ) as response:
-            payload = json.load(response)
+            raw = response.read(_MAX_OIDC_RESPONSE_BYTES + 1)
+            if len(raw) > _MAX_OIDC_RESPONSE_BYTES:
+                raise CallbackError("GitHub OIDC response exceeded size limit")
+            payload = json.loads(raw)
     except urllib.error.URLError as exc:
         raise CallbackError(f"could not obtain GitHub OIDC token: {exc}") from exc
 
@@ -92,7 +99,12 @@ def send_result(
 ) -> None:
     callback_url = _validated_https_url(callback_url)
 
-    payload = Path(result_path).read_bytes()
+    result = Path(result_path)
+    if not result.is_file() or result.is_symlink():
+        raise CallbackError("callback result must be a regular file")
+    if result.stat().st_size > _MAX_CALLBACK_PAYLOAD_BYTES:
+        raise CallbackError("callback result exceeds payload size limit")
+    payload = result.read_bytes()
     request = urllib.request.Request(
         callback_url,
         data=payload,
@@ -114,7 +126,7 @@ def send_result(
                     f"callback returned HTTP {response.status}"
                 )
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")[-2000:]
+        body = exc.read(2000).decode("utf-8", errors="replace")
         raise CallbackError(
             f"callback failed with HTTP {exc.code}: {body}"
         ) from exc
