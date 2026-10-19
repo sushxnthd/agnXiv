@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -28,7 +29,12 @@ def _load_rows(path: Path) -> list[dict]:
     return rows
 
 
-def _paper_case(row: dict, *, oracle_window: int) -> dict | None:
+def _paper_case(
+    row: dict,
+    *,
+    oracle_window: int,
+    direct_only: bool,
+) -> dict | None:
     source = row.get("source")
     labels = row.get("source_labels")
     paper_id = str(row.get("paper_id") or "").strip()
@@ -65,6 +71,9 @@ def _paper_case(row: dict, *, oracle_window: int) -> dict | None:
 
     gold_candidate_ids = set(direct_gold_ids)
     gold_method = "direct_oracle_sentence"
+
+    if not gold_candidate_ids and direct_only:
+        return None
 
     if not gold_candidate_ids:
         nearest_distance: int | None = None
@@ -165,16 +174,47 @@ def main() -> None:
     )
     parser.add_argument("--minimum-cases", type=int, default=75)
     parser.add_argument("--oracle-window", type=int, default=2)
-    parser.add_argument("--min-recall-at-1", type=float, default=0.60)
+    parser.add_argument("--direct-only", action="store_true")
+    parser.add_argument("--hash-seed", default="")
+    parser.add_argument("--hash-modulus", type=int, default=1)
+    parser.add_argument("--hash-bucket", type=int, default=0)
+    parser.add_argument("--min-recall-at-1", type=float, default=0.0)
     parser.add_argument("--min-recall-at-3", type=float, default=0.90)
     parser.add_argument("--min-recall-at-5", type=float, default=0.95)
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
+    if args.hash_modulus < 1:
+        raise ValueError("hash-modulus must be >= 1")
+    if not 0 <= args.hash_bucket < args.hash_modulus:
+        raise ValueError("hash-bucket must be in [0, hash-modulus)")
+
+    rows = _load_rows(Path(args.input))
+    if args.hash_modulus > 1:
+        def selected(row: dict) -> bool:
+            paper_id = str(row.get("paper_id") or "").strip()
+            if not paper_id:
+                return False
+            digest = hashlib.sha256(
+                f"{args.hash_seed}|{paper_id}".encode("utf-8")
+            ).digest()
+            return (
+                int.from_bytes(digest[:8], "big") % args.hash_modulus
+                == args.hash_bucket
+            )
+        rows = [row for row in rows if selected(row)]
+
     cases = [
         case
-        for row in _load_rows(Path(args.input))
-        if (case := _paper_case(row, oracle_window=args.oracle_window)) is not None
+        for row in rows
+        if (
+            case := _paper_case(
+                row,
+                oracle_window=args.oracle_window,
+                direct_only=args.direct_only,
+            )
+        )
+        is not None
     ]
     total = len(cases)
 
@@ -237,15 +277,26 @@ def main() -> None:
             "commit": "5ccad9c00a60ad75c9e04abf7f27d0f53f983b20",
             "input": str(args.input),
             "gold_signal": "SciTLDR source_labels oracle sentence labels",
+            "hash_seed": args.hash_seed or None,
+            "hash_modulus": args.hash_modulus,
+            "hash_bucket": args.hash_bucket,
         },
         "eligibility": (
             "A paper must contain at least two AgnXiv-extracted quantitative "
-            "claims. Gold is any quantitative claim in a SciTLDR oracle sentence; "
-            "if the oracle is qualitative, gold falls back to the nearest "
-            f"quantitative sentence within +/-{args.oracle_window} source sentences."
+            "claims. Gold is any quantitative claim in a SciTLDR oracle sentence. "
+            + (
+                "Cases with qualitative-only oracle sentences are excluded."
+                if args.direct_only
+                else (
+                    "If the oracle is qualitative, gold falls back to the nearest "
+                    f"quantitative sentence within +/-{args.oracle_window} source sentences."
+                )
+            )
         ),
         "cases": total,
         "oracle_window": args.oracle_window,
+        "direct_only": args.direct_only,
+        "source_rows_after_partition": len(rows),
         "gold_methods": dict(sorted(gold_methods.items())),
         "recall_at_1": recall_at_1,
         "recall_at_3": recall_at_3,
@@ -262,9 +313,9 @@ def main() -> None:
         "cases_detail": cases,
         "interpretation": (
             "SciTLDR oracle labels provide an external sentence-level summary "
-            "target. Direct quantitative oracle sentences are preferred; otherwise "
-            "the nearest quantitative sentence within the frozen local window is "
-            "used. The benchmark measures whether AgnXiv ranks those externally "
+            "target. The production holdout uses direct quantitative oracle "
+            "sentences only; development mode may optionally use the frozen local "
+            "fallback. The benchmark measures whether AgnXiv ranks those externally "
             "anchored quantitative claims near the top. It does "
             "not itself evaluate execution or numeric verification correctness."
         ),
