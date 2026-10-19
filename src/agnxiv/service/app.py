@@ -19,6 +19,7 @@ from ..pipeline import VerificationBundle
 from ..preprint import parse_arxiv_reference
 from ..statement import (
     build_verification_statement,
+    public_key_id,
     public_key_pem_from_private,
     sign_statement_ed25519,
 )
@@ -254,16 +255,61 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         allowed_hosts=allowed_hosts,
     )
 
+    def issuer_keyring() -> tuple[dict, list[dict]]:
+        if not active_config.issuer_private_key_b64:
+            raise ValueError("issuer private key is not configured")
+        private_key = base64.b64decode(
+            active_config.issuer_private_key_b64,
+            validate=True,
+        )
+        active_public_pem, active_key_id = public_key_pem_from_private(private_key)
+        active = {
+            "key_id": active_key_id,
+            "algorithm": "Ed25519",
+            "public_key_pem": active_public_pem.decode("ascii"),
+            "status": "active",
+            "signs_new_records": True,
+        }
+        keys = [active]
+        seen = {active_key_id}
+        configured_public_keys = (
+            (
+                "retired",
+                True,
+                active_config.issuer_previous_public_keys_b64,
+            ),
+            (
+                "revoked",
+                False,
+                active_config.issuer_revoked_public_keys_b64,
+            ),
+        )
+        for status, trusted, encoded_keys in configured_public_keys:
+            for encoded in encoded_keys:
+                public_pem = base64.b64decode(encoded, validate=True)
+                key_id = public_key_id(public_pem)
+                if key_id in seen:
+                    raise ValueError("issuer keyring contains a duplicate key")
+                seen.add(key_id)
+                keys.append(
+                    {
+                        "key_id": key_id,
+                        "algorithm": "Ed25519",
+                        "public_key_pem": public_pem.decode("ascii"),
+                        "status": status,
+                        "trusted_for_historical_records": trusted,
+                        "signs_new_records": False,
+                    }
+                )
+        active["trusted_for_historical_records"] = True
+        return active, keys
+
     def issuer_key_valid() -> bool:
         if not active_config.issuer_private_key_b64:
             return False
         try:
-            private_key = base64.b64decode(
-                active_config.issuer_private_key_b64,
-                validate=True,
-            )
-            public_key_pem_from_private(private_key)
-        except (ValueError, binascii.Error):
+            issuer_keyring()
+        except (ValueError, binascii.Error, UnicodeDecodeError):
             return False
         return True
 
@@ -386,6 +432,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             "zero_manifest": True,
             "signed_statements": bool(active_config.issuer_private_key_b64),
             "transparency_log": True,
+            "issuer_key_rollover": True,
         }
 
     @app.get("/v1/metrics")
@@ -446,20 +493,23 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
                 detail="hosted issuer key is not configured",
             )
         try:
-            private_key = base64.b64decode(
-                active_config.issuer_private_key_b64,
-                validate=True,
-            )
-            public_pem, key_id = public_key_pem_from_private(private_key)
-        except (ValueError, binascii.Error) as exc:
+            active, keys = issuer_keyring()
+        except (ValueError, binascii.Error, UnicodeDecodeError) as exc:
             raise HTTPException(
                 status_code=503,
-                detail="hosted issuer key is invalid",
+                detail="hosted issuer keyring is invalid",
             ) from exc
         return {
-            "key_id": key_id,
-            "algorithm": "Ed25519",
-            "public_key_pem": public_pem.decode("ascii"),
+            "schema_version": "agnxiv.issuer/2",
+            "key_id": active["key_id"],
+            "algorithm": active["algorithm"],
+            "public_key_pem": active["public_key_pem"],
+            "keys": keys,
+            "rotation_policy": (
+                "active key signs new records; retired keys remain trusted "
+                "for historical records; revoked keys remain discoverable but "
+                "must not be trusted"
+            ),
         }
 
     @app.post("/v1/jobs", response_model=JobView, status_code=202)

@@ -173,6 +173,11 @@ def public_key_pem_from_private(private_key_pem: bytes) -> tuple[bytes, str]:
     return public_pem, _key_id(public_key)
 
 
+def public_key_id(public_key_pem: bytes) -> str:
+    """Return the stable AgnXiv key identifier for an Ed25519 public key."""
+    return _key_id(_load_ed25519_public_key(public_key_pem))
+
+
 def _load_ed25519_private_key(private_key_pem: bytes):
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -223,6 +228,54 @@ def sign_statement_ed25519(
                 sig=base64.b64encode(signature).decode("ascii"),
             )
         ],
+    )
+
+
+def verify_statement_with_keyring(
+    envelope: DSSEEnvelope,
+    issuer_keyring: dict[str, Any],
+) -> dict[str, Any]:
+    """Verify a DSSE envelope against AgnXiv issuer rollover metadata."""
+    if len(envelope.signatures) != 1:
+        raise AttestationSignatureError(
+            "AgnXiv requires exactly one DSSE signature"
+        )
+    supplied_key_id = envelope.signatures[0].keyid
+    if not supplied_key_id:
+        raise AttestationSignatureError(
+            "DSSE key identifier is required for keyring verification"
+        )
+
+    keys = issuer_keyring.get("keys")
+    if not isinstance(keys, list):
+        raise AttestationSignatureError("issuer keyring is missing keys")
+
+    matching = [
+        item
+        for item in keys
+        if isinstance(item, dict) and item.get("key_id") == supplied_key_id
+    ]
+    if len(matching) != 1:
+        raise AttestationSignatureError(
+            "DSSE key identifier is not uniquely present in issuer keyring"
+        )
+
+    key = matching[0]
+    if key.get("status") == "revoked":
+        raise AttestationSignatureError("DSSE issuer key is revoked")
+    if key.get("trusted_for_historical_records") is not True:
+        raise AttestationSignatureError(
+            "DSSE issuer key is not trusted for historical records"
+        )
+    if key.get("algorithm") != "Ed25519":
+        raise AttestationSignatureError("unsupported issuer key algorithm")
+    public_key_pem = key.get("public_key_pem")
+    if not isinstance(public_key_pem, str):
+        raise AttestationSignatureError("issuer key lacks public key material")
+
+    return verify_statement_ed25519(
+        envelope,
+        public_key_pem.encode("ascii"),
     )
 
 

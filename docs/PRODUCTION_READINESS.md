@@ -48,7 +48,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Authenticated operator job metrics and request correlation IDs.
 - [ ] Alerting and error-budget SLOs.
 - [ ] Backup/restore drill for production PostgreSQL.
-- [ ] Key rotation procedure and issuer-key rollover metadata.
+- [x] Key rotation procedure and issuer-key rollover metadata, including active/retired/revoked Ed25519 key discovery and fail-closed keyring validation (see `docs/KEY_ROTATION.md`).
 - [ ] Multi-region execution strategy and disaster recovery.
 
 ### Evidence durability

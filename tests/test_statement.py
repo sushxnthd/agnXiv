@@ -20,6 +20,7 @@ from agnxiv.statement import (
     generate_ed25519_keypair,
     sign_statement_ed25519,
     verify_statement_ed25519,
+    verify_statement_with_keyring,
 )
 from agnxiv.verify import verify_numeric_claim
 
@@ -94,3 +95,37 @@ def test_tampered_payload_type_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(AttestationSignatureError):
         verify_statement_ed25519(envelope, public_key)
+
+
+def test_keyring_verifier_accepts_retired_key_and_rejects_revoked(
+    tmp_path: Path,
+) -> None:
+    statement = build_verification_statement(_bundle(tmp_path))
+    retired_private, retired_public, retired_id = generate_ed25519_keypair()
+    envelope = sign_statement_ed25519(statement, retired_private)
+
+    trusted_keyring = {
+        "keys": [
+            {
+                "key_id": retired_id,
+                "algorithm": "Ed25519",
+                "public_key_pem": retired_public.decode("ascii"),
+                "status": "retired",
+                "trusted_for_historical_records": True,
+                "signs_new_records": False,
+            }
+        ]
+    }
+    assert verify_statement_with_keyring(envelope, trusted_keyring) == statement
+
+    revoked_keyring = {
+        "keys": [
+            {
+                **trusted_keyring["keys"][0],
+                "status": "revoked",
+                "trusted_for_historical_records": False,
+            }
+        ]
+    }
+    with pytest.raises(AttestationSignatureError, match="revoked"):
+        verify_statement_with_keyring(envelope, revoked_keyring)
