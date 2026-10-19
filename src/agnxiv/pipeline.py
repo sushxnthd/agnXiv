@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -52,13 +53,22 @@ class ExecutionSummary(BaseModel):
 class RuntimeBuildEvidence(BaseModel):
     """Content-bound description of the runtime construction used for execution."""
 
-    builder: str
-    plan_id: str
-    dependency_file: str | None = None
-    dependency_sha256: str | None = None
-    dependency_precision: str
-    base_image_id: str
-    image_id: str
+    builder: str = Field(min_length=1, max_length=128)
+    plan_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    dependency_file: str | None = Field(default=None, max_length=1024)
+    dependency_sha256: str | None = Field(
+        default=None,
+        pattern=r"^[0-9a-f]{64}$",
+    )
+    dependency_precision: Literal[
+        "base-only",
+        "floating",
+        "version-pinned",
+        "hash-pinned",
+        "locked",
+    ]
+    base_image_id: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    image_id: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
 
 
 class VerificationBundle(BaseModel):
