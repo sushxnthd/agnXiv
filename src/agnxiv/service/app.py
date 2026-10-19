@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from ..pipeline import VerificationBundle
 from ..preprint import parse_arxiv_reference
-from ..registry import RegistryLookupError, normalize_doi, resolve_crossref_doi
+from ..registry import RegistryLookupError, normalize_doi, resolve_doi_registry
 from ..statement import (
     build_verification_statement,
     public_key_id,
@@ -652,7 +652,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         if body.doi:
             try:
                 doi = normalize_doi(body.doi)
-                publication = resolve_crossref_doi(doi).model_dump(mode="json")
+                publication = resolve_doi_registry(doi).model_dump(mode="json")
             except ValueError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
             except RegistryLookupError as exc:
