@@ -86,3 +86,12 @@ def test_transparency_anchor_is_external_sigstore_witness() -> None:
     ) in text
     assert "gh attestation verify" in text
     assert "--proto '=https'" in text
+
+
+def test_codeql_security_workflow_is_pinned_and_extended() -> None:
+    text = _read(".github/workflows/codeql-security.yml")
+    pinned = "6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee"
+    assert f"github/codeql-action/init@{pinned}" in text
+    assert f"github/codeql-action/analyze@{pinned}" in text
+    assert "queries: security-extended" in text
+    assert "security-events: write" in text
