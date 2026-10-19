@@ -33,6 +33,8 @@ jobs:
           ruff check src tests research/scripts
           pytest \
             tests/test_service_hardening.py \
+            tests/test_production_preflight.py \
+            tests/test_heldout_safety.py \
             tests/test_safety_confidence.py \
             tests/test_zero_manifest.py \
             tests/test_sandbox.py \
