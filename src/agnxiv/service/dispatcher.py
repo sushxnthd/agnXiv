@@ -11,6 +11,14 @@ class DispatchError(RuntimeError):
     """A hosted execution job could not be dispatched."""
 
 
+def workflow_dispatch_ref(ref: str) -> str:
+    """Convert a full Git ref into the branch/tag name required by GitHub."""
+    for prefix in ("refs/heads/", "refs/tags/"):
+        if ref.startswith(prefix):
+            return ref.removeprefix(prefix)
+    return ref
+
+
 @dataclass(frozen=True)
 class DispatchRequest:
     job_id: str
@@ -81,7 +89,7 @@ class GitHubActionsDispatcher:
         )
         payload = json.dumps(
             {
-                "ref": self.ref,
+                "ref": workflow_dispatch_ref(self.ref),
                 "inputs": {
                     "job_id": request.job_id,
                     "mode": request.mode,
