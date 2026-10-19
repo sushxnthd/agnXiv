@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import shlex
 from pathlib import Path
 from typing import Literal
@@ -8,6 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 from .models import Claim, VerificationPolicy
+from .outputs import safe_regex_pattern
 from .pipeline import VerificationBundle, verify_with_command
 from .provenance import sha256_file
 
@@ -23,6 +25,10 @@ class ObservationLocator(BaseModel):
             raise ValueError(f"{self.kind} observation requires a locator value")
         if self.kind == "semantic_stdout" and self.value is not None:
             raise ValueError("semantic_stdout observation does not accept a locator value")
+        if self.kind == "regex" and self.value and not safe_regex_pattern(self.value):
+            raise ValueError("regex observation uses an unsafe or unsupported pattern")
+        if not math.isfinite(self.scale) or abs(self.scale) > 1_000_000:
+            raise ValueError("observation scale must be finite and reasonably bounded")
         return self
 
 
