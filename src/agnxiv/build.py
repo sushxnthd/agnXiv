@@ -165,8 +165,10 @@ def _pyproject_runtime_requirements(
                 constraint.strip(),
             ):
                 return None, [
-                    "only exact Poetry dependency versions can be converted "
-                    "without invoking project build code"
+                    (
+                        "only exact Poetry dependency versions can be converted "
+                        "without invoking project build code"
+                    )
                 ]
             generated.append(f"{name}=={constraint.strip()}")
         return generated, []
@@ -321,8 +323,10 @@ def plan_python_environment(
                 network_required=False,
                 safe_manifest_only=False,
                 rejected_reasons=[
-                    "setup.py cannot be executed or copied into the network-enabled "
-                    "dependency build context"
+                    (
+                        "setup.py cannot be executed or copied into the network-enabled "
+                        "dependency build context"
+                    )
                 ],
             )
 
