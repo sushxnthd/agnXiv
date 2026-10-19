@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from agnxiv.auto import (\n    build_auto_plan,\n    rank_claim_indices_with_statement_diversity,\n    score_claim_centrality,\n)
+from agnxiv.auto import (
+    build_auto_plan,
+    rank_claim_indices_with_statement_diversity,
+    score_claim_centrality,
+)
 from agnxiv.models import Claim, ClaimSource
 
 
