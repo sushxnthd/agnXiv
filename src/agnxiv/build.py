@@ -67,6 +67,15 @@ _MAX_REQUIREMENT_LINES = 10_000
 _MAX_REQUIREMENT_LINE_CHARS = 8192
 
 
+_MICROMAMBA_VERSION = "2.9.0-0"
+_MICROMAMBA_URL = (
+    "https://github.com/mamba-org/micromamba-releases/releases/download/"
+    f"{_MICROMAMBA_VERSION}/micromamba-linux-64"
+)
+_MICROMAMBA_SHA256 = "366cd9cd8be14df1ab8ed50352a82111082a36686b2d389fdb79a92c3fafb3e3"
+_TRUSTED_CONDA_CHANNELS = {"defaults", "conda-forge", "pytorch", "nvidia"}
+
+
 def _read_dependency_text(path: Path) -> str:
     if path.is_symlink() or not path.is_file():
         raise EnvironmentBuildError(
@@ -167,6 +176,128 @@ def audit_requirement_lines(lines: list[str]) -> list[str]:
                 )
                 break
     return reasons
+
+
+
+def _readme_text(root: Path) -> str:
+    for name in ("README.md", "README.rst", "README.txt", "readme.md"):
+        path = root / name
+        if path.is_file() and not path.is_symlink():
+            try:
+                return path.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                return ""
+    return ""
+
+
+def discover_referenced_nested_conda(root: Path) -> Path | None:
+    """Return one README-referenced nested Conda manifest, otherwise abstain."""
+    candidates: list[Path] = []
+    for name in ("environment.yml", "environment.yaml"):
+        for path in root.rglob(name):
+            if path.is_symlink() or not path.is_file():
+                continue
+            relative = path.relative_to(root)
+            if len(relative.parts) > 4 or len(relative.parts) < 2:
+                continue
+            candidates.append(path)
+    if len(candidates) != 1:
+        return None
+
+    candidate = candidates[0]
+    relative_parent = candidate.parent.relative_to(root).as_posix().rstrip("/") + "/"
+    readme = _readme_text(root).replace("\\", "/")
+    if relative_parent.lower() not in readme.lower():
+        return None
+    return candidate
+
+
+def _audit_conda_environment(path: Path) -> list[str]:
+    """Reject custom channels, URLs, VCS/path installs, and unbounded metadata."""
+    text = _read_dependency_text(path)
+    reasons: list[str] = []
+    in_channels = False
+    in_dependencies = False
+    for number, raw in enumerate(text.splitlines(), start=1):
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if raw == stripped and stripped == "channels:":
+            in_channels = True
+            in_dependencies = False
+            continue
+        if raw == stripped and stripped == "dependencies:":
+            in_dependencies = True
+            in_channels = False
+            continue
+        if raw == stripped and stripped.endswith(":"):
+            in_channels = False
+            in_dependencies = False
+            continue
+
+        if in_channels and stripped.startswith("- "):
+            channel = stripped[2:].strip()
+            if channel not in _TRUSTED_CONDA_CHANNELS:
+                reasons.append(
+                    f"line {number}: untrusted Conda channel: {channel}"
+                )
+            continue
+
+        if in_dependencies and stripped.startswith("- "):
+            value = stripped[2:].strip()
+            lower = value.lower()
+            if value == "pip:":
+                continue
+            if any(marker in lower for marker in _UNSAFE_REQUIREMENT_MARKERS):
+                reasons.append(
+                    f"line {number}: unsupported Conda/Pip dependency source"
+                )
+    return reasons
+
+
+def _conda_environment_plan(path: Path, *, root: Path, base_image: str) -> BuildPlan:
+    rejected = _audit_conda_environment(path)
+    relative = path.relative_to(root).as_posix()
+    sanitized = [
+        line
+        for line in _read_dependency_text(path).splitlines()
+        if not line.startswith("prefix:")
+    ]
+    generated = sanitized
+    dockerfile = (
+        f"FROM {base_image}\n"
+        "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 "
+        "MAMBA_ROOT_PREFIX=/opt/micromamba\n"
+        "RUN python - <<'PY'\n"
+        "import hashlib, pathlib, urllib.request\n"
+        f"url = {_MICROMAMBA_URL!r}\n"
+        f"expected = {_MICROMAMBA_SHA256!r}\n"
+        "target = pathlib.Path('/usr/local/bin/micromamba')\n"
+        "with urllib.request.urlopen(url, timeout=60) as response:\n"
+        "    data = response.read(32 * 1024 * 1024)\n"
+        "if hashlib.sha256(data).hexdigest() != expected:\n"
+        "    raise SystemExit('micromamba digest mismatch')\n"
+        "target.write_bytes(data)\n"
+        "target.chmod(0o755)\n"
+        "PY\n"
+        "COPY agnxiv-generated-environment.yml /tmp/environment.yml\n"
+        "RUN micromamba create -y -p /opt/agnxiv-env -f /tmp/environment.yml "
+        "&& micromamba clean --all --yes\n"
+        "ENV PATH=/opt/agnxiv-env/bin:$PATH\n"
+        "WORKDIR /workspace\n"
+    )
+    return BuildPlan(
+        builder="conda-micromamba-metadata",
+        base_image=base_image,
+        dependency_file=relative,
+        dependency_sha256=sha256_file(path),
+        dependency_precision="version-pinned",
+        dockerfile=dockerfile,
+        network_required=True,
+        safe_manifest_only=not rejected,
+        rejected_reasons=rejected,
+        generated_requirements=generated,
+    )
 
 
 def _pyproject_runtime_requirements(
@@ -327,11 +458,29 @@ def plan_python_environment(
         raise ValueError(f"repository path is not a directory: {root}")
 
     requirements = root / "requirements.txt"
+    root_conda = next(
+        (
+            path
+            for path in (root / "environment.yml", root / "environment.yaml")
+            if path.exists()
+        ),
+        None,
+    )
 
     if requirements.is_symlink():
         raise ValueError("requirements.txt symlinks are not allowed")
 
     if not requirements.exists():
+        conda_manifest = root_conda or discover_referenced_nested_conda(root)
+        if conda_manifest is not None:
+            if conda_manifest.is_symlink():
+                raise ValueError("Conda environment symlinks are not allowed")
+            return _conda_environment_plan(
+                conda_manifest,
+                root=root,
+                base_image=base_image,
+            )
+
         pyproject = root / "pyproject.toml"
         setup_cfg = root / "setup.cfg"
         setup_py = root / "setup.py"
@@ -461,7 +610,12 @@ def build_python_environment(
         context = Path(temp)
         (context / "Dockerfile").write_text(plan.dockerfile, encoding="utf-8")
 
-        if plan.generated_requirements:
+        if plan.builder == "conda-micromamba-metadata":
+            (context / "agnxiv-generated-environment.yml").write_text(
+                "\n".join(plan.generated_requirements) + "\n",
+                encoding="utf-8",
+            )
+        elif plan.generated_requirements:
             (context / "agnxiv-generated-requirements.txt").write_text(
                 "\n".join(plan.generated_requirements) + "\n",
                 encoding="utf-8",
