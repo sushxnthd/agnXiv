@@ -199,3 +199,32 @@ def test_setup_py_without_static_manifest_is_not_executed_during_build(
     assert plan.safe_manifest_only is False
     with pytest.raises(EnvironmentBuildError):
         build_python_environment(tmp_path)
+
+
+def test_oversized_requirements_fail_closed_before_build(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_bytes(b"numpy==2.1.0\n" + b"#" * (2 * 1024 * 1024))
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is False
+    assert any("byte limit" in reason for reason in plan.rejected_reasons)
+    with pytest.raises(EnvironmentBuildError):
+        build_python_environment(tmp_path)
+
+
+def test_oversized_dependency_line_fails_closed(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("pkg==" + "1" * 9000 + "\n", encoding="utf-8")
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is False
+    assert any("oversized line" in reason for reason in plan.rejected_reasons)
+
+
+def test_oversized_pyproject_is_not_parsed_or_executed(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_bytes(
+        b'[project]\nname="paper"\nversion="0.1.0"\n'
+        + b"#" * (2 * 1024 * 1024)
+    )
+    plan = plan_python_environment(tmp_path)
+    assert plan.safe_manifest_only is False
+    assert any("EnvironmentBuildError" in reason for reason in plan.rejected_reasons)
