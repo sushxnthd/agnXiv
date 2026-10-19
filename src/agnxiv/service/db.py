@@ -59,6 +59,7 @@ class Job(Base):
         index=True,
     )
     request_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    workflow_run_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -476,6 +477,23 @@ class JobStore:
     def mark_running(self, job_id: str) -> None:
         self._update(job_id, status="running", error=None)
 
+    def bind_workflow_run(self, job_id: str, workflow_run_id: int) -> None:
+        if workflow_run_id <= 0:
+            raise ValueError("workflow run ID must be positive")
+        with self.session_factory() as session:
+            job = session.scalar(
+                select(Job).where(Job.id == job_id).with_for_update()
+            )
+            if job is None:
+                raise KeyError(job_id)
+            if job.status not in {"queued", "running"}:
+                raise JobAlreadyFinalized(job_id)
+            if job.workflow_run_id is not None and job.workflow_run_id != workflow_run_id:
+                raise ValueError("job is already bound to a different workflow run")
+            job.workflow_run_id = workflow_run_id
+            job.updated_at = datetime.now(UTC)
+            session.commit()
+
     def reap_stale(self, *, minutes: int) -> int:
         """Fail stale jobs and append one tamper-evident finalization entry each."""
         cutoff = datetime.now(UTC) - timedelta(minutes=max(1, minutes))
@@ -577,6 +595,7 @@ class JobStore:
         payload_sha256 = _canonical_digest(
             {
                 "job_id": job.id,
+                "workflow_run_id": job.workflow_run_id,
                 "status": status,
                 "result": result,
                 "error": error,
