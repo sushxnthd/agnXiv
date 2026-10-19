@@ -55,8 +55,8 @@ def test_verification_creates_content_addressed_evidence_archive(tmp_path) -> No
     assert payload["publication"]["doi"] == "10.1145/1234.5678"
     assert payload["job"]["repository_ref"] == "a" * 40
     assert payload["transparency"]["entry_hash"] == archive.transparency_entry_hash
-    created = datetime.fromisoformat(archive.created_at.replace("Z", "+00:00"))
-    retained = datetime.fromisoformat(archive.retain_until.replace("Z", "+00:00"))
+    created = datetime.fromisoformat(archive.created_at)
+    retained = datetime.fromisoformat(archive.retain_until)
     assert (retained - created).days >= 3650
 
 
@@ -78,8 +78,10 @@ def test_evidence_archive_rejects_update_and_delete(tmp_path) -> None:
         "UPDATE agnxiv_evidence_archives SET retention_policy='forged' WHERE job_id=:job",
         "DELETE FROM agnxiv_evidence_archives WHERE job_id=:job",
     ):
-        with pytest.raises(SQLAlchemyError, match="append-only"):
-            with store.engine.begin() as connection:
-                connection.execute(text(sql), {"job": job.id})
+        with (
+            pytest.raises(SQLAlchemyError, match="append-only"),
+            store.engine.begin() as connection,
+        ):
+            connection.execute(text(sql), {"job": job.id})
 
     assert store.verify_evidence_archive(job.id) is True
