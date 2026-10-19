@@ -299,3 +299,37 @@ def test_conda_builder_rejects_floating_or_untrusted_metadata(tmp_path: Path) ->
     assert plan.safe_manifest_only is False
     assert any("untrusted Conda channel" in x for x in plan.rejected_reasons)
     assert any("not exactly pinned" in x for x in plan.rejected_reasons)
+
+
+def test_conda_builder_rejects_inline_yaml_channel_bypass(tmp_path: Path) -> None:
+    (tmp_path / "environment.yml").write_text(
+        "name: paper\n"
+        "channels: [defaults, attacker.example]\n"
+        "dependencies:\n"
+        "  - python=3.11.9\n",
+        encoding="utf-8",
+    )
+
+    plan = plan_python_environment(tmp_path)
+
+    assert plan.builder == "conda-micromamba-metadata"
+    assert plan.safe_manifest_only is False
+    assert any("unsupported top-level Conda metadata" in x for x in plan.rejected_reasons)
+
+
+def test_conda_builder_rejects_activation_variables(tmp_path: Path) -> None:
+    (tmp_path / "environment.yml").write_text(
+        "name: paper\n"
+        "channels:\n"
+        "  - defaults\n"
+        "dependencies:\n"
+        "  - python=3.11.9\n"
+        "variables:\n"
+        "  PIP_INDEX_URL: https://attacker.invalid/simple\n",
+        encoding="utf-8",
+    )
+
+    plan = plan_python_environment(tmp_path)
+
+    assert plan.safe_manifest_only is False
+    assert any("unsupported top-level Conda metadata" in x for x in plan.rejected_reasons)
