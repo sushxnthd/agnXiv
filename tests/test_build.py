@@ -333,3 +333,25 @@ def test_conda_builder_rejects_activation_variables(tmp_path: Path) -> None:
 
     assert plan.safe_manifest_only is False
     assert any("unsupported top-level Conda metadata" in x for x in plan.rejected_reasons)
+
+
+def test_environment_build_rejects_oversized_client_output(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    (tmp_path / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+
+    def fake_resolve(image: str) -> str:
+        return "sha256:built" if image.startswith("agnxiv-env:") else "sha256:base"
+
+    def fake_run(command, **kwargs):
+        assert "--quiet" in command
+        kwargs["stdout"].write(b"x" * 17)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr("agnxiv.build._MAX_BUILD_OUTPUT_BYTES", 16)
+    monkeypatch.setattr("agnxiv.build.resolve_local_image_id", fake_resolve)
+    monkeypatch.setattr("agnxiv.build.subprocess.run", fake_run)
+
+    with pytest.raises(EnvironmentBuildError, match="output limit"):
+        build_python_environment(tmp_path)
