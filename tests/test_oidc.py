@@ -22,6 +22,8 @@ def _policy() -> GitHubOIDCPolicy:
         ref="main",
         workflow="hosted-verify.yml",
         workflow_sha="a" * 40,
+        run_id=12345,
+        run_attempt=1,
     )
 
 
@@ -34,6 +36,8 @@ def _claims() -> dict:
             "sushxnthd/agnXiv/.github/workflows/hosted-verify.yml@refs/heads/main"
         ),
         "workflow_sha": "a" * 40,
+        "run_id": "12345",
+        "run_attempt": "1",
         "runner_environment": "github-hosted",
     }
 
@@ -64,6 +68,8 @@ def test_oidc_policy_accepts_only_expected_workflow(monkeypatch) -> None:
             "sushxnthd/agnXiv/.github/workflows/other.yml@refs/heads/main",
         ),
         ("workflow_sha", "b" * 40),
+        ("run_id", "99999"),
+        ("run_attempt", "2"),
         ("runner_environment", "self-hosted"),
     ],
 )
