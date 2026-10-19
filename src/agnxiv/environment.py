@@ -13,6 +13,8 @@ class EnvironmentSpec(BaseModel):
     language: str = "python"
     python_version: str = "3.11"
     dependency_files: list[str] = Field(default_factory=list)
+    preferred_dependency_file: str | None = None
+    environment_scope: list[str] = Field(default_factory=list)
     base_image: str = "python:3.11-slim"
     install_commands: list[list[str]] = Field(default_factory=list)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -47,6 +49,57 @@ _IMPORT_PACKAGE_MAP = {
 _EXACT_REQUIREMENT_RE = re.compile(
     r"^[A-Za-z0-9_.-]+(?:\[[A-Za-z0-9_.,-]+\])?==[^\s;\\]+"
 )
+
+
+_SCOPED_MANIFEST_PRIORITY = (
+    "requirements.txt",
+    "requirement.txt",
+    "environment.yml",
+    "environment.yaml",
+    "pyproject.toml",
+    "poetry.lock",
+    "uv.lock",
+    "setup.py",
+    "setup.cfg",
+)
+
+
+def _scoped_dependency_manifests(
+    root: Path,
+    scope_paths: list[str],
+) -> list[Path]:
+    """Find the nearest dependency manifest for each selected workflow source."""
+    found: list[Path] = []
+
+    for raw_scope in scope_paths:
+        scope = Path(raw_scope)
+        if scope.is_absolute() or ".." in scope.parts:
+            continue
+
+        candidate = root / scope
+        directory = candidate.parent if candidate.suffix or candidate.is_file() else candidate
+
+        while directory != root and root in directory.parents:
+            matches = [
+                directory / name
+                for name in _SCOPED_MANIFEST_PRIORITY
+                if (directory / name).is_file()
+                and not (directory / name).is_symlink()
+            ]
+            if matches:
+                found.append(matches[0])
+                break
+            directory = directory.parent
+
+    unique: list[Path] = []
+    seen: set[str] = set()
+    for path in found:
+        relative = path.relative_to(root).as_posix()
+        if relative in seen:
+            continue
+        seen.add(relative)
+        unique.append(path)
+    return unique
 
 
 def _requirements_precision(path: Path) -> Literal["floating", "version-pinned"]:
@@ -99,8 +152,12 @@ def _infer_import_packages(root: Path) -> list[str]:
     )
 
 
-def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
-    """Infer a conservative Python environment from repository metadata and imports."""
+def infer_python_environment(
+    repository: str | Path,
+    *,
+    scope_paths: list[str] | None = None,
+) -> EnvironmentSpec:
+    """Infer a conservative Python environment from metadata, workflow scope, and imports."""
     root = Path(repository)
     if not root.is_dir():
         raise ValueError(f"repository path is not a directory: {root}")
@@ -114,6 +171,65 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
         "none", "inferred", "floating", "version-pinned", "locked"
     ] = "none"
     historical_fidelity: Literal["unknown", "approximate", "constrained"] = "unknown"
+    preferred_dependency_file: str | None = None
+    environment_scope = list(dict.fromkeys(scope_paths or []))
+
+    scoped_manifests = _scoped_dependency_manifests(root, environment_scope)
+    if len(scoped_manifests) == 1:
+        scoped = scoped_manifests[0]
+        preferred_dependency_file = scoped.relative_to(root).as_posix()
+        dependency_files.append(preferred_dependency_file)
+        notes.append(
+            "Workflow-scoped dependency manifest selected from the nearest "
+            f"documented command directory: {preferred_dependency_file}"
+        )
+        if scoped.name in {"requirements.txt", "requirement.txt"}:
+            install_commands.append(
+                [
+                    "python",
+                    "-m",
+                    "pip",
+                    "install",
+                    "-r",
+                    preferred_dependency_file,
+                ]
+            )
+            confidence = max(confidence, 0.86)
+            dependency_source = "manifest"
+            dependency_precision = _requirements_precision(scoped)
+            historical_fidelity = (
+                "constrained"
+                if dependency_precision == "version-pinned"
+                else "approximate"
+            )
+        elif scoped.name in {"environment.yml", "environment.yaml"}:
+            confidence = max(confidence, 0.86)
+            dependency_source = "manifest"
+            dependency_precision = "floating"
+            historical_fidelity = "approximate"
+            notes.append(
+                "Scoped Conda environment detected; a Conda-capable builder is required."
+            )
+        elif scoped.name in {"poetry.lock", "uv.lock"}:
+            confidence = max(confidence, 0.9)
+            dependency_source = "lockfile"
+            dependency_precision = "locked"
+            historical_fidelity = "constrained"
+        else:
+            confidence = max(confidence, 0.72)
+            dependency_source = "manifest"
+            dependency_precision = "floating"
+            historical_fidelity = "approximate"
+    elif len(scoped_manifests) > 1:
+        dependency_files.extend(
+            path.relative_to(root).as_posix()
+            for path in scoped_manifests
+        )
+        notes.append(
+            "Multiple workflow-scoped dependency manifests were discovered; "
+            "AgnXiv will not choose among them automatically."
+        )
+        confidence = max(confidence, 0.55)
 
     pyproject = root / "pyproject.toml"
     requirements = root / "requirements.txt"
@@ -206,7 +322,9 @@ def infer_python_environment(repository: str | Path) -> EnvironmentSpec:
             confidence = max(confidence, 0.4)
 
     return EnvironmentSpec(
-        dependency_files=dependency_files,
+        dependency_files=list(dict.fromkeys(dependency_files)),
+        preferred_dependency_file=preferred_dependency_file,
+        environment_scope=environment_scope,
         install_commands=install_commands,
         confidence=confidence,
         dependency_source=dependency_source,
