@@ -73,7 +73,7 @@ _LABEL_RE = re.compile(
 
 _HYPHENS = "-‐‑‒–—"
 _DIMENSION_RE = re.compile(
-    r"(?<!\\d)\\d{2,5}\\s*(?:x|×|\\^|ˆ)\\s*\\d{2,5}(?!\\d)",
+    r"(?<!\d)\d{2,5}\s*(?:x|×|\^|ˆ)\s*\d{2,5}(?!\d)",
     flags=re.IGNORECASE,
 )
 
@@ -93,7 +93,7 @@ def _inside_numeric_citation(normalized: str, match: re.Match[str]) -> bool:
     contents = normalized[left + 1 : right]
     return bool(
         re.fullmatch(
-            r"\\s*\\d+(?:\\s*[-,]\\s*\\d+)*\\s*",
+            r"\s*\d+(?:\s*[-,]\s*\d+)*\s*",
             contents,
         )
     )
@@ -112,10 +112,10 @@ def _looks_like_hyphenated_identifier(
         return False
 
     prefix = normalized[max(0, hyphen_index - 32) : hyphen_index]
-    token_match = re.search(r"([A-Za-z][A-Za-z0-9_. ]{0,24})$", prefix)
+    token_match = re.search(r"([A-Za-z][A-Za-z0-9_.]*)$", prefix)
     if token_match is None:
         return False
-    token = token_match.group(1).strip()
+    token = token_match.group(1)
     return any(character.isupper() for character in token)
 
 
