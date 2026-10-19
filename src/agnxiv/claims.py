@@ -73,7 +73,16 @@ _LABEL_RE = re.compile(
 
 _HYPHENS = "-‐‑‒–—"
 _DIMENSION_RE = re.compile(
-    r"(?<!\d)\d{2,5}\s*(?:x|×|\^|ˆ)\s*\d{2,5}(?!\d)",
+    r"(?<!\d)\d{1,5}\s*(?:x|×|\^|ˆ)\s*\d{1,5}(?!\d)",
+    flags=re.IGNORECASE,
+)
+
+_VARIABLE_ASSIGNMENT_RE = re.compile(
+    r"(?:^|[\s(])(?P<name>[A-Za-z])\s*=\s*$"
+)
+_TOP_INDEX_RE = re.compile(r"\btop\s*-\s*$", flags=re.IGNORECASE)
+_STRUCTURAL_PREFIX_RE = re.compile(
+    r"(?:§|(?:section|sec\.?|figure|fig\.?|table|equation|eq\.?))\s*$",
     flags=re.IGNORECASE,
 )
 
@@ -239,7 +248,53 @@ def _looks_like_label_or_citation(
 
     start = match.start("value")
     prefix = normalized[max(0, start - 40) : start]
-    return bool(_LABEL_RE.search(prefix))
+    return bool(
+        _LABEL_RE.search(prefix)
+        or _STRUCTURAL_PREFIX_RE.search(prefix)
+        or _TOP_INDEX_RE.search(prefix)
+    )
+
+
+def _looks_like_structural_quantity(
+    normalized: str,
+    match: re.Match[str],
+    *,
+    value: float,
+    unit: str | None,
+    uncertainty_raw: str | None,
+    metric: str | None,
+    local_context: str,
+) -> bool:
+    """Reject equation/list/section numerals that are not measured outcomes."""
+    if unit or uncertainty_raw or metric:
+        return False
+
+    start = match.start("value")
+    end = match.end("value")
+    prefix = normalized[max(0, start - 24) : start]
+    suffix = normalized[end : min(len(normalized), end + 4)]
+
+    variable = _VARIABLE_ASSIGNMENT_RE.search(prefix)
+    if variable is not None:
+        # A bare symbolic assignment such as k=2, B=1.2 or t=2 is a model
+        # parameter/equation value, not a paper result. Explicit metrics/units
+        # were already exempted above.
+        return True
+
+    if value.is_integer() and abs(value) <= 50:
+        if suffix.startswith(")") or suffix.startswith(":"):
+            return True
+
+        stripped = local_context.lstrip()
+        literal = str(int(value))
+        if re.match(
+            rf"^{re.escape(literal)}\s+(?:we|our|the|in|results?|experiments?)\b",
+            stripped,
+            flags=re.IGNORECASE,
+        ):
+            return True
+
+    return False
 
 
 def extract_quantitative_claims(
@@ -290,6 +345,17 @@ def extract_quantitative_claims(
         metric = _metric_from_context(preceding) or _metric_from_context(local_context)
 
         if not unit and not uncertainty_raw and value.is_integer() and 1900 <= value <= 2100:
+            continue
+
+        if _looks_like_structural_quantity(
+            normalized,
+            match,
+            value=value,
+            unit=unit,
+            uncertainty_raw=uncertainty_raw,
+            metric=metric,
+            local_context=local_context,
+        ):
             continue
 
         if not _looks_material(
