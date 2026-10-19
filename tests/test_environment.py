@@ -136,3 +136,39 @@ def test_pipfile_lock_is_recorded_as_historical_constraint(tmp_path: Path) -> No
     assert spec.historical_fidelity == "constrained"
     assert spec.reconstruction_supported is False
     assert "Pipfile.lock" in spec.reconstruction_reason
+
+
+def test_readme_referenced_nested_conda_is_historically_constrained(
+    tmp_path: Path,
+) -> None:
+    nested = tmp_path / "examples" / "NLU"
+    nested.mkdir(parents=True)
+    (tmp_path / "README.md").write_text(
+        "Follow examples/NLU/ for reproduction.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "setup.py").write_text(
+        "from setuptools import setup\nsetup(name='loralib', version='0.1.0')\n",
+        encoding="utf-8",
+    )
+    (nested / "environment.yml").write_text(
+        "name: NLU\n"
+        "channels:\n"
+        "  - pytorch\n"
+        "  - defaults\n"
+        "dependencies:\n"
+        "  - python=3.7.10=h12debd9_4\n"
+        "  - numpy=1.20.2=py37h2d18471_0\n"
+        "  - pip=21.1.3=py37h06a4308_0\n"
+        "  - pip:\n"
+        "    - datasets==1.9.0\n",
+        encoding="utf-8",
+    )
+
+    spec = infer_python_environment(tmp_path)
+
+    assert spec.dependency_source == "manifest"
+    assert spec.dependency_precision == "version-pinned"
+    assert spec.historical_fidelity == "constrained"
+    assert spec.reconstruction_supported is True
+    assert "examples/NLU/environment.yml" in spec.dependency_files
