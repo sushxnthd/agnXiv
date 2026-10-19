@@ -90,10 +90,19 @@ def _paper_case(row: dict, *, oracle_window: int) -> dict | None:
         gold_candidate_ids = nearest_ids
         gold_method = f"nearest_within_{oracle_window}_sentences"
 
+    sentence_denominator = max(1, len(source) - 1)
+
+    def centrality(item: tuple[int, int, Claim]) -> float:
+        sentence_index, _, claim = item
+        return score_claim_centrality(
+            claim,
+            document_position=sentence_index / sentence_denominator,
+        )
+
     ranked = sorted(
         candidates,
         key=lambda item: (
-            -score_claim_centrality(item[2]),
+            -centrality(item),
             item[0],
             item[1],
         ),
@@ -131,7 +140,10 @@ def _paper_case(row: dict, *, oracle_window: int) -> dict | None:
                 "rank": rank,
                 "sentence_index": sentence_index,
                 "local_claim_index": local_index,
-                "score": score_claim_centrality(claim),
+                "score": score_claim_centrality(
+                    claim,
+                    document_position=sentence_index / sentence_denominator,
+                ),
                 "text": claim.text,
                 "metric": claim.metric,
                 "reported_value": claim.reported_value,
