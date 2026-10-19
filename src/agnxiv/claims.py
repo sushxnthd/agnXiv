@@ -174,6 +174,16 @@ def _looks_like_label_or_citation(
     ):
         return True
 
+    # Do not treat model/product version suffixes such as GPT-2 or GPT-3
+    # as scientific measurements. The numeric regex can otherwise restart
+    # immediately after the hyphen and see a standalone digit.
+    if (
+        start >= 2
+        and normalized[start - 1] == "-"
+        and normalized[start - 2].isalnum()
+    ):
+        return True
+
     prefix = normalized[max(0, start - 40) : start]
     return bool(_LABEL_RE.search(prefix))
 
