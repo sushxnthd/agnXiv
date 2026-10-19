@@ -423,8 +423,14 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
 
     def authenticate(api_key: str | None) -> tuple[str, str]:
         if not active_config.api_keys:
-            if api_key not in {None, "", "development"}:
-                raise HTTPException(status_code=401, detail="invalid API key")
+            if (
+                not active_config.allow_development_auth
+                or api_key != "development"
+            ):
+                raise HTTPException(
+                    status_code=503,
+                    detail="API authentication is not configured",
+                )
             value = "development"
             return value, hash_secret(value)
 
