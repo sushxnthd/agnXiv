@@ -5,6 +5,7 @@ import csv
 import hashlib
 import json
 import math
+import re
 from collections import Counter, defaultdict, deque
 from pathlib import Path
 
@@ -60,17 +61,56 @@ def _metric_compatible(left: Claim, right: Claim) -> bool:
     return left.metric == right.metric
 
 
+_STOPWORDS = {
+    "about", "after", "again", "against", "also", "among", "and", "are",
+    "because", "been", "being", "between", "both", "can", "compared", "could",
+    "does", "each", "for", "from", "has", "have", "into", "its", "may", "more",
+    "most", "new", "not", "our", "over", "paper", "propose", "proposed", "show",
+    "shows", "than", "that", "the", "their", "these", "this", "through", "toward",
+    "towards", "using", "via", "was", "were", "which", "while", "with", "without",
+    "we", "work",
+}
+
+
+def _stem(token: str) -> str:
+    for suffix in ("ingly", "edly", "ing", "ed", "es", "s"):
+        if token.endswith(suffix) and len(token) - len(suffix) >= 4:
+            return token[: -len(suffix)]
+    return token
+
+
+def _content_tokens(text: str) -> set[str]:
+    return {
+        _stem(token)
+        for token in re.findall(r"[a-z][a-z0-9-]{2,}", text.lower())
+        if token not in _STOPWORDS
+    }
+
+
+def _lexical_score(anchor: set[str], claim: set[str]) -> tuple[float, int]:
+    overlap = len(anchor & claim)
+    if not anchor or not claim or overlap == 0:
+        return 0.0, overlap
+    precision = overlap / len(claim)
+    recall = overlap / len(anchor)
+    score = 2.0 * precision * recall / (precision + recall)
+    return score, overlap
+
+
 def _gold_abstract_indices(
+    *,
+    title: str,
+    tldr: str,
     tldr_claims: list[Claim],
     abstract_claims: list[Claim],
-) -> set[int]:
-    """Map author-TLDR quantitative claims to unique abstract claims.
+) -> tuple[set[int], str | None]:
+    """Map author metadata to abstract gold without consulting AgnXiv rank scores.
 
-    A TLDR claim contributes gold only when its reported numeric value maps to
-    exactly one compatible abstract claim. Ambiguous matches are ignored rather
-    than resolved with AgnXiv's ranking score.
+    Prefer exact quantitative TLDR-to-abstract matches. If the author TLDR is
+    qualitative, use a frozen title+TLDR lexical anchor and accept only one
+    clearly separated quantitative abstract claim.
     """
-    gold: set[int] = set()
+    exact: set[int] = set()
 
     for tldr_claim in tldr_claims:
         if tldr_claim.reported_value is None:
@@ -89,9 +129,33 @@ def _gold_abstract_indices(
             )
         ]
         if len(matches) == 1:
-            gold.add(matches[0])
+            exact.add(matches[0])
 
-    return gold
+    if exact:
+        return exact, "quantitative_tldr"
+
+    anchor = _content_tokens(f"{title} {tldr}")
+    scored: list[tuple[float, int, int]] = []
+    for index, claim in enumerate(abstract_claims):
+        score, overlap = _lexical_score(anchor, _content_tokens(claim.text))
+        scored.append((score, overlap, index))
+    scored.sort(reverse=True)
+
+    if not scored:
+        return set(), None
+
+    best_score, best_overlap, best_index = scored[0]
+    second_score = scored[1][0] if len(scored) > 1 else 0.0
+
+    # Frozen before the first expanded held-out run.
+    if (
+        best_overlap >= 3
+        and best_score >= 0.12
+        and best_score - second_score >= 0.02
+    ):
+        return {best_index}, "author_anchor_lexical"
+
+    return set(), None
 
 
 def _load_rows(paths: list[Path]) -> list[dict[str, str]]:
@@ -111,7 +175,8 @@ def _load_rows(paths: list[Path]) -> list[dict[str, str]]:
 def _eligible_case(row: dict[str, str]) -> dict | None:
     abstract = (row.get("abstract") or "").strip()
     tldr = (row.get("tldr") or "").strip()
-    if not abstract or not tldr or not _repository(row):
+    title = (row.get("title") or row.get("Paper") or "").strip()
+    if not abstract or not tldr or not title or not _repository(row):
         return None
 
     abstract_claims = extract_quantitative_claims(abstract)
@@ -120,8 +185,13 @@ def _eligible_case(row: dict[str, str]) -> dict | None:
         # A one-candidate abstract does not meaningfully test ranking.
         return None
 
-    gold_indices = _gold_abstract_indices(tldr_claims, abstract_claims)
-    if not gold_indices:
+    gold_indices, gold_method = _gold_abstract_indices(
+        title=title,
+        tldr=tldr,
+        tldr_claims=tldr_claims,
+        abstract_claims=abstract_claims,
+    )
+    if not gold_indices or gold_method is None:
         return None
 
     scored = sorted(
@@ -141,7 +211,8 @@ def _eligible_case(row: dict[str, str]) -> dict | None:
         "paper_cluster": _paper_key(row),
         "stratum": _stratum(row),
         "repository": _repository(row),
-        "title": (row.get("title") or row.get("Paper") or "").strip(),
+        "title": title,
+        "gold_method": gold_method,
         "candidate_claims": len(abstract_claims),
         "gold_claims": len(gold_indices),
         "first_gold_rank": first_gold_rank,
@@ -263,6 +334,7 @@ def main() -> None:
         else 0.0
     )
     strata = Counter(str(case["stratum"]) for case in cases)
+    gold_methods = Counter(str(case["gold_method"]) for case in cases)
 
     passed = (
         total >= args.minimum_cases
@@ -273,23 +345,29 @@ def main() -> None:
     )
 
     report = {
-        "schema_version": "agnxiv.external-centrality/1",
+        "schema_version": "agnxiv.external-centrality/2",
         "evaluation_role": "heldout_external_author_tldr",
         "source": {
             "dataset": "ReproRepo paper metadata",
             "repository": "LithiumDA/ReproRepo",
             "commit": "470a4c69d9f11df15526464e0a5bb66d95a12f55",
-            "gold_signal": "author/OpenReview TLDR quantitative claims",
+            "gold_signal": (
+                "author/OpenReview TLDR exact quantitative mapping, falling back "
+                "to frozen author title+TLDR lexical anchoring"
+            ),
             "sampling_seed": "agnxiv-centrality-heldout-v1",
         },
         "eligibility": (
-            "Papers require a repository, an abstract with at least two "
-            "quantitative candidates, and at least one author-TLDR quantitative "
-            "claim that uniquely maps to a compatible abstract claim."
+            "Papers require a repository, author title/TLDR metadata, an abstract "
+            "with at least two quantitative candidates, and an external gold map. "
+            "Gold is exact quantitative TLDR matching when available; otherwise "
+            "the best title+TLDR lexical match must share >=3 content tokens, "
+            "score >=0.12, and exceed the runner-up by >=0.02."
         ),
         "cases": total,
         "eligible_before_sampling": len(eligible),
         "strata": dict(sorted(strata.items())),
+        "gold_methods": dict(sorted(gold_methods.items())),
         "recall_at_1": recall_at_1,
         "recall_at_3": recall_at_3,
         "recall_at_5": recall_at_5,
