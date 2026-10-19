@@ -282,7 +282,7 @@ def _looks_like_structural_quantity(
         return True
 
     if value.is_integer() and abs(value) <= 50:
-        if suffix.startswith(")") or suffix.startswith(":"):
+        if suffix.startswith((")", ":")):
             return True
 
         stripped = local_context.lstrip()
