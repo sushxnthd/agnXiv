@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 
 from sqlalchemy import (
+    BigInteger,
     DateTime,
     Integer,
     String,
@@ -59,7 +60,7 @@ class Job(Base):
         index=True,
     )
     request_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    workflow_run_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    workflow_run_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True, index=True)
     result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
