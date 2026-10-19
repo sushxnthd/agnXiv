@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+from statistics import NormalDist
 from pathlib import Path
 from typing import Literal
 
@@ -29,6 +30,7 @@ class FalsePassConfidenceReport(BaseModel):
     independent_supports: bool
     one_sided_confidence: float
     zero_false_pass_upper_bound: float | None
+    one_sided_upper_bound: float | None
     target_upper_bound: float
     minimum_zero_error_supports: int
     production_pass: bool
@@ -80,10 +82,26 @@ def false_pass_confidence(
     independent = len(keys) == len(supports)
 
     upper: float | None = None
+    zero_error_upper: float | None = None
     if supports and false_passes == 0:
         # Exact Clopper-Pearson one-sided upper confidence limit when x=0:
         # P(X=0 | p)=(1-p)^n=alpha.
-        upper = 1.0 - alpha ** (1.0 / len(supports))
+        zero_error_upper = 1.0 - alpha ** (1.0 / len(supports))
+        upper = zero_error_upper
+    elif supports:
+        # One-sided Wilson score upper bound. This remains defined after a
+        # false pass, so monitoring and release reports cannot drop uncertainty
+        # exactly when the verifier becomes unsafe.
+        n = len(supports)
+        phat = false_passes / n
+        z = NormalDist().inv_cdf(1.0 - alpha)
+        z2 = z * z
+        denominator = 1.0 + z2 / n
+        centre = phat + z2 / (2.0 * n)
+        radius = z * math.sqrt(
+            phat * (1.0 - phat) / n + z2 / (4.0 * n * n)
+        )
+        upper = min(1.0, (centre + radius) / denominator)
 
     required = minimum_zero_error_sample(
         target_upper_bound=target_upper_bound,
@@ -104,7 +122,8 @@ def false_pass_confidence(
         unique_support_independence_keys=len(keys),
         independent_supports=independent,
         one_sided_confidence=1.0 - alpha,
-        zero_false_pass_upper_bound=upper,
+        zero_false_pass_upper_bound=zero_error_upper,
+        one_sided_upper_bound=upper,
         target_upper_bound=target_upper_bound,
         minimum_zero_error_supports=required,
         production_pass=production_pass,
