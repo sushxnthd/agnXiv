@@ -16,7 +16,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Floating/unreconstructed dependency environments are labeled **CONDITIONAL** evidence rather than silently treated as publication-era equivalence.
 - [x] Multiple claim bundles from one run are preserved.
 - [x] Repeated attempts sharing the same evidence cluster are not counted as independent votes.
-- [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.
+- [x] Held-out evaluator keeps predictions and ground-truth labels separate until evaluation, freezes the case-set commitment, checks evidence-cluster independence, and reports exact/Wilson one-sided uncertainty.
+- [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%. No qualifying external cohort is populated yet.
 - [x] Central-claim selection is validated beyond v0 on five manually anchored public real-paper development cases: recall@1 0.40, recall@3 1.00, recall@5 1.00. This is development evidence, not the held-out false-pass estimate.
 - [ ] Historical environment recovery reaches the frozen v2 threshold of >=50% constrained, builder-supported recovery on the fixed eight-paper suite. Current strong recovery is 25%; safe builder support is tracked separately.
 
@@ -50,6 +51,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] HTTP request bodies are capped on actual streamed ASGI bytes, including chunked requests without `Content-Length`.
 - [x] Production release inputs are bound in a GitHub/Sigstore attested manifest containing commit, service image, base image, dependency lock, trusted workflows, and migrations.
 - [x] Fail-closed deployment and rollback runbook requires immutable release tags and matching trusted workflow SHA.
+- [x] Deployment preflight verifies production configuration, immutable release-ref/SHA agreement, and live GitHub default-branch protection.
+- [ ] GitHub release governance is actually enforced. As of 2026-10-19, the repository reports `main protected: false` and no repository rulesets; this requires a repository-admin setting change.
 - [x] Error-budget/SLO policy and scheduled synthetic probes exist for the public product and hosted readiness endpoint.
 - [ ] Production service URL plus operator notification routing are configured and tested after deployment.
 - [x] Scheduled PostgreSQL logical backup/clean-restore rehearsal verifies jobs plus the transparency chain in CI.
@@ -75,8 +78,9 @@ The repository can now enforce substantially stronger operational invariants, bu
 1. held-out false-pass evidence at the predeclared confidence bound;
 2. historical-environment validation still fails the current real-paper diagnostic target;
 3. external security/threat-model review;
-4. an actual hosted control-plane deployment with alert routing, production-provider restore rehearsal, and disaster-recovery testing;
-5. a successfully exercised external transparency anchor against that production deployment.
+4. GitHub branch/ruleset protection for the release repository (currently absent);
+5. an actual hosted control-plane deployment with alert routing, production-provider restore rehearsal, and disaster-recovery testing;
+6. a successfully exercised external transparency anchor against that production deployment.
 
 The connected Railway account currently has no AgnXiv project deployed, so deployment-specific gates cannot yet be truthfully marked complete. `docs/DEPLOYMENT.md` defines the exact release-tag, workflow-SHA, migration, canary, monitoring, backup/restore, and rollback sequence required when a production environment is provisioned.
 
