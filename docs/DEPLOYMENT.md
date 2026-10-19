@@ -108,8 +108,16 @@ verification evidence it exercises.
 
 ## 8. Enable operational monitoring
 
-Set the repository variable `AGNXIV_PRODUCTION_URL` to the production base URL.
-The scheduled synthetic monitor must then check both `/healthz` and `/readyz`.
+Set protected repository variables:
+
+- `AGNXIV_PRODUCTION_URL` — the production HTTPS base URL;
+- `AGNXIV_OIDC_AUDIENCE_BASE` — the exact value configured as
+  `AGNXIV_OIDC_AUDIENCE` in the service.
+
+The trusted hosted workflow derives both callback URL and per-job OIDC audience
+from these protected variables and the job ID. They are deliberately **not**
+workflow-dispatch inputs. The scheduled synthetic monitor must then check both
+`/healthz` and `/readyz`.
 
 Route workflow failures and SLO alerts to an operator before calling the hosted
 service production-grade.
