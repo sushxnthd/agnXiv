@@ -163,3 +163,43 @@ def test_arxiv_download_rejects_redirects(tmp_path: Path, monkeypatch) -> None:
 
     with pytest.raises(HostedRunnerError, match="could not download arXiv PDF"):
         download_arxiv_pdf("2601.00001v1", tmp_path / "paper.pdf")
+
+
+def test_containerized_pdf_parser_is_no_network_unprivileged_and_read_only(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    paper = tmp_path / "paper.pdf"
+    paper.write_bytes(b"%PDF-1.7\n")
+    captured: list[str] = []
+
+    class Completed:
+        returncode = 0
+
+    def fake_run(command, **kwargs):
+        captured.extend(command)
+        out = tmp_path / "pdf-parser-output" / "claims.json"
+        out.write_text('{"ok":true,"claims":[]}', encoding="utf-8")
+        return Completed()
+
+    monkeypatch.setattr("agnxiv.hosted_runner.subprocess.run", fake_run)
+
+    claims = extract_pdf_claims_isolated(
+        paper,
+        tmp_path,
+        parser_image="agnxiv-pdf-parser:trusted",
+    )
+
+    joined = " ".join(captured)
+    assert claims == []
+    assert "--network none" in joined
+    assert "--ipc none" in joined
+    assert "--read-only" in captured
+    assert "--cap-drop ALL" in joined
+    assert "--security-opt no-new-privileges" in joined
+    assert "--user 65534:65534" in joined
+    assert "--pids-limit 64" in joined
+    assert "--memory 1024m" in joined
+    assert "--ulimit nofile=128:128" in joined
+    assert "dst=/input/paper.pdf,readonly" in joined
+    assert "agnxiv-pdf-parser:trusted" in captured
