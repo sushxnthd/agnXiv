@@ -74,7 +74,7 @@ def request_github_oidc_token(audience: str) -> str:
     )
 
     try:
-        with _NO_REDIRECT_OPENER.open(
+        with _NO_REDIRECT_OPENER.open(  # nosec B310 - HTTPS origin validated above
             request,
             timeout=20,
         ) as response:
@@ -121,7 +121,7 @@ def send_result(
     )
 
     try:
-        with _NO_REDIRECT_OPENER.open(
+        with _NO_REDIRECT_OPENER.open(  # nosec B310 - HTTPS origin validated above
             request,
             timeout=30,
         ) as response:
