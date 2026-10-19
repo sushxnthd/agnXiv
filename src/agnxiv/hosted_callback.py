@@ -84,7 +84,11 @@ def request_github_oidc_token(audience: str) -> str:
             payload = json.loads(raw)
     except urllib.error.URLError as exc:
         raise CallbackError(f"could not obtain GitHub OIDC token: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise CallbackError("GitHub OIDC response was not valid JSON") from exc
 
+    if not isinstance(payload, dict):
+        raise CallbackError("GitHub OIDC response had an invalid schema")
     token = payload.get("value")
     if not isinstance(token, str) or not token:
         raise CallbackError("GitHub OIDC response did not contain a token")
