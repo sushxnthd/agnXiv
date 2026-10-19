@@ -142,6 +142,7 @@ def plan_python_environment(
     repository: str | Path,
     *,
     base_image: str = "python:3.11-slim",
+    dependency_file: str | Path | None = None,
 ) -> BuildPlan:
     """Create a dependency-only environment build plan.
 
@@ -152,12 +153,26 @@ def plan_python_environment(
     if not root.is_dir():
         raise ValueError(f"repository path is not a directory: {root}")
 
-    requirements = root / "requirements.txt"
+    if dependency_file is None:
+        dependency_relative = Path("requirements.txt")
+    else:
+        dependency_relative = Path(dependency_file)
+        if dependency_relative.is_absolute() or ".." in dependency_relative.parts:
+            raise ValueError("dependency file must be workspace-relative")
+        if dependency_relative.suffix.lower() != ".txt":
+            raise ValueError("only pip requirements text files are supported")
 
+    requirements = root / dependency_relative
     if requirements.is_symlink():
-        raise ValueError("requirements.txt symlinks are not allowed")
+        raise ValueError("dependency manifest symlinks are not allowed")
+    if requirements.exists() and not requirements.is_file():
+        raise ValueError("dependency manifest is not a regular file")
 
     if not requirements.exists():
+        if dependency_file is not None:
+            raise ValueError(
+                f"dependency manifest does not exist: {dependency_relative.as_posix()}"
+            )
         return BuildPlan(
             base_image=base_image,
             dependency_file=None,
@@ -182,7 +197,7 @@ def plan_python_environment(
     )
     return BuildPlan(
         base_image=base_image,
-        dependency_file="requirements.txt",
+        dependency_file=dependency_relative.as_posix(),
         dependency_sha256=sha256_file(requirements),
         dependency_precision=classify_dependency_precision(requirements),
         dockerfile=dockerfile,
@@ -196,11 +211,16 @@ def build_python_environment(
     repository: str | Path,
     *,
     base_image: str = "python:3.11-slim",
+    dependency_file: str | Path | None = None,
     timeout_seconds: int = 1200,
 ) -> BuildResult:
     """Build a runtime without exposing research source to dependency installers."""
     root = Path(repository)
-    plan = plan_python_environment(root, base_image=base_image)
+    plan = plan_python_environment(
+        root,
+        base_image=base_image,
+        dependency_file=dependency_file,
+    )
 
     if not plan.safe_manifest_only:
         reasons = "; ".join(plan.rejected_reasons)
@@ -225,7 +245,7 @@ def build_python_environment(
         if plan.dependency_file is not None:
             shutil.copyfile(
                 root / plan.dependency_file,
-                context / plan.dependency_file,
+                context / "requirements.txt",
             )
 
         command = [
