@@ -54,9 +54,7 @@ def _close(left: float, right: float) -> bool:
 def _compatible(left: Claim, right: Claim) -> bool:
     if left.metric and right.metric and left.metric != right.metric:
         return False
-    if left.unit and right.unit and left.unit != right.unit:
-        return False
-    return True
+    return not (left.unit and right.unit and left.unit != right.unit)
 
 
 def _load_rows(path: Path) -> list[dict]:
