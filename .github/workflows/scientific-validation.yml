@@ -12,6 +12,7 @@ on:
       - "research/scripts/run_external_centrality_validation.py"
       - "research/scripts/run_external_centrality_position_validation.py"
       - "research/scripts/run_scitldr_centrality_validation.py"
+      - "research/scripts/run_scitldr_author_centrality_validation.py"
       - "research/scripts/run_historical_environment_validation.py"
       - "research/benchmarks/centrality-dev-paper-clusters-v1.txt"
       - "research/protocols/centrality-production-gate-v1.md"
@@ -30,6 +31,7 @@ on:
       - "research/scripts/run_external_centrality_validation.py"
       - "research/scripts/run_external_centrality_position_validation.py"
       - "research/scripts/run_scitldr_centrality_validation.py"
+      - "research/scripts/run_scitldr_author_centrality_validation.py"
       - "research/scripts/run_historical_environment_validation.py"
       - "research/benchmarks/centrality-dev-paper-clusters-v1.txt"
       - "research/protocols/centrality-production-gate-v1.md"
@@ -226,7 +228,7 @@ jobs:
           if-no-files-found: warn
 
 
-  scitldr-centrality-production-holdout:
+  scitldr-author-centrality-production-holdout:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -251,32 +253,28 @@ jobs:
       - name: Install verifier
         run: python -m pip install -e .
 
-      - name: Run frozen direct-oracle production holdout
+      - name: Run frozen author-TLDR production holdout
         run: |
-          python research/scripts/run_scitldr_centrality_validation.py \
+          python research/scripts/run_scitldr_author_centrality_validation.py \
             --input external/scitldr/SciTLDR-Data/SciTLDR-AIC/train.jsonl \
-            --role heldout \
-            --direct-only \
             --hash-seed agnxiv-centrality-production-v1 \
             --hash-modulus 4 \
-            --hash-bucket 0 \
+            --hash-bucket 1 \
             --minimum-cases 75 \
-            --min-recall-at-1 0.0 \
             --min-recall-at-3 0.90 \
             --min-recall-at-5 0.95 \
-            --output /tmp/agnxiv-scitldr-centrality-production.json
+            --output /tmp/agnxiv-scitldr-author-centrality-production.json
 
       - name: Assert frozen centrality production threshold
         run: |
           python - <<'PY'
           import json
           with open(
-              "/tmp/agnxiv-scitldr-centrality-production.json",
+              "/tmp/agnxiv-scitldr-author-centrality-production.json",
               encoding="utf-8",
           ) as handle:
               report = json.load(handle)
-          assert report["evaluation_role"] == "heldout_external_oracle"
-          assert report["direct_only"] is True
+          assert report["evaluation_role"] == "heldout_external_author_tldr"
           assert report["cases"] >= 75
           assert report["recall_at_3"] >= 0.90
           assert report["recall_at_5"] >= 0.95
@@ -286,8 +284,8 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
-          name: scientific-validation-scitldr-production-holdout
-          path: /tmp/agnxiv-scitldr-centrality-production.json
+          name: scientific-validation-scitldr-author-production-holdout
+          path: /tmp/agnxiv-scitldr-author-centrality-production.json
           retention-days: 90
           if-no-files-found: warn
 
