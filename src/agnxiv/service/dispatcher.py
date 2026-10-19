@@ -96,7 +96,11 @@ class GitHubActionsDispatcher:
             ) as response:
                 payload = _read_json_response(response)
         except urllib.error.HTTPError as exc:
-            body = exc.read(2000).decode("utf-8", errors="replace")
+            body = (
+            exc.read(2000).decode("utf-8", errors="replace")
+            if exc.fp is not None
+            else ""
+        )
             raise DispatchError(
                 f"could not resolve GitHub ref with HTTP {exc.code}: {body}"
             ) from exc
@@ -151,7 +155,11 @@ class GitHubActionsDispatcher:
                     )
                 details = _read_json_response(response)
         except urllib.error.HTTPError as exc:
-            body = exc.read(2000).decode("utf-8", errors="replace")
+            body = (
+            exc.read(2000).decode("utf-8", errors="replace")
+            if exc.fp is not None
+            else ""
+        )
             raise DispatchError(
                 f"GitHub workflow dispatch failed with HTTP {exc.code}: {body}"
             ) from exc
