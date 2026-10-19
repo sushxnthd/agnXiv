@@ -23,14 +23,15 @@ All P0 items must be true before calling the hosted service production-grade.
 ### Execution security
 
 - [x] Research execution is separated from the control plane.
-- [x] Research containers run without network, added Linux capabilities, or write access to host evidence.
+- [x] Research containers run non-root with private IPC, without network, added Linux capabilities, or write access to host evidence.
 - [x] GitHub credentials are not persisted into research execution.
 - [x] Worker callbacks require GitHub Actions OIDC.
 - [x] Returned Git commit must match the control-plane pinned commit.
 - [x] Dependency installers do not receive the research source tree.
 - [ ] Dedicated sandbox provider / microVM boundary for workloads beyond public beta risk envelope.
 - [x] Continuous Python dependency vulnerability scanning with a blocking `pip-audit` gate and CycloneDX SBOM output.
-- [ ] Container/OS package vulnerability scanning.
+- [x] Static security analysis gates cover Python source with Bandit and GitHub Actions with zizmor.
+- [x] Container/OS package vulnerability scanning blocks HIGH/CRITICAL findings in the hosted service image.
 - [ ] External security review and threat-model review.
 
 ### Control-plane reliability

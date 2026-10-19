@@ -130,8 +130,10 @@ jobs:
       - run: python -m pip install -e ".[pdf]"
       - run: |
           python research/scripts/run_diagnostic_case.py \
-            --case-id "${{ inputs.case_id }}" \
+            --case-id "$CASE_ID" \
             --output-dir "/tmp/research-diagnostic"
+        env:
+          CASE_ID: ${{ inputs.case_id }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: research-diagnostic-${{ inputs.case_id }}
