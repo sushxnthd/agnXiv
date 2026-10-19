@@ -5,7 +5,7 @@ import json
 import math
 from pathlib import Path
 
-from agnxiv.auto import score_claim_centrality
+from agnxiv.auto import rank_claim_indices_with_statement_diversity, score_claim_centrality
 from agnxiv.claims import extract_quantitative_claims
 from agnxiv.models import Claim
 
@@ -98,14 +98,12 @@ def _paper_case(row: dict, *, oracle_window: int) -> dict | None:
             document_position=sentence_index / sentence_denominator,
         )
 
-    ranked = sorted(
-        candidates,
-        key=lambda item: (
-            -centrality(item),
-            item[0],
-            item[1],
-        ),
+    candidate_scores = [centrality(item) for item in candidates]
+    order = rank_claim_indices_with_statement_diversity(
+        [item[2] for item in candidates],
+        candidate_scores,
     )
+    ranked = [candidates[index] for index in order]
     ranks = {
         (sentence_index, local_index): rank
         for rank, (sentence_index, local_index, _) in enumerate(
