@@ -14,10 +14,13 @@ jobs:
     steps:
       - name: Checkout AgnXiv
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Checkout third-party research artifact
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          persist-credentials: false
           repository: Pranavsingh431/Perturbation-Based-Measurements
           ref: d7fa58215bf6966df70d05f5433f1238c05d2ea0
           path: external/perturbation-measurements
