@@ -129,7 +129,12 @@ def test_hosted_job_lifecycle_oidc_and_quota(tmp_path, monkeypatch) -> None:
         assert fetched.status_code == 200
         final = fetched.json()
         assert final["status"] == "needs_review"
+        assert final["workflow_run_id"] == 12345
         assert final["result"]["plan"]["automation_score"] == 0.75
+        assert final["result"]["orchestration"] == {
+            "provider": "github-actions",
+            "workflow_run_id": 12345,
+        }
 
 
 def test_hosted_callback_rejects_untrusted_oidc(tmp_path, monkeypatch) -> None:
