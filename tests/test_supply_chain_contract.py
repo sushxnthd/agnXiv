@@ -44,3 +44,30 @@ def test_hosted_callback_runs_even_when_worker_job_fails() -> None:
     assert "continue-on-error: true" in callback
     assert "Synthesize terminal failure when worker produced no result" in callback
     assert "execute_job=" in callback
+
+
+def test_release_provenance_is_sigstore_attested_and_binds_trusted_inputs() -> None:
+    text = _read(".github/workflows/release-provenance.yml")
+    assert "attestations: write" in text
+    assert "id-token: write" in text
+    assert (
+        "actions/attest-build-provenance@"
+        "4d101475d8b20a2381f78447822ac1eab6504dd8"
+    ) in text
+    for required in (
+        "commit_sha",
+        "service_image_id",
+        "service_base_image",
+        "dockerfile_sha256",
+        "constraints_sha256",
+        "hosted_workflow_sha256",
+        "production_gate_sha256",
+        "migration_files",
+    ):
+        assert required in text
+
+
+def test_example_production_config_requires_immutable_workflow_commit() -> None:
+    text = _read(".env.example")
+    assert "AGNXIV_GITHUB_WORKFLOW_SHA=" in text
+    assert "AGNXIV_MAX_REQUEST_BYTES=" in text
