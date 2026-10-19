@@ -52,9 +52,14 @@ AGNXIV_MAX_JOBS_PER_HOUR=20
 AGNXIV_JOB_STALE_MINUTES=45
 AGNXIV_MIN_API_KEY_LENGTH=32
 AGNXIV_MAX_REQUEST_BYTES=5242880
+AGNXIV_ALLOW_DEVELOPMENT_AUTH=false
 ```
 
-`AGNXIV_GITHUB_WORKFLOW_SHA` is a trust root. The service rejects callbacks whose GitHub OIDC `workflow_sha` does not exactly match this value. `AGNXIV_GITHUB_REF` must be the matching `refs/tags/...` release ref; the dispatcher converts it to GitHub's tag-name form while callback authentication requires the full OIDC tag ref.
+`AGNXIV_GITHUB_WORKFLOW_SHA` is a trust root. Production must also leave
+`AGNXIV_ALLOW_DEVELOPMENT_AUTH=false`; development authentication is a
+readiness failure and must never be used on an Internet-facing deployment.
+
+ The service rejects callbacks whose GitHub OIDC `workflow_sha` does not exactly match this value. `AGNXIV_GITHUB_REF` must be the matching `refs/tags/...` release ref; the dispatcher converts it to GitHub's tag-name form while callback authentication requires the full OIDC tag ref.
 
 ## 4. Apply schema migrations before traffic
 
@@ -101,7 +106,9 @@ Submit one known-safe public paper/repository pair with a fresh
 4. each decided claim has a DSSE signature;
 5. a transparency receipt exists for the job;
 6. the receipt chain verifies;
-7. the issuer public key verifies the DSSE envelope offline.
+7. the issuer public key verifies the DSSE envelope offline;
+8. the job's stored `workflow_run_id`, the GitHub OIDC `run_id`, and the
+   signed statement's `predicate.orchestration.workflowRunId` are identical.
 
 Do not use a successful canary to broaden a claim beyond the individual
 verification evidence it exercises.
