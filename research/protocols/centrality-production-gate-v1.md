@@ -80,3 +80,27 @@ The same frozen release thresholds apply unchanged: at least 75 eligible
 papers, Recall@3 >= 0.90, and Recall@5 >= 0.95. Recall@1 remains diagnostic.
 If this partition fails, bucket 0 becomes development evidence and cannot be
 reused for certification after any tuning.
+
+
+## Frozen dense author-TLDR holdout
+
+The direct-oracle SciTLDR bucket 0 was intentionally conservative but yielded
+only two eligible quantitative oracle-sentence cases from 510 rows. It is now
+development evidence and is not reused.
+
+Before evaluating another partition, the dense author-TLDR mapping is frozen
+on hash bucket 1 of the same untouched upstream corpus:
+
+- hash seed: `agnxiv-centrality-production-v1`
+- partition: `uint64(sha256(seed + "|" + paper_id)[:8]) mod 4 == 1`
+- external anchor: `target[0]`, documented by SciTLDR as the author TLDR
+- first preference: a unique quantitative author-TLDR value maps to a unique
+  source quantitative claim with compatible metric/unit semantics
+- fallback: title + author-TLDR lexical F1, requiring >=2 shared content
+  tokens, F1 >=0.08, and a >=0.015 margin over the runner-up
+- ambiguous mappings are excluded rather than guessed
+
+The centrality score is never consulted while constructing gold. The frozen
+release thresholds remain unchanged: n >= 75, Recall@3 >= 0.90, Recall@5 >=
+0.95, with Recall@1 diagnostic only. If bucket 1 fails, it becomes development
+evidence and cannot be reused after tuning.
