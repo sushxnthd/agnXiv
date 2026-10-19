@@ -58,8 +58,16 @@ jobs:
           sudo apt-get install -y --no-install-recommends postgresql-client
           python -m pip install -e ".[service,sign,pdf]"
 
-      - name: Apply production schema
-        run: alembic upgrade head
+      - name: Apply production schema concurrently under migration lock
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+        run: |
+          python -m agnxiv.service.migrate &
+          FIRST=$!
+          python -m agnxiv.service.migrate &
+          SECOND=$!
+          wait "$FIRST"
+          wait "$SECOND"
 
       - name: Seed one finalized verification receipt
         run: |
