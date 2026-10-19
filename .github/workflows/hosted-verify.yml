@@ -27,14 +27,6 @@ on:
         description: Manifest path for verify-spec jobs
         required: false
         type: string
-      callback_url:
-        description: AgnXiv completion endpoint
-        required: true
-        type: string
-      oidc_audience:
-        description: Expected callback OIDC audience
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -140,10 +132,30 @@ jobs:
 
       - name: Authenticate with GitHub OIDC and deliver result
         env:
-          CALLBACK_URL: ${{ inputs.callback_url }}
-          OIDC_AUDIENCE: ${{ inputs.oidc_audience }}
+          CALLBACK_BASE_URL: ${{ vars.AGNXIV_PRODUCTION_URL }}
+          OIDC_AUDIENCE_BASE: ${{ vars.AGNXIV_OIDC_AUDIENCE_BASE }}
+          JOB_ID: ${{ inputs.job_id }}
           PYTHONPATH: ${{ github.workspace }}/src
         run: |
+          python - <<'PY'
+          import os
+          from urllib.parse import urlparse
+
+          for name in ("CALLBACK_BASE_URL", "OIDC_AUDIENCE_BASE"):
+              value = os.environ.get(name, "").rstrip("/")
+              parsed = urlparse(value)
+              if (
+                  parsed.scheme != "https"
+                  or not parsed.hostname
+                  or parsed.username
+                  or parsed.password
+                  or parsed.query
+                  or parsed.fragment
+              ):
+                  raise SystemExit(f"{name} must be a clean HTTPS origin")
+          PY
+          CALLBACK_URL="${CALLBACK_BASE_URL%/}/internal/jobs/$JOB_ID/complete"
+          OIDC_AUDIENCE="${OIDC_AUDIENCE_BASE%/}/jobs/$JOB_ID"
           python -m agnxiv.hosted_callback \
             --result /tmp/agnxiv-result/agnxiv-hosted-result.json \
             --callback-url "$CALLBACK_URL" \
