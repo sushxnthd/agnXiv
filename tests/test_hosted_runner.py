@@ -119,3 +119,29 @@ def test_repository_checkout_disables_lfs_smudge_and_submodule_recursion(
     assert "filter.lfs.process=" in joined
     assert "filter.lfs.required=false" in joined
     assert "submodule.recurse=false" in joined
+
+
+def test_hosted_verify_spec_rejects_manifest_link(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    def fake_checkout(slug: str, ref: str, destination: Path) -> None:
+        destination.mkdir(parents=True)
+        target = destination / "real.json"
+        target.write_text('{"schema_version":"agnxiv.spec/1"}', encoding="utf-8")
+        link = destination / "agnxiv.json"
+        try:
+            link.symlink_to(target)
+        except OSError:
+            pytest.skip("filesystem links are unavailable on this platform")
+
+    monkeypatch.setattr("agnxiv.hosted_runner.checkout_repository", fake_checkout)
+
+    with pytest.raises(HostedRunnerError, match="symlinks are not allowed"):
+        execute_job(
+            mode="verify_spec",
+            repository="owner/repository",
+            repository_ref="main",
+            arxiv_id=None,
+            spec_path="agnxiv.json",
+        )
