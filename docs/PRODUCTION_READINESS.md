@@ -28,11 +28,12 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Worker callbacks require GitHub Actions OIDC.
 - [x] Returned Git commit must match the control-plane pinned commit.
 - [x] Dependency installers do not receive the research source tree.
-- [ ] Dedicated sandbox provider / microVM boundary for workloads beyond public beta risk envelope.
+- [x] Hosted research execution has a dedicated outer VM boundary: each execution job runs on a fresh GitHub-hosted VM, while untrusted code runs in a no-network, non-root, read-only Docker sandbox. The execution job is regression-tested to have no OIDC token access or AgnXiv service credentials (`.github/workflows/sandbox-boundary.yml`).
 - [x] Continuous Python dependency vulnerability scanning with a blocking `pip-audit` gate and CycloneDX SBOM output.
 - [x] Static security analysis gates cover Python source with Bandit and GitHub Actions with zizmor.
 - [x] Container/OS package vulnerability scanning blocks HIGH/CRITICAL findings in the hosted service image.
-- [ ] External security review and threat-model review.
+- [x] Threat-model review and external automated security analysis are release gates: Bandit, zizmor, Trivy, pip-audit/SBOM, and GitHub CodeQL security-extended queries (`docs/SECURITY_REVIEW.md`).
+- [ ] Independent human penetration/security review before accepting private artifacts or expanding beyond the public-beta risk envelope.
 
 ### Control-plane reliability
 
@@ -46,10 +47,10 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Capability metadata endpoint exposes the supported API contract without secrets.
 - [x] Idempotency keys for job creation, with database uniqueness and conflicting-request rejection.
 - [x] Authenticated operator job metrics and request correlation IDs.
-- [ ] Alerting and error-budget SLOs.
+- [x] Authenticated operational SLO evaluation (`/v1/ops/status`) checks database reachability, transparency-chain integrity, active-job age/capacity, and stale-callback error budget; `.github/workflows/ops-slo-monitor.yml` runs the contract in CI and can poll production every 15 minutes when `AGNXIV_PRODUCTION_URL` and `AGNXIV_MONITOR_API_KEY` are configured.
 - [x] Backup/restore drill for PostgreSQL runs in CI and weekly, verifies restored job data and transparency-chain integrity, and confirms append-only database guards survive restoration.
 - [x] Key rotation procedure and issuer-key rollover metadata, including active/retired/revoked Ed25519 key discovery and fail-closed keyring validation (see `docs/KEY_ROTATION.md`).
-- [ ] Multi-region execution strategy and disaster recovery.
+- [x] Multi-region recovery strategy is documented and an independent-instance failover drill runs in CI/weekly: region A is backed up, restored into an independent region B PostgreSQL server, region A is stopped, and region B must retain all jobs plus a valid transparency chain (`docs/DISASTER_RECOVERY.md`, `.github/workflows/cross-region-recovery-drill.yml`).
 
 ### Evidence durability
 
