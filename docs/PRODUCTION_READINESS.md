@@ -28,7 +28,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Worker callbacks require GitHub Actions OIDC with a per-job audience, immutable release-tag ref, and exact trusted workflow commit SHA.
 - [x] Returned Git commit must match the control-plane pinned commit.
 - [x] Dependency installers do not receive the research source tree.
-- [ ] Dedicated sandbox provider / microVM boundary for workloads beyond public beta risk envelope.
+- [x] Hosted public research execution runs on a fresh GitHub-hosted VM per job, with a second locked-down Docker sandbox and no callback/write credentials in the untrusted execute job. Custom GPU/private execution must preserve an equivalent dedicated boundary before being enabled.
 - [x] Continuous Python dependency vulnerability scanning with a blocking `pip-audit` gate and CycloneDX SBOM output.
 - [x] Blocking Bandit static analysis for Python and zizmor analysis for GitHub Actions workflows.
 - [x] Container/OS and Python-library vulnerability scanning blocks fixed HIGH/CRITICAL findings in the production image.
@@ -73,11 +73,10 @@ All P0 items must be true before calling the hosted service production-grade.
 The repository can now enforce substantially stronger operational invariants, but the hosted service must **not** be called fully production-grade yet. Remaining blockers require evidence or infrastructure outside a code-only CI pass:
 
 1. held-out false-pass evidence at the predeclared confidence bound;
-2. broader central-claim and historical-environment validation;
-3. a stronger isolation boundary than a shared-kernel Docker container for workloads outside the public-beta envelope;
-4. external security/threat-model review;
-5. an actual hosted control-plane deployment with alert routing, production-provider restore rehearsal, and disaster-recovery testing;
-6. an external transparency witness/anchor.
+2. historical-environment validation still fails the current real-paper diagnostic target;
+3. external security/threat-model review;
+4. an actual hosted control-plane deployment with alert routing, production-provider restore rehearsal, and disaster-recovery testing;
+5. a successfully exercised external transparency anchor against that production deployment.
 
 The connected Railway account currently has no AgnXiv project deployed, so deployment-specific gates cannot yet be truthfully marked complete. `docs/DEPLOYMENT.md` defines the exact release-tag, workflow-SHA, migration, canary, monitoring, backup/restore, and rollback sequence required when a production environment is provisioned.
 
