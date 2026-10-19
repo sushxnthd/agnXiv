@@ -441,7 +441,11 @@ def execute_job(
                     "plan": outcome.plan.model_dump(mode="json"),
                     "reason": outcome.reason,
                 }
-            verdicts = [item.record.verdict.value for item in outcome.bundles]
+            bound_bundles = [
+                _bind_runtime_build(item, build)
+                for item in outcome.bundles
+            ]
+            verdicts = [item.record.verdict.value for item in bound_bundles]
             status = (
                 "succeeded"
                 if any(item in {"VERIFIED", "CONTRADICTED"} for item in verdicts)
@@ -451,16 +455,15 @@ def execute_job(
                 "kind": "verification",
                 "zero_manifest": True,
                 "build": build.model_dump(mode="json"),
-                "environment": plan.environment.model_dump(mode="json"),
                 "discovery": outcome.frozen_locator.model_dump(mode="json"),
-                "bundle": outcome.bundle.model_dump(mode="json"),
+                "bundle": bound_bundles[0].model_dump(mode="json"),
                 "additional_verifications": [
                     {
                         "discovery": locator.model_dump(mode="json"),
                         "bundle": item.model_dump(mode="json"),
                     }
                     for locator, item in zip(
-                        outcome.frozen_locators[1:], outcome.bundles[1:]
+                        outcome.frozen_locators[1:], bound_bundles[1:]
                     )
                 ],
             }
