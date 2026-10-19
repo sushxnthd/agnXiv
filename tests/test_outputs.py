@@ -240,3 +240,31 @@ def test_target_and_observed_on_same_line_still_abstains_after_key_binding() -> 
     )
 
     assert select_unambiguous_observation(candidates) is None
+
+
+def test_explicit_regex_locator_rejects_redos_shapes_and_extra_captures() -> None:
+    from agnxiv.outputs import extract_regex_observation, safe_regex_pattern
+
+    assert safe_regex_pattern(r"accuracy: (?P<value>\d+\.\d+)")
+    for pattern in (
+        r"(?P<value>(a+)+)$",
+        r"(?P<value>(a|aa)+)$",
+        r"(?=(?P<value>\d+))",
+        r"(?P<value>\d+)\s+\1",
+        r"(?P<value>\d+)(extra)",
+    ):
+        assert safe_regex_pattern(pattern) is False
+        assert extract_regex_observation("a" * 10000, pattern) is None
+
+
+def test_explicit_regex_locator_stops_after_second_match() -> None:
+    from agnxiv.outputs import extract_regex_observation
+
+    output = ("accuracy: 0.8\n" * 100_000)
+    assert (
+        extract_regex_observation(
+            output,
+            r"accuracy: (?P<value>\d+\.\d+)",
+        )
+        is None
+    )
