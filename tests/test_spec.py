@@ -372,3 +372,27 @@ def test_manifest_rejects_nonfinite_reported_value_and_tolerance() -> None:
                 },
             }
         )
+
+
+def test_manifest_rejects_explicit_artifact_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "data.bin"
+    target.write_bytes(b"evidence")
+    link = tmp_path / "data-link.bin"
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("symlinks are unavailable on this platform")
+
+    spec_path = tmp_path / "agnxiv.json"
+    payload = {
+        "schema_version": "agnxiv.spec/1",
+        "repository": ".",
+        "claim": {"id": "C1", "text": "Result", "reported_value": 1.0},
+        "policy": {"kind": "absolute", "operator": "approx", "tolerance": 0.01},
+        "runtime": {"image": "local:test", "command": ["python", "run.py"]},
+        "artifacts": ["data-link.bin"],
+    }
+    spec_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="artifact symlinks are not allowed"):
+        execute_verification_spec(spec_path)
