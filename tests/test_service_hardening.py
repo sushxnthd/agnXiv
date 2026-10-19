@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -594,3 +595,31 @@ def test_production_readiness_requires_immutable_trusted_workflow_sha() -> None:
         }
     )
     assert "trusted_workflow_sha_invalid" in invalid.production_issues
+
+
+def test_streamed_request_body_limit_cannot_be_bypassed_without_content_length(
+    tmp_path,
+) -> None:
+    config = replace(
+        _productionish_config(
+            f"sqlite:///{tmp_path / 'body-limit.db'}",
+            issuer=None,
+        ),
+        max_request_bytes=1024,
+    )
+    app = create_app(config)
+
+    def oversized_chunks():
+        yield b'{"mode":"auto_verify","repository":"'
+        yield b"a" * 2048
+        yield b'","arxiv_id":"2601.00001"}'
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/jobs",
+            headers={"X-API-Key": "k" * 48},
+            content=oversized_chunks(),
+        )
+
+    assert response.status_code == 413
+    assert response.json()["detail"] == "request body too large"
