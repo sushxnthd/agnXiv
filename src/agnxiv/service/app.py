@@ -17,12 +17,12 @@ from pydantic import BaseModel, Field
 
 from ..pipeline import VerificationBundle
 from ..preprint import parse_arxiv_reference
-from ..transparency import GENESIS_HASH, TRANSPARENCY_SCHEMA
 from ..statement import (
     build_verification_statement,
     public_key_pem_from_private,
     sign_statement_ed25519,
 )
+from ..transparency import GENESIS_HASH, TRANSPARENCY_SCHEMA
 from .config import ServiceConfig
 from .db import Job, JobStore, TransparencyEntry, job_result
 from .dispatcher import DispatchError, DispatchRequest, GitHubActionsDispatcher
