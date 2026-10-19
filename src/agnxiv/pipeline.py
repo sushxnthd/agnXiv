@@ -22,7 +22,6 @@ from .outputs import (
     select_unambiguous_observation,
 )
 from .planner import CommandCandidate, discover_commands
-from .registry import PublicationBinding
 from .provenance import (
     ArtifactFingerprint,
     DocumentFingerprint,
@@ -31,6 +30,7 @@ from .provenance import (
     fingerprint_document,
     fingerprint_tree,
 )
+from .registry import PublicationBinding
 from .sandbox import ExecutionResult, SandboxError, SandboxLimits, execute_in_docker
 from .verify import verify_numeric_claim
 
