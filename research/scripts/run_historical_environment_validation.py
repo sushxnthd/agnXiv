@@ -27,6 +27,16 @@ def _stable_key(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def _load_exclusions(path: Path | None) -> set[str]:
+    if path is None:
+        return set()
+    return {
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+
+
 def _load_rows(paths: list[Path]) -> list[dict]:
     rows: list[dict] = []
     seen: set[str] = set()
@@ -130,7 +140,13 @@ def _small_safe_requirements(root: Path) -> bool:
 
 def _attempt_build(root: Path) -> tuple[bool, str | None, str | None]:
     errors: list[str] = []
-    for image in ("python:3.10-slim", "python:3.11-slim", "python:3.12-slim"):
+    for image in (
+        "python:3.9-slim",
+        "python:3.8-slim",
+        "python:3.10-slim",
+        "python:3.11-slim",
+        "python:3.12-slim",
+    ):
         try:
             result = build_python_environment(
                 root,
@@ -147,12 +163,18 @@ def _attempt_build(root: Path) -> tuple[bool, str | None, str | None]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", action="append", required=True)
+    parser.add_argument("--exclude")
     parser.add_argument("--max-classification", type=int, default=30)
     parser.add_argument("--max-builds", type=int, default=8)
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
-    candidates = _load_rows([Path(value) for value in args.input])
+    exclusions = _load_exclusions(Path(args.exclude) if args.exclude else None)
+    candidates = [
+        row
+        for row in _load_rows([Path(value) for value in args.input])
+        if row["key"] not in exclusions
+    ]
     candidates.sort(key=lambda row: _stable_key(row["key"] + "|agnxiv-env-heldout-v1"))
 
     classification_rows: list[dict] = []
@@ -161,8 +183,12 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="agnxiv-env-validation-") as temp:
         base = Path(temp)
         for row in candidates:
+            classified_count = sum(
+                item.get("status") == "classified"
+                for item in classification_rows
+            )
             if (
-                len(classification_rows) >= args.max_classification
+                classified_count >= args.max_classification
                 and len(build_rows) >= args.max_builds
             ):
                 break
@@ -214,7 +240,11 @@ def main() -> None:
 
             shutil.rmtree(checkout, ignore_errors=True)
 
-            if len(classification_rows) >= args.max_classification and len(build_rows) >= args.max_builds:
+            classified_count = sum(
+                item.get("status") == "classified"
+                for item in classification_rows
+            )
+            if classified_count >= args.max_classification and len(build_rows) >= args.max_builds:
                 break
 
     classified = [row for row in classification_rows if row.get("status") == "classified"]
@@ -255,6 +285,7 @@ def main() -> None:
             "minimum_build_success_rate": _MIN_BUILD_SUCCESS_RATE,
         },
         "candidate_repositories": len(candidates),
+        "excluded_development_repositories": len(exclusions),
         "classification_cases": len(classified),
         "classification_accuracy": classification_accuracy,
         "build_attempts": len(build_rows),
