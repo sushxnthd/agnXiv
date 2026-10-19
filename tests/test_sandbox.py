@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from agnxiv.sandbox import SandboxLimits, docker_command, prepare_artifact_mounts
 
 
@@ -13,12 +15,17 @@ def test_docker_command_is_locked_down(tmp_path: Path) -> None:
 
     joined = " ".join(command)
     assert "--network none" in joined
+    assert "--ipc private" in joined
+    assert "--user 65534:65534" in joined
     assert "--read-only" in command
     assert "--cap-drop ALL" in joined
     assert "--security-opt no-new-privileges" in joined
     assert "--pids-limit 64" in joined
     assert "--memory 2g" in joined
     assert "--cpus 1.0" in joined
+    assert "nodev" in joined
+    assert "uid=65534" in joined
+    assert "gid=65534" in joined
     assert "readonly" in joined
 
 
@@ -50,3 +57,15 @@ def test_workspace_copy_excludes_git_metadata(tmp_path: Path) -> None:
     assert "! -name .git" in shell_command
     assert "cp -R /source/. /workspace/" not in shell_command
     assert "--network" in command
+
+
+def test_repository_mount_source_rejects_delimiter_injection(tmp_path: Path) -> None:
+    unsafe_repo = tmp_path / "unsafe,repo"
+    unsafe_repo.mkdir()
+
+    with pytest.raises(ValueError, match="repository path"):
+        docker_command(
+            image="python:3.11-slim",
+            repository=unsafe_repo,
+            command=["python", "evaluate.py"],
+        )
