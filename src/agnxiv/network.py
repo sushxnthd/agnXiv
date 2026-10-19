@@ -263,10 +263,9 @@ def _evidence_metadata(
     *,
     repository: str,
 ) -> tuple[str | None, str | None, EvidenceGrade, str]:
-    build = result.get("build") or {}
-    plan = build.get("plan") or {}
-    dependency_precision = plan.get("dependency_precision")
-    environment = result.get("environment") or {}
+    runtime_build = bundle.get("runtime_build") or {}
+    dependency_precision = runtime_build.get("dependency_precision")
+    environment = bundle.get("environment") or {}
     historical_fidelity = environment.get("historical_fidelity")
     observation_method = bundle.get("observation_method")
     execution = bundle.get("execution") or {}
