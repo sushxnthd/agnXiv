@@ -18,8 +18,7 @@ Release only a commit on `main` for which all required workflows are green:
 - `deepwalk-auto`
 - `release-provenance`
 
-Record the 40-character release commit SHA. The release-provenance workflow must
-produce a GitHub/Sigstore attestation for `agnxiv-release-manifest.json`.
+Record the 40-character release commit SHA. Create an immutable release tag at that exact commit, for example `agnxiv-release-2026-10-19.1`. The release-provenance workflow must produce a GitHub/Sigstore attestation for `agnxiv-release-manifest.json`.
 
 ## 2. Provision the production dependencies
 
@@ -42,7 +41,7 @@ AGNXIV_API_KEYS=<high-entropy-key>
 AGNXIV_PUBLIC_BASE_URL=https://<service-host>
 AGNXIV_GITHUB_TOKEN=<actions-dispatch-token>
 AGNXIV_GITHUB_REPOSITORY=sushxnthd/agnXiv
-AGNXIV_GITHUB_REF=main
+AGNXIV_GITHUB_REF=refs/tags/agnxiv-release-<version>
 AGNXIV_GITHUB_WORKFLOW=hosted-verify.yml
 AGNXIV_GITHUB_WORKFLOW_SHA=<40-char release commit SHA>
 AGNXIV_OIDC_AUDIENCE=https://<service-host>/github-actions
@@ -55,8 +54,7 @@ AGNXIV_MIN_API_KEY_LENGTH=32
 AGNXIV_MAX_REQUEST_BYTES=5242880
 ```
 
-`AGNXIV_GITHUB_WORKFLOW_SHA` is a trust root. The service rejects callbacks
-whose GitHub OIDC `workflow_sha` does not exactly match this value.
+`AGNXIV_GITHUB_WORKFLOW_SHA` is a trust root. The service rejects callbacks whose GitHub OIDC `workflow_sha` does not exactly match this value. `AGNXIV_GITHUB_REF` must be the matching `refs/tags/...` release ref; the dispatcher converts it to GitHub's tag-name form while callback authentication requires the full OIDC tag ref.
 
 ## 4. Apply schema migrations before traffic
 
