@@ -266,6 +266,8 @@ def _evidence_metadata(
     build = result.get("build") or {}
     plan = build.get("plan") or {}
     dependency_precision = plan.get("dependency_precision")
+    environment = result.get("environment") or {}
+    historical_fidelity = environment.get("historical_fidelity")
     observation_method = bundle.get("observation_method")
     execution = bundle.get("execution") or {}
     record = bundle.get("record") or {}
@@ -285,12 +287,10 @@ def _evidence_metadata(
         "explicit_json_path",
         "explicit_regex",
     }
-    strong_environment = dependency_precision in {
-        "base-only",
-        "version-pinned",
-        "hash-pinned",
-        "locked",
-    }
+    strong_environment = (
+        dependency_precision in {"hash-pinned", "locked"}
+        and historical_fidelity == "constrained"
+    )
     if decided and execution_sound and locator_sound and strong_environment:
         grade = EvidenceGrade.STRONG
     elif decided and execution_sound and locator_sound:
