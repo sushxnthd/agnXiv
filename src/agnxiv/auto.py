@@ -120,7 +120,16 @@ def _read_readme(root: Path) -> str:
     return ""
 
 
-def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
+def score_claim_centrality(
+    claim: Claim,
+    *,
+    evidence_score: float | None = None,
+) -> float:
+    """Score whether a quantitative claim is scientifically central.
+
+    This is a discovery score only. It may choose which claim to investigate,
+    but it never contributes evidence to the final verification verdict.
+    """
     score = 0.10
 
     if claim.reported_value is not None:
@@ -133,39 +142,58 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
         score += 0.05
     if claim.reported_uncertainty is not None:
         score += 0.05
-    if claim.source.page is not None:
+
+    page = claim.source.page
+    if page is not None:
         score += 0.05
-        if claim.source.page == 1:
+        if page == 1:
             score += 0.18
-        elif claim.source.page == 2:
+        elif page == 2:
             score += 0.07
 
     lower = claim.text.lower()
-    if any(
-        token in lower
-        for token in (
-            "achiev",
-            "outperform",
-            "improv",
-            "reduc",
-            "increase",
-            "decrease",
-            "significant",
-            "result",
-            "score",
-            "accelerat",
-            "saving",
-            "save",
-            "fewer",
-        )
-    ):
+    contribution_signals = (
+        "achiev",
+        "outperform",
+        "improv",
+        "reduc",
+        "increase",
+        "decrease",
+        "significant",
+        "result",
+        "score",
+        "accelerat",
+        "saving",
+        "save",
+        "fewer",
+    )
+    if any(token in lower for token in contribution_signals):
         score += 0.10
 
-    if evidence:
-        score += min(0.20, 0.08 + evidence[0].score * 0.12)
+    # Abstract/introduction result statements are a better prior for scientific
+    # centrality than later incidental measurements. This bonus is deliberately
+    # lexical and page-bounded; it cannot award a verifier verdict.
+    if page in {1, 2} and any(
+        phrase in lower
+        for phrase in (
+            "compared with",
+            "compared to",
+            "can reduce",
+            "while saving",
+            "accelerat",
+            "outperform",
+            "experiments demonstrate",
+            "we demonstrate",
+        )
+    ):
+        score += 0.12
+
+    if evidence_score is not None:
+        score += min(0.20, 0.08 + evidence_score * 0.12)
 
     numeric_tokens = re.findall(
-        r"(?<![A-Za-z0-9_.])[-+]?\d+(?:\.\d+)?%?",
+        r"(?<![A-Za-z0-9_.])[-+]?\\d+(?:,\\d{3})*(?:\\.\\d+)?"
+        r"(?:[eE][-+]?\\d+)?%?",
         claim.text,
     )
     word_tokens = re.findall(r"[A-Za-z]{2,}", claim.text)
@@ -209,6 +237,14 @@ def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
         score -= 0.06
 
     return min(max(score, 0.0), 1.0)
+
+
+def _rank_claim(claim: Claim, evidence: list[EvidenceCandidate]) -> float:
+    evidence_score = evidence[0].score if evidence else None
+    return score_claim_centrality(
+        claim,
+        evidence_score=evidence_score,
+    )
 
 
 def _historical_environment_warnings(readme: str) -> list[str]:

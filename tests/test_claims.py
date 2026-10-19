@@ -79,3 +79,38 @@ def test_image_dimensions_are_not_multiplier_claims() -> None:
         claim.reported_value == 64 and claim.unit in {"×", "x"}
         for claim in claims
     )
+
+
+def test_ignores_hyphenated_model_identifiers_as_measurements() -> None:
+    claims = extract_quantitative_claims(
+        "LoRA performs well on GPT-2 and GPT-3 with no additional inference latency."
+    )
+
+    assert claims == []
+
+
+def test_ignores_pdf_rendered_image_dimensions() -> None:
+    claims = extract_quantitative_claims(
+        "Our model establishes strong accuracy while synthesizing 512ˆ512 images."
+    )
+
+    assert claims == []
+
+
+def test_ignores_multi_number_citation_lists() -> None:
+    claims = extract_quantitative_claims(
+        "The perceptual loss [26,54] improves image fidelity."
+    )
+
+    assert claims == []
+
+
+def test_keeps_numeric_range_speedup_after_identifier_filter() -> None:
+    claims = extract_quantitative_claims(
+        "Our method significantly accelerates VQGAN by 30-64x."
+    )
+
+    assert any(
+        claim.reported_value == 64 and claim.unit and claim.unit.lower() == "x"
+        for claim in claims
+    )

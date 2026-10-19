@@ -46,7 +46,7 @@
       "id": "centrality",
       "name": "Central-claim identification",
       "priority": "S",
-      "status": "v0_diagnostic_complete",
+      "status": "v1_real_diagnostic_regression_gate_complete_scale_pending",
       "primary_metric": "central_claim_recall_at_k",
       "target": "verify scientifically central claims before incidental metrics"
     },

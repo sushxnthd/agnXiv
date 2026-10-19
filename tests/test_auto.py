@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from agnxiv.auto import build_auto_plan
+from agnxiv.auto import build_auto_plan, score_claim_centrality
+from agnxiv.models import Claim, ClaimSource
 
 
 def test_auto_plan_generates_draft_but_abstains_without_locator(tmp_path: Path) -> None:
@@ -149,3 +150,49 @@ def test_auto_plan_abstains_when_multiple_evaluation_targets_are_documented(
         "execution order could not be inferred safely" in blocker
         for blocker in plan.blockers
     )
+
+
+def test_centrality_prefers_early_primary_efficiency_result() -> None:
+    primary = Claim(
+        id="primary",
+        text=(
+            "Compared with full fine-tuning, the proposed method can reduce "
+            "trainable parameters by 10,000 times and memory by 3 times."
+        ),
+        reported_value=10000,
+        unit="times",
+        source=ClaimSource(page=1),
+    )
+    later = Claim(
+        id="later",
+        text="We also observe a 25% speedup during a later training analysis.",
+        metric="speedup",
+        reported_value=0.25,
+        unit="fraction",
+        source=ClaimSource(page=5),
+    )
+
+    assert score_claim_centrality(
+        primary,
+        evidence_score=0.95,
+    ) > score_claim_centrality(
+        later,
+        evidence_score=0.80,
+    )
+
+
+def test_centrality_score_is_discovery_only_and_bounded() -> None:
+    claim = Claim(
+        id="central",
+        text=(
+            "Our model significantly outperforms the state of the art and "
+            "accelerates decoding by 64x."
+        ),
+        reported_value=64,
+        unit="x",
+        source=ClaimSource(page=1),
+    )
+
+    score = score_claim_centrality(claim, evidence_score=1.0)
+
+    assert 0.0 <= score <= 1.0
