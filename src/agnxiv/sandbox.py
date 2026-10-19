@@ -72,6 +72,14 @@ def _safe_artifact_name(name: str) -> str:
     return cleaned or "artifact"
 
 
+def _validated_mount_source(value: str | Path, *, label: str) -> Path:
+    path = Path(value).resolve()
+    raw = str(path)
+    if "," in raw or "\n" in raw or "\r" in raw:
+        raise ValueError(`${label} path may not contain commas or newlines`)
+    return path
+
+
 def prepare_artifact_mounts(
     artifact_paths: list[str | Path] | None,
 ) -> tuple[ArtifactMount, ...]:
@@ -79,11 +87,9 @@ def prepare_artifact_mounts(
     mounts: list[ArtifactMount] = []
 
     for index, value in enumerate(artifact_paths or []):
-        path = Path(value).resolve()
+        path = _validated_mount_source(value, label="artifact")
         if not path.exists():
             raise ValueError(f"artifact path does not exist: {path}")
-        if "," in str(path) or "\n" in str(path):
-            raise ValueError("artifact paths may not contain commas or newlines")
 
         target = f"/agnxiv-artifacts/{index:03d}-{_safe_artifact_name(path.name)}"
         mounts.append(
@@ -124,7 +130,7 @@ def docker_command(
 ) -> list[str]:
     """Build the locked-down Docker command used for research execution."""
     active_limits = limits or SandboxLimits()
-    repo = Path(repository).resolve()
+    repo = _validated_mount_source(repository, label="repository")
     mounts = prepare_artifact_mounts(artifact_paths)
 
     if not repo.is_dir():
@@ -142,6 +148,10 @@ def docker_command(
         "never",
         "--network",
         "none",
+        "--ipc",
+        "private",
+        "--user",
+        "65534:65534",
         "--read-only",
         "--cap-drop",
         "ALL",
@@ -154,7 +164,7 @@ def docker_command(
         "--cpus",
         str(active_limits.cpus),
         "--tmpfs",
-        "/tmp:rw,noexec,nosuid,size=1g",
+        "/tmp:rw,noexec,nosuid,nodev,size=1g,mode=1770,uid=65534,gid=65534",
         *_artifact_mount_args(mounts),
     ]
 
@@ -180,7 +190,10 @@ def docker_command(
         "--mount",
         f"type=bind,src={repo},dst=/source,readonly",
         "--tmpfs",
-        f"/workspace:rw,nosuid,size={active_limits.workspace_size}",
+        (
+            f"/workspace:rw,nosuid,nodev,size={active_limits.workspace_size},"
+            "mode=0770,uid=65534,gid=65534"
+        ),
         "--workdir",
         "/workspace",
         image,
