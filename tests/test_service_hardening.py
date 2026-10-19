@@ -32,6 +32,7 @@ def _productionish_config(database_url: str, *, issuer: str | None = None) -> Se
         max_jobs_per_hour=20,
         oidc_audience="https://agnxiv.example/github-actions",
         issuer_private_key_b64=issuer,
+        github_workflow_sha="a" * 40,
     )
 
 
@@ -567,3 +568,29 @@ def test_stale_reaper_wins_over_late_callback_without_rewriting_receipt(
     with pytest.raises(JobAlreadyFinalized):
         store.complete(job.id, status="succeeded", result={"late": True}, error=None)
     assert store.transparency_head()["sequence"] == 1
+
+
+def test_production_readiness_requires_immutable_trusted_workflow_sha() -> None:
+    config = ServiceConfig(
+        database_url="postgresql://user:pass@example/db",
+        api_keys=("k" * 48,),
+        public_base_url="https://agnxiv.example",
+        github_token="token",
+        github_repository="sushxnthd/agnXiv",
+        github_ref="main",
+        github_workflow="hosted-verify.yml",
+        max_active_jobs_per_key=3,
+        max_jobs_per_hour=20,
+        oidc_audience="https://agnxiv.example/github-actions",
+        issuer_private_key_b64="configured",
+        github_workflow_sha=None,
+    )
+    assert "trusted_workflow_sha_invalid" in config.production_issues
+
+    invalid = ServiceConfig(
+        **{
+            **config.__dict__,
+            "github_workflow_sha": "not-a-commit",
+        }
+    )
+    assert "trusted_workflow_sha_invalid" in invalid.production_issues
