@@ -61,6 +61,7 @@ jobs:
 
       - name: Execute untrusted research analysis without service credentials
         env:
+          AGNXIV_REQUIRE_EPHEMERAL_VM: "1"
           JOB_MODE: ${{ inputs.mode }}
           RESEARCH_REPOSITORY: ${{ inputs.repository }}
           RESEARCH_REF: ${{ inputs.repository_ref }}
