@@ -70,8 +70,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Build production service image
-        run: docker build --file Dockerfile.service --tag agnxiv-service:security-audit .
+      - name: Build production service and trusted parser images
+        run: |
+          docker build --file Dockerfile.service --tag agnxiv-service:security-audit .
+          docker build --file Dockerfile.pdf-parser --tag agnxiv-pdf-parser:security-audit .
 
       - name: Block fixed HIGH/CRITICAL OS and library vulnerabilities
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -86,10 +88,25 @@ jobs:
           output: trivy-container.json
           exit-code: "1"
 
+      - name: Block fixed HIGH/CRITICAL parser-image vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: agnxiv-pdf-parser:security-audit
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: json
+          output: trivy-pdf-parser.json
+          exit-code: "1"
+
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: hosted-service-container-security-audit
-          path: trivy-container.json
+          path: |
+            trivy-container.json
+            trivy-pdf-parser.json
           retention-days: 90
           if-no-files-found: warn
