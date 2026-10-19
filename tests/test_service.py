@@ -258,6 +258,37 @@ def test_issuer_endpoint_exposes_public_key(tmp_path) -> None:
         assert issuer["public_key_pem"].encode("ascii") == public_key
 
 
+def test_issuer_endpoint_supports_public_key_rollover(tmp_path) -> None:
+    old_private, old_public, old_key_id = generate_ed25519_keypair()
+    new_private, new_public, new_key_id = generate_ed25519_keypair()
+    config = replace(
+        _config(f"sqlite:///{tmp_path / 'service.db'}"),
+        issuer_private_key_b64=base64.b64encode(new_private).decode("ascii"),
+        issuer_previous_public_keys_b64=(
+            base64.b64encode(old_public).decode("ascii"),
+        ),
+    )
+    app = create_app(config)
+
+    with TestClient(app) as client:
+        response = client.get("/v1/issuer")
+
+    assert response.status_code == 200
+    issuer = response.json()
+    assert issuer["schema_version"] == "agnxiv.issuer/1"
+    assert issuer["active_key_id"] == new_key_id
+    assert issuer["key_id"] == new_key_id
+    assert issuer["public_key_pem"].encode("ascii") == new_public
+
+    keys = {item["key_id"]: item for item in issuer["verification_keys"]}
+    assert set(keys) == {new_key_id, old_key_id}
+    assert keys[new_key_id]["status"] == "active"
+    assert keys[old_key_id]["status"] == "retired"
+    assert keys[old_key_id]["public_key_pem"].encode("ascii") == old_public
+    assert base64.b64encode(old_private).decode("ascii") not in response.text
+    assert base64.b64encode(new_private).decode("ascii") not in response.text
+
+
 def test_hosted_callback_rejects_wrong_pinned_commit(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         GitHubActionsDispatcher,
