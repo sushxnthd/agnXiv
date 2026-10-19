@@ -12,6 +12,7 @@ def test_infers_requirements_environment(tmp_path: Path) -> None:
     assert "requirements.txt" in spec.dependency_files
     assert ["python", "-m", "pip", "install", "-r", "requirements.txt"] in spec.install_commands
     assert spec.confidence >= 0.8
+    assert spec.reconstruction_supported is True
 
 
 def test_infers_packages_from_imports_without_manifest(tmp_path: Path) -> None:
@@ -27,6 +28,7 @@ def test_infers_packages_from_imports_without_manifest(tmp_path: Path) -> None:
     assert spec.historical_fidelity == "unknown"
     assert spec.confidence >= 0.6
     assert {"torch", "numpy", "Pillow"}.issubset(set(spec.inferred_packages))
+    assert spec.reconstruction_supported is False
 
 
 def test_version_pinned_requirements_are_historically_constrained(tmp_path: Path) -> None:
@@ -40,6 +42,7 @@ def test_version_pinned_requirements_are_historically_constrained(tmp_path: Path
     assert spec.dependency_source == "manifest"
     assert spec.dependency_precision == "version-pinned"
     assert spec.historical_fidelity == "constrained"
+    assert spec.reconstruction_supported is True
 
 
 def test_exact_python_version_changes_historical_base_image(tmp_path: Path) -> None:
@@ -66,6 +69,7 @@ def test_pinned_pep621_dependencies_are_recognized(tmp_path: Path) -> None:
 
     assert spec.dependency_precision == "version-pinned"
     assert spec.historical_fidelity == "constrained"
+    assert spec.reconstruction_supported is True
 
 
 def test_pinned_setup_cfg_dependencies_are_recognized(tmp_path: Path) -> None:
@@ -81,6 +85,7 @@ def test_pinned_setup_cfg_dependencies_are_recognized(tmp_path: Path) -> None:
 
     assert spec.dependency_precision == "version-pinned"
     assert spec.historical_fidelity == "constrained"
+    assert spec.reconstruction_supported is True
 
 
 def test_pinned_conda_environment_recovers_python_version(tmp_path: Path) -> None:
@@ -98,6 +103,8 @@ def test_pinned_conda_environment_recovers_python_version(tmp_path: Path) -> Non
     assert spec.python_version == "3.10"
     assert spec.dependency_precision == "version-pinned"
     assert spec.historical_fidelity == "constrained"
+    assert spec.reconstruction_supported is False
+    assert "Conda" in spec.reconstruction_reason
 
 
 def test_floating_manifest_prevents_other_manifest_from_looking_fully_pinned(
@@ -127,3 +134,5 @@ def test_pipfile_lock_is_recorded_as_historical_constraint(tmp_path: Path) -> No
     assert spec.dependency_source == "lockfile"
     assert spec.dependency_precision == "locked"
     assert spec.historical_fidelity == "constrained"
+    assert spec.reconstruction_supported is False
+    assert "Pipfile.lock" in spec.reconstruction_reason
