@@ -114,3 +114,40 @@ def test_keeps_numeric_range_speedup_after_identifier_filter() -> None:
         claim.reported_value == 64 and claim.unit and claim.unit.lower() == "x"
         for claim in claims
     )
+
+
+def test_ignores_single_digit_patch_dimensions() -> None:
+    claims = extract_quantitative_claims(
+        "We evaluate shuffled images using 1×1, 2×2, 4×4 and 8×8 patches."
+    )
+
+    assert claims == []
+
+
+def test_ignores_section_list_and_symbolic_parameter_numbers() -> None:
+    claims = extract_quantitative_claims(
+        "Section 4 gives two examples: 1) robust accuracy and 2) clean accuracy. "
+        "We set k = 2 and B = 1.2 for the analysis."
+    )
+
+    assert claims == []
+
+
+def test_ignores_top_k_label_index_but_keeps_reported_accuracy() -> None:
+    claims = extract_quantitative_claims(
+        "Our method achieves top-1 accuracy of 46.6% on ImageNet."
+    )
+
+    assert not any(claim.reported_value == 1 for claim in claims)
+    assert any(
+        abs((claim.reported_value or 0) - 0.466) < 1e-9
+        for claim in claims
+    )
+
+
+def test_ignores_pdf_section_heading_number_before_result_prose() -> None:
+    claims = extract_quantitative_claims(
+        "5 we report experimental results and discuss ablations."
+    )
+
+    assert claims == []
