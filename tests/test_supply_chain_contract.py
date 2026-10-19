@@ -35,3 +35,12 @@ def test_service_constraints_are_exact_pins() -> None:
     ]
     assert lines
     assert all("==" in line for line in lines)
+
+
+def test_hosted_callback_runs_even_when_worker_job_fails() -> None:
+    text = _read(".github/workflows/hosted-verify.yml")
+    callback = text.split("\n  callback:\n", 1)[1]
+    assert "if: ${{ always() }}" in callback
+    assert "continue-on-error: true" in callback
+    assert "Synthesize terminal failure when worker produced no result" in callback
+    assert "execute_job=" in callback
