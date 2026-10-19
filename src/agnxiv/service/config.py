@@ -23,6 +23,7 @@ class ServiceConfig:
     issuer_previous_public_keys_b64: tuple[str, ...] = ()
     github_workflow_sha: str | None = None
     max_request_bytes: int = 5 * 1024 * 1024
+    allow_development_auth: bool = False
 
     @classmethod
     def from_env(cls) -> ServiceConfig:
@@ -95,6 +96,9 @@ class ServiceConfig:
                     ),
                 ),
             ),
+            allow_development_auth=os.getenv(
+                "AGNXIV_ALLOW_DEVELOPMENT_AUTH", ""
+            ).strip().lower() in {"1", "true", "yes"},
         )
 
     @property
@@ -104,6 +108,8 @@ class ServiceConfig:
             issues.append("database_not_postgresql")
         if not self.api_keys:
             issues.append("api_keys_missing")
+        if self.allow_development_auth:
+            issues.append("development_auth_enabled")
         elif any(len(key) < self.min_api_key_length for key in self.api_keys):
             issues.append("api_key_too_short")
         elif len(set(self.api_keys)) != len(self.api_keys):
