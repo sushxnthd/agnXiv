@@ -84,3 +84,18 @@ The hosted service uses immutable GitHub Action SHAs, a digest-pinned Python bas
 ## Signing-key lifecycle
 
 Only the current Ed25519 private key may sign new evidence. Previous public keys can be retained through `AGNXIV_ISSUER_PREVIOUS_PUBLIC_KEYS_B64` and are published by `/v1/issuer` so historical DSSE statements remain verifiable after rotation. See `docs/KEY_ROTATION.md`.
+
+
+## Ephemeral VM execution boundary
+
+Hosted research execution is dispatched only to GitHub-hosted `ubuntu-latest`
+jobs. GitHub documents these standard public-repository jobs as fresh virtual
+machines that are decommissioned after the job. AgnXiv then applies the
+no-network, no-capabilities, no-new-privileges, resource-limited Docker sandbox
+inside that VM. The research-execution job receives no OIDC callback identity
+and no repository write permission.
+
+Production CI rejects changes that move the untrusted execute job to
+`ubuntu-slim`, a self-hosted runner, or a job with callback/write privileges.
+Custom GPU/private workloads must provide an isolation boundary at least as
+strong; they are not covered by the hosted public execution contract.
