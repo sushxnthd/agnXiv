@@ -141,3 +141,19 @@ def test_hosted_workflow_builds_parser_before_untrusted_analysis() -> None:
     assert build < execute
     assert "Dockerfile.pdf-parser" in workflow
     assert "agnxiv-pdf-parser:trusted" in workflow
+
+
+def test_docker_build_context_is_allowlisted() -> None:
+    rules = [
+        line.strip()
+        for line in _read(".dockerignore").splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+    assert rules[0] == "**"
+    assert "!src/**" in rules
+    assert "!migrations/**" in rules
+    assert "!constraints-service.txt" in rules
+    assert "!Dockerfile.service" in rules
+    assert "!Dockerfile.pdf-parser" in rules
+    assert all("tests" not in line for line in rules[1:])
+    assert all("docs" not in line for line in rules[1:])
