@@ -519,6 +519,7 @@ def execute_job(
                 manifest,
                 image_override=build.image_ref,
             )
+            bundle = _bind_runtime_build(bundle, build)
             verdict = bundle.record.verdict.value
             status = "succeeded" if verdict in {"VERIFIED", "CONTRADICTED"} else "needs_review"
             return status, {
