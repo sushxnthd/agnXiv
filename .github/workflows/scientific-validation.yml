@@ -15,6 +15,7 @@ on:
       - "research/scripts/run_historical_environment_validation.py"
       - "research/benchmarks/centrality-dev-paper-clusters-v1.txt"
       - "research/protocols/centrality-production-gate-v1.md"
+      - "research/benchmarks/environment-dev-repositories-v1.txt"
       - "src/agnxiv/auto.py"
       - "tests/test_validation.py"
       - ".github/workflows/scientific-validation.yml"
@@ -32,6 +33,7 @@ on:
       - "research/scripts/run_historical_environment_validation.py"
       - "research/benchmarks/centrality-dev-paper-clusters-v1.txt"
       - "research/protocols/centrality-production-gate-v1.md"
+      - "research/benchmarks/environment-dev-repositories-v1.txt"
       - "src/agnxiv/auto.py"
       - "tests/test_validation.py"
       - ".github/workflows/scientific-validation.yml"
@@ -251,6 +253,8 @@ jobs:
 
       - name: Pull approved archaeology runtimes
         run: |
+          docker pull python:3.8-slim
+          docker pull python:3.9-slim
           docker pull python:3.10-slim
           docker pull python:3.11-slim
           docker pull python:3.12-slim
@@ -260,6 +264,7 @@ jobs:
           python research/scripts/run_historical_environment_validation.py \
             --input external/scicoqa/data/scicoqa-real-v1.1.jsonl \
             --input external/scicoqa/data/scicoqa-synthetic-v1.1.jsonl \
+            --exclude research/benchmarks/environment-dev-repositories-v1.txt \
             --max-classification 30 \
             --max-builds 8 \
             --output /tmp/agnxiv-historical-environment.json
@@ -270,6 +275,7 @@ jobs:
           import json
           with open("/tmp/agnxiv-historical-environment.json", encoding="utf-8") as handle:
               report = json.load(handle)
+          assert report["excluded_development_repositories"] == 30
           assert report["classification_cases"] >= 20
           assert report["classification_accuracy"] >= 0.95
           assert report["build_attempts"] >= 8
