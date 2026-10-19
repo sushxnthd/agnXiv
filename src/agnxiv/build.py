@@ -213,29 +213,50 @@ def discover_referenced_nested_conda(root: Path) -> Path | None:
 
 
 def _audit_conda_environment(path: Path) -> list[str]:
-    """Reject custom channels, URLs, VCS/path installs, and unbounded metadata."""
+    """Accept only a deliberately small, line-oriented Conda YAML subset."""
     text = _read_dependency_text(path)
     reasons: list[str] = []
     in_channels = False
     in_dependencies = False
+    pip_block_indent: int | None = None
+    saw_channels = False
+    saw_dependencies = False
+
     for number, raw in enumerate(text.splitlines(), start=1):
         stripped = raw.strip()
         if not stripped or stripped.startswith("#"):
             continue
-        if raw == stripped and stripped == "channels:":
-            in_channels = True
-            in_dependencies = False
-            continue
-        if raw == stripped and stripped == "dependencies:":
-            in_dependencies = True
-            in_channels = False
-            continue
-        if raw == stripped and stripped.endswith(":"):
+        indent = len(raw) - len(raw.lstrip(" "))
+
+        if indent == 0:
             in_channels = False
             in_dependencies = False
+            pip_block_indent = None
+            if stripped.startswith("name:"):
+                value = stripped.partition(":")[2].strip()
+                if not value or any(char in value for char in "[]{}&*!|>@"):
+                    reasons.append(f"line {number}: unsafe Conda environment name")
+                continue
+            if stripped == "channels:":
+                saw_channels = True
+                in_channels = True
+                continue
+            if stripped == "dependencies:":
+                saw_dependencies = True
+                in_dependencies = True
+                continue
+            if stripped.startswith("prefix:"):
+                # Machine-local prefixes are stripped from the generated file.
+                continue
+            reasons.append(
+                f"line {number}: unsupported top-level Conda metadata"
+            )
             continue
 
-        if in_channels and stripped.startswith("- "):
+        if in_channels:
+            if indent < 2 or not stripped.startswith("- "):
+                reasons.append(f"line {number}: unsupported Conda channel syntax")
+                continue
             channel = stripped[2:].strip()
             if channel not in _TRUSTED_CONDA_CHANNELS:
                 reasons.append(
@@ -243,21 +264,38 @@ def _audit_conda_environment(path: Path) -> list[str]:
                 )
             continue
 
-        if in_dependencies and stripped.startswith("- "):
-            value = stripped[2:].strip()
-            lower = value.lower()
-            if value == "pip:":
-                continue
-            if any(marker in lower for marker in _UNSAFE_REQUIREMENT_MARKERS):
+        if in_dependencies:
+            if not stripped.startswith("- "):
                 reasons.append(
-                    f"line {number}: unsupported Conda/Pip dependency source"
+                    f"line {number}: unsupported Conda dependency syntax"
                 )
                 continue
-            if "==" in value:
-                if not _EXACT_REQUIREMENT_RE.fullmatch(value):
+            value = stripped[2:].strip()
+            lower = value.lower()
+
+            if value == "pip:":
+                if indent < 2:
+                    reasons.append(f"line {number}: malformed pip dependency block")
+                else:
+                    pip_block_indent = indent
+                continue
+
+            if pip_block_indent is not None and indent > pip_block_indent:
+                if any(marker in lower for marker in _UNSAFE_REQUIREMENT_MARKERS):
+                    reasons.append(
+                        f"line {number}: unsupported Pip dependency source"
+                    )
+                elif not _EXACT_REQUIREMENT_RE.fullmatch(value):
                     reasons.append(
                         f"line {number}: Pip dependency is not exactly pinned"
                     )
+                continue
+
+            pip_block_indent = None
+            if any(marker in lower for marker in _UNSAFE_REQUIREMENT_MARKERS):
+                reasons.append(
+                    f"line {number}: unsupported Conda dependency source"
+                )
                 continue
             if not re.fullmatch(
                 r"[A-Za-z0-9_.-]+=\d+(?:\.\d+){0,4}(?:[A-Za-z0-9_.+-]*)"
@@ -267,6 +305,14 @@ def _audit_conda_environment(path: Path) -> list[str]:
                 reasons.append(
                     f"line {number}: Conda dependency is not exactly pinned"
                 )
+            continue
+
+        reasons.append(f"line {number}: unsupported Conda YAML structure")
+
+    if not saw_dependencies:
+        reasons.append("Conda environment is missing a block dependencies section")
+    if not saw_channels:
+        reasons.append("Conda environment is missing a block channels section")
     return reasons
 
 
