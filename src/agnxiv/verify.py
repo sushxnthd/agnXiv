@@ -55,6 +55,23 @@ def verify_numeric_claim(
             rationale="Claim has no machine-readable reported numeric value.",
         )
 
+    if (
+        not math.isfinite(claim.reported_value)
+        or not math.isfinite(policy.tolerance)
+        or any(not math.isfinite(item.value) for item in observations)
+    ):
+        return VerificationRecord(
+            claim=claim,
+            policy=policy,
+            observations=[],
+            verdict=Verdict.UNABLE_TO_VERIFY,
+            expected=None,
+            observed_mean=None,
+            absolute_error=None,
+            relative_error=None,
+            rationale="Non-finite numeric evidence is not eligible for verification.",
+        )
+
     if len(observations) < policy.minimum_repetitions:
         return VerificationRecord(
             claim=claim,
