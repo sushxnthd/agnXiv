@@ -148,6 +148,7 @@ class JobView(BaseModel):
     spec_path: str | None
     result: dict | None
     error: str | None
+    workflow_run_id: int | None
     created_at: str
     updated_at: str
 
@@ -167,6 +168,7 @@ def _job_view(job: Job) -> JobView:
         spec_path=job.spec_path,
         result=job_result(job),
         error=job.error,
+        workflow_run_id=job.workflow_run_id,
         created_at=job.created_at.isoformat(),
         updated_at=job.updated_at.isoformat(),
     )
@@ -293,19 +295,38 @@ def _validate_worker_result(
     return bundles[0]
 
 
-def _enrich_signed_result(config: ServiceConfig, result: dict | None) -> dict | None:
-    if not result or "bundle" not in result or not config.issuer_private_key_b64:
+def _enrich_signed_result(
+    config: ServiceConfig,
+    result: dict | None,
+    *,
+    workflow_run_id: int | None = None,
+) -> dict | None:
+    if not result:
         return result
+
+    enriched = dict(result)
+    if workflow_run_id is not None:
+        enriched["orchestration"] = {
+            "provider": "github-actions",
+            "workflow_run_id": workflow_run_id,
+        }
+
+    if "bundle" not in result or not config.issuer_private_key_b64:
+        return enriched
 
     bundle = VerificationBundle.model_validate(result["bundle"])
     statement = build_verification_statement(bundle)
+    if workflow_run_id is not None:
+        statement["predicate"]["orchestration"] = {
+            "provider": "github-actions",
+            "workflowRunId": workflow_run_id,
+        }
     private_key = base64.b64decode(
         config.issuer_private_key_b64,
         validate=True,
     )
     envelope = sign_statement_ed25519(statement, private_key)
 
-    enriched = dict(result)
     enriched["statement"] = statement
     enriched["dsseEnvelope"] = envelope.model_dump(mode="json")
 
@@ -314,6 +335,11 @@ def _enrich_signed_result(config: ServiceConfig, result: dict | None) -> dict | 
         for item in result.get("additional_verifications", []):
             other_bundle = VerificationBundle.model_validate(item["bundle"])
             other_statement = build_verification_statement(other_bundle)
+            if workflow_run_id is not None:
+                other_statement["predicate"]["orchestration"] = {
+                    "provider": "github-actions",
+                    "workflowRunId": workflow_run_id,
+                }
             other_envelope = sign_statement_ed25519(other_statement, private_key)
             extra_signed.append({
                 **item,
@@ -759,7 +785,8 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
 
         store.mark_running(job.id)
         try:
-            dispatcher.dispatch(request)
+            workflow_run_id = dispatcher.dispatch(request)
+            store.bind_workflow_run(job.id, workflow_run_id)
         except DispatchError as exc:
             store.complete(
                 job.id,
@@ -795,7 +822,7 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
             raise HTTPException(status_code=401, detail="missing GitHub OIDC token")
         token = authorization.removeprefix("Bearer ").strip()
         try:
-            verify_github_actions_token(
+            oidc_claims = verify_github_actions_token(
                 token,
                 GitHubOIDCPolicy(
                     audience=_job_oidc_audience(
@@ -815,6 +842,11 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
         job = store.get_job(job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="job not found")
+        if (
+            job.workflow_run_id is None
+            or str(oidc_claims.get("run_id")) != str(job.workflow_run_id)
+        ):
+            raise HTTPException(status_code=401, detail="untrusted workflow run identity")
         if job.status not in {"queued", "running"}:
             raise HTTPException(
                 status_code=409,
@@ -823,7 +855,11 @@ def create_app(config: ServiceConfig | None = None) -> FastAPI:
 
         try:
             _validate_worker_result(job, body.status, body.result)
-            result = _enrich_signed_result(active_config, body.result)
+            result = _enrich_signed_result(
+                active_config,
+                body.result,
+                workflow_run_id=job.workflow_run_id,
+            )
         except (ValueError, TypeError, binascii.Error) as exc:
             try:
                 store.complete(
