@@ -105,10 +105,13 @@ def _looks_like_hyphenated_identifier(
 ) -> bool:
     """Reject model/configuration identifiers such as GPT-3 and ResNet-50."""
     start = match.start("value")
-    if start < 2 or normalized[start - 1] not in _HYPHENS:
+    raw_value = match.group("value")
+    digit_start = start + (1 if raw_value[:1] in {"+", "-"} else 0)
+    hyphen_index = digit_start - 1
+    if hyphen_index < 1 or normalized[hyphen_index] not in _HYPHENS:
         return False
 
-    prefix = normalized[max(0, start - 32) : start - 1]
+    prefix = normalized[max(0, hyphen_index - 32) : hyphen_index]
     token_match = re.search(r"([A-Za-z][A-Za-z0-9_. ]{0,24})$", prefix)
     if token_match is None:
         return False
@@ -253,7 +256,17 @@ def extract_quantitative_claims(
         if _looks_like_label_or_citation(normalized, match):
             continue
 
-        value = _clean_number(match.group("value"))
+        value_raw = match.group("value")
+        # A standard hyphen between adjacent numbers denotes a range endpoint,
+        # not a negative sign: "30-64x" should yield 30 and 64, while
+        # "loss = -0.2" remains negative.
+        if (
+            value_raw.startswith("-")
+            and match.start("value") > 0
+            and normalized[match.start("value") - 1].isdigit()
+        ):
+            value_raw = value_raw[1:]
+        value = _clean_number(value_raw)
         uncertainty_raw = match.group("uncertainty")
         unit = match.group("unit")
 
