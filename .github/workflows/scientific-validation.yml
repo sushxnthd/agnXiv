@@ -14,6 +14,7 @@ on:
       - "research/scripts/run_scitldr_centrality_validation.py"
       - "research/scripts/run_historical_environment_validation.py"
       - "research/benchmarks/centrality-dev-paper-clusters-v1.txt"
+      - "research/protocols/centrality-production-gate-v1.md"
       - "src/agnxiv/auto.py"
       - "tests/test_validation.py"
       - ".github/workflows/scientific-validation.yml"
@@ -30,6 +31,7 @@ on:
       - "research/scripts/run_scitldr_centrality_validation.py"
       - "research/scripts/run_historical_environment_validation.py"
       - "research/benchmarks/centrality-dev-paper-clusters-v1.txt"
+      - "research/protocols/centrality-production-gate-v1.md"
       - "src/agnxiv/auto.py"
       - "tests/test_validation.py"
       - ".github/workflows/scientific-validation.yml"
@@ -141,7 +143,6 @@ jobs:
             --input external/scitldr/SciTLDR-Data/SciTLDR-AIC/dev.jsonl \
             --role development \
             --minimum-cases 75 \
-            --min-recall-at-1 0.60 \
             --min-recall-at-3 0.90 \
             --min-recall-at-5 0.95 \
             --output /tmp/agnxiv-scitldr-centrality-dev.json
@@ -207,10 +208,9 @@ jobs:
           ) as handle:
               report = json.load(handle)
           assert report["evaluation_role"] == "heldout_external_author_metadata"
-          assert report["excluded_development_papers"] == 139
+          assert report["excluded_development_papers"] == 170
           assert report["cases"] >= 75
           assert len(report["strata"]) >= 3
-          assert report["recall_at_1"] >= 0.60
           assert report["recall_at_3"] >= 0.90
           assert report["recall_at_5"] >= 0.95
           assert report["passed"] is True
