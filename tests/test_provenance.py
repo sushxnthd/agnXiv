@@ -75,3 +75,19 @@ def test_explicit_artifact_symlink_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="symlinks are not allowed"):
         fingerprint_artifact(link)
+
+
+def test_tree_fingerprint_fails_closed_if_file_hashing_fails(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    target = tmp_path / "analysis.py"
+    target.write_text("value = 1\n", encoding="utf-8")
+
+    def fail(path):
+        raise OSError("simulated unreadable evidence")
+
+    monkeypatch.setattr("agnxiv.provenance.sha256_file", fail)
+
+    with pytest.raises(ValueError, match="could not fingerprint repository file"):
+        fingerprint_tree(tmp_path)
