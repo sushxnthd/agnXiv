@@ -110,6 +110,8 @@ def _verification_bundle(
     expected: float,
     observed: float,
     commit: str = "deadbeef",
+    dependency_precision: str | None = None,
+    historical_fidelity: str | None = None,
 ) -> dict:
     return {
         "claim": {
@@ -123,6 +125,16 @@ def _verification_bundle(
             "observed_mean": observed,
         },
         "provenance": {"git": {"commit": commit}},
+        "environment": {
+            "historical_fidelity": historical_fidelity or "unknown",
+        },
+        "runtime_build": (
+            {
+                "dependency_precision": dependency_precision,
+            }
+            if dependency_precision is not None
+            else None
+        ),
         "observation_method": "explicit_regex",
         "execution": {
             "returncode": 0,
@@ -184,12 +196,13 @@ def test_version_pinned_explicit_execution_remains_conditional() -> None:
         "result": {
             "kind": "verification",
             "build": {"plan": {"dependency_precision": "version-pinned"}},
-            "environment": {"historical_fidelity": "constrained"},
             "bundle": _verification_bundle(
                 claim_id="C1",
                 verdict="VERIFIED",
                 expected=0.9,
                 observed=0.9,
+                dependency_precision="version-pinned",
+                historical_fidelity="constrained",
             ),
         },
         "error": None,
@@ -213,12 +226,13 @@ def test_hash_pinned_historically_constrained_execution_is_strong() -> None:
         "result": {
             "kind": "verification",
             "build": {"plan": {"dependency_precision": "hash-pinned"}},
-            "environment": {"historical_fidelity": "constrained"},
             "bundle": _verification_bundle(
                 claim_id="C1",
                 verdict="VERIFIED",
                 expected=0.9,
                 observed=0.9,
+                dependency_precision="hash-pinned",
+                historical_fidelity="constrained",
             ),
         },
         "error": None,
@@ -246,6 +260,7 @@ def test_hash_pinned_without_historical_fidelity_is_conditional() -> None:
                 verdict="VERIFIED",
                 expected=0.9,
                 observed=0.9,
+                dependency_precision="hash-pinned",
             ),
         },
         "error": None,
