@@ -196,3 +196,36 @@ def test_centrality_score_is_discovery_only_and_bounded() -> None:
     score = score_claim_centrality(claim, evidence_score=1.0)
 
     assert 0.0 <= score <= 1.0
+
+
+def test_auto_plan_uses_environment_nearest_selected_evaluation(tmp_path: Path) -> None:
+    paper = tmp_path / "paper.txt"
+    paper.write_text(
+        "Our proposed method achieves accuracy of 91.4%.",
+        encoding="utf-8",
+    )
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "setup.py").write_text(
+        "from setuptools import setup\nsetup()\n",
+        encoding="utf-8",
+    )
+    scoped = repo / "examples" / "NLG"
+    (scoped / "eval").mkdir(parents=True)
+    (scoped / "requirement.txt").write_text(
+        "numpy==2.1.0\n",
+        encoding="utf-8",
+    )
+    (scoped / "eval" / "eval.py").write_text(
+        "print('accuracy: 91.4%')\n",
+        encoding="utf-8",
+    )
+
+    plan = build_auto_plan(paper, repo)
+
+    assert plan.environment.scope_resolution == "resolved"
+    assert (
+        plan.environment.preferred_dependency_file
+        == "examples/NLG/requirement.txt"
+    )
+    assert plan.environment.dependency_precision == "version-pinned"
