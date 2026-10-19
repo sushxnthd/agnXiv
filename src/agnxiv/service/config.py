@@ -18,6 +18,7 @@ class ServiceConfig:
     max_jobs_per_hour: int
     oidc_audience: str
     issuer_private_key_b64: str | None
+    issuer_previous_public_keys_b64: tuple[str, ...] = ()
     job_stale_minutes: int = 45
     min_api_key_length: int = 32
 
@@ -62,6 +63,14 @@ class ServiceConfig:
                 public_base_url + "/github-actions",
             ),
             issuer_private_key_b64=os.getenv("AGNXIV_ISSUER_PRIVATE_KEY_B64") or None,
+            issuer_previous_public_keys_b64=tuple(
+                item.strip()
+                for item in os.getenv(
+                    "AGNXIV_ISSUER_PREVIOUS_PUBLIC_KEYS_B64",
+                    "",
+                ).split(",")
+                if item.strip()
+            ),
             job_stale_minutes=max(
                 5,
                 int(os.getenv("AGNXIV_JOB_STALE_MINUTES", "45")),
