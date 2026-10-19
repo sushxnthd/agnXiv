@@ -25,7 +25,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Research execution is separated from the control plane.
 - [x] Research containers run without network, added Linux capabilities, or write access to host evidence.
 - [x] GitHub credentials are not persisted into research execution.
-- [x] Worker callbacks require GitHub Actions OIDC with a per-job audience, immutable release-tag ref, and exact trusted workflow commit SHA.
+- [x] Worker callbacks require GitHub Actions OIDC with a per-job audience, immutable release-tag ref, exact trusted workflow commit SHA, first-run-attempt requirement, and the exact control-plane-dispatched `workflow_run_id`; that run ID is persisted and bound into signed statements.
 - [x] Returned Git commit must match the control-plane pinned commit.
 - [x] Dependency installers do not receive the research source tree.
 - [x] Hosted public research execution runs on a fresh GitHub-hosted VM per job, with a second locked-down Docker sandbox and no callback/write credentials in the untrusted execute job. Custom GPU/private execution must preserve an equivalent dedicated boundary before being enabled.
