@@ -254,6 +254,8 @@ class JobStore:
 
     def metrics(self) -> dict[str, object]:
         """Return secret-free operator counters for the hosted control plane."""
+        now = datetime.now(UTC)
+        recent_cutoff = now - timedelta(hours=1)
         with self.session_factory() as session:
             status_rows = session.execute(
                 select(Job.status, func.count()).group_by(Job.status)
@@ -262,7 +264,6 @@ class JobStore:
                 select(Job.mode, func.count()).group_by(Job.mode)
             ).all()
             total = int(session.scalar(select(func.count()).select_from(Job)) or 0)
-            recent_cutoff = datetime.now(UTC) - timedelta(hours=1)
             recent = int(
                 session.scalar(
                     select(func.count())
@@ -271,14 +272,52 @@ class JobStore:
                 )
                 or 0
             )
+            terminal_recent = int(
+                session.scalar(
+                    select(func.count())
+                    .select_from(Job)
+                    .where(
+                        Job.updated_at >= recent_cutoff,
+                        Job.status.in_(("succeeded", "needs_review", "failed")),
+                    )
+                )
+                or 0
+            )
+            stale_recent = int(
+                session.scalar(
+                    select(func.count())
+                    .select_from(Job)
+                    .where(
+                        Job.updated_at >= recent_cutoff,
+                        Job.status == "failed",
+                        Job.error == "hosted verification exceeded its callback deadline",
+                    )
+                )
+                or 0
+            )
+            oldest_active = session.scalar(
+                select(func.min(Job.updated_at)).where(
+                    Job.status.in_(("queued", "running"))
+                )
+            )
+
         statuses = {str(key): int(value) for key, value in status_rows}
         modes = {str(key): int(value) for key, value in mode_rows}
+        oldest_active_seconds = 0.0
+        if oldest_active is not None:
+            if oldest_active.tzinfo is None:
+                oldest_active = oldest_active.replace(tzinfo=UTC)
+            oldest_active_seconds = max(0.0, (now - oldest_active).total_seconds())
+
         return {
             "jobs_total": total,
             "jobs_last_hour": recent,
+            "jobs_terminal_last_hour": terminal_recent,
+            "stale_failures_last_hour": stale_recent,
             "jobs_by_status": statuses,
             "jobs_by_mode": modes,
             "jobs_active": statuses.get("queued", 0) + statuses.get("running", 0),
+            "oldest_active_seconds": oldest_active_seconds,
         }
 
     def count_active(self, api_key_hash: str) -> int:
