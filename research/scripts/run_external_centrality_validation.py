@@ -176,7 +176,7 @@ def _eligible_case(row: dict[str, str]) -> dict | None:
     abstract = (row.get("abstract") or "").strip()
     tldr = (row.get("tldr") or "").strip()
     title = (row.get("title") or row.get("Paper") or "").strip()
-    if not abstract or not tldr or not title or not _repository(row):
+    if not abstract or not title or not _repository(row):
         return None
 
     abstract_claims = extract_quantitative_claims(abstract)
@@ -346,22 +346,22 @@ def main() -> None:
 
     report = {
         "schema_version": "agnxiv.external-centrality/2",
-        "evaluation_role": "heldout_external_author_tldr",
+        "evaluation_role": "heldout_external_author_metadata",
         "source": {
             "dataset": "ReproRepo paper metadata",
             "repository": "LithiumDA/ReproRepo",
             "commit": "470a4c69d9f11df15526464e0a5bb66d95a12f55",
             "gold_signal": (
-                "author/OpenReview TLDR exact quantitative mapping, falling back "
-                "to frozen author title+TLDR lexical anchoring"
+                "author/OpenReview TLDR exact quantitative mapping when present, "
+                "falling back to frozen author title+optional-TLDR lexical anchoring"
             ),
             "sampling_seed": "agnxiv-centrality-heldout-v1",
         },
         "eligibility": (
-            "Papers require a repository, author title/TLDR metadata, an abstract "
+            "Papers require a repository, an author title, an abstract "
             "with at least two quantitative candidates, and an external gold map. "
             "Gold is exact quantitative TLDR matching when available; otherwise "
-            "the best title+TLDR lexical match must share >=3 content tokens, "
+            "the best title+optional-TLDR lexical match must share >=3 content tokens, "
             "score >=0.12, and exceed the runner-up by >=0.02."
         ),
         "cases": total,
@@ -384,7 +384,7 @@ def main() -> None:
         "cases_detail": cases,
         "interpretation": (
             "This evaluates quantitative central-claim ranking within abstracts "
-            "against an external author-supplied TLDR signal. It does not claim "
+            "against external author-supplied title/TLDR metadata. It does not claim "
             "full-document semantic centrality accuracy."
         ),
     }
