@@ -47,8 +47,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Idempotency keys for job creation, with database uniqueness and conflicting-request rejection.
 - [x] Authenticated operator job metrics and request correlation IDs.
 - [ ] Alerting and error-budget SLOs.
-- [ ] Backup/restore drill for production PostgreSQL.
-- [ ] Key rotation procedure and issuer-key rollover metadata.
+- [x] Backup/restore drill for PostgreSQL runs in CI and on a weekly schedule, verifies restored job data and transparency-chain integrity, and confirms append-only database guards survive restoration.
+- [x] Ed25519 issuer key rotation has a documented rollback procedure and a public `agnxiv.issuer/1` verification keyring that preserves retired public keys without retaining retired private keys.
 - [ ] Multi-region execution strategy and disaster recovery.
 
 ### Evidence durability
