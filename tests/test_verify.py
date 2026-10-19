@@ -77,3 +77,26 @@ def test_absolute_tolerance_includes_decimal_boundary() -> None:
         VerificationPolicy(kind="absolute", tolerance=0.2),
     )
     assert record.verdict == Verdict.VERIFIED
+
+
+def test_numeric_models_reject_nonfinite_values() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError, match="finite"):
+        Observation(value=float("nan"))
+    with pytest.raises(ValidationError, match="finite"):
+        Claim(id="Cbad", text="bad", reported_value=float("inf"))
+    with pytest.raises(ValidationError, match="finite"):
+        VerificationPolicy(kind="absolute", tolerance=float("inf"))
+
+
+def test_final_verifier_abstains_on_bypassed_nonfinite_observation() -> None:
+    unsafe = Observation.model_construct(value=float("nan"))
+    record = verify_numeric_claim(
+        Claim(id="C1", text="metric", reported_value=1.0),
+        [unsafe],
+        VerificationPolicy(kind="absolute", tolerance=0.01),
+    )
+    assert record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert record.observed_mean is None
