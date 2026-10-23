@@ -22,7 +22,7 @@ MANIFESTS = (
 
 def content(name: str) -> str:
     if name in {"requirements.txt", "requirement.txt"}:
-        return "numpy==1.26.4\n"
+        return "numpy==1.26.4\n" if name == "requirements.txt" else "numpy==2.1.0\n"
     if name.startswith("environment"):
         return "name: frozen\ndependencies:\n  - python=3.8\n  - numpy=1.19\n"
     if name == "pyproject.toml":
