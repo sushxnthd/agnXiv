@@ -1,0 +1,451 @@
+{
+  "certificate": "sha256(exact manifest bytes)",
+  "false_accepts": 0,
+  "independent_checks": 20,
+  "independent_failures": 0,
+  "limits": [
+    "Exact bytes only; semantic normalization is deliberately excluded.",
+    "Only requirements.txt plus requirement.txt in one directory are eligible.",
+    "The certificate does not establish historical environment fidelity."
+  ],
+  "negative_cases": 12,
+  "negatives": [
+    {
+      "case": "version",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "marker",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "url_hash",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "option",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "include",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "comment",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "whitespace",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "newline",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "order",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "encoding",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "extra_dependency",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "case": "trailing_blank",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": null,
+      "independent": {
+        "equal": false,
+        "expected_digest": null,
+        "passed": true,
+        "reported_digest": null
+      },
+      "install_commands": [],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    }
+  ],
+  "positive_cases": 8,
+  "positive_failures": 0,
+  "positives": [
+    {
+      "case": "pins",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": "7023242b770d49ce9ecb20d09f5fe72417242ce3c99aa142bd6cbd175a4d4753",
+      "independent": {
+        "equal": true,
+        "expected_digest": "7023242b770d49ce9ecb20d09f5fe72417242ce3c99aa142bd6cbd175a4d4753",
+        "passed": true,
+        "reported_digest": "7023242b770d49ce9ecb20d09f5fe72417242ce3c99aa142bd6cbd175a4d4753"
+      },
+      "install_commands": [
+        [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "experiment/requirements.txt"
+        ]
+      ],
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    },
+    {
+      "case": "markers",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": "2277e8028aa08a541d318f5056cfd91d81874e3156b9ef090679110d0d367907",
+      "independent": {
+        "equal": true,
+        "expected_digest": "2277e8028aa08a541d318f5056cfd91d81874e3156b9ef090679110d0d367907",
+        "passed": true,
+        "reported_digest": "2277e8028aa08a541d318f5056cfd91d81874e3156b9ef090679110d0d367907"
+      },
+      "install_commands": [
+        [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "experiment/requirements.txt"
+        ]
+      ],
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    },
+    {
+      "case": "url_hash",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": "663cbcb517aed0f9c57b4247833131ed33abb5f550f35eca19601a3e72474965",
+      "independent": {
+        "equal": true,
+        "expected_digest": "663cbcb517aed0f9c57b4247833131ed33abb5f550f35eca19601a3e72474965",
+        "passed": true,
+        "reported_digest": "663cbcb517aed0f9c57b4247833131ed33abb5f550f35eca19601a3e72474965"
+      },
+      "install_commands": [
+        [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "experiment/requirements.txt"
+        ]
+      ],
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    },
+    {
+      "case": "include",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": "69a2a6ea27fdcc2376187d09bf8a52164ef3fa72b562e1a0c1132d957157f171",
+      "independent": {
+        "equal": true,
+        "expected_digest": "69a2a6ea27fdcc2376187d09bf8a52164ef3fa72b562e1a0c1132d957157f171",
+        "passed": true,
+        "reported_digest": "69a2a6ea27fdcc2376187d09bf8a52164ef3fa72b562e1a0c1132d957157f171"
+      },
+      "install_commands": [
+        [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "experiment/requirements.txt"
+        ]
+      ],
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    },
+    {
+      "case": "comments",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": "6b72297e3abc864276082e259ef1cccc1bc1bccc4ae7205bcfed6468d6220141",
+      "independent": {
+        "equal": true,
+        "expected_digest": "6b72297e3abc864276082e259ef1cccc1bc1bccc4ae7205bcfed6468d6220141",
+        "passed": true,
+        "reported_digest": "6b72297e3abc864276082e259ef1cccc1bc1bccc4ae7205bcfed6468d6220141"
+      },
+      "install_commands": [
+        [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "experiment/requirements.txt"
+        ]
+      ],
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    },
+    {
+      "case": "blank",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independent": {
+        "equal": true,
+        "expected_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true,
+        "reported_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "install_commands": [
+        [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "experiment/requirements.txt"
+        ]
+      ],
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    },
+    {
+      "case": "crlf",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": "48fb15820d59a384f39c743742907be99a3968d17985428ec35cb1808edaa880",
+      "independent": {
+        "equal": true,
+        "expected_digest": "48fb15820d59a384f39c743742907be99a3968d17985428ec35cb1808edaa880",
+        "passed": true,
+        "reported_digest": "48fb15820d59a384f39c743742907be99a3968d17985428ec35cb1808edaa880"
+      },
+      "install_commands": [
+        [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "experiment/requirements.txt"
+        ]
+      ],
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    },
+    {
+      "case": "non_utf8",
+      "dependency_files": [
+        "experiment/requirement.txt",
+        "experiment/requirements.txt"
+      ],
+      "digest": "e95fd4c45526db493a4cee34529a5ac182956db9953acf2c513d297d390abcef",
+      "independent": {
+        "equal": true,
+        "expected_digest": "e95fd4c45526db493a4cee34529a5ac182956db9953acf2c513d297d390abcef",
+        "passed": true,
+        "reported_digest": "e95fd4c45526db493a4cee34529a5ac182956db9953acf2c513d297d390abcef"
+      },
+      "install_commands": [
+        [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "-r",
+          "experiment/requirements.txt"
+        ]
+      ],
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    }
+  ],
+  "schema": "agnxiv.scoped-environment-equivalence/1"
+}
