@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -16,6 +17,7 @@ class EnvironmentSpec(BaseModel):
     preferred_dependency_file: str | None = None
     environment_scope: list[str] = Field(default_factory=list)
     scope_resolution: Literal["none", "resolved", "ambiguous"] = "none"
+    manifest_equivalence_sha256: str | None = None
     base_image: str = "python:3.11-slim"
     install_commands: list[list[str]] = Field(default_factory=list)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -117,6 +119,23 @@ def _requirements_precision(path: Path) -> Literal["floating", "version-pinned"]
     return "floating"
 
 
+def _requirements_alias_equivalence(manifests: list[Path]) -> str | None:
+    """Return an exact-byte proof for the two supported requirements aliases."""
+    if len(manifests) != 2:
+        return None
+    if {path.name for path in manifests} != {"requirements.txt", "requirement.txt"}:
+        return None
+    if manifests[0].parent != manifests[1].parent:
+        return None
+    try:
+        payloads = [path.read_bytes() for path in manifests]
+    except OSError:
+        return None
+    if payloads[0] != payloads[1]:
+        return None
+    return hashlib.sha256(payloads[0]).hexdigest()
+
+
 def _local_module_names(root: Path) -> set[str]:
     names = {path.stem for path in root.glob("*.py") if path.is_file()}
     names.update(path.name for path in root.iterdir() if path.is_dir() and not path.name.startswith("."))
@@ -178,17 +197,30 @@ def infer_python_environment(
     preferred_dependency_file: str | None = None
     environment_scope = list(dict.fromkeys(scope_paths or []))
     scope_resolution: Literal["none", "resolved", "ambiguous"] = "none"
+    manifest_equivalence_sha256: str | None = None
 
     scoped_manifests = _scoped_dependency_manifests(root, environment_scope)
-    if len(scoped_manifests) == 1:
+    if len(scoped_manifests) > 1:
+        manifest_equivalence_sha256 = _requirements_alias_equivalence(scoped_manifests)
+    if len(scoped_manifests) == 1 or manifest_equivalence_sha256 is not None:
         scope_resolution = "resolved"
         scoped = scoped_manifests[0]
         preferred_dependency_file = scoped.relative_to(root).as_posix()
-        dependency_files.append(preferred_dependency_file)
-        notes.append(
-            "Workflow-scoped dependency manifest selected from the nearest "
-            f"documented command directory: {preferred_dependency_file}"
+        dependency_files.extend(
+            path.relative_to(root).as_posix() for path in scoped_manifests
         )
+        if manifest_equivalence_sha256 is None:
+            notes.append(
+                "Workflow-scoped dependency manifest selected from the nearest "
+                f"documented command directory: {preferred_dependency_file}"
+            )
+        else:
+            notes.append(
+                "Colocated requirements filename aliases have exact-byte identity "
+                f"(SHA-256 {manifest_equivalence_sha256}); selected "
+                f"{preferred_dependency_file} deterministically while retaining both "
+                "paths as audit evidence."
+            )
         if scoped.name in {"requirements.txt", "requirement.txt"}:
             install_commands.append(
                 [
@@ -336,6 +368,7 @@ def infer_python_environment(
         preferred_dependency_file=preferred_dependency_file,
         environment_scope=environment_scope,
         scope_resolution=scope_resolution,
+        manifest_equivalence_sha256=manifest_equivalence_sha256,
         install_commands=install_commands,
         confidence=confidence,
         dependency_source=dependency_source,
