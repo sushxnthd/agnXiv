@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
 """Exact adversarial matrix for workflow-scoped manifest selection."""
-from itertools import combinations
+
 import json
+from itertools import combinations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
