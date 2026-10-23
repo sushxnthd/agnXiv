@@ -1,0 +1,443 @@
+{
+  "conflict_cases": 36,
+  "conflict_false_accepts": 0,
+  "conflicts": [
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirements.txt",
+        "requirement.txt"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirements.txt",
+        "environment.yml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirements.txt",
+        "environment.yaml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirements.txt",
+        "pyproject.toml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirements.txt",
+        "poetry.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirements.txt",
+        "uv.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirements.txt",
+        "setup.py"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirements.txt",
+        "setup.cfg"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirement.txt",
+        "environment.yml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirement.txt",
+        "environment.yaml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirement.txt",
+        "pyproject.toml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirement.txt",
+        "poetry.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirement.txt",
+        "uv.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirement.txt",
+        "setup.py"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "requirement.txt",
+        "setup.cfg"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yml",
+        "environment.yaml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yml",
+        "pyproject.toml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yml",
+        "poetry.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yml",
+        "uv.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yml",
+        "setup.py"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yml",
+        "setup.cfg"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yaml",
+        "pyproject.toml"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yaml",
+        "poetry.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yaml",
+        "uv.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yaml",
+        "setup.py"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "environment.yaml",
+        "setup.cfg"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "pyproject.toml",
+        "poetry.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "pyproject.toml",
+        "uv.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "pyproject.toml",
+        "setup.py"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "pyproject.toml",
+        "setup.cfg"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "poetry.lock",
+        "uv.lock"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "poetry.lock",
+        "setup.py"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "poetry.lock",
+        "setup.cfg"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "uv.lock",
+        "setup.py"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "uv.lock",
+        "setup.cfg"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    },
+    {
+      "install_commands": [],
+      "manifests": [
+        "setup.py",
+        "setup.cfg"
+      ],
+      "passed": true,
+      "preferred": null,
+      "resolution": "ambiguous"
+    }
+  ],
+  "control_cases": 10,
+  "control_failures": 0,
+  "controls": [
+    {
+      "manifest": "requirements.txt",
+      "passed": true,
+      "preferred": "experiment/requirements.txt",
+      "resolution": "resolved"
+    },
+    {
+      "manifest": "requirement.txt",
+      "passed": true,
+      "preferred": "experiment/requirement.txt",
+      "resolution": "resolved"
+    },
+    {
+      "manifest": "environment.yml",
+      "passed": true,
+      "preferred": "experiment/environment.yml",
+      "resolution": "resolved"
+    },
+    {
+      "manifest": "environment.yaml",
+      "passed": true,
+      "preferred": "experiment/environment.yaml",
+      "resolution": "resolved"
+    },
+    {
+      "manifest": "pyproject.toml",
+      "passed": true,
+      "preferred": "experiment/pyproject.toml",
+      "resolution": "resolved"
+    },
+    {
+      "manifest": "poetry.lock",
+      "passed": true,
+      "preferred": "experiment/poetry.lock",
+      "resolution": "resolved"
+    },
+    {
+      "manifest": "uv.lock",
+      "passed": true,
+      "preferred": "experiment/uv.lock",
+      "resolution": "resolved"
+    },
+    {
+      "manifest": "setup.py",
+      "passed": true,
+      "preferred": "experiment/setup.py",
+      "resolution": "resolved"
+    },
+    {
+      "manifest": "setup.cfg",
+      "passed": true,
+      "preferred": "experiment/setup.cfg",
+      "resolution": "resolved"
+    }
+  ],
+  "pre_fix_counterexample": {
+    "environment_yml_omitted": true,
+    "false_accept": true,
+    "manifests": [
+      "requirements.txt",
+      "environment.yml"
+    ],
+    "observed_preferred": "experiment/requirements.txt",
+    "observed_resolution": "resolved"
+  },
+  "root_scope_precedence": {
+    "dependency_files": [
+      "experiment/requirements.txt"
+    ],
+    "passed": true,
+    "preferred": "experiment/requirements.txt",
+    "resolution": "resolved"
+  },
+  "schema": "agnxiv.scoped-environment-conflict/1"
+}
