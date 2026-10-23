@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import hmac
 import json
 import re
 import subprocess
@@ -27,6 +29,39 @@ _HOSTED_IMAGE_RE = re.compile(
 
 class HostedRunnerError(RuntimeError):
     """A hosted verification runner failed safely."""
+
+
+def _validate_expected_manuscript_sha256(value: str | None) -> str | None:
+    if value is None:
+        return None
+    candidate = value.strip().lower()
+    if not re.fullmatch(r"[0-9a-f]{64}", candidate):
+        raise HostedRunnerError(
+            "expected manuscript SHA-256 must be exactly 64 hexadecimal characters"
+        )
+    return candidate
+
+
+def _verify_manuscript_identity(
+    paper: Path,
+    *,
+    arxiv_id: str,
+    expected_sha256: str | None,
+) -> dict[str, str | bool | None]:
+    observed = hashlib.sha256(paper.read_bytes()).hexdigest()
+    if expected_sha256 is not None and not hmac.compare_digest(
+        observed, expected_sha256
+    ):
+        raise HostedRunnerError(
+            "downloaded manuscript SHA-256 mismatch: "
+            f"expected {expected_sha256}, observed {observed}"
+        )
+    return {
+        "arxiv_id": parse_arxiv_reference(arxiv_id).versioned_id,
+        "sha256": observed,
+        "expected_sha256": expected_sha256,
+        "identity_verified": expected_sha256 is not None,
+    }
 
 
 def _run(command: list[str], *, timeout: int = 300) -> subprocess.CompletedProcess[str]:
@@ -167,7 +202,11 @@ def execute_job(
     repository_ref: str,
     arxiv_id: str | None,
     spec_path: str | None,
+    expected_manuscript_sha256: str | None = None,
 ) -> tuple[str, dict]:
+    expected_manuscript_sha256 = _validate_expected_manuscript_sha256(
+        expected_manuscript_sha256
+    )
     with tempfile.TemporaryDirectory(prefix="agnxiv-hosted-") as temp:
         workspace = Path(temp)
         repo = workspace / "repository"
@@ -178,6 +217,11 @@ def execute_job(
                 raise HostedRunnerError("AUTO mode requires an arXiv identifier")
             paper = workspace / "paper.pdf"
             download_arxiv_pdf(arxiv_id, paper)
+            manuscript_identity = _verify_manuscript_identity(
+                paper,
+                arxiv_id=arxiv_id,
+                expected_sha256=expected_manuscript_sha256,
+            )
             identity = detect_git_identity(repo)
             if identity is None:
                 raise HostedRunnerError("checked-out repository has no Git identity")
@@ -187,6 +231,7 @@ def execute_job(
                 return "needs_review", {
                     "kind": "auto_plan",
                     "repository_commit": identity.commit,
+                    "manuscript_identity": manuscript_identity,
                     "plan": plan.model_dump(mode="json"),
                 }
 
@@ -203,6 +248,7 @@ def execute_job(
                 return "needs_review", {
                     "kind": "auto_plan",
                     "repository_commit": identity.commit,
+                    "manuscript_identity": manuscript_identity,
                     "plan": plan.model_dump(mode="json"),
                     "reason": "The plan did not pass execution prerequisites.",
                 }
@@ -232,6 +278,7 @@ def execute_job(
             return status, {
                 "kind": "verification",
                 "zero_manifest": True,
+                "manuscript_identity": manuscript_identity,
                 "build": build.model_dump(mode="json"),
                 "discovery": outcome.frozen_locator.model_dump(mode="json"),
                 "bundle": outcome.bundle.model_dump(mode="json"),
@@ -306,6 +353,7 @@ def main() -> None:
     parser.add_argument("--repository", required=True)
     parser.add_argument("--repository-ref", required=True)
     parser.add_argument("--arxiv-id", default="")
+    parser.add_argument("--expected-manuscript-sha256", default="")
     parser.add_argument("--spec-path", default="")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
@@ -321,6 +369,7 @@ def main() -> None:
             repository_ref=args.repository_ref,
             arxiv_id=args.arxiv_id or None,
             spec_path=args.spec_path or None,
+            expected_manuscript_sha256=args.expected_manuscript_sha256 or None,
         )
     except HostedRunnerError as exc:
         error = str(exc)

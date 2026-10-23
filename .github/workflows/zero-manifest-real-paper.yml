@@ -40,7 +40,8 @@ jobs:
             --mode auto_verify \
             --repository synthiumjp/metacognitive-monitoring-battery \
             --repository-ref 2f83d0fa506e7af2b72ca191b65ce42e07c9e185 \
-            --arxiv-id 2604.15702 \
+            --arxiv-id 2604.15702v2 \
+            --expected-manuscript-sha256 f60c57f5c39453638b82b8eb1317db6b9e92d440ddf4b06eaab0a6f3a08605a7 \
             --output /tmp/zero-manifest-real.json
 
       - name: Inspect reproducibility result
@@ -89,6 +90,12 @@ jobs:
           result = payload["result"]
           assert result["kind"] == "verification"
           assert result["zero_manifest"] is True
+          assert result["manuscript_identity"] == {
+              "arxiv_id": "2604.15702v2",
+              "sha256": "f60c57f5c39453638b82b8eb1317db6b9e92d440ddf4b06eaab0a6f3a08605a7",
+              "expected_sha256": "f60c57f5c39453638b82b8eb1317db6b9e92d440ddf4b06eaab0a6f3a08605a7",
+              "identity_verified": True,
+          }
           locator = result["discovery"]
           assert locator["regex"]
           assert locator["discovery_stdout_sha256"]
