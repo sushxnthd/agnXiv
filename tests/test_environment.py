@@ -89,3 +89,62 @@ def test_abstains_from_choosing_between_multiple_scoped_environments(tmp_path: P
         "a/requirements.txt",
         "b/requirements.txt",
     ]
+
+
+def test_abstains_on_colocated_requirements_and_conda_environments(tmp_path: Path) -> None:
+    scoped = tmp_path / "eval"
+    scoped.mkdir()
+    (scoped / "eval.py").write_text("print('ok')\n", encoding="utf-8")
+    (scoped / "requirements.txt").write_text("numpy==1.26.4\n", encoding="utf-8")
+    (scoped / "environment.yml").write_text(
+        "name: incompatible\ndependencies:\n  - python=3.8\n  - numpy=1.19\n",
+        encoding="utf-8",
+    )
+
+    spec = infer_python_environment(tmp_path, scope_paths=["eval/eval.py"])
+
+    assert spec.scope_resolution == "ambiguous"
+    assert spec.preferred_dependency_file is None
+    assert sorted(spec.dependency_files) == [
+        "eval/environment.yml",
+        "eval/requirements.txt",
+    ]
+    assert spec.install_commands == []
+
+
+def test_abstains_on_colocated_requirements_aliases(tmp_path: Path) -> None:
+    scoped = tmp_path / "eval"
+    scoped.mkdir()
+    (scoped / "eval.py").write_text("print('ok')\n", encoding="utf-8")
+    (scoped / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+    (scoped / "requirement.txt").write_text("numpy==1.26.4\n", encoding="utf-8")
+
+    spec = infer_python_environment(
+        tmp_path,
+        scope_paths=["eval/eval.py", "eval/eval.py"],
+    )
+
+    assert spec.scope_resolution == "ambiguous"
+    assert sorted(spec.dependency_files) == [
+        "eval/requirement.txt",
+        "eval/requirements.txt",
+    ]
+
+
+def test_root_manifest_cannot_upgrade_scoped_environment_precision(tmp_path: Path) -> None:
+    (tmp_path / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+    scoped = tmp_path / "eval"
+    scoped.mkdir()
+    (scoped / "eval.py").write_text("print('ok')\n", encoding="utf-8")
+    (scoped / "requirements.txt").write_text("numpy>=1.20\n", encoding="utf-8")
+
+    spec = infer_python_environment(tmp_path, scope_paths=["eval/eval.py"])
+
+    assert spec.scope_resolution == "resolved"
+    assert spec.preferred_dependency_file == "eval/requirements.txt"
+    assert spec.dependency_files == ["eval/requirements.txt"]
+    assert spec.dependency_precision == "floating"
+    assert spec.historical_fidelity == "approximate"
+    assert spec.install_commands == [
+        ["python", "-m", "pip", "install", "-r", "eval/requirements.txt"]
+    ]
