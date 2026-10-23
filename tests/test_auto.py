@@ -229,3 +229,24 @@ def test_auto_plan_uses_environment_nearest_selected_evaluation(tmp_path: Path) 
         == "examples/NLG/requirement.txt"
     )
     assert plan.environment.dependency_precision == "version-pinned"
+
+
+def test_auto_plan_abstains_on_competing_colocated_environments(tmp_path: Path) -> None:
+    paper = tmp_path / "paper.txt"
+    paper.write_text("Our proposed method achieves accuracy of 91.4%.", encoding="utf-8")
+    repo = tmp_path / "repo"
+    scoped = repo / "eval"
+    scoped.mkdir(parents=True)
+    (scoped / "eval.py").write_text("print('accuracy: 91.4%')\n", encoding="utf-8")
+    (scoped / "requirements.txt").write_text("numpy==2.1.0\n", encoding="utf-8")
+    (scoped / "environment.yml").write_text(
+        "name: incompatible\ndependencies:\n  - python=3.8\n  - numpy=1.19\n",
+        encoding="utf-8",
+    )
+
+    plan = build_auto_plan(paper, repo)
+
+    assert plan.environment.scope_resolution == "ambiguous"
+    assert plan.environment.preferred_dependency_file is None
+    assert not plan.safe_to_execute
+    assert any("Multiple workflow-scoped" in blocker for blocker in plan.blockers)
