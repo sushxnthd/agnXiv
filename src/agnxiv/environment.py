@@ -88,7 +88,10 @@ def _scoped_dependency_manifests(
                 and not (directory / name).is_symlink()
             ]
             if matches:
-                found.append(matches[0])
+                # Filename priority must not resolve scientifically competing
+                # environments.  Preserve every co-located candidate so the
+                # caller can abstain on ambiguity.
+                found.extend(matches)
                 break
             directory = directory.parent
 
@@ -244,7 +247,10 @@ def infer_python_environment(
     environment_yml = root / "environment.yml"
     environment_yaml = root / "environment.yaml"
 
-    if requirements.exists():
+    # Once workflow scope resolves (or reveals a conflict), root metadata is
+    # not the executed environment and must not overwrite its precision,
+    # fidelity, or install commands.
+    if requirements.exists() and scope_resolution == "none":
         dependency_files.append("requirements.txt")
         install_commands.append(["python", "-m", "pip", "install", "-r", "requirements.txt"])
         confidence = max(confidence, 0.8)
@@ -256,7 +262,7 @@ def infer_python_environment(
             else "approximate"
         )
 
-    if pyproject.exists():
+    if pyproject.exists() and scope_resolution == "none":
         dependency_files.append("pyproject.toml")
         install_commands.append(["python", "-m", "pip", "install", "."])
         confidence = max(confidence, 0.75)
@@ -265,7 +271,7 @@ def infer_python_environment(
             dependency_precision = "floating"
             historical_fidelity = "approximate"
 
-    if setup_py.exists():
+    if setup_py.exists() and scope_resolution == "none":
         dependency_files.append("setup.py")
         if not pyproject.exists():
             install_commands.append(["python", "-m", "pip", "install", "."])
@@ -275,7 +281,7 @@ def infer_python_environment(
             dependency_precision = "floating"
             historical_fidelity = "approximate"
 
-    if setup_cfg.exists():
+    if setup_cfg.exists() and scope_resolution == "none":
         dependency_files.append("setup.cfg")
         confidence = max(confidence, 0.55)
         dependency_source = "manifest"
@@ -283,7 +289,7 @@ def infer_python_environment(
             dependency_precision = "floating"
             historical_fidelity = "approximate"
 
-    if poetry_lock.exists():
+    if poetry_lock.exists() and scope_resolution == "none":
         dependency_files.append("poetry.lock")
         notes.append("Poetry lockfile detected; prefer the exact locked dependency set.")
         confidence = max(confidence, 0.85)
@@ -291,7 +297,7 @@ def infer_python_environment(
         dependency_precision = "locked"
         historical_fidelity = "constrained"
 
-    if uv_lock.exists():
+    if uv_lock.exists() and scope_resolution == "none":
         dependency_files.append("uv.lock")
         notes.append("uv lockfile detected; prefer the exact locked dependency set.")
         confidence = max(confidence, 0.9)
@@ -300,7 +306,7 @@ def infer_python_environment(
         historical_fidelity = "constrained"
 
     conda_file = environment_yml if environment_yml.exists() else environment_yaml
-    if conda_file.exists():
+    if conda_file.exists() and scope_resolution == "none":
         dependency_files.append(conda_file.name)
         notes.append("Conda environment detected; a Conda-capable builder is required.")
         confidence = max(confidence, 0.8)
