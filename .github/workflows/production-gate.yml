@@ -36,6 +36,7 @@ jobs:
             tests/test_environment.py \
             tests/test_auto.py
           python research/scripts/verify_scoped_environment_conflicts.py
+          python research/scripts/verify_scoped_environment_equivalence.py
 
       - name: Run frozen safety benchmarks
         run: |
