@@ -129,6 +129,46 @@ def test_abstains_on_colocated_requirements_aliases(tmp_path: Path) -> None:
         "eval/requirement.txt",
         "eval/requirements.txt",
     ]
+    assert spec.manifest_equivalence_sha256 is None
+
+
+def test_resolves_exact_duplicate_requirements_aliases_with_audit_proof(
+    tmp_path: Path,
+) -> None:
+    scoped = tmp_path / "eval"
+    scoped.mkdir()
+    (scoped / "eval.py").write_text("print('ok')\n", encoding="utf-8")
+    payload = b"numpy==2.1.0\n--extra-index-url https://example.invalid/simple\n"
+    (scoped / "requirements.txt").write_bytes(payload)
+    (scoped / "requirement.txt").write_bytes(payload)
+
+    spec = infer_python_environment(tmp_path, scope_paths=["eval/eval.py"])
+
+    assert spec.scope_resolution == "resolved"
+    assert spec.preferred_dependency_file == "eval/requirements.txt"
+    assert sorted(spec.dependency_files) == [
+        "eval/requirement.txt",
+        "eval/requirements.txt",
+    ]
+    assert spec.manifest_equivalence_sha256 is not None
+    assert spec.install_commands == [
+        ["python", "-m", "pip", "install", "-r", "eval/requirements.txt"]
+    ]
+
+
+def test_near_duplicate_requirements_aliases_remain_ambiguous(tmp_path: Path) -> None:
+    scoped = tmp_path / "eval"
+    scoped.mkdir()
+    (scoped / "eval.py").write_text("print('ok')\n", encoding="utf-8")
+    (scoped / "requirements.txt").write_bytes(b"numpy==2.1.0\n")
+    (scoped / "requirement.txt").write_bytes(b"numpy==2.1.0\r\n")
+
+    spec = infer_python_environment(tmp_path, scope_paths=["eval/eval.py"])
+
+    assert spec.scope_resolution == "ambiguous"
+    assert spec.preferred_dependency_file is None
+    assert spec.manifest_equivalence_sha256 is None
+    assert spec.install_commands == []
 
 
 def test_root_manifest_cannot_upgrade_scoped_environment_precision(tmp_path: Path) -> None:
