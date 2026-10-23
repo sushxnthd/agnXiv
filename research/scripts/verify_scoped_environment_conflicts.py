@@ -7,7 +7,6 @@ from tempfile import TemporaryDirectory
 
 from agnxiv.environment import infer_python_environment
 
-
 MANIFESTS = (
     "requirements.txt",
     "requirement.txt",
