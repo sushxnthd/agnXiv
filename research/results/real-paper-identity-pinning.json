@@ -1,0 +1,54 @@
+{
+  "schema": "agnxiv.real-paper-identity-result/1",
+  "final_head": "8bb16732432d4b364113b763cb74fd18a4accadb",
+  "workflow_run": {
+    "id": 40039779755,
+    "url": "https://github.com/sushxnthd/agnXiv/actions/runs/40039779755",
+    "conclusion": "success",
+    "artifact_id": 12539050875,
+    "artifact_digest": "sha256:012f224ae8bfe4beb135cb19fbe57394c6acb7f73593636d7b942f1adc14a6f4",
+    "artifact_expires_at": "2026-11-22T23:28:35Z"
+  },
+  "manuscript": {
+    "arxiv_id": "2604.15702v2",
+    "sha256": "f60c57f5c39453638b82b8eb1317db6b9e92d440ddf4b06eaab0a6f3a08605a7",
+    "expected_sha256": "f60c57f5c39453638b82b8eb1317db6b9e92d440ddf4b06eaab0a6f3a08605a7",
+    "identity_verified": true
+  },
+  "repository": {
+    "slug": "synthiumjp/metacognitive-monitoring-battery",
+    "commit": "2f83d0fa506e7af2b72ca191b65ce42e07c9e185"
+  },
+  "verdicts": [
+    {
+      "metric": "split_half_r",
+      "expected": 0.51,
+      "observed": 0.504,
+      "verdict": "CONTRADICTED"
+    },
+    {
+      "metric": "spearman_brown",
+      "expected": 0.68,
+      "observed": 0.67,
+      "verdict": "CONTRADICTED"
+    }
+  ],
+  "falsification": {
+    "malformed_digest_rejected_before_checkout": true,
+    "mismatch_rejected_before_auto_plan": true,
+    "mismatch_rejected_before_environment_build": true,
+    "mismatch_rejected_before_scientific_execution": true
+  },
+  "security_remediation": {
+    "failed_run": 40039597423,
+    "cause": "pypdf 6.21.1 had three crafted-PDF denial-of-service advisories",
+    "fixed_version": "6.21.2",
+    "passing_run": 40039779685
+  },
+  "limitations": [
+    "exact byte identity does not establish scientific correctness",
+    "the external repository environment remains floating and historically approximate",
+    "the full hosted artifact has 30-day retention",
+    "general AUTO requests without an expected digest remain backward-compatible and unverified"
+  ]
+}
