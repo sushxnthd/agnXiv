@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-pdf = ["pypdf>=6.21.1,<7"]
+pdf = ["pypdf>=6.21.2,<7"]
 sign = ["cryptography>=50.0.2,<51"]
 service = [
   "fastapi>=0.115,<1",
