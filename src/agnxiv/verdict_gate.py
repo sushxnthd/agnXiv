@@ -3,6 +3,7 @@ from __future__ import annotations
 from .build import BuildResult
 from .models import Verdict
 from .pipeline import VerificationBundle
+from .sandbox import is_immutable_image_id
 
 _DECISIVE_VERDICTS = {
     Verdict.VERIFIED,
@@ -31,10 +32,10 @@ def environment_verdict_blockers(
             "built dependency manifest precision is "
             f"{build.plan.dependency_precision}, not hash-pinned"
         )
-    if not build.base_image_id.startswith("sha256:"):
-        blockers.append("base image lacks an immutable image ID")
-    if not build.image_id.startswith("sha256:"):
-        blockers.append("built environment lacks an immutable image ID")
+    if not is_immutable_image_id(build.base_image_id):
+        blockers.append("base image lacks a canonical immutable SHA-256 image ID")
+    if not is_immutable_image_id(build.image_id):
+        blockers.append("built environment lacks a canonical immutable SHA-256 image ID")
 
     return blockers
 

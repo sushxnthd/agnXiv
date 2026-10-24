@@ -1,0 +1,10 @@
+{
+  "attack_cases": 210,
+  "canonical_control_passed": true,
+  "digest_matches": true,
+  "independently_invalid": true,
+  "passed": true,
+  "production_imports": false,
+  "schema": "immutable-image-identity-gate-independent-audit-v1",
+  "verdicts_fail_closed": true
+}

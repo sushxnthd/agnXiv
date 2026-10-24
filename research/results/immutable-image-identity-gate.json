@@ -1,0 +1,1482 @@
+{
+  "attack_cases": 210,
+  "attacks": [
+    {
+      "candidate": "sha256:",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:a",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:a",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:built",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:built",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha512:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha512:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": " sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": " sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaasuffix",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "base"
+    },
+    {
+      "candidate": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaasuffix",
+      "passed": true,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "target": "built"
+    }
+  ],
+  "canonical_control_passed": true,
+  "digest": "a6469812a7ac8ecd40dce6c06c4a77be6b216a87cb718641c03e46ceec81f29d",
+  "false_decisive_verdicts": 0,
+  "measurements_preserved": true,
+  "passed": true,
+  "rejected": 210,
+  "schema": "immutable-image-identity-gate-v1"
+}

@@ -28,7 +28,12 @@ def _bundle(
     )
 
 
-def _build(precision: str) -> BuildResult:
+def _build(
+    precision: str,
+    *,
+    image_id: str | None = None,
+    base_image_id: str | None = None,
+) -> BuildResult:
     return BuildResult(
         plan=BuildPlan(
             base_image="python:3.11-slim",
@@ -40,8 +45,8 @@ def _build(precision: str) -> BuildResult:
             safe_manifest_only=True,
         ),
         image_ref="agnxiv-env:test",
-        image_id="sha256:" + "c" * 64,
-        base_image_id="sha256:" + "d" * 64,
+        image_id=image_id or "sha256:" + "c" * 64,
+        base_image_id=base_image_id or "sha256:" + "d" * 64,
         stdout_sha256="e" * 64,
         stderr_sha256="f" * 64,
     )
@@ -82,6 +87,26 @@ def test_ambiguous_scope_is_suppressed_even_with_hashes() -> None:
 
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
     assert any("ambiguous" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_malformed_built_image_identity_is_suppressed() -> None:
+    gated = gate_hosted_verdict(
+        _bundle(historical_fidelity="constrained"),
+        _build("hash-pinned", image_id="sha256:built"),
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert gated.provisional_verdict == Verdict.CONTRADICTED
+    assert any("built environment" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_malformed_base_image_identity_is_suppressed() -> None:
+    gated = gate_hosted_verdict(
+        _bundle(historical_fidelity="constrained"),
+        _build("hash-pinned", base_image_id="sha256:" + "D" * 64),
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert gated.provisional_verdict == Verdict.CONTRADICTED
+    assert any("base image" in reason for reason in gated.verdict_gate_reasons)
 
 
 def test_existing_abstention_is_not_rewritten() -> None:

@@ -31,6 +31,7 @@ jobs:
             tests/test_service_hardening.py \
             tests/test_zero_manifest.py \
             tests/test_sandbox.py \
+            tests/test_verdict_gate.py \
             tests/test_oidc.py \
             tests/test_network.py \
             tests/test_environment.py \
@@ -39,6 +40,10 @@ jobs:
           python research/scripts/verify_scoped_environment_equivalence.py
           python research/scripts/verify_environment_verdict_firewall.py \
             > /tmp/environment-verdict-firewall.json
+          python research/scripts/verify_immutable_image_identity_gate.py \
+            > /tmp/immutable-image-identity-gate.json
+          python research/scripts/audit_immutable_image_identity_gate.py \
+            > /tmp/immutable-image-identity-gate-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -127,5 +132,7 @@ jobs:
             /tmp/locator.json
             /tmp/aggregation.json
             /tmp/environment-verdict-firewall.json
+            /tmp/immutable-image-identity-gate.json
+            /tmp/immutable-image-identity-gate-audit.json
           retention-days: 90
           if-no-files-found: warn

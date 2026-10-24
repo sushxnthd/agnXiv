@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+_IMMUTABLE_IMAGE_ID_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+
 
 class SandboxError(RuntimeError):
     """A controlled failure while preparing or executing an isolated run."""
@@ -37,6 +39,11 @@ class ExecutionResult:
     stderr: str
 
 
+def is_immutable_image_id(value: str) -> bool:
+    """Return whether value is a canonical Docker SHA-256 content ID."""
+    return _IMMUTABLE_IMAGE_ID_RE.fullmatch(value) is not None
+
+
 def resolve_local_image_id(image: str) -> str:
     """Resolve a local image reference to the immutable image content ID."""
     if not image.strip():
@@ -60,9 +67,9 @@ def resolve_local_image_id(image: str) -> str:
         )
 
     image_id = completed.stdout.strip()
-    if not image_id.startswith("sha256:"):
+    if not is_immutable_image_id(image_id):
         raise SandboxError(
-            f"Docker returned a non-content-addressed image ID: {image_id}"
+            "Docker returned a non-canonical SHA-256 image content ID"
         )
     return image_id
 

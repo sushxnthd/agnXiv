@@ -1,8 +1,16 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
-from agnxiv.sandbox import SandboxLimits, docker_command, prepare_artifact_mounts
+from agnxiv.sandbox import (
+    SandboxError,
+    SandboxLimits,
+    docker_command,
+    is_immutable_image_id,
+    prepare_artifact_mounts,
+    resolve_local_image_id,
+)
 
 
 def test_docker_command_is_locked_down(tmp_path: Path) -> None:
@@ -27,6 +35,27 @@ def test_docker_command_is_locked_down(tmp_path: Path) -> None:
     assert "uid=65534" in joined
     assert "gid=65534" in joined
     assert "readonly" in joined
+
+
+def test_image_identity_requires_canonical_sha256() -> None:
+    assert is_immutable_image_id("sha256:" + "a" * 64)
+    assert not is_immutable_image_id("sha256:built")
+    assert not is_immutable_image_id("sha256:" + "A" * 64)
+    assert not is_immutable_image_id("sha256:" + "a" * 63)
+    assert not is_immutable_image_id(" sha256:" + "a" * 64)
+
+
+def test_docker_inspection_rejects_malformed_content_id(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "agnxiv.sandbox.subprocess.run",
+        lambda *args, **kwargs: SimpleNamespace(
+            returncode=0,
+            stdout="sha256:not-a-content-id\n",
+            stderr="",
+        ),
+    )
+    with pytest.raises(SandboxError, match="non-canonical"):
+        resolve_local_image_id("python:3.11-slim")
 
 
 def test_external_artifacts_get_deterministic_readonly_mounts(tmp_path: Path) -> None:
