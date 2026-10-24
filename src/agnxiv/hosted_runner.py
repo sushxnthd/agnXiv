@@ -261,7 +261,7 @@ def execute_job(
                 base_image=base_image,
                 dependency_file=plan.environment.preferred_dependency_file,
             )
-            outcome = run_zero_manifest(paper, repo, image=build.image_ref)
+            outcome = run_zero_manifest(paper, repo, image=build.image_id)
 
             if outcome.bundle is None:
                 return "needs_review", {
@@ -338,7 +338,7 @@ def execute_job(
             )
             raw_bundle = execute_verification_spec(
                 manifest,
-                image_override=build.image_ref,
+                image_override=build.image_id,
             )
             bundle = gate_hosted_verdict(raw_bundle, build)
             verdict = bundle.record.verdict.value

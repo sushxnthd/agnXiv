@@ -36,6 +36,14 @@ def environment_verdict_blockers(
         blockers.append("base image lacks a canonical immutable SHA-256 image ID")
     if not is_immutable_image_id(build.image_id):
         blockers.append("built environment lacks a canonical immutable SHA-256 image ID")
+    if bundle.execution is None:
+        blockers.append("scientific verdict lacks recorded execution image identity")
+    elif not is_immutable_image_id(bundle.execution.image_id):
+        blockers.append("execution lacks a canonical immutable SHA-256 image ID")
+    elif bundle.execution.image_id != build.image_id:
+        blockers.append(
+            "executed image does not match the audited built environment image ID"
+        )
 
     return blockers
 

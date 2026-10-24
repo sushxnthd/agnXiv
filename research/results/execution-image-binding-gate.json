@@ -1,0 +1,1190 @@
+{
+  "attack_cases": 128,
+  "attacks": [
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "0",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "0",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:abaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "1",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:abaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "1",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "2",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "2",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "3",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "3",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "4",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "4",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "5",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "5",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "6",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "6",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "7",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "7",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "8",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "8",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "9",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "9",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "10",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "10",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "11",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "11",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "12",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "12",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "13",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "13",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "14",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "14",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "15",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "15",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "16",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "16",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "17",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "17",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "18",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "18",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "19",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "19",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "20",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "20",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "21",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "21",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "22",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "22",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "23",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "23",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "24",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "24",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "25",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "25",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "26",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "26",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "27",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "27",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "28",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "28",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "29",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "29",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "30",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "30",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "31",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "31",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "32",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "32",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "33",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "33",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "34",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "34",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "35",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "35",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "36",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "36",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "37",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "37",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "38",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "38",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "39",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "39",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "40",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "40",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "41",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "41",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "42",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "42",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "43",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "43",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "44",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "44",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "45",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "45",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "46",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "46",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "47",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "47",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "48",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "48",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "49",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "49",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "50",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "50",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "51",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "51",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "52",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "52",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "53",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "53",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "54",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "54",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "55",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "55",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaa",
+      "measurement_preserved": true,
+      "position": "56",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "56",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaa",
+      "measurement_preserved": true,
+      "position": "57",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "57",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaa",
+      "measurement_preserved": true,
+      "position": "58",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "58",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaa",
+      "measurement_preserved": true,
+      "position": "59",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "59",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaa",
+      "measurement_preserved": true,
+      "position": "60",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "60",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaa",
+      "measurement_preserved": true,
+      "position": "61",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "61",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaba",
+      "measurement_preserved": true,
+      "position": "62",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaba",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "62",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+      "measurement_preserved": true,
+      "position": "63",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    },
+    {
+      "binding_blocker": true,
+      "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+      "execution_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "measurement_preserved": true,
+      "position": "63",
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY"
+    }
+  ],
+  "controls": [
+    {
+      "image_id": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "passed": true,
+      "public_verdict": "CONTRADICTED"
+    },
+    {
+      "image_id": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+      "passed": true,
+      "public_verdict": "CONTRADICTED"
+    },
+    {
+      "image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "passed": true,
+      "public_verdict": "CONTRADICTED"
+    },
+    {
+      "image_id": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "passed": true,
+      "public_verdict": "CONTRADICTED"
+    }
+  ],
+  "digest": "272ca143ed9f0087ab519fd81f08b9e5e8aa33edcdf4385e704aa8608c4fc835",
+  "exact_match_controls": 4,
+  "exact_match_controls_passed": 4,
+  "false_decisive_verdicts": 0,
+  "hosted_execution_paths_bound_to_immutable_id": true,
+  "malformed_execution_rejected": true,
+  "measurements_preserved": true,
+  "missing_execution_rejected": true,
+  "passed": true,
+  "rejected": 128,
+  "schema": "execution-image-binding-gate-v1"
+}

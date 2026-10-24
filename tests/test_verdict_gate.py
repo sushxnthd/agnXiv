@@ -1,7 +1,7 @@
 from agnxiv.build import BuildPlan, BuildResult
 from agnxiv.environment import EnvironmentSpec
 from agnxiv.models import Claim, Observation, Verdict, VerificationPolicy
-from agnxiv.pipeline import VerificationBundle
+from agnxiv.pipeline import ExecutionSummary, VerificationBundle
 from agnxiv.provenance import ProvenanceManifest
 from agnxiv.verdict_gate import gate_hosted_verdict
 from agnxiv.verify import verify_numeric_claim
@@ -12,9 +12,25 @@ def _bundle(
     historical_fidelity: str,
     scope_resolution: str = "resolved",
     observed: float = 0.8,
+    execution_image_id: str | None = "sha256:" + "c" * 64,
 ) -> VerificationBundle:
     claim = Claim(id="C1", text="Accuracy is 0.9", metric="accuracy", reported_value=0.9)
     policy = VerificationPolicy(kind="absolute", tolerance=0.01)
+    execution = None
+    if execution_image_id is not None:
+        execution = ExecutionSummary(
+            command=["docker", "run"],
+            image_id=execution_image_id,
+            returncode=0,
+            stdout_sha256="1" * 64,
+            stderr_sha256="2" * 64,
+            stdout_excerpt="",
+            stderr_excerpt="",
+            pre_execution_tree_sha256="a" * 64,
+            post_execution_tree_sha256="a" * 64,
+            source_unchanged=True,
+            artifacts_unchanged=True,
+        )
     return VerificationBundle(
         claim=claim,
         provenance=ProvenanceManifest(
@@ -24,6 +40,7 @@ def _bundle(
             historical_fidelity=historical_fidelity,
             scope_resolution=scope_resolution,
         ),
+        execution=execution,
         record=verify_numeric_claim(claim, [Observation(value=observed)], policy),
     )
 
@@ -107,6 +124,45 @@ def test_malformed_base_image_identity_is_suppressed() -> None:
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
     assert gated.provisional_verdict == Verdict.CONTRADICTED
     assert any("base image" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_distinct_canonical_execution_image_is_suppressed() -> None:
+    gated = gate_hosted_verdict(
+        _bundle(
+            historical_fidelity="constrained",
+            execution_image_id="sha256:" + "e" * 64,
+        ),
+        _build("hash-pinned"),
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert gated.provisional_verdict == Verdict.CONTRADICTED
+    assert gated.record.expected == 0.9
+    assert gated.record.observed_mean == 0.8
+    assert any("does not match" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_missing_execution_identity_is_suppressed() -> None:
+    gated = gate_hosted_verdict(
+        _bundle(historical_fidelity="constrained", execution_image_id=None),
+        _build("hash-pinned"),
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any(
+        "lacks recorded execution" in reason
+        for reason in gated.verdict_gate_reasons
+    )
+
+
+def test_malformed_execution_identity_is_suppressed() -> None:
+    gated = gate_hosted_verdict(
+        _bundle(
+            historical_fidelity="constrained",
+            execution_image_id="sha256:execution",
+        ),
+        _build("hash-pinned"),
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("execution lacks" in reason for reason in gated.verdict_gate_reasons)
 
 
 def test_existing_abstention_is_not_rewritten() -> None:

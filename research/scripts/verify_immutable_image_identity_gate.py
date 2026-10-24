@@ -7,7 +7,7 @@ from pathlib import Path
 from agnxiv.build import BuildPlan, BuildResult
 from agnxiv.environment import EnvironmentSpec
 from agnxiv.models import Claim, Observation, Verdict, VerificationPolicy
-from agnxiv.pipeline import VerificationBundle
+from agnxiv.pipeline import ExecutionSummary, VerificationBundle
 from agnxiv.provenance import ProvenanceManifest
 from agnxiv.verdict_gate import gate_hosted_verdict
 from agnxiv.verify import verify_numeric_claim
@@ -17,7 +17,7 @@ OUT = ROOT / "research" / "results" / "immutable-image-identity-gate.json"
 CANONICAL = "sha256:" + "a" * 64
 
 
-def bundle():
+def bundle(execution_image_id):
     claim = Claim(
         id="C1",
         text="Accuracy is 0.9",
@@ -33,6 +33,19 @@ def bundle():
         environment=EnvironmentSpec(
             historical_fidelity="constrained",
             scope_resolution="resolved",
+        ),
+        execution=ExecutionSummary(
+            command=["docker", "run"],
+            image_id=execution_image_id,
+            returncode=0,
+            stdout_sha256="1" * 64,
+            stderr_sha256="2" * 64,
+            stdout_excerpt="",
+            stderr_excerpt="",
+            pre_execution_tree_sha256="b" * 64,
+            post_execution_tree_sha256="b" * 64,
+            source_unchanged=True,
+            artifacts_unchanged=True,
         ),
         record=verify_numeric_claim(
             claim,
@@ -87,7 +100,9 @@ def main():
                 "base_image_id": malformed if target == "base" else CANONICAL,
                 "image_id": malformed if target == "built" else CANONICAL,
             }
-            gated = gate_hosted_verdict(bundle(), build(**kwargs))
+            gated = gate_hosted_verdict(
+                bundle(kwargs["image_id"]), build(**kwargs)
+            )
             passed = (
                 gated.record.verdict == Verdict.UNABLE_TO_VERIFY
                 and gated.provisional_verdict == Verdict.CONTRADICTED
@@ -105,7 +120,7 @@ def main():
             })
 
     control = gate_hosted_verdict(
-        bundle(),
+        bundle("sha256:" + "f" * 64),
         build(base_image_id=CANONICAL, image_id="sha256:" + "f" * 64),
     )
     control_passed = (

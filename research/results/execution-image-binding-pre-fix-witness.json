@@ -1,0 +1,15 @@
+{
+  "schema": "execution-image-binding-pre-fix-witness-v1",
+  "source_commit": "d43dafab91089d925f4c4a7261c20604ce8cf146",
+  "built_image_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "execution_image_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "both_ids_canonical": true,
+  "public_verdict": "CONTRADICTED",
+  "provisional_verdict": null,
+  "verdict_gate_reasons": [],
+  "measurement": {
+    "expected": 0.9,
+    "observed_mean": 0.8
+  },
+  "falsified_property": "canonical image-ID syntax alone binds a decisive verdict to the audited built image"
+}
