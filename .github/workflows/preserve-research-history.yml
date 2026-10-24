@@ -1,0 +1,36 @@
+name: Preserve research history
+
+on:
+  push:
+    branches:
+      - 'research/**'
+      - 'breakthrough-engine/**'
+      - 'hardening/**'
+      - 'bench/**'
+
+permissions:
+  contents: write
+
+jobs:
+  preserve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Preserve pushed research head
+        shell: bash
+        env:
+          SOURCE_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          safe="$(printf '%s' "$SOURCE_BRANCH" | tr '/:@ ' '----')"
+          target="preserved/auto/$safe"
+          echo "Preserving $GITHUB_SHA from $SOURCE_BRANCH at $target"
+          if git push origin "HEAD:refs/heads/$target"; then
+            exit 0
+          fi
+          fallback="$target-${GITHUB_SHA:0:12}"
+          echo "Preservation ref was not fast-forwardable; writing immutable fallback $fallback"
+          git push origin "HEAD:refs/heads/$fallback"
