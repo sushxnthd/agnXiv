@@ -50,7 +50,7 @@ class ExecutionSummary(BaseModel):
 
 
 class VerificationBundle(BaseModel):
-    schema_version: str = "agnxiv.bundle/0.6"
+    schema_version: str = "agnxiv.bundle/0.7"
     verification_spec_sha256: str | None = None
     claim: Claim
     manuscript: DocumentFingerprint | None = None
@@ -63,6 +63,8 @@ class VerificationBundle(BaseModel):
     observation_method: str | None = None
     observation_locator: str | None = None
     observation_candidates: list[ObservationCandidate] = Field(default_factory=list)
+    provisional_verdict: Verdict | None = None
+    verdict_gate_reasons: list[str] = Field(default_factory=list)
     record: VerificationRecord
 
 

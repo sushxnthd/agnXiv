@@ -17,6 +17,7 @@ from .preprint import parse_arxiv_reference
 from .provenance import detect_git_identity
 from .service.security import validate_git_ref, validate_github_slug
 from .spec import execute_verification_spec, load_verification_spec
+from .verdict_gate import gate_hosted_verdict
 from .zero_manifest import run_zero_manifest
 
 _MAX_PAPER_BYTES = 50 * 1024 * 1024
@@ -269,7 +270,10 @@ def execute_job(
                     "plan": outcome.plan.model_dump(mode="json"),
                     "reason": outcome.reason,
                 }
-            verdicts = [item.record.verdict.value for item in outcome.bundles]
+            gated_bundles = [
+                gate_hosted_verdict(item, build) for item in outcome.bundles
+            ]
+            verdicts = [item.record.verdict.value for item in gated_bundles]
             status = (
                 "succeeded"
                 if any(item in {"VERIFIED", "CONTRADICTED"} for item in verdicts)
@@ -281,14 +285,14 @@ def execute_job(
                 "manuscript_identity": manuscript_identity,
                 "build": build.model_dump(mode="json"),
                 "discovery": outcome.frozen_locator.model_dump(mode="json"),
-                "bundle": outcome.bundle.model_dump(mode="json"),
+                "bundle": gated_bundles[0].model_dump(mode="json"),
                 "additional_verifications": [
                     {
                         "discovery": locator.model_dump(mode="json"),
                         "bundle": item.model_dump(mode="json"),
                     }
                     for locator, item in zip(
-                        outcome.frozen_locators[1:], outcome.bundles[1:]
+                        outcome.frozen_locators[1:], gated_bundles[1:]
                     )
                 ],
             }
@@ -332,10 +336,11 @@ def execute_job(
                 build_repository,
                 base_image=base_image,
             )
-            bundle = execute_verification_spec(
+            raw_bundle = execute_verification_spec(
                 manifest,
                 image_override=build.image_ref,
             )
+            bundle = gate_hosted_verdict(raw_bundle, build)
             verdict = bundle.record.verdict.value
             status = "succeeded" if verdict in {"VERIFIED", "CONTRADICTED"} else "needs_review"
             return status, {

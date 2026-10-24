@@ -1,0 +1,69 @@
+from __future__ import annotations
+
+from .build import BuildResult
+from .models import Verdict
+from .pipeline import VerificationBundle
+
+_DECISIVE_VERDICTS = {
+    Verdict.VERIFIED,
+    Verdict.PARTIALLY_VERIFIED,
+    Verdict.CONTRADICTED,
+}
+
+
+def environment_verdict_blockers(
+    bundle: VerificationBundle,
+    build: BuildResult,
+) -> list[str]:
+    """Return independently inspectable reasons a hosted verdict must abstain."""
+    blockers: list[str] = []
+    environment = bundle.environment
+
+    if environment.scope_resolution == "ambiguous":
+        blockers.append("workflow-scoped dependency environment is ambiguous")
+    if environment.historical_fidelity != "constrained":
+        blockers.append(
+            "historical dependency fidelity is "
+            f"{environment.historical_fidelity}, not constrained"
+        )
+    if build.plan.dependency_precision != "hash-pinned":
+        blockers.append(
+            "built dependency manifest precision is "
+            f"{build.plan.dependency_precision}, not hash-pinned"
+        )
+    if not build.base_image_id.startswith("sha256:"):
+        blockers.append("base image lacks an immutable image ID")
+    if not build.image_id.startswith("sha256:"):
+        blockers.append("built environment lacks an immutable image ID")
+
+    return blockers
+
+
+def gate_hosted_verdict(
+    bundle: VerificationBundle,
+    build: BuildResult,
+) -> VerificationBundle:
+    """Fail closed when environment drift remains an alternative explanation.
+
+    Numeric measurements and their raw decision remain available for audit, but
+    the public scientific verdict is suppressed at the hosted publication
+    boundary.
+    """
+    if bundle.record.verdict not in _DECISIVE_VERDICTS:
+        return bundle
+
+    blockers = environment_verdict_blockers(bundle, build)
+    if not blockers:
+        return bundle
+
+    gated = bundle.model_copy(deep=True)
+    raw_verdict = gated.record.verdict
+    gated.provisional_verdict = raw_verdict
+    gated.verdict_gate_reasons = blockers
+    gated.record.verdict = Verdict.UNABLE_TO_VERIFY
+    gated.record.rationale = (
+        f"Hosted environment-fidelity gate suppressed provisional "
+        f"{raw_verdict.value}: " + "; ".join(blockers) + ". "
+        + gated.record.rationale
+    )
+    return gated

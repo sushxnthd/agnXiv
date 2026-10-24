@@ -1,0 +1,48 @@
+{
+  "schema": "agnxiv.environment-verdict-firewall-result/1",
+  "protocol_commit": "9f6424dda5968c34f60759f1abf02db553fef342",
+  "pre_fix_external_witness": {
+    "environment_historical_fidelity": "approximate",
+    "build_dependency_precision": "floating",
+    "definitive_verdicts": 2,
+    "verdicts": [
+      {
+        "metric": "split_half_r",
+        "expected": 0.51,
+        "observed": 0.504,
+        "verdict": "CONTRADICTED"
+      },
+      {
+        "metric": "spearman_brown",
+        "expected": 0.68,
+        "observed": 0.67,
+        "verdict": "CONTRADICTED"
+      }
+    ]
+  },
+  "local_validation": {
+    "tests_passed": 197,
+    "ruff_clean": true,
+    "frozen_cases": 5,
+    "matched": 5,
+    "false_definitive_verdicts": 0,
+    "exact_controls_preserved": 1,
+    "independent_audit_sha256": "6b568be806fe738a109ed88ff95d02013f2ff6c1de336901d6ab61c611cc2dd4"
+  },
+  "prospective_hosted_prediction": {
+    "status": "needs_review",
+    "measurements_preserved": true,
+    "public_verdicts": ["UNABLE_TO_VERIFY", "UNABLE_TO_VERIFY"],
+    "provisional_verdicts": ["CONTRADICTED", "CONTRADICTED"]
+  },
+  "hosted_validation": {
+    "status": "pending"
+  },
+  "smallest_supported_claim": "The local production boundary and independent checker suppress definitive hosted scientific verdicts whenever scoped dependency evidence is ambiguous, historical fidelity is unconstrained, or the actual build is not hash-pinned, while preserving measurements and a provisional numeric verdict.",
+  "limitations": [
+    "hosted prospective validation is pending",
+    "hash-pinned artifacts and immutable image IDs establish environment identity, not historical equivalence to an author's unpublished runtime",
+    "the provisional numeric comparison is not itself a scientific verdict",
+    "this firewall does not validate datasets, code semantics, or claim extraction"
+  ]
+}

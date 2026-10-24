@@ -37,6 +37,8 @@ jobs:
             tests/test_auto.py
           python research/scripts/verify_scoped_environment_conflicts.py
           python research/scripts/verify_scoped_environment_equivalence.py
+          python research/scripts/verify_environment_verdict_firewall.py \
+            > /tmp/environment-verdict-firewall.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -124,5 +126,6 @@ jobs:
             /tmp/redbench.json
             /tmp/locator.json
             /tmp/aggregation.json
+            /tmp/environment-verdict-firewall.json
           retention-days: 90
           if-no-files-found: warn

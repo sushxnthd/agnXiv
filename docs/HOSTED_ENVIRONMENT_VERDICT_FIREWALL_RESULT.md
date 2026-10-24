@@ -1,0 +1,51 @@
+# Hosted environment-fidelity verdict firewall
+
+## Decisive falsification
+
+The prior real-paper workflow pinned manuscript bytes and repository code but used a floating dependency file whose inferred historical fidelity was explicitly approximate. It nevertheless published two `CONTRADICTED` scientific verdicts. Dependency drift therefore remained a live alternative explanation, so those labels exceeded the evidence.
+
+This is a correction to the interpretation of the earlier result. The measurements remain valid observations of that hosted execution; they did not yet justify a claim of scientific contradiction.
+
+## Enforced law
+
+A hosted numeric decision is publishable as `VERIFIED`, `PARTIALLY_VERIFIED`, or `CONTRADICTED` only if:
+
+1. the workflow-scoped environment is unambiguous;
+2. historical dependency fidelity is constrained;
+3. the actual build manifest is hash-pinned, including artifacts rather than only direct version strings; and
+4. both the base and built environments have immutable image IDs.
+
+If any condition fails, agnXiv preserves expected values, observations, errors, rationale and the raw decision as `provisional_verdict`, but publishes `UNABLE_TO_VERIFY` and a machine-readable list of blockers. Hosted job status becomes `needs_review`.
+
+## Frozen local evidence
+
+| Test | Result |
+|---|---:|
+| Adversarial gate cases | 5/5 |
+| False definitive verdicts | 0 |
+| Hash-pinned constrained controls preserved | 1/1 |
+| Full unit suite | 197/197 |
+| Ruff | clean |
+| Independent stdlib-only audit | 5/5 |
+
+The independent checker imports no production module and reproduced digest `6b568be806fe738a109ed88ff95d02013f2ff6c1de336901d6ab61c611cc2dd4`.
+
+The production gate now runs that checker. The real-paper workflow is a prospective untouched test: its two observations must remain 0.504 and 0.67, while the public decisions must become `UNABLE_TO_VERIFY` with provisional `CONTRADICTED` labels.
+
+## Strongest alternative and controls
+
+The specific paper computations may be invariant to the dependency changes. That is possible, but it has not been proved independently. The firewall treats unresolved environment sensitivity as an alternative explanation rather than silently assuming invariance.
+
+The strongest positive control is a constrained, unambiguous, hash-pinned build with immutable image IDs. It retains the original decisive numeric verdict. Direct `package==version` pins intentionally fail the control because they need not pin transitive artifacts.
+
+## Direct product consequence
+
+A hosted job can no longer turn a result from an underdetermined runtime into a public scientific verification or contradiction. Reviewers still receive the full measurement and provisional comparison, so abstention does not erase evidence.
+
+## Limits and smallest claim
+
+This mechanism establishes a necessary publication boundary, not sufficient proof of reproduction. Hashes identify an environment but do not prove it matches an author's unpublished historical runtime. The firewall also does not certify datasets, code semantics or automatic claim extraction.
+
+Smallest supported claim before hosted validation: the local production boundary and an independent checker suppress definitive hosted verdicts for every frozen underdetermined-environment case while preserving observations, and do not suppress the exact positive control.
+
+The claim will be upgraded only if the frozen external-paper workflow matches the prospective prediction.

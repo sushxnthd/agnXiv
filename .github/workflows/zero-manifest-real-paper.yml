@@ -80,13 +80,13 @@ jobs:
           }, indent=2)[:12000])
           PY
 
-      - name: Require genuine execution-grounded claim-level verdicts
+      - name: Require conservative environment-fidelity abstention
         run: |
           python - <<'PY'
           import json
           with open("/tmp/zero-manifest-real.json", encoding="utf-8") as handle:
               payload = json.load(handle)
-          assert payload["status"] == "succeeded", payload.get("error") or (payload.get("result") or {}).get("reason")
+          assert payload["status"] == "needs_review", payload.get("error") or (payload.get("result") or {}).get("reason")
           result = payload["result"]
           assert result["kind"] == "verification"
           assert result["zero_manifest"] is True
@@ -100,7 +100,11 @@ jobs:
           assert locator["regex"]
           assert locator["discovery_stdout_sha256"]
           bundle = result["bundle"]
-          assert bundle["record"]["verdict"] in {"VERIFIED", "CONTRADICTED"}
+          assert bundle["record"]["verdict"] == "UNABLE_TO_VERIFY"
+          assert bundle["provisional_verdict"] == "CONTRADICTED"
+          assert bundle["record"]["expected"] == 0.51
+          assert bundle["record"]["observed_mean"] == 0.504
+          assert any("not hash-pinned" in reason for reason in bundle["verdict_gate_reasons"])
           assert bundle["observation_method"] == "explicit_regex"
           assert bundle["execution"]["returncode"] == 0
           assert bundle["execution"]["source_unchanged"] is True
@@ -109,11 +113,15 @@ jobs:
           assert bundle["provenance"]["git"]["commit"] == "2f83d0fa506e7af2b72ca191b65ce42e07c9e185"
           for item in result.get("additional_verifications", []):
               other = item["bundle"]
-              assert other["record"]["verdict"] in {"VERIFIED", "CONTRADICTED"}
+              assert other["record"]["verdict"] == "UNABLE_TO_VERIFY"
+              assert other["provisional_verdict"] == "CONTRADICTED"
+              assert other["record"]["expected"] == 0.68
+              assert other["record"]["observed_mean"] == 0.67
+              assert other["verdict_gate_reasons"]
               assert other["execution"]["returncode"] == 0
               assert other["execution"]["source_unchanged"] is True
               assert other["observation_method"] == "explicit_regex"
-          print("PASS: external paper, no manifest, frozen answer-blind locators, independent reruns, scoped claim verdicts")
+          print("PASS: measurements preserved; approximate environment cannot publish scientific contradiction")
           PY
 
       - name: Upload reproducibility evidence
