@@ -21,14 +21,14 @@ If any condition fails, agnXiv preserves expected values, observations, errors, 
 
 | Test | Result |
 |---|---:|
-| Adversarial gate cases | 5/5 |
+| Adversarial gate cases | 6/6 |
 | False definitive verdicts | 0 |
 | Hash-pinned constrained controls preserved | 1/1 |
-| Full unit suite | 197/197 |
+| Full unit suite | 199/199 |
 | Ruff | clean |
-| Independent stdlib-only audit | 5/5 |
+| Independent stdlib-only audit | 6/6 |
 
-The independent checker imports no production module and reproduced digest `6b568be806fe738a109ed88ff95d02013f2ff6c1de336901d6ab61c611cc2dd4`.
+The independent checker imports no production module and reproduced digest `610c38f452a8675791ccbfbe316b6a1489660961ea2008fa29ddaa7afa2497bd`.
 
 The production gate now runs that checker. The real-paper workflow is a prospective untouched test: its two observations must remain 0.504 and 0.67, while the public decisions must become `UNABLE_TO_VERIFY` with provisional `CONTRADICTED` labels.
 
@@ -36,7 +36,7 @@ The production gate now runs that checker. The real-paper workflow is a prospect
 
 The specific paper computations may be invariant to the dependency changes. That is possible, but it has not been proved independently. The firewall treats unresolved environment sensitivity as an alternative explanation rather than silently assuming invariance.
 
-The strongest positive control is a constrained, unambiguous, hash-pinned build with immutable image IDs. It retains the original decisive numeric verdict. Direct `package==version` pins intentionally fail the control because they need not pin transitive artifacts.
+The strongest positive control is a constrained, unambiguous, hash-pinned build with immutable image IDs. It retains the original decisive numeric verdict. Direct `package==version` pins intentionally fail the control because they need not pin transitive artifacts. A mixed manifest with one hashed and one unhashed package also fails; the classifier now requires a valid 64-hex SHA-256 for every logical requirement.
 
 ## Direct product consequence
 

@@ -24,6 +24,14 @@ CASES = [
         "expected": "UNABLE_TO_VERIFY",
     },
     {
+        "id": "partial_hash_attack",
+        "scope": "resolved",
+        "historical": "constrained",
+        "precision": "partially-hashed",
+        "raw": "VERIFIED",
+        "expected": "UNABLE_TO_VERIFY",
+    },
+    {
         "id": "hash_pinned_control",
         "scope": "resolved",
         "historical": "constrained",

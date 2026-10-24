@@ -79,6 +79,7 @@ _UNSAFE_REQUIREMENT_MARKERS = (
 _EXACT_REQUIREMENT_RE = re.compile(
     r"^[A-Za-z0-9_.-]+(?:\[[A-Za-z0-9_.,-]+\])?==[^\s;\\]+"
 )
+_SHA256_REQUIREMENT_HASH_RE = re.compile(r"--hash=sha256:[0-9a-fA-F]{64}(?:\s|$)")
 
 
 def _active_requirement_lines(path: Path) -> list[str]:
@@ -97,9 +98,25 @@ def classify_dependency_precision(path: str | Path) -> Literal[
     """Classify how precisely a requirements file identifies dependencies."""
     requirement_path = Path(path)
     lines = _active_requirement_lines(requirement_path)
+    logical_lines: list[str] = []
+    continuation: list[str] = []
+    dangling_continuation = False
+    for line in lines:
+        continued = line.endswith("\\")
+        continuation.append(line[:-1].strip() if continued else line)
+        if continued:
+            dangling_continuation = True
+            continue
+        logical_lines.append(" ".join(continuation))
+        continuation = []
+        dangling_continuation = False
+
+    if continuation:
+        logical_lines.append(" ".join(continuation))
+
     package_lines = [
         line
-        for line in lines
+        for line in logical_lines
         if not line.startswith("-") and not line.startswith("\\")
     ]
 
@@ -110,8 +127,13 @@ def classify_dependency_precision(path: str | Path) -> Literal[
     if not all_exact:
         return "floating"
 
-    has_hashes = any("--hash=sha256:" in line for line in lines)
-    return "hash-pinned" if has_hashes else "version-pinned"
+    if dangling_continuation:
+        return "version-pinned"
+
+    every_package_hashed = all(
+        _SHA256_REQUIREMENT_HASH_RE.search(line) for line in package_lines
+    )
+    return "hash-pinned" if every_package_hashed else "version-pinned"
 
 
 def audit_requirements(path: str | Path) -> list[str]:

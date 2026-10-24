@@ -21,13 +21,13 @@
     ]
   },
   "local_validation": {
-    "tests_passed": 197,
+    "tests_passed": 199,
     "ruff_clean": true,
-    "frozen_cases": 5,
-    "matched": 5,
+    "frozen_cases": 6,
+    "matched": 6,
     "false_definitive_verdicts": 0,
     "exact_controls_preserved": 1,
-    "independent_audit_sha256": "6b568be806fe738a109ed88ff95d02013f2ff6c1de336901d6ab61c611cc2dd4"
+    "independent_audit_sha256": "610c38f452a8675791ccbfbe316b6a1489660961ea2008fa29ddaa7afa2497bd"
   },
   "prospective_hosted_prediction": {
     "status": "needs_review",

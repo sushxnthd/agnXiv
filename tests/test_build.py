@@ -40,7 +40,31 @@ def test_floating_requirements_are_identified(tmp_path: Path) -> None:
 def test_hash_pinned_requirements_are_identified(tmp_path: Path) -> None:
     requirements = tmp_path / "requirements.txt"
     requirements.write_text(
-        "numpy==2.1.0 --hash=sha256:abcdef\n",
+        "numpy==2.1.0 --hash=sha256:" + "a" * 64 + "\n",
+        encoding="utf-8",
+    )
+
+    assert classify_dependency_precision(requirements) == "hash-pinned"
+
+
+def test_partial_hashes_cannot_upgrade_an_unhashed_dependency(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text(
+        "numpy==2.1.0 --hash=sha256:" + "a" * 64 + "\n"
+        "pandas==2.2.3\n",
+        encoding="utf-8",
+    )
+
+    assert classify_dependency_precision(requirements) == "version-pinned"
+
+
+def test_multiline_hashes_are_bound_to_each_requirement(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text(
+        "numpy==2.1.0 \\\n"
+        "  --hash=sha256:" + "a" * 64 + "\n"
+        "pandas==2.2.3 \\\n"
+        "  --hash=sha256:" + "b" * 64 + "\n",
         encoding="utf-8",
     )
 
