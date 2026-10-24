@@ -7,8 +7,10 @@ from agnxiv.sandbox import (
     SandboxError,
     SandboxLimits,
     docker_command,
+    is_immutable_image_digest_ref,
     is_immutable_image_id,
     prepare_artifact_mounts,
+    resolve_local_image_digest_ref,
     resolve_local_image_id,
 )
 
@@ -43,6 +45,38 @@ def test_image_identity_requires_canonical_sha256() -> None:
     assert not is_immutable_image_id("sha256:" + "A" * 64)
     assert not is_immutable_image_id("sha256:" + "a" * 63)
     assert not is_immutable_image_id(" sha256:" + "a" * 64)
+    assert is_immutable_image_digest_ref("python@sha256:" + "a" * 64)
+    assert is_immutable_image_digest_ref(
+        "docker.io/library/python@sha256:" + "b" * 64
+    )
+    assert not is_immutable_image_digest_ref("python:3.11-slim")
+    assert not is_immutable_image_digest_ref("python@sha256:" + "A" * 64)
+
+
+def test_repository_digest_resolution_rejects_missing_evidence(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "agnxiv.sandbox.subprocess.run",
+        lambda *args, **kwargs: SimpleNamespace(
+            returncode=0,
+            stdout="[]\n",
+            stderr="",
+        ),
+    )
+    with pytest.raises(SandboxError, match="no canonical"):
+        resolve_local_image_digest_ref("python:3.11-slim")
+
+
+def test_repository_digest_resolution_is_canonical(monkeypatch) -> None:
+    expected = "python@sha256:" + "a" * 64
+    monkeypatch.setattr(
+        "agnxiv.sandbox.subprocess.run",
+        lambda *args, **kwargs: SimpleNamespace(
+            returncode=0,
+            stdout='["' + expected + '"]\n',
+            stderr="",
+        ),
+    )
+    assert resolve_local_image_digest_ref("python:3.11-slim") == expected
 
 
 def test_docker_inspection_rejects_malformed_content_id(monkeypatch) -> None:

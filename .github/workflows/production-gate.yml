@@ -30,6 +30,7 @@ jobs:
           pytest \
             tests/test_service_hardening.py \
             tests/test_zero_manifest.py \
+            tests/test_build.py \
             tests/test_sandbox.py \
             tests/test_verdict_gate.py \
             tests/test_oidc.py \
@@ -48,6 +49,10 @@ jobs:
             > /tmp/execution-image-binding-gate.json
           python research/scripts/audit_execution_image_binding_gate.py \
             > /tmp/execution-image-binding-gate-audit.json
+          python research/scripts/verify_base_image_aba_binding.py \
+            > /tmp/base-image-aba-binding.json
+          python research/scripts/audit_base_image_aba_binding.py \
+            > /tmp/base-image-aba-binding-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -140,5 +145,7 @@ jobs:
             /tmp/immutable-image-identity-gate-audit.json
             /tmp/execution-image-binding-gate.json
             /tmp/execution-image-binding-gate-audit.json
+            /tmp/base-image-aba-binding.json
+            /tmp/base-image-aba-binding-audit.json
           retention-days: 90
           if-no-files-found: warn

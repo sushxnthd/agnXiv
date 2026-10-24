@@ -11,7 +11,12 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from .provenance import sha256_file
-from .sandbox import SandboxError, resolve_local_image_id
+from .sandbox import (
+    SandboxError,
+    is_immutable_image_digest_ref,
+    resolve_local_image_digest_ref,
+    resolve_local_image_id,
+)
 
 
 class EnvironmentBuildError(RuntimeError):
@@ -229,6 +234,24 @@ def plan_python_environment(
     )
 
 
+def bind_plan_to_immutable_base(
+    plan: BuildPlan,
+    immutable_base: str,
+) -> BuildPlan:
+    """Replace the mutable Dockerfile base tag with its repository digest."""
+    if not is_immutable_image_digest_ref(immutable_base):
+        raise EnvironmentBuildError(
+            "base image lacks a canonical immutable repository digest"
+        )
+    expected = f"FROM {plan.base_image}\n"
+    if not plan.dockerfile.startswith(expected):
+        raise EnvironmentBuildError("build plan has an unexpected base-image directive")
+    dockerfile = f"FROM {immutable_base}\n" + plan.dockerfile[len(expected):]
+    return plan.model_copy(
+        update={"base_image": immutable_base, "dockerfile": dockerfile}
+    )
+
+
 def build_python_environment(
     repository: str | Path,
     *,
@@ -253,10 +276,13 @@ def build_python_environment(
 
     try:
         base_image_id_before = resolve_local_image_id(base_image)
+        immutable_base = resolve_local_image_digest_ref(base_image)
     except (SandboxError, ValueError) as exc:
         raise EnvironmentBuildError(
-            "base image must already exist locally before environment construction"
+            "base image must have local immutable identity before construction"
         ) from exc
+
+    plan = bind_plan_to_immutable_base(plan, immutable_base)
 
     image_ref = f"agnxiv-env:{plan.plan_id[:24]}"
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import shlex
 import subprocess
@@ -8,6 +9,9 @@ from pathlib import Path
 from typing import Literal
 
 _IMMUTABLE_IMAGE_ID_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+_IMMUTABLE_IMAGE_DIGEST_REF_RE = re.compile(
+    r"^[a-z0-9][a-z0-9._:/-]*@sha256:[0-9a-f]{64}$"
+)
 
 
 class SandboxError(RuntimeError):
@@ -42,6 +46,46 @@ class ExecutionResult:
 def is_immutable_image_id(value: str) -> bool:
     """Return whether value is a canonical Docker SHA-256 content ID."""
     return _IMMUTABLE_IMAGE_ID_RE.fullmatch(value) is not None
+
+
+def is_immutable_image_digest_ref(value: str) -> bool:
+    """Return whether value is a canonical repository@sha256 reference."""
+    return _IMMUTABLE_IMAGE_DIGEST_REF_RE.fullmatch(value) is not None
+
+
+def resolve_local_image_digest_ref(image: str) -> str:
+    """Resolve a pulled tag to a canonical immutable repository digest."""
+    if not image.strip():
+        raise ValueError("container image is required")
+    try:
+        completed = subprocess.run(
+            ["docker", "image", "inspect", "--format", "{{json .RepoDigests}}", image],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise SandboxError(f"could not inspect container image digest: {exc}") from exc
+    if completed.returncode != 0:
+        message = completed.stderr.strip() or completed.stdout.strip()
+        raise SandboxError(
+            f"container image digest is not available locally: {image}: {message}"
+        )
+    try:
+        candidates = json.loads(completed.stdout)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise SandboxError("Docker returned malformed repository-digest evidence") from exc
+    valid = sorted(
+        candidate
+        for candidate in candidates
+        if isinstance(candidate, str) and is_immutable_image_digest_ref(candidate)
+    ) if isinstance(candidates, list) else []
+    if not valid:
+        raise SandboxError(
+            "Docker returned no canonical immutable repository digest"
+        )
+    return valid[0]
 
 
 def resolve_local_image_id(image: str) -> str:

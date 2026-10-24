@@ -6,6 +6,7 @@ import pytest
 from agnxiv.build import (
     EnvironmentBuildError,
     audit_requirements,
+    bind_plan_to_immutable_base,
     build_python_environment,
     classify_dependency_precision,
     plan_python_environment,
@@ -45,6 +46,17 @@ def test_hash_pinned_requirements_are_identified(tmp_path: Path) -> None:
     )
 
     assert classify_dependency_precision(requirements) == "hash-pinned"
+
+
+def test_build_plan_binds_from_to_repository_digest(tmp_path: Path) -> None:
+    plan = plan_python_environment(tmp_path, base_image="python:3.11-slim")
+    immutable = "python@sha256:" + "a" * 64
+    bound = bind_plan_to_immutable_base(plan, immutable)
+
+    assert bound.base_image == immutable
+    assert bound.dockerfile.startswith(f"FROM {immutable}\n")
+    assert "FROM python:3.11-slim\n" not in bound.dockerfile
+    assert bound.plan_id != plan.plan_id
 
 
 def test_partial_hashes_cannot_upgrade_an_unhashed_dependency(tmp_path: Path) -> None:
@@ -115,6 +127,10 @@ def test_runtime_build_context_excludes_research_source(
         return SimpleNamespace(returncode=0, stdout="built", stderr="")
 
     monkeypatch.setattr("agnxiv.build.resolve_local_image_id", fake_resolve)
+    monkeypatch.setattr(
+        "agnxiv.build.resolve_local_image_digest_ref",
+        lambda image: "python@sha256:" + "a" * 64,
+    )
     monkeypatch.setattr("agnxiv.build.subprocess.run", fake_run)
 
     result = build_python_environment(tmp_path)
@@ -122,6 +138,8 @@ def test_runtime_build_context_excludes_research_source(
     assert seen_context_files == ["Dockerfile", "requirements.txt"]
     assert result.base_image_id == "sha256:base"
     assert result.image_id == "sha256:built"
+    assert result.plan.base_image == "python@sha256:" + "a" * 64
+    assert seen_context_files == ["Dockerfile", "requirements.txt"]
 
 
 def test_unsafe_manifest_is_rejected_before_build(tmp_path: Path) -> None:
@@ -172,6 +190,10 @@ def test_runtime_build_uses_selected_nested_requirements_only(
         return SimpleNamespace(returncode=0, stdout="built", stderr="")
 
     monkeypatch.setattr("agnxiv.build.resolve_local_image_id", fake_resolve)
+    monkeypatch.setattr(
+        "agnxiv.build.resolve_local_image_digest_ref",
+        lambda image: "python@sha256:" + "a" * 64,
+    )
     monkeypatch.setattr("agnxiv.build.subprocess.run", fake_run)
 
     result = build_python_environment(
