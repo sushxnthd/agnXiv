@@ -88,11 +88,17 @@ _SHA256_REQUIREMENT_HASH_RE = re.compile(r"--hash=sha256:[0-9a-fA-F]{64}(?:\s|$)
 
 
 def _active_requirement_lines(path: Path) -> list[str]:
-    return [
-        raw.strip()
-        for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines()
-        if raw.strip() and not raw.lstrip().startswith("#")
-    ]
+    lines: list[str] = []
+    for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        # Pip treats a hash mark preceded by whitespace as an inline comment.
+        # Evidence inside that discarded suffix must not satisfy hash pinning.
+        effective = re.split(r"\s+#", stripped, maxsplit=1)[0].rstrip()
+        if effective:
+            lines.append(effective)
+    return lines
 
 
 def classify_dependency_precision(path: str | Path) -> Literal[
@@ -215,18 +221,23 @@ def plan_python_environment(
         )
 
     rejected = audit_requirements(requirements)
+    dependency_precision = classify_dependency_precision(requirements)
+    hash_enforcement = (
+        " --require-hashes" if dependency_precision == "hash-pinned" else ""
+    )
     dockerfile = (
         f"FROM {base_image}\n"
         "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1\n"
         "COPY requirements.txt /tmp/requirements.txt\n"
-        "RUN python -m pip install --no-cache-dir -r /tmp/requirements.txt\n"
+        "RUN python -m pip install --no-cache-dir"
+        f"{hash_enforcement} -r /tmp/requirements.txt\n"
         "WORKDIR /workspace\n"
     )
     return BuildPlan(
         base_image=base_image,
         dependency_file=dependency_relative.as_posix(),
         dependency_sha256=sha256_file(requirements),
-        dependency_precision=classify_dependency_precision(requirements),
+        dependency_precision=dependency_precision,
         dockerfile=dockerfile,
         network_required=True,
         safe_manifest_only=not rejected,

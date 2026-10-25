@@ -1,0 +1,10 @@
+{
+  "attack_total": 128,
+  "attacks_rejected": 128,
+  "control_total": 32,
+  "controls_preserved": 32,
+  "digest": "b248c3949b3ae78f2b719bbb3498cde7a0b1ebec137f55f91ac2b7ddc4e79609",
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.comment-smuggled-hash-audit/1"
+}

@@ -1,0 +1,1103 @@
+{
+  "cases": [
+    {
+      "case": 0,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 1,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 2,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 3,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 4,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 5,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 6,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 7,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 8,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 9,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 10,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 11,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 12,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 13,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 14,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 15,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 16,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 17,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 18,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 19,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 20,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 21,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 22,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 23,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 24,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 25,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 26,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 27,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 28,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 29,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 30,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 31,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 32,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 33,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 34,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 35,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 36,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 37,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 38,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 39,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 40,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 41,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 42,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 43,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 44,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 45,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 46,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 47,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 48,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 49,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 50,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 51,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 52,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 53,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 54,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 55,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 56,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 57,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 58,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 59,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 60,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 61,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 62,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 63,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 64,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 65,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 66,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 67,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 68,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 69,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 70,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 71,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 72,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 73,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 74,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 75,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 76,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 77,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 78,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 79,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 80,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 81,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 82,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 83,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 84,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 85,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 86,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 87,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 88,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 89,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 90,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 91,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 92,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 93,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 94,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 95,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 96,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 97,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 98,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 99,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 100,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 101,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 102,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 103,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 104,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 105,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 106,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 107,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 108,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 109,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 110,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 111,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 112,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 113,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 114,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 115,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 116,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 117,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 118,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 119,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 120,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 121,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 122,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 123,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 124,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 125,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 126,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 127,
+      "new_precision": "version-pinned",
+      "old_precision": "hash-pinned",
+      "passed": true,
+      "runtime_hash_mode": false
+    },
+    {
+      "case": 0,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 1,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 2,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 3,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 4,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 5,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 6,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 7,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 8,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 9,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 10,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 11,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 12,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 13,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 14,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 15,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 16,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 17,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 18,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 19,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 20,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 21,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 22,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 23,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 24,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 25,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 26,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 27,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 28,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 29,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 30,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    },
+    {
+      "case": 31,
+      "passed": true,
+      "precision": "hash-pinned",
+      "runtime_hash_mode": true
+    }
+  ],
+  "schema": "agnxiv.comment-smuggled-hash/1",
+  "summary": {
+    "attack_total": 128,
+    "attacks_rejected": 128,
+    "control_total": 32,
+    "controls_preserved": 32,
+    "digest": "30badedd4e540984a4be121837590201c90c3930fdeb7793d4361865516c3909",
+    "false_definitive_evidence": 0,
+    "old_false_accepts": 128,
+    "passed": true
+  }
+}

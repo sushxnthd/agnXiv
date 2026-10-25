@@ -47,6 +47,33 @@ def test_hash_pinned_requirements_are_identified(tmp_path: Path) -> None:
     )
 
     assert classify_dependency_precision(requirements) == "hash-pinned"
+    assert "pip install --no-cache-dir --require-hashes" in plan_python_environment(
+        tmp_path
+    ).dockerfile
+
+
+def test_comment_smuggled_hash_cannot_upgrade_requirement(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text(
+        "numpy==2.1.0 # --hash=sha256:" + "a" * 64 + "\n",
+        encoding="utf-8",
+    )
+
+    plan = plan_python_environment(tmp_path)
+    assert classify_dependency_precision(requirements) == "version-pinned"
+    assert plan.dependency_precision == "version-pinned"
+    assert "--require-hashes" not in plan.dockerfile
+
+
+def test_mixed_real_and_comment_hashes_are_not_hash_pinned(tmp_path: Path) -> None:
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text(
+        "numpy==2.1.0 --hash=sha256:" + "a" * 64 + "\n"
+        "pandas==2.2.3 # --hash=sha256:" + "b" * 64 + "\n",
+        encoding="utf-8",
+    )
+
+    assert classify_dependency_precision(requirements) == "version-pinned"
 
 
 def test_build_plan_binds_from_to_repository_digest(tmp_path: Path) -> None:
