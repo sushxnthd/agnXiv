@@ -287,6 +287,57 @@ def test_build_identity_comes_from_iidfile_not_mutable_tag(
     assert not any(image.startswith("agnxiv-env:") for image in resolved)
 
 
+def test_base_identity_is_derived_from_bound_immutable_digest(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    mutable = "python:3.11-slim"
+    immutable = "python@sha256:" + "b" * 64
+    image_b = "sha256:" + "b" * 64
+    resolved: list[str] = []
+
+    def fake_resolve(image: str) -> str:
+        resolved.append(image)
+        if image == mutable:
+            return BASE_ID
+        assert image == immutable
+        return image_b
+
+    def fake_run(command, **kwargs):
+        Path(command[command.index("--iidfile") + 1]).write_text(
+            BUILT_ID + "\n", encoding="utf-8"
+        )
+        return SimpleNamespace(returncode=0, stdout="built", stderr="")
+
+    monkeypatch.setattr("agnxiv.build.resolve_local_image_id", fake_resolve)
+    monkeypatch.setattr(
+        "agnxiv.build.resolve_local_image_digest_ref", lambda image: immutable
+    )
+    monkeypatch.setattr("agnxiv.build.subprocess.run", fake_run)
+
+    result = build_python_environment(tmp_path, base_image=mutable)
+
+    assert result.plan.base_image == immutable
+    assert result.base_image_id == image_b
+    assert resolved == [immutable, immutable]
+
+
+def test_malformed_bound_base_identity_fails_before_build(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    immutable = "python@sha256:" + "b" * 64
+    monkeypatch.setattr(
+        "agnxiv.build.resolve_local_image_digest_ref", lambda image: immutable
+    )
+    monkeypatch.setattr(
+        "agnxiv.build.resolve_local_image_id", lambda image: "sha256:malformed"
+    )
+
+    with pytest.raises(EnvironmentBuildError, match="malformed image identity"):
+        build_python_environment(tmp_path)
+
+
 @pytest.mark.parametrize(
     "payload",
     [None, "", "sha256:not-a-digest\n", BUILT_ID + "\n" + ATTACKER_ID + "\n"],

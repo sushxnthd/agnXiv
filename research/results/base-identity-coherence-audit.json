@@ -1,0 +1,12 @@
+{
+  "schema": "agnxiv.base-identity-coherence-audit/1",
+  "summary": {
+    "attack_total": 128,
+    "case_total": 144,
+    "control_total": 16,
+    "independently_valid": 144,
+    "passed": true,
+    "primary_digest_reproduced": true,
+    "production_imports": 0
+  }
+}

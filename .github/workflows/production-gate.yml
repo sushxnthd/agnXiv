@@ -65,6 +65,10 @@ jobs:
             > /tmp/build-output-identity.json
           python research/scripts/audit_build_output_identity.py \
             > /tmp/build-output-identity-audit.json
+          python research/scripts/verify_base_identity_coherence.py \
+            > /tmp/base-identity-coherence.json
+          python research/scripts/audit_base_identity_coherence.py \
+            > /tmp/base-identity-coherence-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -165,5 +169,7 @@ jobs:
             /tmp/comment-smuggled-hashes-audit.json
             /tmp/build-output-identity.json
             /tmp/build-output-identity-audit.json
+            /tmp/base-identity-coherence.json
+            /tmp/base-identity-coherence-audit.json
           retention-days: 90
           if-no-files-found: warn

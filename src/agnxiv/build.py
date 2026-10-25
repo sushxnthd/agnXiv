@@ -318,12 +318,19 @@ def build_python_environment(
         )
 
     try:
-        base_image_id_before = resolve_local_image_id(base_image)
+        # Resolve the mutable tag once, then derive every audited identity from
+        # that immutable reference. Looking up the tag's ID and digest
+        # separately permits a retag race to splice identities from two images.
         immutable_base = resolve_local_image_digest_ref(base_image)
+        base_image_id_before = resolve_local_image_id(immutable_base)
     except (SandboxError, ValueError) as exc:
         raise EnvironmentBuildError(
             "base image must have local immutable identity before construction"
         ) from exc
+    if not is_immutable_image_id(base_image_id_before):
+        raise EnvironmentBuildError(
+            "immutable base digest resolved to malformed image identity"
+        )
 
     plan = bind_plan_to_immutable_base(plan, immutable_base)
 
@@ -377,10 +384,16 @@ def build_python_environment(
             )
         image_id = read_build_output_image_id(iidfile)
 
-    base_image_id_after = resolve_local_image_id(base_image)
+    try:
+        base_image_id_after = resolve_local_image_id(immutable_base)
+    except (SandboxError, ValueError) as exc:
+        raise EnvironmentBuildError(
+            "immutable base image identity was unavailable after construction"
+        ) from exc
     if base_image_id_after != base_image_id_before:
         raise EnvironmentBuildError(
-            "base image changed during environment construction; build rejected"
+            "immutable base image changed during environment construction; "
+            "build rejected"
         )
 
     return BuildResult(
