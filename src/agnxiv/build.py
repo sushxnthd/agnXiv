@@ -14,6 +14,7 @@ from .provenance import sha256_file
 from .sandbox import (
     SandboxError,
     is_immutable_image_digest_ref,
+    is_immutable_image_id,
     resolve_local_image_digest_ref,
     resolve_local_image_id,
 )
@@ -278,6 +279,22 @@ def copy_frozen_dependency_manifest(
         )
 
 
+def read_build_output_image_id(path: str | Path) -> str:
+    """Read Docker's atomic build-output identity evidence or fail closed."""
+    iidfile = Path(path)
+    try:
+        lines = iidfile.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise EnvironmentBuildError(
+            "environment build did not emit image identity evidence"
+        ) from exc
+    if len(lines) != 1 or not is_immutable_image_id(lines[0]):
+        raise EnvironmentBuildError(
+            "environment build emitted malformed image identity evidence"
+        )
+    return lines[0]
+
+
 def build_python_environment(
     repository: str | Path,
     *,
@@ -313,7 +330,10 @@ def build_python_environment(
     image_ref = f"agnxiv-env:{plan.plan_id[:24]}"
 
     with tempfile.TemporaryDirectory(prefix="agnxiv-build-") as temp:
-        context = Path(temp)
+        build_root = Path(temp)
+        context = build_root / "context"
+        context.mkdir()
+        iidfile = build_root / "image-id"
         (context / "Dockerfile").write_text(plan.dockerfile, encoding="utf-8")
 
         if plan.dependency_file is not None:
@@ -335,6 +355,8 @@ def build_python_environment(
             "default" if plan.network_required else "none",
             "--tag",
             image_ref,
+            "--iidfile",
+            str(iidfile),
             str(context),
         ]
 
@@ -348,12 +370,12 @@ def build_python_environment(
             )
         except (OSError, subprocess.SubprocessError) as exc:
             raise EnvironmentBuildError(f"environment build failed: {exc}") from exc
-
-    if completed.returncode != 0:
-        message = completed.stderr[-4000:] or completed.stdout[-4000:]
-        raise EnvironmentBuildError(
-            f"environment build exited with {completed.returncode}: {message}"
-        )
+        if completed.returncode != 0:
+            message = completed.stderr[-4000:] or completed.stdout[-4000:]
+            raise EnvironmentBuildError(
+                f"environment build exited with {completed.returncode}: {message}"
+            )
+        image_id = read_build_output_image_id(iidfile)
 
     base_image_id_after = resolve_local_image_id(base_image)
     if base_image_id_after != base_image_id_before:
@@ -361,7 +383,6 @@ def build_python_environment(
             "base image changed during environment construction; build rejected"
         )
 
-    image_id = resolve_local_image_id(image_ref)
     return BuildResult(
         plan=plan,
         image_ref=image_ref,

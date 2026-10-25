@@ -11,7 +11,12 @@ from agnxiv.build import (
     classify_dependency_precision,
     copy_frozen_dependency_manifest,
     plan_python_environment,
+    read_build_output_image_id,
 )
+
+BUILT_ID = "sha256:" + "b" * 64
+ATTACKER_ID = "sha256:" + "c" * 64
+BASE_ID = "sha256:" + "d" * 64
 
 
 def test_manifest_only_build_plan(tmp_path: Path) -> None:
@@ -158,7 +163,7 @@ def test_runtime_build_context_excludes_research_source(
     seen_context_files: list[str] = []
 
     def fake_resolve(image: str) -> str:
-        return "sha256:built" if image.startswith("agnxiv-env:") else "sha256:base"
+        return ATTACKER_ID if image.startswith("agnxiv-env:") else BASE_ID
 
     def fake_run(command, **kwargs):
         context = Path(command[-1])
@@ -166,6 +171,9 @@ def test_runtime_build_context_excludes_research_source(
             sorted(path.name for path in context.iterdir() if path.is_file())
         )
         assert not (context / "secret_research.py").exists()
+        Path(command[command.index("--iidfile") + 1]).write_text(
+            BUILT_ID + "\n", encoding="utf-8"
+        )
         return SimpleNamespace(returncode=0, stdout="built", stderr="")
 
     monkeypatch.setattr("agnxiv.build.resolve_local_image_id", fake_resolve)
@@ -178,8 +186,8 @@ def test_runtime_build_context_excludes_research_source(
     result = build_python_environment(tmp_path)
 
     assert seen_context_files == ["Dockerfile", "requirements.txt"]
-    assert result.base_image_id == "sha256:base"
-    assert result.image_id == "sha256:built"
+    assert result.base_image_id == BASE_ID
+    assert result.image_id == BUILT_ID
     assert result.plan.base_image == "python@sha256:" + "a" * 64
     assert seen_context_files == ["Dockerfile", "requirements.txt"]
 
@@ -217,7 +225,7 @@ def test_runtime_build_uses_selected_nested_requirements_only(
     seen_requirements: list[str] = []
 
     def fake_resolve(image: str) -> str:
-        return "sha256:built" if image.startswith("agnxiv-env:") else "sha256:base"
+        return ATTACKER_ID if image.startswith("agnxiv-env:") else BASE_ID
 
     def fake_run(command, **kwargs):
         context = Path(command[-1])
@@ -228,6 +236,9 @@ def test_runtime_build_uses_selected_nested_requirements_only(
         assert not (context / "secret_research.py").exists()
         seen_requirements.append(
             (context / "requirements.txt").read_text(encoding="utf-8")
+        )
+        Path(command[command.index("--iidfile") + 1]).write_text(
+            BUILT_ID + "\n", encoding="utf-8"
         )
         return SimpleNamespace(returncode=0, stdout="built", stderr="")
 
@@ -245,6 +256,48 @@ def test_runtime_build_uses_selected_nested_requirements_only(
 
     assert result.plan.dependency_file == "examples/eval/requirements.txt"
     assert seen_requirements == ["numpy==2.1.0\n"]
+
+
+def test_build_identity_comes_from_iidfile_not_mutable_tag(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    resolved: list[str] = []
+
+    def fake_resolve(image: str) -> str:
+        resolved.append(image)
+        return ATTACKER_ID if image.startswith("agnxiv-env:") else BASE_ID
+
+    def fake_run(command, **kwargs):
+        Path(command[command.index("--iidfile") + 1]).write_text(
+            BUILT_ID + "\n", encoding="utf-8"
+        )
+        return SimpleNamespace(returncode=0, stdout="built", stderr="")
+
+    monkeypatch.setattr("agnxiv.build.resolve_local_image_id", fake_resolve)
+    monkeypatch.setattr(
+        "agnxiv.build.resolve_local_image_digest_ref",
+        lambda image: "python@sha256:" + "a" * 64,
+    )
+    monkeypatch.setattr("agnxiv.build.subprocess.run", fake_run)
+
+    result = build_python_environment(tmp_path)
+
+    assert result.image_id == BUILT_ID
+    assert not any(image.startswith("agnxiv-env:") for image in resolved)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [None, "", "sha256:not-a-digest\n", BUILT_ID + "\n" + ATTACKER_ID + "\n"],
+)
+def test_build_identity_evidence_fails_closed(tmp_path: Path, payload: str | None) -> None:
+    iidfile = tmp_path / "image-id"
+    if payload is not None:
+        iidfile.write_text(payload, encoding="utf-8")
+
+    with pytest.raises(EnvironmentBuildError, match="image identity evidence"):
+        read_build_output_image_id(iidfile)
 
 
 def test_nested_dependency_manifest_must_stay_inside_workspace(tmp_path: Path) -> None:

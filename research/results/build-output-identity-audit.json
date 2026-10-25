@@ -1,0 +1,654 @@
+{
+  "cases": [
+    {
+      "case": 0,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 1,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 2,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 3,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 4,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 5,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 6,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 7,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 8,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 9,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 10,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 11,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 12,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 13,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 14,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 15,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 16,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 17,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 18,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 19,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 20,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 21,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 22,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 23,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 24,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 25,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 26,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 27,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 28,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 29,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 30,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 31,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 32,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 33,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 34,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 35,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 36,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 37,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 38,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 39,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 40,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 41,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 42,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 43,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 44,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 45,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 46,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 47,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 48,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 49,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 50,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 51,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 52,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 53,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 54,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 55,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 56,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 57,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 58,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 59,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 60,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 61,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 62,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 63,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 64,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 65,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 66,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 67,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 68,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 69,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 70,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 71,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 72,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 73,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 74,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 75,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 76,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 77,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 78,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 79,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 80,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 81,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 82,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 83,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 84,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 85,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 86,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 87,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 88,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 89,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 90,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 91,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 92,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 93,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 94,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 95,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 96,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 97,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 98,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 99,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 100,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 101,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 102,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 103,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 104,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 105,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 106,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 107,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 108,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 109,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 110,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 111,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 112,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 113,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 114,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 115,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 116,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 117,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 118,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 119,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 120,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 121,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 122,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 123,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 124,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 125,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 126,
+      "independent_binding": true,
+      "old_false_accept": true
+    },
+    {
+      "case": 127,
+      "independent_binding": true,
+      "old_false_accept": true
+    }
+  ],
+  "schema": "agnxiv.build-output-identity-audit/1",
+  "summary": {
+    "attack_total": 128,
+    "digest": "a38f6937c4e9e0adbdb6a533a82a1ac3451345036fd320f2c580786182ac2bd5",
+    "independent_bindings": 128,
+    "malformed_rejected": 3,
+    "old_baseline_false_accepts": 128,
+    "passed": true,
+    "production_imports": 0
+  }
+}

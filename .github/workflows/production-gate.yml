@@ -61,6 +61,10 @@ jobs:
             > /tmp/comment-smuggled-hashes.json
           python research/scripts/audit_comment_smuggled_hashes.py \
             > /tmp/comment-smuggled-hashes-audit.json
+          python research/scripts/verify_build_output_identity.py \
+            > /tmp/build-output-identity.json
+          python research/scripts/audit_build_output_identity.py \
+            > /tmp/build-output-identity-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -159,5 +163,7 @@ jobs:
             /tmp/dependency-manifest-snapshot-audit.json
             /tmp/comment-smuggled-hashes.json
             /tmp/comment-smuggled-hashes-audit.json
+            /tmp/build-output-identity.json
+            /tmp/build-output-identity-audit.json
           retention-days: 90
           if-no-files-found: warn
