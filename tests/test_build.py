@@ -9,6 +9,7 @@ from agnxiv.build import (
     bind_plan_to_immutable_base,
     build_python_environment,
     classify_dependency_precision,
+    copy_frozen_dependency_manifest,
     plan_python_environment,
 )
 
@@ -57,6 +58,20 @@ def test_build_plan_binds_from_to_repository_digest(tmp_path: Path) -> None:
     assert bound.dockerfile.startswith(f"FROM {immutable}\n")
     assert "FROM python:3.11-slim\n" not in bound.dockerfile
     assert bound.plan_id != plan.plan_id
+
+
+def test_frozen_manifest_copy_rejects_content_drift(tmp_path: Path) -> None:
+    source = tmp_path / "requirements.txt"
+    destination = tmp_path / "context-requirements.txt"
+    source.write_text("numpy==2.1.0\n", encoding="utf-8")
+    expected = "f" * 64
+
+    with pytest.raises(EnvironmentBuildError, match="changed after build planning"):
+        copy_frozen_dependency_manifest(
+            source,
+            destination,
+            expected_sha256=expected,
+        )
 
 
 def test_partial_hashes_cannot_upgrade_an_unhashed_dependency(tmp_path: Path) -> None:

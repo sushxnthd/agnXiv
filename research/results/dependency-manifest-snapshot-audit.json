@@ -1,0 +1,11 @@
+{
+  "attacks": 128,
+  "controls": 16,
+  "controls_passed": 16,
+  "digest": "78fcf9da247b3bffbe1b4558607655f18387dff873a9f907246965ce0777efab",
+  "old_false_accepts": 128,
+  "passed": true,
+  "production_imports": 0,
+  "rejected": 128,
+  "schema": "agnxiv.dependency-manifest-snapshot-audit/1"
+}

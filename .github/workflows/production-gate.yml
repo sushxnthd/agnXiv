@@ -53,6 +53,10 @@ jobs:
             > /tmp/base-image-aba-binding.json
           python research/scripts/audit_base_image_aba_binding.py \
             > /tmp/base-image-aba-binding-audit.json
+          python research/scripts/verify_dependency_manifest_snapshot.py \
+            > /tmp/dependency-manifest-snapshot.json
+          python research/scripts/audit_dependency_manifest_snapshot.py \
+            > /tmp/dependency-manifest-snapshot-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -147,5 +151,7 @@ jobs:
             /tmp/execution-image-binding-gate-audit.json
             /tmp/base-image-aba-binding.json
             /tmp/base-image-aba-binding-audit.json
+            /tmp/dependency-manifest-snapshot.json
+            /tmp/dependency-manifest-snapshot-audit.json
           retention-days: 90
           if-no-files-found: warn

@@ -252,6 +252,21 @@ def bind_plan_to_immutable_base(
     )
 
 
+def copy_frozen_dependency_manifest(
+    source: str | Path,
+    destination: str | Path,
+    *,
+    expected_sha256: str,
+) -> None:
+    """Copy a manifest into the private build context or fail on drift."""
+    shutil.copyfile(source, destination)
+    observed_sha256 = sha256_file(destination)
+    if observed_sha256 != expected_sha256:
+        raise EnvironmentBuildError(
+            "dependency manifest changed after build planning; build rejected"
+        )
+
+
 def build_python_environment(
     repository: str | Path,
     *,
@@ -291,9 +306,14 @@ def build_python_environment(
         (context / "Dockerfile").write_text(plan.dockerfile, encoding="utf-8")
 
         if plan.dependency_file is not None:
-            shutil.copyfile(
+            if plan.dependency_sha256 is None:
+                raise EnvironmentBuildError(
+                    "dependency manifest lacks a frozen content digest"
+                )
+            copy_frozen_dependency_manifest(
                 root / plan.dependency_file,
                 context / "requirements.txt",
+                expected_sha256=plan.dependency_sha256,
             )
 
         command = [
