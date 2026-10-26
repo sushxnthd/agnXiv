@@ -1,0 +1,33 @@
+{
+  "schema": "agnxiv.legacy-hosted-authority-migration-protocol/1",
+  "status": "frozen_before_implementation",
+  "archive": {
+    "path": "research/evidence/hosted-real-paper/run-40116884857.zip",
+    "sha256": "fce92fdc1ced72366437cad6830c043520870abbc299a54cb00fdb0e6c3f94cb",
+    "workflow_run": 40116884857,
+    "workflow_head": "4cea106867a53377ea264b070e79ce11b5ddcd5a"
+  },
+  "claim_under_test": "A legacy hosted bundle that predates verification-authority binding cannot be accepted by the current service callback merely by omission, relabelling, or binding it to another claim locator.",
+  "cases": [
+    "untouched legacy bundle with no verification authority",
+    "legacy bundle relabelled auto_planned without authority evidence",
+    "legacy bundle relabelled auto_planned with the other archived claim locator digest",
+    "structural control with auto_planned and its own exact locator digest"
+  ],
+  "success_criteria": {
+    "legacy_missing_authority_rejected": "2/2",
+    "label_only_upgrade_rejected": "2/2",
+    "cross_locator_upgrade_rejected": "2/2",
+    "exact_binding_controls_accepted": "2/2",
+    "measurements_preserved": "2/2",
+    "public_verdicts_remain_unable_to_verify": "2/2",
+    "independent_audit_uses_production_imports": 0
+  },
+  "kill_criteria": [
+    "any missing-authority legacy bundle is accepted",
+    "any label-only or cross-locator mutation is accepted",
+    "measurement or provisional comparison is erased",
+    "a legacy result is described as independently authorized without contemporaneous evidence"
+  ],
+  "bounded_interpretation": "The exact-binding control tests current callback structure only. It does not retroactively establish that the archived workflow had independent authority."
+}
