@@ -1,0 +1,31 @@
+{
+  "archive_sha256": "fce92fdc1ced72366437cad6830c043520870abbc299a54cb00fdb0e6c3f94cb",
+  "artifact_id": 12569325839,
+  "false_definitive_verdicts": 0,
+  "manuscript_identity_verified": true,
+  "measurements_preserved": 2,
+  "observations": [
+    {
+      "metric": "spearman_brown",
+      "observed": 0.67,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "reported": 0.68
+    },
+    {
+      "metric": "split_half_r",
+      "observed": 0.504,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "reported": 0.51
+    }
+  ],
+  "observations_sha256": "e04c075b89adacd7f4761789232aa4dd8ac7591da91945915a73d7106575dd94",
+  "prediction_matched": true,
+  "preserved_archive": "research/evidence/hosted-real-paper/run-40116884857.zip",
+  "provisional_comparisons_preserved": 2,
+  "repository_commit": "2f83d0fa506e7af2b72ca191b65ce42e07c9e185",
+  "schema": "agnxiv.real-paper-hosted-artifact-audit/1",
+  "workflow_head": "4cea106867a53377ea264b070e79ce11b5ddcd5a",
+  "workflow_run": 40116884857
+}

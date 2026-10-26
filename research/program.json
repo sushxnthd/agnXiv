@@ -30,7 +30,7 @@
       "id": "scicoqa",
       "name": "Execution-grounded paper-code discrepancy detection",
       "priority": "S+",
-      "status": "v0_diagnostic_complete",
+      "status": "hosted_real_paper_firewall_validated_recovery_pending",
       "primary_metric": "real_discrepancy_recall_at_precision",
       "target": "outperform static paper+code baselines using evidence graphs and executable probes"
     },

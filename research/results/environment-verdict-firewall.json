@@ -36,11 +36,20 @@
     "provisional_verdicts": ["CONTRADICTED", "CONTRADICTED"]
   },
   "hosted_validation": {
-    "status": "pending"
+    "status": "matched",
+    "workflow_run": 40116884857,
+    "workflow_head": "4cea106867a53377ea264b070e79ce11b5ddcd5a",
+    "artifact_id": 12569325839,
+    "artifact_sha256": "fce92fdc1ced72366437cad6830c043520870abbc299a54cb00fdb0e6c3f94cb",
+    "preserved_archive": "research/evidence/hosted-real-paper/run-40116884857.zip",
+    "public_verdicts": ["UNABLE_TO_VERIFY", "UNABLE_TO_VERIFY"],
+    "provisional_verdicts": ["CONTRADICTED", "CONTRADICTED"],
+    "measurements_preserved": true,
+    "independent_artifact_audit": "research/scripts/audit_real_paper_hosted_artifact.py"
   },
   "smallest_supported_claim": "The local production boundary and independent checker suppress definitive hosted scientific verdicts whenever scoped dependency evidence is ambiguous, historical fidelity is unconstrained, or the actual build is not hash-pinned, while preserving measurements and a provisional numeric verdict.",
   "limitations": [
-    "hosted prospective validation is pending",
+    "the original hosted artifact expires on 2026-11-23; its exact archive is vendored under the published SHA-256 for durable audit",
     "hash-pinned artifacts and immutable image IDs establish environment identity, not historical equivalence to an author's unpublished runtime",
     "the provisional numeric comparison is not itself a scientific verdict",
     "this firewall does not validate datasets, code semantics, or claim extraction"

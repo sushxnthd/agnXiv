@@ -48,4 +48,24 @@ This mechanism establishes a necessary publication boundary, not sufficient proo
 
 Smallest supported claim before hosted validation: the local production boundary and an independent checker suppress definitive hosted verdicts for every frozen underdetermined-environment case while preserving observations, and do not suppress the exact positive control.
 
-The claim will be upgraded only if the frozen external-paper workflow matches the prospective prediction.
+## Hosted prospective validation
+
+The untouched real-paper workflow matched the prediction at
+[run 40116884857](https://github.com/sushxnthd/agnXiv/actions/runs/40116884857),
+head `4cea106867a53377ea264b070e79ce11b5ddcd5a`.  Its exact artifact archive
+(`12569325839`, SHA-256
+`fce92fdc1ced72366437cad6830c043520870abbc299a54cb00fdb0e6c3f94cb`)
+preserved both measurements: 0.504 versus 0.51 and 0.67 versus 0.68.  Both
+public verdicts became `UNABLE_TO_VERIFY`; both raw numeric decisions remained
+`provisional_verdict=CONTRADICTED`; job status became `needs_review`.
+
+`research/scripts/audit_real_paper_hosted_artifact.py` independently verifies
+the archive bytes, manuscript identity, repository commit, immutable execution
+identity, unchanged source tree, both observations and every fail-closed reason
+without importing agnXiv production code.  This closes the preregistered hosted
+gate.  It does not upgrade either provisional comparison to a scientific
+contradiction.
+
+The exact 21,398-byte GitHub artifact is preserved at
+`research/evidence/hosted-real-paper/run-40116884857.zip`, so the audit remains
+replayable after GitHub's temporary artifact retention expires.
