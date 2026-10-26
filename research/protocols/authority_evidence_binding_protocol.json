@@ -1,0 +1,27 @@
+{
+  "protocol": "agnxiv.authority-evidence-binding/1",
+  "frozen_before_implementation": true,
+  "kernel": "independent-verification-authority",
+  "hypothesis": "A decisive auto-planned bundle must be cryptographically bound to the exact frozen discovery locator that authorized its observation. Validating the bundle and locator separately permits cross-object substitution.",
+  "attack": {
+    "baseline_trials": 128,
+    "construction": "Pair a decisive bundle produced under frozen locator A with a distinct syntactically valid frozen locator B while retaining auto_planned authority.",
+    "old_expected_false_accepts": 128,
+    "corrected_expected_false_accepts": 0
+  },
+  "controls": {
+    "matching_authority_pairs": 32,
+    "expected_decisive": 32,
+    "repository_supplied_authority_remains_provisional": true
+  },
+  "required_correction": [
+    "Canonicalize each FrozenLocator with stable JSON serialization.",
+    "Store its SHA-256 digest inside the corresponding VerificationBundle before verdict gating.",
+    "Require the digest at the local verdict gate for auto_planned authority.",
+    "Recompute and compare the digest for the primary and every additional verification at the service callback boundary.",
+    "Preserve measurements and provisional verdicts when authority evidence is absent, but abstain publicly."
+  ],
+  "independent_check": "A stdlib-only replay must reproduce all attack and control counts without importing agnxiv production code.",
+  "kill_condition": "Kill this experiment if the current service callback already proves a one-to-one cryptographic binding between each discovery locator and bundle.",
+  "bounded_claim": "This test establishes cross-object provenance coherence only; it does not establish scientific correctness, reviewer independence, sandbox integrity, or trust in the worker."
+}
