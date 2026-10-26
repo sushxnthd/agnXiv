@@ -1,0 +1,1037 @@
+{
+  "attack_total": 128,
+  "case_digest": "ed9754868333054a4ccabf898aa6d21929de2b78ba2fa6b1be93661c604a5b23",
+  "cases": [
+    {
+      "authority_blocked": true,
+      "case": 0,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 1,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 2,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 3,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 4,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 5,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 6,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 7,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 8,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 9,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 10,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 11,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 12,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 13,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 14,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 15,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 16,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 17,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 18,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 19,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 20,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 21,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 22,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 23,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 24,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 25,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 26,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 27,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 28,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 29,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 30,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 31,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 32,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 33,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 34,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 35,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 36,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 37,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 38,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 39,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 40,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 41,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 42,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 43,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 44,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 45,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 46,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 47,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 48,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 49,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 50,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 51,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 52,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 53,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 54,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 55,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 56,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 57,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 58,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 59,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 60,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 61,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 62,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 63,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 64,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 65,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 66,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 67,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 68,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 69,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 70,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 71,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 72,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 73,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 74,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 75,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 76,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 77,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 78,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 79,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 80,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 81,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 82,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 83,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 84,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 85,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 86,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 87,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 88,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 89,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 90,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 91,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 92,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 93,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 94,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 95,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 96,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 97,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 98,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 99,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 100,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 101,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 102,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 103,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 104,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 105,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 106,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 107,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 108,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 109,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 110,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 111,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 112,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 113,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 114,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 115,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 116,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 117,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 118,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 119,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 120,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 121,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 122,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 123,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 124,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 125,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 126,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    },
+    {
+      "authority_blocked": true,
+      "case": 127,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "old_verdict": "VERIFIED",
+      "provisional_verdict": "VERIFIED"
+    }
+  ],
+  "corrected_false_definitive_verdicts": 0,
+  "independent_authority_control_total": 32,
+  "independent_authority_controls_decisive": 32,
+  "old_false_definitive_verdicts": 128,
+  "passed": true,
+  "provisional_evidence_preserved": 128,
+  "schema": "agnxiv.self-certifying-manifests/1"
+}

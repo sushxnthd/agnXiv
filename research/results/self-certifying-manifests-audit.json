@@ -1,0 +1,8 @@
+{
+  "attack_total": 128,
+  "attacks_replayed": 128,
+  "case_digest_reproduced": true,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.self-certifying-manifests-audit/1"
+}

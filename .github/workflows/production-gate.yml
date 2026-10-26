@@ -69,6 +69,10 @@ jobs:
             > /tmp/base-identity-coherence.json
           python research/scripts/audit_base_identity_coherence.py \
             > /tmp/base-identity-coherence-audit.json
+          python research/scripts/verify_self_certifying_manifests.py \
+            > /tmp/self-certifying-manifests.json
+          python research/scripts/audit_self_certifying_manifests.py \
+            > /tmp/self-certifying-manifests-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -171,5 +175,7 @@ jobs:
             /tmp/build-output-identity-audit.json
             /tmp/base-identity-coherence.json
             /tmp/base-identity-coherence-audit.json
+            /tmp/self-certifying-manifests.json
+            /tmp/self-certifying-manifests-audit.json
           retention-days: 90
           if-no-files-found: warn

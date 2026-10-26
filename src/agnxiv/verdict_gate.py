@@ -20,6 +20,11 @@ def environment_verdict_blockers(
     blockers: list[str] = []
     environment = bundle.environment
 
+    if bundle.verification_authority == "repository_supplied":
+        blockers.append(
+            "verification manifest and executable are supplied by the same "
+            "untrusted repository; no independent verification authority is bound"
+        )
     if environment.scope_resolution == "ambiguous":
         blockers.append("workflow-scoped dependency environment is ambiguous")
     if environment.historical_fidelity != "constrained":

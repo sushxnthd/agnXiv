@@ -96,6 +96,21 @@ def test_hash_pinned_constrained_control_remains_decisive() -> None:
     assert gated.verdict_gate_reasons == []
 
 
+def test_repository_supplied_manifest_cannot_self_certify() -> None:
+    original = _bundle(historical_fidelity="constrained")
+    original.verification_authority = "repository_supplied"
+    gated = gate_hosted_verdict(original, _build("hash-pinned"))
+
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert gated.provisional_verdict == Verdict.CONTRADICTED
+    assert gated.record.expected == 0.9
+    assert gated.record.observed_mean == 0.8
+    assert any(
+        "no independent verification authority" in reason
+        for reason in gated.verdict_gate_reasons
+    )
+
+
 def test_ambiguous_scope_is_suppressed_even_with_hashes() -> None:
     gated = gate_hosted_verdict(
         _bundle(historical_fidelity="constrained", scope_resolution="ambiguous"),

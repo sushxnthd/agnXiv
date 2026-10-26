@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -52,6 +53,7 @@ class ExecutionSummary(BaseModel):
 class VerificationBundle(BaseModel):
     schema_version: str = "agnxiv.bundle/0.7"
     verification_spec_sha256: str | None = None
+    verification_authority: Literal["auto_planned", "repository_supplied"] | None = None
     claim: Claim
     manuscript: DocumentFingerprint | None = None
     provenance: ProvenanceManifest

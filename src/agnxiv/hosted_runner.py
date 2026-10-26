@@ -340,6 +340,7 @@ def execute_job(
                 manifest,
                 image_override=build.image_id,
             )
+            raw_bundle.verification_authority = "repository_supplied"
             bundle = gate_hosted_verdict(raw_bundle, build)
             verdict = bundle.record.verdict.value
             status = "succeeded" if verdict in {"VERIFIED", "CONTRADICTED"} else "needs_review"
