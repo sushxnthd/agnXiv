@@ -16,6 +16,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Floating/unreconstructed dependency environments are labeled **CONDITIONAL** evidence rather than silently treated as publication-era equivalence.
 - [x] Multiple claim bundles from one run are preserved.
 - [x] Every auto-planned decisive bundle is cryptographically bound to its exact frozen locator at both verdict and callback boundaries.
+- [x] Hosted callbacks bind the requested arXiv identity, exact manuscript digest, every additional bundle, and frozen locator to one matching scientific claim.
 - [x] Repeated attempts sharing the same evidence cluster are not counted as independent votes.
 - [ ] Auto-planned procedure authority is independently validated by a trusted reviewer, registry, or quorum; locator binding alone does not establish scientific correctness.
 - [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.

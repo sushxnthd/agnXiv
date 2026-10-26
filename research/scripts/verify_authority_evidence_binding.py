@@ -30,14 +30,20 @@ def locator(case: int, variant: str) -> dict:
 def bundle(case: int, commit: str, frozen_locator: dict) -> dict:
     value = 0.5 + (case % 40) / 100
     claim = {
-        "id": f"CLAIM-{case:03d}-A",
+        "id": frozen_locator["claim_id"],
         "text": f"Accuracy is {value}",
+        "metric": frozen_locator["metric"],
         "reported_value": value,
     }
     return {
         "verification_authority": "auto_planned",
         "authority_evidence_sha256": canonical_json_sha256(frozen_locator),
         "claim": claim,
+        "manuscript": {
+            "name": "paper.pdf",
+            "sha256": "d" * 64,
+            "size_bytes": 2048,
+        },
         "provenance": {
             "tree_digest": "a" * 64,
             "git": {"commit": commit, "dirty": False},
@@ -94,6 +100,15 @@ def corrected_accepts(result: dict, commit: str) -> bool:
     return True
 
 
+def manuscript_identity() -> dict:
+    return {
+        "arxiv_id": "2601.00001",
+        "sha256": "d" * 64,
+        "expected_sha256": None,
+        "identity_verified": False,
+    }
+
+
 def main() -> None:
     commit = "c" * 40
     attacks = []
@@ -103,6 +118,7 @@ def main() -> None:
         result = {
             "kind": "verification",
             "zero_manifest": True,
+            "manuscript_identity": manuscript_identity(),
             "discovery": substituted,
             "bundle": bundle(case, commit, source),
         }
@@ -122,6 +138,7 @@ def main() -> None:
         result = {
             "kind": "verification",
             "zero_manifest": True,
+            "manuscript_identity": manuscript_identity(),
             "discovery": frozen,
             "bundle": bundle(1000 + case, commit, frozen),
         }

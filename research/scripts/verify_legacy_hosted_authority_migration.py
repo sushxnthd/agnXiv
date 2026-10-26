@@ -31,10 +31,11 @@ def job(commit: str) -> Job:
     )
 
 
-def attempt(bundle: dict, discovery: dict) -> dict:
+def attempt(bundle: dict, discovery: dict, manuscript_identity: dict) -> dict:
     result = {
         "kind": "verification",
         "zero_manifest": True,
+        "manuscript_identity": manuscript_identity,
         "discovery": discovery,
         "bundle": bundle,
     }
@@ -51,6 +52,7 @@ def main() -> None:
     with zipfile.ZipFile(ARCHIVE) as zipped:
         payload = json.loads(zipped.read("zero-manifest-real.json"))
     root = payload["result"]
+    manuscript_identity = root["manuscript_identity"]
     items = [root, *root["additional_verifications"]]
     rows = []
     for index, item in enumerate(items):
@@ -59,20 +61,20 @@ def main() -> None:
         other = items[1 - index]["discovery"]
 
         legacy = copy.deepcopy(bundle)
-        missing = attempt(legacy, discovery)
+        missing = attempt(legacy, discovery, manuscript_identity)
 
         label_only = copy.deepcopy(bundle)
         label_only["verification_authority"] = "auto_planned"
         label_only["authority_evidence_sha256"] = None
-        relabelled = attempt(label_only, discovery)
+        relabelled = attempt(label_only, discovery, manuscript_identity)
 
         crossed = copy.deepcopy(label_only)
         crossed["authority_evidence_sha256"] = canonical_json_sha256(other)
-        cross_locator = attempt(crossed, discovery)
+        cross_locator = attempt(crossed, discovery, manuscript_identity)
 
         exact = copy.deepcopy(label_only)
         exact["authority_evidence_sha256"] = canonical_json_sha256(discovery)
-        control = attempt(exact, discovery)
+        control = attempt(exact, discovery, manuscript_identity)
 
         rows.append(
             {

@@ -1,0 +1,17 @@
+{
+  "attack_families": {
+    "cross_additional_manuscript": 128,
+    "cross_arxiv_identity": 128,
+    "cross_claim_locator": 128,
+    "cross_manuscript_digest": 128,
+    "cross_metric_locator": 128
+  },
+  "attack_total": 640,
+  "case_digest_reproduced": true,
+  "controls_replayed": 32,
+  "corrected_rejections_replayed": 640,
+  "legacy_false_accepts_replayed": 640,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.callback-scientific-object-binding-audit/1"
+}

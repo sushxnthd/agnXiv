@@ -7,6 +7,7 @@ import zipfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from agnxiv.attestation import canonical_json_sha256
@@ -22,13 +23,23 @@ def _worker_bundle(
     *,
     discovery: dict | None = None,
 ) -> dict:
-    claim = {"id": "C1", "text": "Accuracy is 0.9", "reported_value": 0.9}
+    claim = {
+        "id": "C1",
+        "text": "Accuracy is 0.9",
+        "metric": "accuracy",
+        "reported_value": 0.9,
+    }
     return {
         "verification_authority": authority,
         "authority_evidence_sha256": (
             canonical_json_sha256(discovery) if discovery is not None else None
         ),
         "claim": claim,
+        "manuscript": {
+            "name": "paper.pdf",
+            "sha256": "c" * 64,
+            "size_bytes": 1234,
+        },
         "provenance": {
             "tree_digest": "a" * 64,
             "git": {"commit": commit, "dirty": False},
@@ -64,15 +75,25 @@ def _worker_job(mode: str, commit: str) -> Job:
     )
 
 
-def test_worker_authority_must_match_verification_mode() -> None:
-    commit = "a" * 40
-    discovery = {"claim_id": "C1", "metric": "accuracy", "regex": "x"}
-    auto_result = {
+def _auto_result(commit: str, discovery: dict) -> dict:
+    return {
         "kind": "verification",
         "zero_manifest": True,
+        "manuscript_identity": {
+            "arxiv_id": "2601.00001",
+            "sha256": "c" * 64,
+            "expected_sha256": None,
+            "identity_verified": False,
+        },
         "discovery": discovery,
         "bundle": _worker_bundle("auto_planned", commit, discovery=discovery),
     }
+
+
+def test_worker_authority_must_match_verification_mode() -> None:
+    commit = "a" * 40
+    discovery = {"claim_id": "C1", "metric": "accuracy", "regex": "x"}
+    auto_result = _auto_result(commit, discovery)
     assert _validate_worker_result(
         _worker_job("auto_verify", commit), "succeeded", auto_result
     ) is not None
@@ -110,19 +131,18 @@ def test_worker_rejects_cross_locator_authority_substitution() -> None:
     commit = "b" * 40
     locator_a = {"claim_id": "C1", "metric": "accuracy", "regex": "A"}
     locator_b = {"claim_id": "C2", "metric": "f1", "regex": "B"}
-    result = {
-        "kind": "verification",
-        "zero_manifest": True,
-        "discovery": locator_b,
-        "bundle": _worker_bundle("auto_planned", commit, discovery=locator_a),
-    }
+    result = _auto_result(commit, locator_b)
+    result["bundle"] = _worker_bundle("auto_planned", commit, discovery=locator_a)
 
     try:
         _validate_worker_result(
             _worker_job("auto_verify", commit), "succeeded", result
         )
     except ValueError as exc:
-        assert "not bound to its frozen locator" in str(exc)
+        assert (
+            "not bound to its frozen locator" in str(exc)
+            or "locator claim" in str(exc)
+        )
     else:
         raise AssertionError("cross-locator authority substitution was accepted")
 
@@ -136,10 +156,12 @@ def test_preserved_legacy_real_paper_bundle_cannot_be_silently_upgraded() -> Non
     discovery = item["discovery"]
     commit = bundle["provenance"]["git"]["commit"]
     job = _worker_job("auto_verify", commit)
+    job.arxiv_id = item["manuscript_identity"]["arxiv_id"]
 
     legacy = {
         "kind": "verification",
         "zero_manifest": True,
+        "manuscript_identity": item["manuscript_identity"],
         "discovery": discovery,
         "bundle": copy.deepcopy(bundle),
     }
@@ -162,6 +184,46 @@ def test_preserved_legacy_real_paper_bundle_cannot_be_silently_upgraded() -> Non
     exact = copy.deepcopy(label_only)
     exact["bundle"]["authority_evidence_sha256"] = canonical_json_sha256(discovery)
     assert _validate_worker_result(job, "needs_review", exact) is not None
+
+
+def test_worker_rejects_cross_scientific_object_substitutions() -> None:
+    commit = "d" * 40
+    locator = {"claim_id": "C1", "metric": "accuracy", "regex": "x"}
+    job = _worker_job("auto_verify", commit)
+
+    wrong_paper = _auto_result(commit, locator)
+    wrong_paper["manuscript_identity"]["arxiv_id"] = "2601.99999v2"
+    with pytest.raises(ValueError, match="requested arXiv job"):
+        _validate_worker_result(job, "succeeded", wrong_paper)
+
+    wrong_digest = _auto_result(commit, locator)
+    wrong_digest["bundle"]["manuscript"]["sha256"] = "e" * 64
+    with pytest.raises(ValueError, match="callback manuscript"):
+        _validate_worker_result(job, "succeeded", wrong_digest)
+
+    wrong_claim_locator = {**locator, "claim_id": "C2"}
+    wrong_claim = _auto_result(commit, wrong_claim_locator)
+    with pytest.raises(ValueError, match="locator claim"):
+        _validate_worker_result(job, "succeeded", wrong_claim)
+
+    wrong_metric_locator = {**locator, "metric": "f1"}
+    wrong_metric = _auto_result(commit, wrong_metric_locator)
+    with pytest.raises(ValueError, match="locator metric"):
+        _validate_worker_result(job, "succeeded", wrong_metric)
+
+    additional = _auto_result(commit, locator)
+    second_locator = {"claim_id": "C1", "metric": "accuracy", "regex": "y"}
+    second_bundle = _worker_bundle("auto_planned", commit, discovery=second_locator)
+    second_bundle["manuscript"]["sha256"] = "f" * 64
+    additional["additional_verifications"] = [
+        {"discovery": second_locator, "bundle": second_bundle}
+    ]
+    with pytest.raises(ValueError, match="callback manuscript"):
+        _validate_worker_result(job, "succeeded", additional)
+
+    assert _validate_worker_result(
+        job, "succeeded", _auto_result(commit, locator)
+    ) is not None
 
 
 def _productionish_config(database_url: str, *, issuer: str | None = None) -> ServiceConfig:

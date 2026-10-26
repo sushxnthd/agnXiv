@@ -85,6 +85,10 @@ jobs:
             > /tmp/legacy-hosted-authority-migration.json
           python research/scripts/audit_legacy_hosted_authority_migration.py \
             > /tmp/legacy-hosted-authority-migration-audit.json
+          python research/scripts/verify_callback_scientific_object_binding.py \
+            > /tmp/callback-scientific-object-binding.json
+          python research/scripts/audit_callback_scientific_object_binding.py \
+            > /tmp/callback-scientific-object-binding-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -195,5 +199,7 @@ jobs:
             /tmp/authority-evidence-binding-audit.json
             /tmp/legacy-hosted-authority-migration.json
             /tmp/legacy-hosted-authority-migration-audit.json
+            /tmp/callback-scientific-object-binding.json
+            /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90
           if-no-files-found: warn

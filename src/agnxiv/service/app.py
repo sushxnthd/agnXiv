@@ -4,6 +4,7 @@ import base64
 import binascii
 import json
 import logging
+import re
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -162,6 +163,32 @@ def _validate_worker_result(
             evidence_pairs.append((item.get("discovery"), item.get("bundle")))
 
     bundles = [VerificationBundle.model_validate(raw) for _, raw in evidence_pairs]
+    if job.mode == "auto_verify":
+        identity = result.get("manuscript_identity")
+        if not isinstance(identity, dict):
+            raise ValueError("AUTO_VERIFY is missing manuscript identity")
+        if not job.arxiv_id:
+            raise ValueError("AUTO_VERIFY job is missing its arXiv identity")
+        expected_arxiv_id = parse_arxiv_reference(job.arxiv_id).versioned_id
+        if identity.get("arxiv_id") != expected_arxiv_id:
+            raise ValueError("verification manuscript does not match requested arXiv job")
+        manuscript_sha256 = identity.get("sha256")
+        if not isinstance(manuscript_sha256, str) or re.fullmatch(
+            r"[0-9a-f]{64}", manuscript_sha256
+        ) is None:
+            raise ValueError("verification manuscript identity lacks canonical SHA-256")
+        for (discovery, _), bundle in zip(evidence_pairs, bundles):
+            if (
+                bundle.manuscript is None
+                or bundle.manuscript.sha256 != manuscript_sha256
+            ):
+                raise ValueError(
+                    "verification bundle is not bound to the callback manuscript"
+                )
+            if discovery.get("claim_id") != bundle.claim.id:
+                raise ValueError("frozen locator claim does not match verification bundle")
+            if discovery.get("metric") != bundle.claim.metric:
+                raise ValueError("frozen locator metric does not match verification bundle")
     expected_authority = (
         "auto_planned" if job.mode == "auto_verify" else "repository_supplied"
     )

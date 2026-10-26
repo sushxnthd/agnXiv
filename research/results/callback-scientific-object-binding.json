@@ -1,0 +1,4022 @@
+{
+  "attack_families": [
+    "cross_arxiv_identity",
+    "cross_manuscript_digest",
+    "cross_additional_manuscript",
+    "cross_claim_locator",
+    "cross_metric_locator"
+  ],
+  "attack_total": 640,
+  "attacks": [
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 0,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 0,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 0,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 0,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 0,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 1,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 1,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 1,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 1,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 1,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 2,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 2,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 2,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 2,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 2,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 3,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 3,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 3,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 3,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 3,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 4,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 4,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 4,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 4,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 4,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 5,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 5,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 5,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 5,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 5,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 6,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 6,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 6,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 6,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 6,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 7,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 7,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 7,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 7,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 7,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 8,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 8,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 8,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 8,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 8,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 9,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 9,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 9,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 9,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 9,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 10,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 10,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 10,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 10,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 10,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 11,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 11,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 11,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 11,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 11,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 12,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 12,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 12,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 12,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 12,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 13,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 13,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 13,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 13,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 13,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 14,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 14,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 14,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 14,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 14,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 15,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 15,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 15,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 15,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 15,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 16,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 16,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 16,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 16,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 16,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 17,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 17,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 17,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 17,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 17,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 18,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 18,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 18,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 18,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 18,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 19,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 19,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 19,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 19,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 19,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 20,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 20,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 20,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 20,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 20,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 21,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 21,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 21,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 21,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 21,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 22,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 22,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 22,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 22,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 22,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 23,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 23,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 23,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 23,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 23,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 24,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 24,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 24,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 24,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 24,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 25,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 25,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 25,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 25,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 25,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 26,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 26,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 26,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 26,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 26,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 27,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 27,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 27,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 27,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 27,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 28,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 28,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 28,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 28,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 28,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 29,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 29,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 29,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 29,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 29,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 30,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 30,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 30,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 30,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 30,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 31,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 31,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 31,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 31,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 31,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 32,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 32,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 32,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 32,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 32,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 33,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 33,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 33,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 33,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 33,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 34,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 34,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 34,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 34,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 34,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 35,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 35,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 35,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 35,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 35,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 36,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 36,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 36,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 36,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 36,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 37,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 37,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 37,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 37,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 37,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 38,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 38,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 38,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 38,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 38,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 39,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 39,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 39,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 39,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 39,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 40,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 40,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 40,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 40,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 40,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 41,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 41,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 41,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 41,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 41,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 42,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 42,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 42,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 42,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 42,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 43,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 43,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 43,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 43,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 43,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 44,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 44,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 44,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 44,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 44,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 45,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 45,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 45,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 45,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 45,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 46,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 46,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 46,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 46,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 46,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 47,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 47,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 47,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 47,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 47,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 48,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 48,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 48,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 48,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 48,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 49,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 49,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 49,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 49,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 49,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 50,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 50,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 50,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 50,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 50,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 51,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 51,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 51,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 51,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 51,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 52,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 52,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 52,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 52,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 52,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 53,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 53,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 53,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 53,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 53,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 54,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 54,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 54,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 54,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 54,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 55,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 55,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 55,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 55,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 55,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 56,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 56,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 56,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 56,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 56,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 57,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 57,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 57,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 57,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 57,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 58,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 58,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 58,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 58,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 58,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 59,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 59,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 59,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 59,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 59,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 60,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 60,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 60,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 60,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 60,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 61,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 61,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 61,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 61,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 61,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 62,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 62,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 62,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 62,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 62,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 63,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 63,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 63,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 63,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 63,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 64,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 64,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 64,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 64,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 64,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 65,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 65,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 65,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 65,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 65,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 66,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 66,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 66,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 66,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 66,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 67,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 67,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 67,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 67,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 67,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 68,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 68,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 68,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 68,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 68,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 69,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 69,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 69,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 69,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 69,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 70,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 70,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 70,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 70,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 70,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 71,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 71,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 71,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 71,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 71,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 72,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 72,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 72,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 72,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 72,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 73,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 73,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 73,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 73,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 73,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 74,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 74,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 74,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 74,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 74,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 75,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 75,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 75,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 75,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 75,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 76,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 76,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 76,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 76,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 76,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 77,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 77,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 77,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 77,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 77,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 78,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 78,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 78,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 78,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 78,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 79,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 79,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 79,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 79,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 79,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 80,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 80,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 80,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 80,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 80,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 81,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 81,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 81,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 81,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 81,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 82,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 82,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 82,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 82,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 82,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 83,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 83,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 83,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 83,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 83,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 84,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 84,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 84,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 84,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 84,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 85,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 85,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 85,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 85,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 85,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 86,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 86,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 86,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 86,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 86,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 87,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 87,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 87,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 87,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 87,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 88,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 88,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 88,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 88,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 88,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 89,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 89,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 89,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 89,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 89,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 90,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 90,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 90,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 90,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 90,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 91,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 91,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 91,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 91,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 91,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 92,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 92,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 92,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 92,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 92,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 93,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 93,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 93,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 93,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 93,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 94,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 94,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 94,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 94,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 94,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 95,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 95,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 95,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 95,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 95,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 96,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 96,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 96,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 96,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 96,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 97,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 97,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 97,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 97,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 97,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 98,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 98,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 98,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 98,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 98,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 99,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 99,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 99,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 99,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 99,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 100,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 100,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 100,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 100,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 100,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 101,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 101,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 101,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 101,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 101,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 102,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 102,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 102,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 102,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 102,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 103,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 103,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 103,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 103,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 103,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 104,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 104,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 104,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 104,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 104,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 105,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 105,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 105,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 105,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 105,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 106,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 106,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 106,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 106,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 106,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 107,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 107,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 107,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 107,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 107,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 108,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 108,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 108,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 108,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 108,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 109,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 109,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 109,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 109,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 109,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 110,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 110,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 110,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 110,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 110,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 111,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 111,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 111,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 111,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 111,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 112,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 112,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 112,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 112,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 112,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 113,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 113,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 113,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 113,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 113,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 114,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 114,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 114,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 114,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 114,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 115,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 115,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 115,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 115,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 115,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 116,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 116,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 116,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 116,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 116,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 117,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 117,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 117,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 117,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 117,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 118,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 118,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 118,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 118,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 118,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 119,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 119,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 119,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 119,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 119,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 120,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 120,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 120,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 120,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 120,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 121,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 121,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 121,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 121,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 121,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 122,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 122,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 122,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 122,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 122,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 123,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 123,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 123,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 123,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 123,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 124,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 124,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 124,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 124,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 124,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 125,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 125,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 125,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 125,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 125,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 126,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 126,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 126,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 126,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 126,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_arxiv_identity",
+      "case": 127,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_manuscript_digest",
+      "case": 127,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_additional_manuscript",
+      "case": 127,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_claim_locator",
+      "case": 127,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    },
+    {
+      "attack": "cross_metric_locator",
+      "case": 127,
+      "corrected_accepted": false,
+      "legacy_accepted": true
+    }
+  ],
+  "case_digest": "9adf94d69b32e226ffff9c961c77ac498323b9c14815ecd591887dfd4c15f2d9",
+  "control_total": 32,
+  "control_verdicts_preserved": 32,
+  "controls": [
+    {
+      "accepted": true,
+      "case": 0,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 1,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 2,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 3,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 4,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 5,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 6,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 7,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 8,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 9,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 10,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 11,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 12,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 13,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 14,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 15,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 16,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 17,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 18,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 19,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 20,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 21,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 22,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 23,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 24,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 25,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 26,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 27,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 28,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 29,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 30,
+      "verdict_preserved": true
+    },
+    {
+      "accepted": true,
+      "case": 31,
+      "verdict_preserved": true
+    }
+  ],
+  "controls_accepted": 32,
+  "corrected_false_accepts": 0,
+  "legacy_false_accepts": 640,
+  "passed": true,
+  "schema": "agnxiv.callback-scientific-object-binding/1"
+}
