@@ -1,0 +1,1359 @@
+{
+  "attack_total": 128,
+  "case_digest": "49875791fc2b86f11751e791c2904ba211b42f1ea69b1a1082bfc0e67af000b5",
+  "cases": [
+    {
+      "case": 0,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 1,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 2,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 3,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 4,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 5,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 6,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 7,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 8,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 9,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 10,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 11,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 12,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 13,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 14,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 15,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 16,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 17,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 18,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 19,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 20,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 21,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 22,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 23,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 24,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 25,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 26,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 27,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 28,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 29,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 30,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 31,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 32,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 33,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 34,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 35,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 36,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 37,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 38,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 39,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 40,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 41,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 42,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 43,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 44,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 45,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 46,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 47,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 48,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 49,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 50,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 51,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 52,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 53,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 54,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 55,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 56,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 57,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 58,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 59,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 60,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 61,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 62,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 63,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 64,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 65,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 66,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 67,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 68,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 69,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 70,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 71,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 72,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 73,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 74,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 75,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 76,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 77,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 78,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 79,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 80,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 81,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 82,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 83,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 84,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 85,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 86,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 87,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 88,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 89,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 90,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 91,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 92,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 93,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 94,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 95,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 96,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 97,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 98,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 99,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 100,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 101,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 102,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 103,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 104,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 105,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 106,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 107,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 108,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 109,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 110,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 111,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 112,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 113,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 114,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 115,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 116,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 117,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 118,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 119,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 120,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 121,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 122,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 123,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 124,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 125,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "PARTIALLY_VERIFIED",
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 126,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "CONTRADICTED",
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 127,
+      "corrected_verdict": "UNABLE_TO_VERIFY",
+      "evidence_preserved": true,
+      "missing_authority_blocked": true,
+      "old_gate_definitive": true,
+      "provisional_verdict": "VERIFIED",
+      "raw_verdict": "VERIFIED"
+    }
+  ],
+  "controls": [
+    {
+      "case": 0,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 1,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 2,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 3,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 4,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 5,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 6,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 7,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 8,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 9,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 10,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 11,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 12,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 13,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 14,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 15,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 16,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 17,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 18,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 19,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 20,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 21,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 22,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 23,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 24,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 25,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 26,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 27,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 28,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    },
+    {
+      "case": 29,
+      "corrected_verdict": "CONTRADICTED",
+      "passed": true,
+      "raw_verdict": "CONTRADICTED"
+    },
+    {
+      "case": 30,
+      "corrected_verdict": "VERIFIED",
+      "passed": true,
+      "raw_verdict": "VERIFIED"
+    },
+    {
+      "case": 31,
+      "corrected_verdict": "PARTIALLY_VERIFIED",
+      "passed": true,
+      "raw_verdict": "PARTIALLY_VERIFIED"
+    }
+  ],
+  "corrected_false_definitive_verdicts": 0,
+  "explicit_auto_planned_control_total": 32,
+  "explicit_auto_planned_controls_passed": 32,
+  "old_false_definitive_verdicts": 128,
+  "passed": true,
+  "provisional_evidence_preserved": 128,
+  "schema": "agnxiv.authority-downgrade/1"
+}

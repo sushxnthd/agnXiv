@@ -50,6 +50,8 @@ def bundle(case: int, *, repository_supplied: bool) -> VerificationBundle:
     )
     if repository_supplied:
         result.verification_authority = "repository_supplied"
+    else:
+        result.verification_authority = "auto_planned"
     return result
 
 

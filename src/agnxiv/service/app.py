@@ -161,7 +161,14 @@ def _validate_worker_result(
             raw_bundles.append(item.get("bundle"))
 
     bundles = [VerificationBundle.model_validate(raw) for raw in raw_bundles]
+    expected_authority = (
+        "auto_planned" if job.mode == "auto_verify" else "repository_supplied"
+    )
     for bundle in bundles:
+        if bundle.verification_authority != expected_authority:
+            raise ValueError(
+                f"{job.mode} result has invalid verification authority"
+            )
         git = bundle.provenance.git
         if git is None or git.commit != job.repository_ref:
             raise ValueError("verification Git commit does not match pinned job")

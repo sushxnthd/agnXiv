@@ -5,10 +5,91 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
-from agnxiv.service.app import create_app
+from agnxiv.service.app import _validate_worker_result, create_app
 from agnxiv.service.config import ServiceConfig
 from agnxiv.service.db import Job, JobStore
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
+
+
+def _worker_bundle(authority: str | None, commit: str) -> dict:
+    claim = {"id": "C1", "text": "Accuracy is 0.9", "reported_value": 0.9}
+    return {
+        "verification_authority": authority,
+        "claim": claim,
+        "provenance": {
+            "tree_digest": "a" * 64,
+            "git": {"commit": commit, "dirty": False},
+            "files": [],
+            "file_count": 0,
+            "total_bytes": 0,
+        },
+        "environment": {},
+        "record": {
+            "claim": claim,
+            "policy": {"kind": "absolute", "tolerance": 0.01},
+            "observations": [{"value": 0.9}],
+            "verdict": "VERIFIED",
+            "expected": 0.9,
+            "observed_mean": 0.9,
+            "absolute_error": 0.0,
+            "relative_error": 0.0,
+            "rationale": "matched",
+        },
+    }
+
+
+def _worker_job(mode: str, commit: str) -> Job:
+    return Job(
+        id="00000000-0000-0000-0000-000000000099",
+        api_key_hash="hash",
+        status="running",
+        mode=mode,
+        repository="owner/repo",
+        repository_ref=commit,
+        arxiv_id="2601.00001",
+        spec_path=None,
+    )
+
+
+def test_worker_authority_must_match_verification_mode() -> None:
+    commit = "a" * 40
+    auto_result = {
+        "kind": "verification",
+        "zero_manifest": True,
+        "discovery": {},
+        "bundle": _worker_bundle("auto_planned", commit),
+    }
+    assert _validate_worker_result(
+        _worker_job("auto_verify", commit), "succeeded", auto_result
+    ) is not None
+
+    auto_result["bundle"]["verification_authority"] = None
+    try:
+        _validate_worker_result(
+            _worker_job("auto_verify", commit), "succeeded", auto_result
+        )
+    except ValueError as exc:
+        assert "invalid verification authority" in str(exc)
+    else:
+        raise AssertionError("missing worker authority was accepted")
+
+    spec_result = {
+        "kind": "verification",
+        "bundle": _worker_bundle("repository_supplied", commit),
+    }
+    assert _validate_worker_result(
+        _worker_job("verify_spec", commit), "succeeded", spec_result
+    ) is not None
+
+    spec_result["bundle"]["verification_authority"] = "auto_planned"
+    try:
+        _validate_worker_result(
+            _worker_job("verify_spec", commit), "succeeded", spec_result
+        )
+    except ValueError as exc:
+        assert "invalid verification authority" in str(exc)
+    else:
+        raise AssertionError("repository worker claimed auto-planned authority")
 
 
 def _productionish_config(database_url: str, *, issuer: str | None = None) -> ServiceConfig:

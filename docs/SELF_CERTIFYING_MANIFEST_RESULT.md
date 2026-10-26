@@ -27,8 +27,8 @@ verification authority is bound.
 | Corrected authority-aware gate | 0/128 |
 
 All 128 provisional verdicts and observations were retained for audit. Thirty-two
-bundles without the repository-supplied authority label remained decisive,
-showing that the correction is scoped to the self-certification boundary.
+explicitly `auto_planned` bundles remained decisive, showing that the correction
+is scoped to the self-certification boundary.
 
 The independent standard-library checker replayed 128/128 cases, reproduced
 the exact case digest

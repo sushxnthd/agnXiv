@@ -73,6 +73,10 @@ jobs:
             > /tmp/self-certifying-manifests.json
           python research/scripts/audit_self_certifying_manifests.py \
             > /tmp/self-certifying-manifests-audit.json
+          python research/scripts/verify_authority_downgrade.py \
+            > /tmp/authority-downgrade.json
+          python research/scripts/audit_authority_downgrade.py \
+            > /tmp/authority-downgrade-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -177,5 +181,7 @@ jobs:
             /tmp/base-identity-coherence-audit.json
             /tmp/self-certifying-manifests.json
             /tmp/self-certifying-manifests-audit.json
+            /tmp/authority-downgrade.json
+            /tmp/authority-downgrade-audit.json
           retention-days: 90
           if-no-files-found: warn

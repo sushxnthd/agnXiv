@@ -26,6 +26,7 @@ def bundle(execution_image_id):
     )
     policy = VerificationPolicy(kind="absolute", tolerance=0.01)
     return VerificationBundle(
+        verification_authority="auto_planned",
         claim=claim,
         provenance=ProvenanceManifest(
             files=[], file_count=0, total_bytes=0, tree_digest="b" * 64

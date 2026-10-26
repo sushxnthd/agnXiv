@@ -13,6 +13,7 @@ def _bundle(
     scope_resolution: str = "resolved",
     observed: float = 0.8,
     execution_image_id: str | None = "sha256:" + "c" * 64,
+    verification_authority: str | None = "auto_planned",
 ) -> VerificationBundle:
     claim = Claim(id="C1", text="Accuracy is 0.9", metric="accuracy", reported_value=0.9)
     policy = VerificationPolicy(kind="absolute", tolerance=0.01)
@@ -32,6 +33,7 @@ def _bundle(
             artifacts_unchanged=True,
         )
     return VerificationBundle(
+        verification_authority=verification_authority,
         claim=claim,
         provenance=ProvenanceManifest(
             files=[], file_count=0, total_bytes=0, tree_digest="a" * 64
@@ -109,6 +111,20 @@ def test_repository_supplied_manifest_cannot_self_certify() -> None:
         "no independent verification authority" in reason
         for reason in gated.verdict_gate_reasons
     )
+
+
+def test_missing_authority_cannot_downgrade_repository_supplied_evidence() -> None:
+    gated = gate_hosted_verdict(
+        _bundle(
+            historical_fidelity="constrained",
+            verification_authority=None,
+        ),
+        _build("hash-pinned"),
+    )
+
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert gated.provisional_verdict == Verdict.CONTRADICTED
+    assert any("authority is missing" in reason for reason in gated.verdict_gate_reasons)
 
 
 def test_ambiguous_scope_is_suppressed_even_with_hashes() -> None:

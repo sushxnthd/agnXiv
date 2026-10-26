@@ -40,6 +40,7 @@ def bundle(execution_image_id: str | None) -> VerificationBundle:
             artifacts_unchanged=True,
         )
     return VerificationBundle(
+        verification_authority="auto_planned",
         claim=claim,
         provenance=ProvenanceManifest(
             files=[], file_count=0, total_bytes=0, tree_digest="3" * 64

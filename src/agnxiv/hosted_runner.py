@@ -270,9 +270,10 @@ def execute_job(
                     "plan": outcome.plan.model_dump(mode="json"),
                     "reason": outcome.reason,
                 }
-            gated_bundles = [
-                gate_hosted_verdict(item, build) for item in outcome.bundles
-            ]
+            gated_bundles = []
+            for item in outcome.bundles:
+                item.verification_authority = "auto_planned"
+                gated_bundles.append(gate_hosted_verdict(item, build))
             verdicts = [item.record.verdict.value for item in gated_bundles]
             status = (
                 "succeeded"

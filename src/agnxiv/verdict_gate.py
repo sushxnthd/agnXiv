@@ -25,6 +25,11 @@ def environment_verdict_blockers(
             "verification manifest and executable are supplied by the same "
             "untrusted repository; no independent verification authority is bound"
         )
+    elif bundle.verification_authority != "auto_planned":
+        blockers.append(
+            "verification authority is missing; absence of provenance cannot "
+            "establish independent verification authority"
+        )
     if environment.scope_resolution == "ambiguous":
         blockers.append("workflow-scoped dependency environment is ambiguous")
     if environment.historical_fidelity != "constrained":
