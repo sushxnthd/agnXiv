@@ -1,0 +1,64 @@
+{
+  "archive_sha256": "fce92fdc1ced72366437cad6830c043520870abbc299a54cb00fdb0e6c3f94cb",
+  "bundle_total": 2,
+  "cross_locator_upgrades_rejected": 2,
+  "exact_binding_controls_accepted": 2,
+  "label_only_upgrades_rejected": 2,
+  "legacy_missing_authority_rejected": 2,
+  "measurements_preserved": 2,
+  "passed": true,
+  "provisional_comparisons_preserved": 2,
+  "public_abstentions_preserved": 2,
+  "rows": [
+    {
+      "cross_locator_upgrade": {
+        "accepted": false,
+        "error": "AUTO_VERIFY authority is not bound to its frozen locator"
+      },
+      "exact_binding_control": {
+        "accepted": true,
+        "error": null
+      },
+      "label_only_upgrade": {
+        "accepted": false,
+        "error": "AUTO_VERIFY authority is not bound to its frozen locator"
+      },
+      "locator_sha256": "0c690b319865863d2002793632651514ebc86d3e93cc065af8eb2dd30905b748",
+      "metric": "split_half_r",
+      "missing_authority": {
+        "accepted": false,
+        "error": "auto_verify result has invalid verification authority"
+      },
+      "observed": 0.504,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "reported": 0.51
+    },
+    {
+      "cross_locator_upgrade": {
+        "accepted": false,
+        "error": "AUTO_VERIFY authority is not bound to its frozen locator"
+      },
+      "exact_binding_control": {
+        "accepted": true,
+        "error": null
+      },
+      "label_only_upgrade": {
+        "accepted": false,
+        "error": "AUTO_VERIFY authority is not bound to its frozen locator"
+      },
+      "locator_sha256": "740a5388afafdf4335bbf3c455fbcea092da4996fc66c8f6ca4db4eec506f875",
+      "metric": "spearman_brown",
+      "missing_authority": {
+        "accepted": false,
+        "error": "auto_verify result has invalid verification authority"
+      },
+      "observed": 0.67,
+      "provisional_verdict": "CONTRADICTED",
+      "public_verdict": "UNABLE_TO_VERIFY",
+      "reported": 0.68
+    }
+  ],
+  "schema": "agnxiv.legacy-hosted-authority-migration/1",
+  "workflow_run": 40116884857
+}

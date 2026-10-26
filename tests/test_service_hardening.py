@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import base64
+import copy
+import json
+import zipfile
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -121,6 +125,43 @@ def test_worker_rejects_cross_locator_authority_substitution() -> None:
         assert "not bound to its frozen locator" in str(exc)
     else:
         raise AssertionError("cross-locator authority substitution was accepted")
+
+
+def test_preserved_legacy_real_paper_bundle_cannot_be_silently_upgraded() -> None:
+    archive = Path("research/evidence/hosted-real-paper/run-40116884857.zip")
+    with zipfile.ZipFile(archive) as zipped:
+        payload = json.loads(zipped.read("zero-manifest-real.json"))
+    item = payload["result"]
+    bundle = copy.deepcopy(item["bundle"])
+    discovery = item["discovery"]
+    commit = bundle["provenance"]["git"]["commit"]
+    job = _worker_job("auto_verify", commit)
+
+    legacy = {
+        "kind": "verification",
+        "zero_manifest": True,
+        "discovery": discovery,
+        "bundle": copy.deepcopy(bundle),
+    }
+    try:
+        _validate_worker_result(job, "needs_review", legacy)
+    except ValueError as exc:
+        assert "invalid verification authority" in str(exc)
+    else:
+        raise AssertionError("legacy bundle without authority was accepted")
+
+    label_only = copy.deepcopy(legacy)
+    label_only["bundle"]["verification_authority"] = "auto_planned"
+    try:
+        _validate_worker_result(job, "needs_review", label_only)
+    except ValueError as exc:
+        assert "not bound to its frozen locator" in str(exc)
+    else:
+        raise AssertionError("label-only legacy authority upgrade was accepted")
+
+    exact = copy.deepcopy(label_only)
+    exact["bundle"]["authority_evidence_sha256"] = canonical_json_sha256(discovery)
+    assert _validate_worker_result(job, "needs_review", exact) is not None
 
 
 def _productionish_config(database_url: str, *, issuer: str | None = None) -> ServiceConfig:

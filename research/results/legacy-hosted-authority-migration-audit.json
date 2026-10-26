@@ -1,0 +1,8 @@
+{
+  "archive_sha256_reproduced": true,
+  "bundle_total": 2,
+  "bundles_replayed": 2,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.legacy-hosted-authority-migration-audit/1"
+}

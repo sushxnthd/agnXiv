@@ -81,6 +81,10 @@ jobs:
             > /tmp/authority-evidence-binding.json
           python research/scripts/audit_authority_evidence_binding.py \
             > /tmp/authority-evidence-binding-audit.json
+          python research/scripts/verify_legacy_hosted_authority_migration.py \
+            > /tmp/legacy-hosted-authority-migration.json
+          python research/scripts/audit_legacy_hosted_authority_migration.py \
+            > /tmp/legacy-hosted-authority-migration-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
@@ -187,5 +191,9 @@ jobs:
             /tmp/self-certifying-manifests-audit.json
             /tmp/authority-downgrade.json
             /tmp/authority-downgrade-audit.json
+            /tmp/authority-evidence-binding.json
+            /tmp/authority-evidence-binding-audit.json
+            /tmp/legacy-hosted-authority-migration.json
+            /tmp/legacy-hosted-authority-migration-audit.json
           retention-days: 90
           if-no-files-found: warn
