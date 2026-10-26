@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime
 
+from .authority import TrustedAuthorityRegistry, authority_registry_blockers
 from .build import BuildResult
 from .models import Verdict
 from .pipeline import VerificationBundle
@@ -18,6 +20,10 @@ _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 def environment_verdict_blockers(
     bundle: VerificationBundle,
     build: BuildResult,
+    *,
+    trusted_authority_registry: TrustedAuthorityRegistry | None = None,
+    require_registry_authority: bool = False,
+    authority_validation_time: datetime | None = None,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -40,6 +46,14 @@ def environment_verdict_blockers(
         blockers.append(
             "auto-planned verification authority is not bound to canonical "
             "frozen-locator evidence"
+        )
+    elif require_registry_authority:
+        blockers.extend(
+            authority_registry_blockers(
+                bundle,
+                trusted_authority_registry,
+                now=authority_validation_time,
+            )
         )
     if environment.scope_resolution == "ambiguous":
         blockers.append("workflow-scoped dependency environment is ambiguous")
@@ -72,6 +86,10 @@ def environment_verdict_blockers(
 def gate_hosted_verdict(
     bundle: VerificationBundle,
     build: BuildResult,
+    *,
+    trusted_authority_registry: TrustedAuthorityRegistry | None = None,
+    require_registry_authority: bool = False,
+    authority_validation_time: datetime | None = None,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -82,7 +100,13 @@ def gate_hosted_verdict(
     if bundle.record.verdict not in _DECISIVE_VERDICTS:
         return bundle
 
-    blockers = environment_verdict_blockers(bundle, build)
+    blockers = environment_verdict_blockers(
+        bundle,
+        build,
+        trusted_authority_registry=trusted_authority_registry,
+        require_registry_authority=require_registry_authority,
+        authority_validation_time=authority_validation_time,
+    )
     if not blockers:
         return bundle
 

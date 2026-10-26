@@ -6,6 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from .authority import AuthorityAttestation
 from .environment import EnvironmentSpec, infer_python_environment
 from .evidence import EvidenceCandidate, map_claim_to_repository
 from .models import (
@@ -55,6 +56,7 @@ class VerificationBundle(BaseModel):
     verification_spec_sha256: str | None = None
     verification_authority: Literal["auto_planned", "repository_supplied"] | None = None
     authority_evidence_sha256: str | None = None
+    authority_attestations: list[AuthorityAttestation] = Field(default_factory=list)
     claim: Claim
     manuscript: DocumentFingerprint | None = None
     provenance: ProvenanceManifest

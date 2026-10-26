@@ -1,0 +1,19 @@
+{
+  "attack_families": {
+    "altered_locator": 32,
+    "cross_claim": 32,
+    "cross_manuscript": 32,
+    "cross_repository": 32,
+    "expired": 32,
+    "rogue_key": 32
+  },
+  "attack_total": 192,
+  "attacks_replayed": 192,
+  "control_total": 32,
+  "controls_replayed": 32,
+  "old_self_asserted_definitive": 128,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.authority-registry-audit/1",
+  "strict_self_asserted_definitive": 0
+}

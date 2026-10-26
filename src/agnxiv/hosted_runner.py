@@ -281,7 +281,13 @@ def execute_job(
                 item.authority_evidence_sha256 = canonical_json_sha256(
                     locator.model_dump(mode="json")
                 )
-                gated_bundles.append(gate_hosted_verdict(item, build))
+                gated_bundles.append(
+                    gate_hosted_verdict(
+                        item,
+                        build,
+                        require_registry_authority=True,
+                    )
+                )
             verdicts = [item.record.verdict.value for item in gated_bundles]
             status = (
                 "succeeded"

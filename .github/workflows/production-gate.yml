@@ -33,6 +33,7 @@ jobs:
             tests/test_build.py \
             tests/test_sandbox.py \
             tests/test_verdict_gate.py \
+            tests/test_authority_registry.py \
             tests/test_oidc.py \
             tests/test_network.py \
             tests/test_environment.py \
@@ -85,6 +86,10 @@ jobs:
             > /tmp/legacy-hosted-authority-migration.json
           python research/scripts/audit_legacy_hosted_authority_migration.py \
             > /tmp/legacy-hosted-authority-migration-audit.json
+          python research/scripts/verify_authority_registry.py \
+            > /tmp/authority-registry.json
+          python research/scripts/audit_authority_registry.py \
+            > /tmp/authority-registry-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -199,6 +204,8 @@ jobs:
             /tmp/authority-evidence-binding-audit.json
             /tmp/legacy-hosted-authority-migration.json
             /tmp/legacy-hosted-authority-migration-audit.json
+            /tmp/authority-registry.json
+            /tmp/authority-registry-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90
