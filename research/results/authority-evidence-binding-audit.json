@@ -1,0 +1,10 @@
+{
+  "attack_total": 128,
+  "attacks_replayed": 128,
+  "case_digest_reproduced": true,
+  "control_total": 32,
+  "controls_replayed": 32,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.authority-evidence-binding-audit/1"
+}

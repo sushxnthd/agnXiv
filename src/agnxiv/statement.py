@@ -102,6 +102,10 @@ def build_verification_statement(bundle: Any) -> dict[str, Any]:
             "bundleSha256": canonical_json_sha256(bundle.model_dump(mode="json")),
             "source": source,
             "claim": bundle.claim.model_dump(mode="json"),
+            "verificationAuthority": {
+                "kind": bundle.verification_authority,
+                "evidenceSha256": bundle.authority_evidence_sha256,
+            },
             "verificationPolicy": record.policy.model_dump(mode="json"),
             "result": {
                 "verdict": record.verdict.value,

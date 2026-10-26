@@ -59,6 +59,10 @@ def test_statement_binds_manuscript_repository_and_artifact(tmp_path: Path) -> N
     assert statement["predicateType"] == PREDICATE_TYPE
     assert len(statement["subject"]) == 3
     assert statement["predicate"]["result"]["verdict"] == "VERIFIED"
+    assert statement["predicate"]["verificationAuthority"] == {
+        "kind": None,
+        "evidenceSha256": None,
+    }
 
 
 def test_ed25519_dsse_round_trip(tmp_path: Path) -> None:

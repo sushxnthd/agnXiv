@@ -51,9 +51,10 @@ class ExecutionSummary(BaseModel):
 
 
 class VerificationBundle(BaseModel):
-    schema_version: str = "agnxiv.bundle/0.7"
+    schema_version: str = "agnxiv.bundle/0.8"
     verification_spec_sha256: str | None = None
     verification_authority: Literal["auto_planned", "repository_supplied"] | None = None
+    authority_evidence_sha256: str | None = None
     claim: Claim
     manuscript: DocumentFingerprint | None = None
     provenance: ProvenanceManifest

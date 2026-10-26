@@ -87,6 +87,8 @@ def control(index: int) -> dict[str, object]:
             copied_digest = sha256_text(
                 (Path(command[-1]) / "requirements.txt").read_text(encoding="utf-8")
             )
+            iidfile = Path(command[command.index("--iidfile") + 1])
+            iidfile.write_text("sha256:" + "b" * 64 + "\n", encoding="utf-8")
             return SimpleNamespace(returncode=0, stdout="built", stderr="")
 
         with (

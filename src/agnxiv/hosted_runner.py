@@ -11,6 +11,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from .attestation import canonical_json_sha256
 from .auto import build_auto_plan
 from .build import build_python_environment
 from .preprint import parse_arxiv_reference
@@ -270,9 +271,16 @@ def execute_job(
                     "plan": outcome.plan.model_dump(mode="json"),
                     "reason": outcome.reason,
                 }
+            if len(outcome.frozen_locators) != len(outcome.bundles):
+                raise HostedRunnerError(
+                    "zero-manifest bundles are not one-to-one with frozen locators"
+                )
             gated_bundles = []
-            for item in outcome.bundles:
+            for locator, item in zip(outcome.frozen_locators, outcome.bundles):
                 item.verification_authority = "auto_planned"
+                item.authority_evidence_sha256 = canonical_json_sha256(
+                    locator.model_dump(mode="json")
+                )
                 gated_bundles.append(gate_hosted_verdict(item, build))
             verdicts = [item.record.verdict.value for item in gated_bundles]
             status = (

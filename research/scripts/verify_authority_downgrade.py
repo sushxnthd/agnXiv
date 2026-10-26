@@ -33,6 +33,7 @@ def bundle(case: int, authority: str | None) -> VerificationBundle:
         record.verdict = Verdict.PARTIALLY_VERIFIED
     return VerificationBundle(
         verification_authority=authority,
+        authority_evidence_sha256=("f" * 64 if authority == "auto_planned" else None),
         claim=claim,
         provenance=ProvenanceManifest(
             files=[], file_count=0, total_bytes=0, tree_digest="a" * 64

@@ -52,6 +52,7 @@ def bundle(case: int, *, repository_supplied: bool) -> VerificationBundle:
         result.verification_authority = "repository_supplied"
     else:
         result.verification_authority = "auto_planned"
+        result.authority_evidence_sha256 = "f" * 64
     return result
 
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from .build import BuildResult
 from .models import Verdict
 from .pipeline import VerificationBundle
@@ -10,6 +12,7 @@ _DECISIVE_VERDICTS = {
     Verdict.PARTIALLY_VERIFIED,
     Verdict.CONTRADICTED,
 }
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 def environment_verdict_blockers(
@@ -29,6 +32,14 @@ def environment_verdict_blockers(
         blockers.append(
             "verification authority is missing; absence of provenance cannot "
             "establish independent verification authority"
+        )
+    elif (
+        bundle.authority_evidence_sha256 is None
+        or _SHA256_RE.fullmatch(bundle.authority_evidence_sha256) is None
+    ):
+        blockers.append(
+            "auto-planned verification authority is not bound to canonical "
+            "frozen-locator evidence"
         )
     if environment.scope_resolution == "ambiguous":
         blockers.append("workflow-scoped dependency environment is ambiguous")

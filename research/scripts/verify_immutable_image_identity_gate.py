@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Frozen adversarial verifier for canonical container image identities."""
 
 import hashlib
@@ -27,6 +28,7 @@ def bundle(execution_image_id):
     policy = VerificationPolicy(kind="absolute", tolerance=0.01)
     return VerificationBundle(
         verification_authority="auto_planned",
+        authority_evidence_sha256="f" * 64,
         claim=claim,
         provenance=ProvenanceManifest(
             files=[], file_count=0, total_bytes=0, tree_digest="b" * 64

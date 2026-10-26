@@ -5,16 +5,25 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
+from agnxiv.attestation import canonical_json_sha256
 from agnxiv.service.app import _validate_worker_result, create_app
 from agnxiv.service.config import ServiceConfig
 from agnxiv.service.db import Job, JobStore
 from agnxiv.service.dispatcher import GitHubActionsDispatcher
 
 
-def _worker_bundle(authority: str | None, commit: str) -> dict:
+def _worker_bundle(
+    authority: str | None,
+    commit: str,
+    *,
+    discovery: dict | None = None,
+) -> dict:
     claim = {"id": "C1", "text": "Accuracy is 0.9", "reported_value": 0.9}
     return {
         "verification_authority": authority,
+        "authority_evidence_sha256": (
+            canonical_json_sha256(discovery) if discovery is not None else None
+        ),
         "claim": claim,
         "provenance": {
             "tree_digest": "a" * 64,
@@ -53,11 +62,12 @@ def _worker_job(mode: str, commit: str) -> Job:
 
 def test_worker_authority_must_match_verification_mode() -> None:
     commit = "a" * 40
+    discovery = {"claim_id": "C1", "metric": "accuracy", "regex": "x"}
     auto_result = {
         "kind": "verification",
         "zero_manifest": True,
-        "discovery": {},
-        "bundle": _worker_bundle("auto_planned", commit),
+        "discovery": discovery,
+        "bundle": _worker_bundle("auto_planned", commit, discovery=discovery),
     }
     assert _validate_worker_result(
         _worker_job("auto_verify", commit), "succeeded", auto_result
@@ -90,6 +100,27 @@ def test_worker_authority_must_match_verification_mode() -> None:
         assert "invalid verification authority" in str(exc)
     else:
         raise AssertionError("repository worker claimed auto-planned authority")
+
+
+def test_worker_rejects_cross_locator_authority_substitution() -> None:
+    commit = "b" * 40
+    locator_a = {"claim_id": "C1", "metric": "accuracy", "regex": "A"}
+    locator_b = {"claim_id": "C2", "metric": "f1", "regex": "B"}
+    result = {
+        "kind": "verification",
+        "zero_manifest": True,
+        "discovery": locator_b,
+        "bundle": _worker_bundle("auto_planned", commit, discovery=locator_a),
+    }
+
+    try:
+        _validate_worker_result(
+            _worker_job("auto_verify", commit), "succeeded", result
+        )
+    except ValueError as exc:
+        assert "not bound to its frozen locator" in str(exc)
+    else:
+        raise AssertionError("cross-locator authority substitution was accepted")
 
 
 def _productionish_config(database_url: str, *, issuer: str | None = None) -> ServiceConfig:

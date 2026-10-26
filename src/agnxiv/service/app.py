@@ -15,6 +15,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
+from ..attestation import canonical_json_sha256
 from ..pipeline import VerificationBundle
 from ..preprint import parse_arxiv_reference
 from ..statement import (
@@ -148,7 +149,7 @@ def _validate_worker_result(
     if job.mode == "verify_spec" and result.get("zero_manifest") is True:
         raise ValueError("VERIFY_SPEC cannot present a zero-manifest result")
 
-    raw_bundles = [result.get("bundle")]
+    evidence_pairs = [(result.get("discovery"), result.get("bundle"))]
     if job.mode == "auto_verify":
         additional = result.get("additional_verifications", [])
         if not isinstance(additional, list) or len(additional) > 3:
@@ -158,17 +159,23 @@ def _validate_worker_result(
         for item in additional:
             if not isinstance(item, dict) or not isinstance(item.get("discovery"), dict):
                 raise TypeError("additional verification lacks locator provenance")
-            raw_bundles.append(item.get("bundle"))
+            evidence_pairs.append((item.get("discovery"), item.get("bundle")))
 
-    bundles = [VerificationBundle.model_validate(raw) for raw in raw_bundles]
+    bundles = [VerificationBundle.model_validate(raw) for _, raw in evidence_pairs]
     expected_authority = (
         "auto_planned" if job.mode == "auto_verify" else "repository_supplied"
     )
-    for bundle in bundles:
+    for (discovery, _), bundle in zip(evidence_pairs, bundles):
         if bundle.verification_authority != expected_authority:
             raise ValueError(
                 f"{job.mode} result has invalid verification authority"
             )
+        if job.mode == "auto_verify":
+            expected_evidence = canonical_json_sha256(discovery)
+            if bundle.authority_evidence_sha256 != expected_evidence:
+                raise ValueError(
+                    "AUTO_VERIFY authority is not bound to its frozen locator"
+                )
         git = bundle.provenance.git
         if git is None or git.commit != job.repository_ref:
             raise ValueError("verification Git commit does not match pinned job")

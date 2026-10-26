@@ -77,6 +77,10 @@ jobs:
             > /tmp/authority-downgrade.json
           python research/scripts/audit_authority_downgrade.py \
             > /tmp/authority-downgrade-audit.json
+          python research/scripts/verify_authority_evidence_binding.py \
+            > /tmp/authority-evidence-binding.json
+          python research/scripts/audit_authority_evidence_binding.py \
+            > /tmp/authority-evidence-binding-audit.json
 
       - name: Run frozen safety benchmarks
         run: |
