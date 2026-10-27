@@ -5,6 +5,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
 
+# The digest-pinned base is necessary for provenance, but its Debian package
+# snapshot may age after publication. Apply fixed security packages at build
+# time and fail closed if the repository cannot provide the first version that
+# fixes CVE-2026-84782.
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends --only-upgrade openssl libssl3 && \
+    dpkg --compare-versions "$(dpkg-query -W -f='${Version}' openssl)" ge "3.0.22-1~deb12u2" && \
+    dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libssl3)" ge "3.0.22-1~deb12u2" && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --system agnxiv && useradd --system --gid agnxiv --create-home agnxiv
 
 WORKDIR /app
