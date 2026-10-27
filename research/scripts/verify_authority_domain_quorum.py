@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 from datetime import UTC, datetime, timedelta
@@ -15,6 +16,7 @@ from agnxiv.authority import (
     TrustedAuthorityKey,
     TrustedAuthorityRegistry,
     authority_scope_for_bundle,
+    canonical_authority_payload,
     sign_authority_scope,
 )
 from agnxiv.build import BuildPlan, BuildResult
@@ -99,6 +101,32 @@ def build() -> BuildResult:
     )
 
 
+def legacy_registry_accepts(item, registry: TrustedAuthorityRegistry) -> bool:
+    """Reproduce the pre-snapshot-binding registry decision."""
+    key_map = {(entry.issuer, entry.key_id): entry for entry in registry.keys}
+    accepted = set()
+    domains = set()
+    for attestation in item.authority_attestations:
+        scope = attestation.scope
+        entry = key_map.get((scope.issuer, scope.key_id))
+        if entry is None or entry.status != "active":
+            continue
+        public = serialization.load_pem_public_key(entry.public_key_pem.encode())
+        try:
+            public.verify(
+                base64.b64decode(attestation.signature_b64, validate=True),
+                canonical_authority_payload(scope),
+            )
+        except Exception:  # noqa: BLE001, S112 - exact historical accept/reject oracle
+            continue
+        accepted.add((scope.issuer, scope.key_id))
+        if entry.trust_domain is not None:
+            domains.add(entry.trust_domain)
+        elif registry.minimum_trust_domains == 1:
+            domains.add(entry.issuer)
+    return len(accepted) >= registry.minimum_signatures and len(domains) >= registry.minimum_trust_domains
+
+
 def credentials(family: str):
     if family == "same_issuer_two_keys":
         return [
@@ -132,10 +160,17 @@ def credentials(family: str):
 def run_case(case: int, family: str) -> dict:
     item = bundle(case)
     creds = credentials(family)
+    parent_registry = TrustedAuthorityRegistry(minimum_signatures=2, keys=[key for key, _ in creds])
+    corrected_registry = TrustedAuthorityRegistry(
+        minimum_signatures=2,
+        minimum_trust_domains=2,
+        keys=[key for key, _ in creds],
+    )
     item.authority_attestations = [
         sign_authority_scope(
             authority_scope_for_bundle(
                 item,
+                registry=corrected_registry,
                 issuer=key.issuer,
                 key_id=key.key_id,
                 issued_at=NOW - timedelta(days=1),
@@ -146,16 +181,7 @@ def run_case(case: int, family: str) -> dict:
         for key, private in creds
         if key.status == "active"
     ]
-    parent_registry = TrustedAuthorityRegistry(minimum_signatures=2, keys=[key for key, _ in creds])
-    corrected_registry = TrustedAuthorityRegistry(
-        minimum_signatures=2,
-        minimum_trust_domains=2,
-        keys=[key for key, _ in creds],
-    )
-    parent = gate_hosted_verdict(
-        item, build(), trusted_authority_registry=parent_registry,
-        require_registry_authority=True, authority_validation_time=NOW,
-    )
+    parent_definitive = legacy_registry_accepts(item, parent_registry)
     corrected = gate_hosted_verdict(
         item, build(), trusted_authority_registry=corrected_registry,
         require_registry_authority=True, authority_validation_time=NOW,
@@ -163,7 +189,7 @@ def run_case(case: int, family: str) -> dict:
     return {
         "case": case,
         "family": family,
-        "parent_definitive": parent.record.verdict != Verdict.UNABLE_TO_VERIFY,
+        "parent_definitive": parent_definitive,
         "corrected_definitive": corrected.record.verdict != Verdict.UNABLE_TO_VERIFY,
         "attestations": [a.model_dump(mode="json") for a in item.authority_attestations],
     }

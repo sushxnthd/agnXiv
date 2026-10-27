@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from agnxiv.authority import (
     TrustedAuthorityKey,
     TrustedAuthorityRegistry,
+    authority_registry_sha256,
     authority_scope_for_bundle,
     sign_authority_scope,
 )
@@ -88,6 +89,7 @@ def _trusted(item):
     )
     scope = authority_scope_for_bundle(
         item,
+        registry=registry,
         issuer="review-board",
         key_id="key-1",
         issued_at=NOW - timedelta(minutes=1),
@@ -138,6 +140,7 @@ def test_future_issued_signature_fails_closed():
     )
     scope = authority_scope_for_bundle(
         item,
+        registry=registry,
         issuer="review-board",
         key_id="key-1",
         issued_at=NOW + timedelta(minutes=1),
@@ -185,6 +188,7 @@ def test_two_keys_in_one_trust_domain_do_not_form_independent_quorum():
         sign_authority_scope(
             authority_scope_for_bundle(
                 item,
+                registry=registry,
                 issuer=issuer,
                 key_id=key_id,
                 issued_at=NOW - timedelta(minutes=1),
@@ -244,6 +248,7 @@ def test_two_explicit_trust_domains_form_independent_quorum():
         sign_authority_scope(
             authority_scope_for_bundle(
                 item,
+                registry=registry,
                 issuer=issuer,
                 key_id=key_id,
                 issued_at=NOW - timedelta(minutes=1),
@@ -274,6 +279,7 @@ def test_missing_domain_metadata_cannot_satisfy_multi_domain_quorum():
         sign_authority_scope(
             authority_scope_for_bundle(
                 item,
+                registry=registry,
                 issuer="board",
                 key_id="key",
                 issued_at=NOW - timedelta(minutes=1),
@@ -291,3 +297,89 @@ def test_missing_domain_metadata_cannot_satisfy_multi_domain_quorum():
     )
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
     assert any("lacks an explicit trust domain" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_registry_digest_is_deterministic_and_policy_complete():
+    _, public = _keys()
+    registry = TrustedAuthorityRegistry(
+        minimum_signatures=2,
+        minimum_trust_domains=2,
+        keys=[
+            TrustedAuthorityKey(
+                issuer="board",
+                key_id="key",
+                public_key_pem=public,
+                trust_domain="operator-a",
+            )
+        ],
+    )
+    assert authority_registry_sha256(registry) == authority_registry_sha256(
+        registry.model_copy(deep=True)
+    )
+    remapped = registry.model_copy(deep=True)
+    remapped.keys[0].trust_domain = "operator-b"
+    assert authority_registry_sha256(registry) != authority_registry_sha256(remapped)
+    revoked = registry.model_copy(deep=True)
+    revoked.keys[0].status = "revoked"
+    assert authority_registry_sha256(registry) != authority_registry_sha256(revoked)
+
+
+def test_signature_cannot_be_reinterpreted_under_remapped_registry():
+    item = _bundle()
+    private, public = _keys()
+    signing_registry = TrustedAuthorityRegistry(
+        keys=[
+            TrustedAuthorityKey(
+                issuer="board",
+                key_id="key",
+                public_key_pem=public,
+                trust_domain="operator-a",
+            )
+        ]
+    )
+    verification_registry = signing_registry.model_copy(deep=True)
+    verification_registry.keys[0].trust_domain = "operator-b"
+    scope = authority_scope_for_bundle(
+        item,
+        registry=signing_registry,
+        issuer="board",
+        key_id="key",
+        issued_at=NOW - timedelta(minutes=1),
+        expires_at=NOW + timedelta(hours=1),
+    )
+    item.authority_attestations = [sign_authority_scope(scope, private)]
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=verification_registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("different registry snapshot" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_missing_registry_digest_fails_closed():
+    item = _bundle()
+    private, public = _keys()
+    registry = TrustedAuthorityRegistry(
+        keys=[TrustedAuthorityKey(issuer="board", key_id="key", public_key_pem=public)]
+    )
+    scope = authority_scope_for_bundle(
+        item,
+        registry=registry,
+        issuer="board",
+        key_id="key",
+        issued_at=NOW - timedelta(minutes=1),
+        expires_at=NOW + timedelta(hours=1),
+    ).model_copy(update={"authority_registry_sha256": ""})
+    item.authority_attestations = [sign_authority_scope(scope, private)]
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("different registry snapshot" in reason for reason in gated.verdict_gate_reasons)

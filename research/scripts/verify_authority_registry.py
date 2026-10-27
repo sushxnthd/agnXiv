@@ -127,6 +127,7 @@ REGISTRY = TrustedAuthorityRegistry(
 def signed(item, private=TRUSTED_PRIVATE, expired=False):
     scope = authority_scope_for_bundle(
         item,
+        registry=REGISTRY,
         issuer="independent-review-board",
         key_id="2026-01",
         issued_at=NOW - timedelta(days=2 if expired else 1),

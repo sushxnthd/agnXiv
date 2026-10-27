@@ -1,0 +1,11 @@
+{
+  "agnxiv_imports": [],
+  "attack_replays": 128,
+  "attack_total": 128,
+  "control_replays": 32,
+  "control_total": 32,
+  "failures": [],
+  "passed": true,
+  "schema": "agnxiv.authority-registry-snapshot-audit/1",
+  "source_sha256": "ffd03aba6dc1b510472a9a128f08ff3f630de1d368af0cd1f5aa1dd34acc34ee"
+}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
 import json
 from datetime import UTC, datetime
 from typing import Any, Literal
@@ -10,7 +11,7 @@ from pydantic import BaseModel, Field
 
 
 class AuthorityScope(BaseModel):
-    schema_version: str = "agnxiv.authority-scope/1"
+    schema_version: str = "agnxiv.authority-scope/2"
     issuer: str = Field(min_length=1)
     key_id: str = Field(min_length=1)
     manuscript_sha256: str
@@ -18,6 +19,7 @@ class AuthorityScope(BaseModel):
     claim_id: str
     metric: str | None = None
     authority_evidence_sha256: str
+    authority_registry_sha256: str = Field(default="", min_length=0, max_length=64)
     issued_at: datetime
     expires_at: datetime
 
@@ -40,6 +42,20 @@ class TrustedAuthorityRegistry(BaseModel):
     minimum_signatures: int = Field(default=1, ge=1)
     minimum_trust_domains: int = Field(default=1, ge=1)
     keys: list[TrustedAuthorityKey] = Field(default_factory=list)
+
+
+def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
+    """Return the exact deterministic policy payload interpreted by the gate."""
+    return json.dumps(
+        registry.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
+def authority_registry_sha256(registry: TrustedAuthorityRegistry) -> str:
+    return hashlib.sha256(canonical_authority_registry_payload(registry)).hexdigest()
 
 
 def canonical_authority_payload(scope: AuthorityScope) -> bytes:
@@ -69,6 +85,7 @@ def sign_authority_scope(scope: AuthorityScope, private_key_pem: bytes) -> Autho
 def authority_scope_for_bundle(
     bundle: Any,
     *,
+    registry: TrustedAuthorityRegistry,
     issuer: str,
     key_id: str,
     issued_at: datetime,
@@ -82,6 +99,7 @@ def authority_scope_for_bundle(
         claim_id=bundle.claim.id,
         metric=bundle.claim.metric,
         authority_evidence_sha256=bundle.authority_evidence_sha256 or "",
+        authority_registry_sha256=authority_registry_sha256(registry),
         issued_at=issued_at,
         expires_at=expires_at,
     )
@@ -99,6 +117,7 @@ def authority_registry_blockers(
     if current.tzinfo is None:
         current = current.replace(tzinfo=UTC)
     key_map = {(key.issuer, key.key_id): key for key in registry.keys}
+    registry_digest = authority_registry_sha256(registry)
     accepted: set[tuple[str, str]] = set()
     accepted_domains: set[str] = set()
     failures: list[str] = []
@@ -112,8 +131,12 @@ def authority_registry_blockers(
         if key.status != "active":
             failures.append("authority attestation uses a revoked registry key")
             continue
+        if scope.authority_registry_sha256 != registry_digest:
+            failures.append("authority attestation is bound to a different registry snapshot")
+            continue
         expected = authority_scope_for_bundle(
             bundle,
+            registry=registry,
             issuer=scope.issuer,
             key_id=scope.key_id,
             issued_at=scope.issued_at,
