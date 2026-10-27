@@ -90,6 +90,10 @@ jobs:
             > /tmp/authority-registry.json
           python research/scripts/audit_authority_registry.py \
             > /tmp/authority-registry-audit.json
+          python research/scripts/verify_authority_domain_quorum.py \
+            > /tmp/authority-domain-quorum.json
+          python research/scripts/audit_authority_domain_quorum.py \
+            > /tmp/authority-domain-quorum-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -206,6 +210,8 @@ jobs:
             /tmp/legacy-hosted-authority-migration-audit.json
             /tmp/authority-registry.json
             /tmp/authority-registry-audit.json
+            /tmp/authority-domain-quorum.json
+            /tmp/authority-domain-quorum-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90

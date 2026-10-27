@@ -31,12 +31,14 @@ class TrustedAuthorityKey(BaseModel):
     issuer: str
     key_id: str
     public_key_pem: str
+    trust_domain: str | None = Field(default=None, min_length=1)
     status: Literal["active", "revoked"] = "active"
 
 
 class TrustedAuthorityRegistry(BaseModel):
     schema_version: str = "agnxiv.authority-registry/1"
     minimum_signatures: int = Field(default=1, ge=1)
+    minimum_trust_domains: int = Field(default=1, ge=1)
     keys: list[TrustedAuthorityKey] = Field(default_factory=list)
 
 
@@ -98,6 +100,7 @@ def authority_registry_blockers(
         current = current.replace(tzinfo=UTC)
     key_map = {(key.issuer, key.key_id): key for key in registry.keys}
     accepted: set[tuple[str, str]] = set()
+    accepted_domains: set[str] = set()
     failures: list[str] = []
     for attestation in bundle.authority_attestations:
         scope = attestation.scope
@@ -146,9 +149,22 @@ def authority_registry_blockers(
             failures.append("authority attestation signature is invalid")
             continue
         accepted.add(identity)
+        if key.trust_domain is not None:
+            accepted_domains.add(key.trust_domain)
+        elif registry.minimum_trust_domains == 1:
+            # Preserve the version-1 single-authority contract. Explicit domain
+            # metadata is mandatory as soon as independent domains are claimed.
+            accepted_domains.add(key.issuer)
+        else:
+            failures.append("registered authority key lacks an explicit trust domain")
     if len(accepted) < registry.minimum_signatures:
         failures.append(
             "trusted authority quorum is not met: "
             f"{len(accepted)}/{registry.minimum_signatures} valid signatures"
+        )
+    if len(accepted_domains) < registry.minimum_trust_domains:
+        failures.append(
+            "trusted authority domain quorum is not met: "
+            f"{len(accepted_domains)}/{registry.minimum_trust_domains} valid trust domains"
         )
     return failures

@@ -19,6 +19,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Hosted callbacks bind the requested arXiv identity, exact manuscript digest, every additional bundle, and frozen locator to one matching scientific claim.
 - [x] Repeated attempts sharing the same evidence cluster are not counted as independent votes.
 - [x] Hosted auto-planned verdicts fail closed unless an Ed25519 authority attestation passes the configured trusted-registry threshold and exact manuscript, repository, claim, metric, and locator binding.
+- [x] Multi-party authority thresholds distinguish key count from explicitly configured trust-domain count; issuer aliases, missing domain metadata, and revoked-domain keys cannot satisfy independent quorum.
 - [ ] A real reviewer registry, independent key custody and revocation, reviewer-selection policy, and multi-party governance are deployed and externally audited; cryptographic registration does not establish scientific correctness.
 - [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.
 - [ ] Central-claim selection is validated beyond the small v0 diagnostic set. The known 3-case non-blind regression now reaches 3/3 R@1, but held-out scale validation is still required.

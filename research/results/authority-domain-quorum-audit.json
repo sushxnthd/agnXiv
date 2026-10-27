@@ -1,0 +1,15 @@
+{
+  "attack_families": {
+    "aliased_issuers_one_domain": 32,
+    "missing_domain_metadata": 32,
+    "revoked_second_domain": 32,
+    "same_issuer_two_keys": 32
+  },
+  "attack_total": 128,
+  "attacks_replayed": 128,
+  "control_total": 32,
+  "controls_replayed": 32,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.authority-domain-quorum-audit/1"
+}
