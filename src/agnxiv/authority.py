@@ -38,7 +38,8 @@ class TrustedAuthorityKey(BaseModel):
 
 
 class TrustedAuthorityRegistry(BaseModel):
-    schema_version: str = "agnxiv.authority-registry/1"
+    schema_version: str = "agnxiv.authority-registry/2"
+    registry_epoch: int = Field(default=0, ge=0)
     minimum_signatures: int = Field(default=1, ge=1)
     minimum_trust_domains: int = Field(default=1, ge=1)
     keys: list[TrustedAuthorityKey] = Field(default_factory=list)
@@ -110,6 +111,8 @@ def authority_registry_blockers(
     registry: TrustedAuthorityRegistry | None,
     *,
     now: datetime | None = None,
+    trusted_minimum_registry_epoch: int | None = None,
+    require_registry_freshness: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -121,6 +124,16 @@ def authority_registry_blockers(
     accepted: set[tuple[str, str]] = set()
     accepted_domains: set[str] = set()
     failures: list[str] = []
+    if trusted_minimum_registry_epoch is not None and trusted_minimum_registry_epoch < 0:
+        failures.append("trusted registry freshness floor is invalid")
+    elif trusted_minimum_registry_epoch is not None:
+        if registry.registry_epoch < trusted_minimum_registry_epoch:
+            failures.append(
+                "authority registry epoch is below trusted freshness floor: "
+                f"{registry.registry_epoch}/{trusted_minimum_registry_epoch}"
+            )
+    elif require_registry_freshness:
+        failures.append("trusted registry freshness floor is not configured")
     for attestation in bundle.authority_attestations:
         scope = attestation.scope
         identity = (scope.issuer, scope.key_id)

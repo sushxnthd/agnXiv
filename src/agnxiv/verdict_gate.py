@@ -24,6 +24,8 @@ def environment_verdict_blockers(
     trusted_authority_registry: TrustedAuthorityRegistry | None = None,
     require_registry_authority: bool = False,
     authority_validation_time: datetime | None = None,
+    trusted_minimum_registry_epoch: int | None = None,
+    require_registry_freshness: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -53,6 +55,8 @@ def environment_verdict_blockers(
                 bundle,
                 trusted_authority_registry,
                 now=authority_validation_time,
+                trusted_minimum_registry_epoch=trusted_minimum_registry_epoch,
+                require_registry_freshness=require_registry_freshness,
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -90,6 +94,8 @@ def gate_hosted_verdict(
     trusted_authority_registry: TrustedAuthorityRegistry | None = None,
     require_registry_authority: bool = False,
     authority_validation_time: datetime | None = None,
+    trusted_minimum_registry_epoch: int | None = None,
+    require_registry_freshness: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -106,6 +112,8 @@ def gate_hosted_verdict(
         trusted_authority_registry=trusted_authority_registry,
         require_registry_authority=require_registry_authority,
         authority_validation_time=authority_validation_time,
+        trusted_minimum_registry_epoch=trusted_minimum_registry_epoch,
+        require_registry_freshness=require_registry_freshness,
     )
     if not blockers:
         return bundle

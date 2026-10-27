@@ -55,9 +55,11 @@ An exported bundle now identifies the exact authority policy under which it was
 approved; a consumer cannot silently relabel signers, reactivate a revoked key,
 or lower quorum requirements while reusing the signature.
 
-This is snapshot integrity, not registry governance or freshness. A verifier
-can still deliberately choose the wrong registry before signatures are issued,
-replay an old but exactly bound snapshot when no external freshness rule exists,
-or trust false domain labels. The mechanism does not prove independent key
+This is snapshot integrity, not registry governance or freshness. The later
+[authority-registry freshness result](AUTHORITY_REGISTRY_FRESHNESS_RESULT.md)
+adds an independently anchored monotonic epoch floor that blocks exact-snapshot
+rollback when callers configure it. A verifier can still deliberately choose
+the wrong registry before signatures are issued or trust false domain labels.
+The mechanism does not prove independent key
 custody, reviewer competence, unbiased selection, scientific correctness, or a
 live external registry deployment.

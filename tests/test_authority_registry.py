@@ -1,7 +1,9 @@
 from datetime import UTC, datetime, timedelta
 
+import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from pydantic import ValidationError
 
 from agnxiv.authority import (
     TrustedAuthorityKey,
@@ -322,6 +324,95 @@ def test_registry_digest_is_deterministic_and_policy_complete():
     revoked = registry.model_copy(deep=True)
     revoked.keys[0].status = "revoked"
     assert authority_registry_sha256(registry) != authority_registry_sha256(revoked)
+    advanced = registry.model_copy(update={"registry_epoch": 1})
+    assert authority_registry_sha256(registry) != authority_registry_sha256(advanced)
+
+
+def test_exact_old_snapshot_requires_independent_freshness_floor():
+    item = _bundle()
+    private, public = _keys()
+    old_registry = TrustedAuthorityRegistry(
+        registry_epoch=40,
+        keys=[TrustedAuthorityKey(issuer="board", key_id="key", public_key_pem=public)],
+    )
+    scope = authority_scope_for_bundle(
+        item,
+        registry=old_registry,
+        issuer="board",
+        key_id="key",
+        issued_at=NOW - timedelta(minutes=1),
+        expires_at=NOW + timedelta(hours=1),
+    )
+    item.authority_attestations = [sign_authority_scope(scope, private)]
+
+    replayed = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=old_registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+    )
+    assert replayed.record.verdict == Verdict.VERIFIED
+
+    fresh = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=old_registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        trusted_minimum_registry_epoch=41,
+        require_registry_freshness=True,
+    )
+    assert fresh.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("below trusted freshness floor" in reason for reason in fresh.verdict_gate_reasons)
+
+
+def test_current_registry_epoch_satisfies_freshness_floor():
+    item = _bundle()
+    private, public = _keys()
+    registry = TrustedAuthorityRegistry(
+        registry_epoch=41,
+        keys=[TrustedAuthorityKey(issuer="board", key_id="key", public_key_pem=public)],
+    )
+    scope = authority_scope_for_bundle(
+        item,
+        registry=registry,
+        issuer="board",
+        key_id="key",
+        issued_at=NOW - timedelta(minutes=1),
+        expires_at=NOW + timedelta(hours=1),
+    )
+    item.authority_attestations = [sign_authority_scope(scope, private)]
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        trusted_minimum_registry_epoch=41,
+        require_registry_freshness=True,
+    )
+    assert gated.record.verdict == Verdict.VERIFIED
+
+
+def test_required_registry_freshness_without_floor_fails_closed():
+    item = _bundle()
+    registry = _trusted(item)
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        require_registry_freshness=True,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("freshness floor is not configured" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_negative_registry_epoch_is_invalid():
+    with pytest.raises(ValidationError):
+        TrustedAuthorityRegistry(registry_epoch=-1)
 
 
 def test_signature_cannot_be_reinterpreted_under_remapped_registry():
