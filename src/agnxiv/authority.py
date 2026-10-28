@@ -275,8 +275,18 @@ def authority_registry_blockers(
             if len(identities) >= quorum.minimum_signatures
             and len(domains) >= quorum.minimum_trust_domains
         ]
+        statement_digests: dict[tuple[str, int], set[str]] = {}
+        for namespace, epoch, digest in qualifying:
+            statement_digests.setdefault((namespace, epoch), set()).add(digest)
+        equivocating = any(
+            len(digests) > 1 for digests in statement_digests.values()
+        )
         namespaces = {namespace for namespace, _, _ in qualifying}
-        if len(namespaces) > 1:
+        if equivocating:
+            failures.append(
+                "registry checkpoint quorum equivocates at one namespace and epoch"
+            )
+        elif len(namespaces) > 1:
             failures.append("registry checkpoint quorum endorses conflicting namespaces")
         elif qualifying:
             namespace = next(iter(namespaces))

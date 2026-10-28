@@ -768,6 +768,36 @@ def test_snapshot_bound_quorum_accepts_endorsed_registry():
     assert gated.record.verdict == Verdict.VERIFIED
 
 
+def test_snapshot_bound_quorum_rejects_disclosed_same_epoch_equivocation():
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    fork = registry.model_copy(deep=True)
+    fork.keys[0].trust_domain = "forked-operator"
+    digests = (authority_registry_sha256(registry), authority_registry_sha256(fork))
+    unsigned, keys = _quorum_material()
+    checkpoints = [
+        sign_registry_checkpoint(
+            checkpoint.scope.model_copy(update={"authority_registry_sha256": digest}),
+            _checkpoint_credential(20 + index)[0],
+        )
+        for digest in digests
+        for index, checkpoint in enumerate(unsigned, start=1)
+    ]
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoints=checkpoints,
+        trusted_registry_checkpoint_keys=keys,
+        registry_checkpoint_quorum=RegistryCheckpointQuorumPolicy(),
+        require_registry_checkpoint_quorum=True,
+        require_registry_checkpoint_snapshot=True,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("equivocates" in reason for reason in gated.verdict_gate_reasons)
+
+
 def test_singular_authenticated_checkpoint_cannot_satisfy_quorum_mode():
     item, registry, checkpoint, keys = _authenticated_checkpoint_case()
     keys[0] = keys[0].model_copy(update={"trust_domain": "operator-a"})
