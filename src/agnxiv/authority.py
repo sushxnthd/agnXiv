@@ -62,6 +62,7 @@ class RegistryCheckpointScope(BaseModel):
     key_id: str = Field(min_length=1)
     registry_namespace: str = Field(min_length=1)
     minimum_registry_epoch: int = Field(ge=0)
+    authority_registry_sha256: str = Field(default="", min_length=0, max_length=64)
 
 
 class SignedRegistryCheckpoint(BaseModel):
@@ -185,6 +186,7 @@ def authority_registry_blockers(
     require_authenticated_registry_checkpoint: bool = False,
     registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
     require_registry_checkpoint_quorum: bool = False,
+    require_registry_checkpoint_snapshot: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -252,12 +254,16 @@ def authority_registry_blockers(
     if signed_many:
         quorum = registry_checkpoint_quorum or RegistryCheckpointQuorumPolicy()
         groups: dict[
-            tuple[str, int],
+            tuple[str, int, str],
             tuple[set[tuple[str, str]], set[str]],
         ] = {}
         for scope, key in valid_checkpoints:
             identities, domains = groups.setdefault(
-                (scope.registry_namespace, scope.minimum_registry_epoch),
+                (
+                    scope.registry_namespace,
+                    scope.minimum_registry_epoch,
+                    scope.authority_registry_sha256,
+                ),
                 (set(), set()),
             )
             identities.add((scope.issuer, scope.key_id))
@@ -269,13 +275,13 @@ def authority_registry_blockers(
             if len(identities) >= quorum.minimum_signatures
             and len(domains) >= quorum.minimum_trust_domains
         ]
-        namespaces = {namespace for namespace, _ in qualifying}
+        namespaces = {namespace for namespace, _, _ in qualifying}
         if len(namespaces) > 1:
             failures.append("registry checkpoint quorum endorses conflicting namespaces")
         elif qualifying:
             namespace = next(iter(namespaces))
             floor = max(
-                epoch for candidate_namespace, epoch in qualifying
+                epoch for candidate_namespace, epoch, _ in qualifying
                 if candidate_namespace == namespace
             )
             authenticated_checkpoint = next(
@@ -283,6 +289,12 @@ def authority_registry_blockers(
                 for scope, _ in valid_checkpoints
                 if scope.registry_namespace == namespace
                 and scope.minimum_registry_epoch == floor
+                and (
+                    scope.registry_namespace,
+                    scope.minimum_registry_epoch,
+                    scope.authority_registry_sha256,
+                )
+                in qualifying
             )
         else:
             failures.append("registry checkpoint quorum is not satisfied")
@@ -309,6 +321,21 @@ def authority_registry_blockers(
                 f"{registry.registry_epoch}/"
                 f"{effective_checkpoint.minimum_registry_epoch}"
             )
+        if require_registry_checkpoint_snapshot:
+            checkpoint_digest = getattr(
+                effective_checkpoint, "authority_registry_sha256", ""
+            )
+            if (
+                len(checkpoint_digest) != 64
+                or any(character not in "0123456789abcdef" for character in checkpoint_digest)
+            ):
+                failures.append(
+                    "registry checkpoint does not bind a valid authority registry digest"
+                )
+            elif checkpoint_digest != registry_digest:
+                failures.append(
+                    "registry checkpoint authority registry digest does not match supplied snapshot"
+                )
     elif require_registry_checkpoint_scope and not signed_candidates:
         failures.append("scoped trusted registry checkpoint is not configured")
     if trusted_minimum_registry_epoch is not None and trusted_minimum_registry_epoch < 0:

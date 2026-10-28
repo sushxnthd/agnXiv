@@ -1,0 +1,11 @@
+{
+  "attack_total": 128,
+  "attacks_reproduced": 128,
+  "control_total": 32,
+  "controls_reproduced": 32,
+  "passed": true,
+  "production_imports": 0,
+  "registry_digest_pairs_reproduced": 160,
+  "schema": "agnxiv.authority-registry-checkpoint-snapshot-audit/1",
+  "valid_signatures_checked": 320
+}

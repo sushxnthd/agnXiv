@@ -41,6 +41,7 @@ def environment_verdict_blockers(
     require_authenticated_registry_checkpoint: bool = False,
     registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
     require_registry_checkpoint_quorum: bool = False,
+    require_registry_checkpoint_snapshot: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -82,6 +83,9 @@ def environment_verdict_blockers(
                 ),
                 registry_checkpoint_quorum=registry_checkpoint_quorum,
                 require_registry_checkpoint_quorum=require_registry_checkpoint_quorum,
+                require_registry_checkpoint_snapshot=(
+                    require_registry_checkpoint_snapshot
+                ),
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -129,6 +133,7 @@ def gate_hosted_verdict(
     require_authenticated_registry_checkpoint: bool = False,
     registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
     require_registry_checkpoint_quorum: bool = False,
+    require_registry_checkpoint_snapshot: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -155,6 +160,7 @@ def gate_hosted_verdict(
         require_authenticated_registry_checkpoint=require_authenticated_registry_checkpoint,
         registry_checkpoint_quorum=registry_checkpoint_quorum,
         require_registry_checkpoint_quorum=require_registry_checkpoint_quorum,
+        require_registry_checkpoint_snapshot=require_registry_checkpoint_snapshot,
     )
     if not blockers:
         return bundle
