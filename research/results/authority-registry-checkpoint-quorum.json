@@ -1,0 +1,4177 @@
+{
+  "adversarial_controls": [
+    {
+      "definitive": false,
+      "name": "duplicate_identity",
+      "reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ]
+    },
+    {
+      "definitive": false,
+      "name": "same_domain",
+      "reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ]
+    },
+    {
+      "definitive": false,
+      "name": "disagreeing_floors",
+      "reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ]
+    },
+    {
+      "definitive": false,
+      "name": "revoked_key",
+      "reasons": [
+        "signed registry checkpoint uses a revoked key",
+        "registry checkpoint quorum is not satisfied"
+      ]
+    }
+  ],
+  "attacks": [
+    {
+      "case": 50000,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50001,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50002,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50003,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50004,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50005,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50006,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50007,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50008,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50009,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50010,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50011,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50012,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50013,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50014,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50015,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50016,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50017,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50018,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50019,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50020,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50021,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50022,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50023,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50024,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50025,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50026,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50027,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50028,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50029,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50030,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50031,
+      "control": false,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "e730bee3d6f296b934f89755e36e6afc9b1b39ef7c44457730555b3efc0ae186",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50100,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50101,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50102,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50103,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50104,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50105,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50106,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50107,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50108,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50109,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50110,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50111,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50112,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50113,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50114,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50115,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50116,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50117,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50118,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50119,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50120,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50121,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50122,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50123,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50124,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50125,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50126,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50127,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50128,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50129,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50130,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50131,
+      "control": false,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "3bb7ef0da6cab65ec7f2ddd0dd5bec0c13601be7b3cda8a427c0a5fd2eb0a2d9",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50200,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50201,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50202,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50203,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50204,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50205,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50206,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50207,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50208,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50209,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50210,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50211,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50212,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50213,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50214,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50215,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50216,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50217,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50218,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50219,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50220,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50221,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50222,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50223,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50224,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50225,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50226,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50227,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50228,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50229,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50230,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50231,
+      "control": false,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "61e71034a8c589030fd2e885d643f525593d2ba658b43f9d5653382a9ebf71b7",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50300,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50301,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50302,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50303,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50304,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50305,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50306,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50307,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50308,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50309,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50310,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50311,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50312,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50313,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50314,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50315,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50316,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50317,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50318,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50319,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50320,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50321,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50322,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50323,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50324,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50325,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50326,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50327,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50328,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50329,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50330,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    },
+    {
+      "case": 50331,
+      "control": false,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": false,
+      "quorum_reasons": [
+        "registry checkpoint quorum is not satisfied"
+      ],
+      "registry_epoch": 55,
+      "registry_sha256": "a7fd15bbdc4e0999125f6bfd1387b81cc48dec3d0dd6a234aaccaf87453fa3b5",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-1",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 55,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "lIJCFTUBto4qxPm8injrKlg9v+4jozcyiH67J1oCoqf3R1kuLIn4ngQ5VChmuRXjOdLJt+qOYoPtkt/aGQXtCg=="
+        }
+      ]
+    }
+  ],
+  "checkpoint_keys": [
+    {
+      "issuer": "checkpoint-board-1",
+      "key_id": "monotonic-floor",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAIvwpd5Lwtv/Av8/bftsMCqFOAlo2XsDjQuhuOCnLdLY=\n-----END PUBLIC KEY-----\n",
+      "status": "active",
+      "trust_domain": "operator-a"
+    },
+    {
+      "issuer": "checkpoint-board-2",
+      "key_id": "monotonic-floor",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA11l5O7wTooGagnx2rbb7qKSa7gB/SfLQmS2ZuCWtLEg=\n-----END PUBLIC KEY-----\n",
+      "status": "active",
+      "trust_domain": "operator-b"
+    },
+    {
+      "issuer": "checkpoint-board-3",
+      "key_id": "monotonic-floor",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAY1VpHBeKj/kQB6dHivuVXvc1LGPnslcDmEz3iybiGlY=\n-----END PUBLIC KEY-----\n",
+      "status": "active",
+      "trust_domain": "operator-c"
+    }
+  ],
+  "controls": [
+    {
+      "case": 60000,
+      "control": true,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "004b5db132972346d0495051af87bebc1c1ed07680caa9fa2e8477a0aa064774",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60001,
+      "control": true,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "002e90cc5f8a169eaf2016a848b462c440d2836eb0de881e62502ac5b6eaf3a1",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60002,
+      "control": true,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "697430bb10bb18d4d1ed05abeb699012893972100708a018fa730b2567e9bff8",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60003,
+      "control": true,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "14105d14af878d0d3a06cac4dbabae09720cacc7d473bf0cad280d52a7a29a9d",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60004,
+      "control": true,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "004b5db132972346d0495051af87bebc1c1ed07680caa9fa2e8477a0aa064774",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60005,
+      "control": true,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "002e90cc5f8a169eaf2016a848b462c440d2836eb0de881e62502ac5b6eaf3a1",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60006,
+      "control": true,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "697430bb10bb18d4d1ed05abeb699012893972100708a018fa730b2567e9bff8",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60007,
+      "control": true,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "14105d14af878d0d3a06cac4dbabae09720cacc7d473bf0cad280d52a7a29a9d",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60008,
+      "control": true,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "004b5db132972346d0495051af87bebc1c1ed07680caa9fa2e8477a0aa064774",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60009,
+      "control": true,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "002e90cc5f8a169eaf2016a848b462c440d2836eb0de881e62502ac5b6eaf3a1",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60010,
+      "control": true,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "697430bb10bb18d4d1ed05abeb699012893972100708a018fa730b2567e9bff8",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60011,
+      "control": true,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "14105d14af878d0d3a06cac4dbabae09720cacc7d473bf0cad280d52a7a29a9d",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60012,
+      "control": true,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "004b5db132972346d0495051af87bebc1c1ed07680caa9fa2e8477a0aa064774",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60013,
+      "control": true,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "002e90cc5f8a169eaf2016a848b462c440d2836eb0de881e62502ac5b6eaf3a1",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60014,
+      "control": true,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "697430bb10bb18d4d1ed05abeb699012893972100708a018fa730b2567e9bff8",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60015,
+      "control": true,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "14105d14af878d0d3a06cac4dbabae09720cacc7d473bf0cad280d52a7a29a9d",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60016,
+      "control": true,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "004b5db132972346d0495051af87bebc1c1ed07680caa9fa2e8477a0aa064774",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60017,
+      "control": true,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "002e90cc5f8a169eaf2016a848b462c440d2836eb0de881e62502ac5b6eaf3a1",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60018,
+      "control": true,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "697430bb10bb18d4d1ed05abeb699012893972100708a018fa730b2567e9bff8",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60019,
+      "control": true,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "14105d14af878d0d3a06cac4dbabae09720cacc7d473bf0cad280d52a7a29a9d",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60020,
+      "control": true,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "004b5db132972346d0495051af87bebc1c1ed07680caa9fa2e8477a0aa064774",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60021,
+      "control": true,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "002e90cc5f8a169eaf2016a848b462c440d2836eb0de881e62502ac5b6eaf3a1",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60022,
+      "control": true,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "697430bb10bb18d4d1ed05abeb699012893972100708a018fa730b2567e9bff8",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60023,
+      "control": true,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "14105d14af878d0d3a06cac4dbabae09720cacc7d473bf0cad280d52a7a29a9d",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60024,
+      "control": true,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "004b5db132972346d0495051af87bebc1c1ed07680caa9fa2e8477a0aa064774",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60025,
+      "control": true,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "002e90cc5f8a169eaf2016a848b462c440d2836eb0de881e62502ac5b6eaf3a1",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60026,
+      "control": true,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "697430bb10bb18d4d1ed05abeb699012893972100708a018fa730b2567e9bff8",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60027,
+      "control": true,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "14105d14af878d0d3a06cac4dbabae09720cacc7d473bf0cad280d52a7a29a9d",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60028,
+      "control": true,
+      "family": "revocation",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "004b5db132972346d0495051af87bebc1c1ed07680caa9fa2e8477a0aa064774",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60029,
+      "control": true,
+      "family": "trust_domain",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "002e90cc5f8a169eaf2016a848b462c440d2836eb0de881e62502ac5b6eaf3a1",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60030,
+      "control": true,
+      "family": "quorum",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "697430bb10bb18d4d1ed05abeb699012893972100708a018fa730b2567e9bff8",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    },
+    {
+      "case": 60031,
+      "control": true,
+      "family": "key_set",
+      "parent_definitive": true,
+      "quorum_definitive": true,
+      "quorum_reasons": [],
+      "registry_epoch": 89,
+      "registry_sha256": "14105d14af878d0d3a06cac4dbabae09720cacc7d473bf0cad280d52a7a29a9d",
+      "supplied_checkpoints": [
+        {
+          "scope": {
+            "issuer": "checkpoint-board-2",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "SgCoDxfC5XUdVnRQ3hKZ+za002fjNGfNhrCfntGvdGiL2qmTjxMR7NbwaCvHnLIiMwbi5A7wWKridnFERWScCA=="
+        },
+        {
+          "scope": {
+            "issuer": "checkpoint-board-3",
+            "key_id": "monotonic-floor",
+            "minimum_registry_epoch": 89,
+            "registry_namespace": "production-release",
+            "schema_version": "agnxiv.authority-registry-checkpoint-scope/1"
+          },
+          "signature_b64": "d5NVPnmWHj3N1pQ0HRx5dUET1A4LYvsPCxEU8FLdIck7Weiit/qqxH3I4JK2QPQcfxNjKnT5U8MKRApuLhaeAg=="
+        }
+      ]
+    }
+  ],
+  "quorum_policy": {
+    "minimum_signatures": 2,
+    "minimum_trust_domains": 2
+  },
+  "schema": "agnxiv.authority-registry-checkpoint-quorum/1",
+  "summary": {
+    "adversarial_controls_blocked": 4,
+    "attack_total": 128,
+    "control_total": 32,
+    "families_blocked": {
+      "key_set": 32,
+      "quorum": 32,
+      "revocation": 32,
+      "trust_domain": 32
+    },
+    "parent_false_passes": 128,
+    "passed": true,
+    "quorum_controls_passed": 32,
+    "quorum_false_passes": 0
+  },
+  "validation_time": "2026-10-28T00:00:00+00:00"
+}

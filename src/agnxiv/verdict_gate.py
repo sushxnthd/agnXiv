@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 
 from .authority import (
+    RegistryCheckpointQuorumPolicy,
     SignedRegistryCheckpoint,
     TrustedAuthorityRegistry,
     TrustedRegistryCheckpoint,
@@ -35,8 +36,11 @@ def environment_verdict_blockers(
     trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
     require_registry_checkpoint_scope: bool = False,
     signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
+    signed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
     trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
     require_authenticated_registry_checkpoint: bool = False,
+    registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
+    require_registry_checkpoint_quorum: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -71,10 +75,13 @@ def environment_verdict_blockers(
                 trusted_registry_checkpoint=trusted_registry_checkpoint,
                 require_registry_checkpoint_scope=require_registry_checkpoint_scope,
                 signed_registry_checkpoint=signed_registry_checkpoint,
+                signed_registry_checkpoints=signed_registry_checkpoints,
                 trusted_registry_checkpoint_keys=trusted_registry_checkpoint_keys,
                 require_authenticated_registry_checkpoint=(
                     require_authenticated_registry_checkpoint
                 ),
+                registry_checkpoint_quorum=registry_checkpoint_quorum,
+                require_registry_checkpoint_quorum=require_registry_checkpoint_quorum,
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -117,8 +124,11 @@ def gate_hosted_verdict(
     trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
     require_registry_checkpoint_scope: bool = False,
     signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
+    signed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
     trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
     require_authenticated_registry_checkpoint: bool = False,
+    registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
+    require_registry_checkpoint_quorum: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -140,8 +150,11 @@ def gate_hosted_verdict(
         trusted_registry_checkpoint=trusted_registry_checkpoint,
         require_registry_checkpoint_scope=require_registry_checkpoint_scope,
         signed_registry_checkpoint=signed_registry_checkpoint,
+        signed_registry_checkpoints=signed_registry_checkpoints,
         trusted_registry_checkpoint_keys=trusted_registry_checkpoint_keys,
         require_authenticated_registry_checkpoint=require_authenticated_registry_checkpoint,
+        registry_checkpoint_quorum=registry_checkpoint_quorum,
+        require_registry_checkpoint_quorum=require_registry_checkpoint_quorum,
     )
     if not blockers:
         return bundle

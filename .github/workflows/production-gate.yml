@@ -106,6 +106,14 @@ jobs:
             > /tmp/authority-registry-checkpoint-scope.json
           python research/scripts/audit_authority_registry_checkpoint_scope.py \
             > /tmp/authority-registry-checkpoint-scope-audit.json
+          python research/scripts/verify_authority_registry_checkpoint_auth.py \
+            > /tmp/authority-registry-checkpoint-auth.json
+          python research/scripts/audit_authority_registry_checkpoint_auth.py \
+            > /tmp/authority-registry-checkpoint-auth-audit.json
+          python research/scripts/verify_authority_registry_checkpoint_quorum.py \
+            > /tmp/authority-registry-checkpoint-quorum.json
+          python research/scripts/audit_authority_registry_checkpoint_quorum.py \
+            > /tmp/authority-registry-checkpoint-quorum-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -230,6 +238,10 @@ jobs:
             /tmp/authority-registry-freshness-audit.json
             /tmp/authority-registry-checkpoint-scope.json
             /tmp/authority-registry-checkpoint-scope-audit.json
+            /tmp/authority-registry-checkpoint-auth.json
+            /tmp/authority-registry-checkpoint-auth-audit.json
+            /tmp/authority-registry-checkpoint-quorum.json
+            /tmp/authority-registry-checkpoint-quorum-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90

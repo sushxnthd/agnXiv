@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
 from agnxiv.authority import (
+    RegistryCheckpointQuorumPolicy,
     RegistryCheckpointScope,
     TrustedAuthorityKey,
     TrustedAuthorityRegistry,
@@ -41,6 +42,18 @@ def _keys():
 
 def _checkpoint_keys():
     private = Ed25519PrivateKey.from_private_bytes(b"\x09" * 32)
+    return private.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    ), private.public_key().public_bytes(
+        serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    ).decode()
+
+
+def _checkpoint_credential(seed):
+    private = Ed25519PrivateKey.from_private_bytes(bytes([seed]) * 32)
     return private.private_bytes(
         serialization.Encoding.PEM,
         serialization.PrivateFormat.PKCS8,
@@ -638,6 +651,81 @@ def test_raw_checkpoint_cannot_satisfy_authenticated_mode():
     )
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
     assert any("authenticated registry checkpoint is not configured" in reason for reason in gated.verdict_gate_reasons)
+
+
+def _quorum_gate(checkpoints, keys):
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    return gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoints=checkpoints,
+        trusted_registry_checkpoint_keys=keys,
+        registry_checkpoint_quorum=RegistryCheckpointQuorumPolicy(
+            minimum_signatures=2,
+            minimum_trust_domains=2,
+        ),
+        require_registry_checkpoint_quorum=True,
+    )
+
+
+def _quorum_material(floors=(41, 41), domains=("operator-a", "operator-b")):
+    checkpoints = []
+    keys = []
+    for index, (floor, domain) in enumerate(zip(floors, domains), start=1):
+        private, public = _checkpoint_credential(20 + index)
+        scope = RegistryCheckpointScope(
+            issuer=f"checkpoint-board-{index}",
+            key_id=f"checkpoint-{index}",
+            registry_namespace="production-release",
+            minimum_registry_epoch=floor,
+        )
+        checkpoints.append(sign_registry_checkpoint(scope, private))
+        keys.append(
+            TrustedRegistryCheckpointKey(
+                issuer=scope.issuer,
+                key_id=scope.key_id,
+                public_key_pem=public,
+                trust_domain=domain,
+            )
+        )
+    return checkpoints, keys
+
+
+def test_two_domain_checkpoint_quorum_preserves_decisive_verdict():
+    checkpoints, keys = _quorum_material()
+    assert _quorum_gate(checkpoints, keys).record.verdict == Verdict.VERIFIED
+
+
+def test_duplicate_checkpoint_identity_does_not_form_quorum():
+    checkpoints, keys = _quorum_material()
+    gated = _quorum_gate([checkpoints[0], checkpoints[0]], keys)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("quorum is not satisfied" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_same_domain_checkpoint_keys_do_not_form_quorum():
+    checkpoints, keys = _quorum_material(domains=("operator-a", "operator-a"))
+    gated = _quorum_gate(checkpoints, keys)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("quorum is not satisfied" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_disagreeing_checkpoint_floors_do_not_form_quorum():
+    checkpoints, keys = _quorum_material(floors=(1, 41))
+    gated = _quorum_gate(checkpoints, keys)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("quorum is not satisfied" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_revoked_checkpoint_key_does_not_form_quorum():
+    checkpoints, keys = _quorum_material()
+    keys[1] = keys[1].model_copy(update={"status": "revoked"})
+    gated = _quorum_gate(checkpoints, keys)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("revoked key" in reason for reason in gated.verdict_gate_reasons)
 
 
 def test_negative_registry_epoch_is_invalid():

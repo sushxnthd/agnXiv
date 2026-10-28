@@ -73,7 +73,13 @@ class TrustedRegistryCheckpointKey(BaseModel):
     issuer: str = Field(min_length=1)
     key_id: str = Field(min_length=1)
     public_key_pem: str = Field(min_length=1)
+    trust_domain: str | None = Field(default=None, min_length=1)
     status: Literal["active", "revoked"] = "active"
+
+
+class RegistryCheckpointQuorumPolicy(BaseModel):
+    minimum_signatures: int = Field(default=2, ge=1)
+    minimum_trust_domains: int = Field(default=2, ge=1)
 
 
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
@@ -174,8 +180,11 @@ def authority_registry_blockers(
     trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
     require_registry_checkpoint_scope: bool = False,
     signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
+    signed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
     trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
     require_authenticated_registry_checkpoint: bool = False,
+    registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
+    require_registry_checkpoint_quorum: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -188,14 +197,24 @@ def authority_registry_blockers(
     accepted_domains: set[str] = set()
     failures: list[str] = []
     authenticated_checkpoint = None
-    if trusted_registry_checkpoint is not None and signed_registry_checkpoint is not None:
+    signed_many = list(signed_registry_checkpoints or [])
+    if signed_registry_checkpoint is not None and signed_many:
+        failures.append("both singular and quorum registry checkpoints are configured")
+    signed_candidates = (
+        signed_many
+        if signed_many
+        else ([signed_registry_checkpoint] if signed_registry_checkpoint is not None else [])
+    )
+    if trusted_registry_checkpoint is not None and signed_candidates:
         failures.append("both unauthenticated and signed registry checkpoints are configured")
-    if signed_registry_checkpoint is not None:
-        checkpoint_scope = signed_registry_checkpoint.scope
-        checkpoint_keys = {
-            (key.issuer, key.key_id): key
-            for key in (trusted_registry_checkpoint_keys or [])
-        }
+    checkpoint_keys = {
+        (key.issuer, key.key_id): key for key in (trusted_registry_checkpoint_keys or [])
+    }
+    valid_checkpoints: list[
+        tuple[RegistryCheckpointScope, TrustedRegistryCheckpointKey]
+    ] = []
+    for signed_checkpoint in signed_candidates:
+        checkpoint_scope = signed_checkpoint.scope
         checkpoint_key = checkpoint_keys.get(
             (checkpoint_scope.issuer, checkpoint_scope.key_id)
         )
@@ -205,13 +224,14 @@ def authority_registry_blockers(
             failures.append("signed registry checkpoint uses a revoked key")
         else:
             try:
-                signature = base64.b64decode(
-                    signed_registry_checkpoint.signature_b64, validate=True
-                )
                 from cryptography.exceptions import InvalidSignature
                 from cryptography.hazmat.primitives import serialization
                 from cryptography.hazmat.primitives.asymmetric.ed25519 import (
                     Ed25519PublicKey,
+                )
+
+                signature = base64.b64decode(
+                    signed_checkpoint.signature_b64, validate=True
                 )
 
                 public_key = serialization.load_pem_public_key(
@@ -224,13 +244,54 @@ def authority_registry_blockers(
                         signature,
                         canonical_registry_checkpoint_payload(checkpoint_scope),
                     )
-                    authenticated_checkpoint = checkpoint_scope
+                    valid_checkpoints.append((checkpoint_scope, checkpoint_key))
             except (ValueError, TypeError, binascii.Error):
                 failures.append("registry checkpoint signature encoding or key is invalid")
             except InvalidSignature:
                 failures.append("registry checkpoint signature is invalid")
+    if signed_many:
+        quorum = registry_checkpoint_quorum or RegistryCheckpointQuorumPolicy()
+        groups: dict[
+            tuple[str, int],
+            tuple[set[tuple[str, str]], set[str]],
+        ] = {}
+        for scope, key in valid_checkpoints:
+            identities, domains = groups.setdefault(
+                (scope.registry_namespace, scope.minimum_registry_epoch),
+                (set(), set()),
+            )
+            identities.add((scope.issuer, scope.key_id))
+            if key.trust_domain is not None:
+                domains.add(key.trust_domain)
+        qualifying = [
+            statement
+            for statement, (identities, domains) in groups.items()
+            if len(identities) >= quorum.minimum_signatures
+            and len(domains) >= quorum.minimum_trust_domains
+        ]
+        namespaces = {namespace for namespace, _ in qualifying}
+        if len(namespaces) > 1:
+            failures.append("registry checkpoint quorum endorses conflicting namespaces")
+        elif qualifying:
+            namespace = next(iter(namespaces))
+            floor = max(
+                epoch for candidate_namespace, epoch in qualifying
+                if candidate_namespace == namespace
+            )
+            authenticated_checkpoint = next(
+                scope
+                for scope, _ in valid_checkpoints
+                if scope.registry_namespace == namespace
+                and scope.minimum_registry_epoch == floor
+            )
+        else:
+            failures.append("registry checkpoint quorum is not satisfied")
+    elif valid_checkpoints:
+        authenticated_checkpoint = valid_checkpoints[0][0]
     elif require_authenticated_registry_checkpoint:
         failures.append("authenticated registry checkpoint is not configured")
+    if require_registry_checkpoint_quorum and not signed_many:
+        failures.append("registry checkpoint quorum is not configured")
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:
@@ -248,7 +309,7 @@ def authority_registry_blockers(
                 f"{registry.registry_epoch}/"
                 f"{effective_checkpoint.minimum_registry_epoch}"
             )
-    elif require_registry_checkpoint_scope and signed_registry_checkpoint is None:
+    elif require_registry_checkpoint_scope and not signed_candidates:
         failures.append("scoped trusted registry checkpoint is not configured")
     if trusted_minimum_registry_epoch is not None and trusted_minimum_registry_epoch < 0:
         failures.append("trusted registry freshness floor is invalid")
