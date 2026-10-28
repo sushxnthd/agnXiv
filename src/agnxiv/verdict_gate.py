@@ -4,8 +4,10 @@ import re
 from datetime import datetime
 
 from .authority import (
+    SignedRegistryCheckpoint,
     TrustedAuthorityRegistry,
     TrustedRegistryCheckpoint,
+    TrustedRegistryCheckpointKey,
     authority_registry_blockers,
 )
 from .build import BuildResult
@@ -32,6 +34,9 @@ def environment_verdict_blockers(
     require_registry_freshness: bool = False,
     trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
     require_registry_checkpoint_scope: bool = False,
+    signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
+    trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
+    require_authenticated_registry_checkpoint: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -65,6 +70,11 @@ def environment_verdict_blockers(
                 require_registry_freshness=require_registry_freshness,
                 trusted_registry_checkpoint=trusted_registry_checkpoint,
                 require_registry_checkpoint_scope=require_registry_checkpoint_scope,
+                signed_registry_checkpoint=signed_registry_checkpoint,
+                trusted_registry_checkpoint_keys=trusted_registry_checkpoint_keys,
+                require_authenticated_registry_checkpoint=(
+                    require_authenticated_registry_checkpoint
+                ),
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -106,6 +116,9 @@ def gate_hosted_verdict(
     require_registry_freshness: bool = False,
     trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
     require_registry_checkpoint_scope: bool = False,
+    signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
+    trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
+    require_authenticated_registry_checkpoint: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -126,6 +139,9 @@ def gate_hosted_verdict(
         require_registry_freshness=require_registry_freshness,
         trusted_registry_checkpoint=trusted_registry_checkpoint,
         require_registry_checkpoint_scope=require_registry_checkpoint_scope,
+        signed_registry_checkpoint=signed_registry_checkpoint,
+        trusted_registry_checkpoint_keys=trusted_registry_checkpoint_keys,
+        require_authenticated_registry_checkpoint=require_authenticated_registry_checkpoint,
     )
     if not blockers:
         return bundle

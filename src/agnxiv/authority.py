@@ -54,6 +54,28 @@ class TrustedRegistryCheckpoint(BaseModel):
     minimum_registry_epoch: int = Field(ge=0)
 
 
+class RegistryCheckpointScope(BaseModel):
+    """Canonical freshness statement issued outside the protected registry."""
+
+    schema_version: str = "agnxiv.authority-registry-checkpoint-scope/1"
+    issuer: str = Field(min_length=1)
+    key_id: str = Field(min_length=1)
+    registry_namespace: str = Field(min_length=1)
+    minimum_registry_epoch: int = Field(ge=0)
+
+
+class SignedRegistryCheckpoint(BaseModel):
+    scope: RegistryCheckpointScope
+    signature_b64: str
+
+
+class TrustedRegistryCheckpointKey(BaseModel):
+    issuer: str = Field(min_length=1)
+    key_id: str = Field(min_length=1)
+    public_key_pem: str = Field(min_length=1)
+    status: Literal["active", "revoked"] = "active"
+
+
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
     """Return the exact deterministic policy payload interpreted by the gate."""
     return json.dumps(
@@ -66,6 +88,33 @@ def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> 
 
 def authority_registry_sha256(registry: TrustedAuthorityRegistry) -> str:
     return hashlib.sha256(canonical_authority_registry_payload(registry)).hexdigest()
+
+
+def canonical_registry_checkpoint_payload(scope: RegistryCheckpointScope) -> bytes:
+    return json.dumps(
+        scope.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
+def sign_registry_checkpoint(
+    scope: RegistryCheckpointScope,
+    private_key_pem: bytes,
+) -> SignedRegistryCheckpoint:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    key = serialization.load_pem_private_key(private_key_pem, password=None)
+    if not isinstance(key, Ed25519PrivateKey):
+        raise TypeError("registry checkpoint private key is not Ed25519")
+    return SignedRegistryCheckpoint(
+        scope=scope,
+        signature_b64=base64.b64encode(
+            key.sign(canonical_registry_checkpoint_payload(scope))
+        ).decode("ascii"),
+    )
 
 
 def canonical_authority_payload(scope: AuthorityScope) -> bytes:
@@ -124,6 +173,9 @@ def authority_registry_blockers(
     require_registry_freshness: bool = False,
     trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
     require_registry_checkpoint_scope: bool = False,
+    signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
+    trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
+    require_authenticated_registry_checkpoint: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -135,23 +187,68 @@ def authority_registry_blockers(
     accepted: set[tuple[str, str]] = set()
     accepted_domains: set[str] = set()
     failures: list[str] = []
-    if trusted_registry_checkpoint is not None:
+    authenticated_checkpoint = None
+    if trusted_registry_checkpoint is not None and signed_registry_checkpoint is not None:
+        failures.append("both unauthenticated and signed registry checkpoints are configured")
+    if signed_registry_checkpoint is not None:
+        checkpoint_scope = signed_registry_checkpoint.scope
+        checkpoint_keys = {
+            (key.issuer, key.key_id): key
+            for key in (trusted_registry_checkpoint_keys or [])
+        }
+        checkpoint_key = checkpoint_keys.get(
+            (checkpoint_scope.issuer, checkpoint_scope.key_id)
+        )
+        if checkpoint_key is None:
+            failures.append("signed registry checkpoint uses an untrusted issuer or key")
+        elif checkpoint_key.status != "active":
+            failures.append("signed registry checkpoint uses a revoked key")
+        else:
+            try:
+                signature = base64.b64decode(
+                    signed_registry_checkpoint.signature_b64, validate=True
+                )
+                from cryptography.exceptions import InvalidSignature
+                from cryptography.hazmat.primitives import serialization
+                from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+                    Ed25519PublicKey,
+                )
+
+                public_key = serialization.load_pem_public_key(
+                    checkpoint_key.public_key_pem.encode()
+                )
+                if not isinstance(public_key, Ed25519PublicKey):
+                    failures.append("trusted registry checkpoint key is not Ed25519")
+                else:
+                    public_key.verify(
+                        signature,
+                        canonical_registry_checkpoint_payload(checkpoint_scope),
+                    )
+                    authenticated_checkpoint = checkpoint_scope
+            except (ValueError, TypeError, binascii.Error):
+                failures.append("registry checkpoint signature encoding or key is invalid")
+            except InvalidSignature:
+                failures.append("registry checkpoint signature is invalid")
+    elif require_authenticated_registry_checkpoint:
+        failures.append("authenticated registry checkpoint is not configured")
+
+    effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
+    if effective_checkpoint is not None:
         if (
-            trusted_registry_checkpoint.registry_namespace
-            != registry.registry_namespace
+            effective_checkpoint.registry_namespace != registry.registry_namespace
         ):
             failures.append(
                 "trusted registry checkpoint namespace does not match authority registry: "
-                f"{trusted_registry_checkpoint.registry_namespace}/"
+                f"{effective_checkpoint.registry_namespace}/"
                 f"{registry.registry_namespace}"
             )
-        elif registry.registry_epoch < trusted_registry_checkpoint.minimum_registry_epoch:
+        elif registry.registry_epoch < effective_checkpoint.minimum_registry_epoch:
             failures.append(
                 "authority registry epoch is below scoped trusted checkpoint: "
                 f"{registry.registry_epoch}/"
-                f"{trusted_registry_checkpoint.minimum_registry_epoch}"
+                f"{effective_checkpoint.minimum_registry_epoch}"
             )
-    elif require_registry_checkpoint_scope:
+    elif require_registry_checkpoint_scope and signed_registry_checkpoint is None:
         failures.append("scoped trusted registry checkpoint is not configured")
     if trusted_minimum_registry_epoch is not None and trusted_minimum_registry_epoch < 0:
         failures.append("trusted registry freshness floor is invalid")
@@ -161,7 +258,7 @@ def authority_registry_blockers(
                 "authority registry epoch is below trusted freshness floor: "
                 f"{registry.registry_epoch}/{trusted_minimum_registry_epoch}"
             )
-    elif require_registry_freshness and trusted_registry_checkpoint is None:
+    elif require_registry_freshness and effective_checkpoint is None:
         failures.append("trusted registry freshness floor is not configured")
     for attestation in bundle.authority_attestations:
         scope = attestation.scope

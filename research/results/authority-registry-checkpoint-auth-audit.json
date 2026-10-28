@@ -1,0 +1,1453 @@
+{
+  "agnxiv_imports": 0,
+  "attack_total": 128,
+  "attacks": [
+    {
+      "case": 50000,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50001,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50002,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50003,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50004,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50005,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50006,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50007,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50008,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50009,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50010,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50011,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50012,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50013,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50014,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50015,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50016,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50017,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50018,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50019,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50020,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50021,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50022,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50023,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50024,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50025,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50026,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50027,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50028,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50029,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50030,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50031,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50100,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50101,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50102,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50103,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50104,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50105,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50106,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50107,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50108,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50109,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50110,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50111,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50112,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50113,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50114,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50115,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50116,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50117,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50118,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50119,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50120,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50121,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50122,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50123,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50124,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50125,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50126,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50127,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50128,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50129,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50130,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50131,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50200,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50201,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50202,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50203,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50204,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50205,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50206,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50207,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50208,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50209,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50210,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50211,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50212,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50213,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50214,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50215,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50216,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50217,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50218,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50219,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50220,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50221,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50222,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50223,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50224,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50225,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50226,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50227,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50228,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50229,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50230,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50231,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50300,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50301,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50302,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50303,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50304,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50305,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50306,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50307,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50308,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50309,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50310,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50311,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50312,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50313,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50314,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50315,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50316,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50317,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50318,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50319,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50320,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50321,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50322,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50323,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50324,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50325,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50326,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50327,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50328,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50329,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50330,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    },
+    {
+      "case": 50331,
+      "control": false,
+      "corrected_definitive": false,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": true,
+      "signature_reused": true
+    }
+  ],
+  "attacks_reproduced": 128,
+  "control_total": 32,
+  "controls": [
+    {
+      "case": 60000,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60001,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60002,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60003,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60004,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60005,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60006,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60007,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60008,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60009,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60010,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60011,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60012,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60013,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60014,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60015,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60016,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60017,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60018,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60019,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60020,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60021,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60022,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60023,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60024,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60025,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60026,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60027,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60028,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "revocation",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60029,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "trust_domain",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60030,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "quorum",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    },
+    {
+      "case": 60031,
+      "control": true,
+      "corrected_definitive": true,
+      "family": "key_set",
+      "matched": true,
+      "payload_changed": false,
+      "signature_reused": true
+    }
+  ],
+  "controls_reproduced": 32,
+  "passed": true,
+  "schema": "agnxiv.authority-registry-checkpoint-auth-audit/1"
+}

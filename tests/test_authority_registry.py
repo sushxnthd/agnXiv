@@ -6,12 +6,15 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
 from agnxiv.authority import (
+    RegistryCheckpointScope,
     TrustedAuthorityKey,
     TrustedAuthorityRegistry,
     TrustedRegistryCheckpoint,
+    TrustedRegistryCheckpointKey,
     authority_registry_sha256,
     authority_scope_for_bundle,
     sign_authority_scope,
+    sign_registry_checkpoint,
 )
 from agnxiv.build import BuildPlan, BuildResult
 from agnxiv.environment import EnvironmentSpec
@@ -26,6 +29,18 @@ NOW = datetime(2026, 10, 27, tzinfo=UTC)
 
 def _keys():
     private = Ed25519PrivateKey.from_private_bytes(b"\x07" * 32)
+    return private.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    ), private.public_key().public_bytes(
+        serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    ).decode()
+
+
+def _checkpoint_keys():
+    private = Ed25519PrivateKey.from_private_bytes(b"\x09" * 32)
     return private.private_bytes(
         serialization.Encoding.PEM,
         serialization.PrivateFormat.PKCS8,
@@ -515,6 +530,114 @@ def test_required_scoped_checkpoint_without_checkpoint_fails_closed():
 def test_malformed_scoped_checkpoint_is_invalid(payload):
     with pytest.raises(ValidationError):
         TrustedRegistryCheckpoint(**payload)
+
+
+def _authenticated_checkpoint_case():
+    item = _bundle()
+    registry = _trusted(item).model_copy(
+        update={"registry_namespace": "production-release", "registry_epoch": 41}
+    )
+    authority_private, _ = _keys()
+    item.authority_attestations = [
+        sign_authority_scope(
+            authority_scope_for_bundle(
+                item,
+                registry=registry,
+                issuer="review-board",
+                key_id="key-1",
+                issued_at=NOW - timedelta(minutes=1),
+                expires_at=NOW + timedelta(hours=1),
+            ),
+            authority_private,
+        )
+    ]
+    checkpoint_private, checkpoint_public = _checkpoint_keys()
+    scope = RegistryCheckpointScope(
+        issuer="checkpoint-board",
+        key_id="checkpoint-1",
+        registry_namespace="production-release",
+        minimum_registry_epoch=41,
+    )
+    signed = sign_registry_checkpoint(scope, checkpoint_private)
+    keys = [
+        TrustedRegistryCheckpointKey(
+            issuer="checkpoint-board",
+            key_id="checkpoint-1",
+            public_key_pem=checkpoint_public,
+        )
+    ]
+    return item, registry, signed, keys
+
+
+def test_authenticated_checkpoint_preserves_decisive_verdict():
+    item, registry, checkpoint, keys = _authenticated_checkpoint_case()
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoint=checkpoint,
+        trusted_registry_checkpoint_keys=keys,
+        require_authenticated_registry_checkpoint=True,
+    )
+    assert gated.record.verdict == Verdict.VERIFIED
+
+
+def test_checkpoint_signature_cannot_be_reinterpreted_at_lower_epoch():
+    item, registry, checkpoint, keys = _authenticated_checkpoint_case()
+    forged = checkpoint.model_copy(deep=True)
+    forged.scope.minimum_registry_epoch = 1
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoint=forged,
+        trusted_registry_checkpoint_keys=keys,
+        require_authenticated_registry_checkpoint=True,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("checkpoint signature is invalid" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_authenticated_checkpoint_rejects_untrusted_or_revoked_key():
+    item, registry, checkpoint, keys = _authenticated_checkpoint_case()
+    for supplied_keys, expected in (
+        ([], "untrusted issuer or key"),
+        ([keys[0].model_copy(update={"status": "revoked"})], "revoked key"),
+    ):
+        gated = gate_hosted_verdict(
+            item.model_copy(deep=True),
+            _build(),
+            trusted_authority_registry=registry,
+            require_registry_authority=True,
+            authority_validation_time=NOW,
+            signed_registry_checkpoint=checkpoint,
+            trusted_registry_checkpoint_keys=supplied_keys,
+            require_authenticated_registry_checkpoint=True,
+        )
+        assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+        assert any(expected in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_raw_checkpoint_cannot_satisfy_authenticated_mode():
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        trusted_registry_checkpoint=TrustedRegistryCheckpoint(
+            registry_namespace="production-release",
+            minimum_registry_epoch=41,
+        ),
+        require_authenticated_registry_checkpoint=True,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("authenticated registry checkpoint is not configured" in reason for reason in gated.verdict_gate_reasons)
 
 
 def test_negative_registry_epoch_is_invalid():
