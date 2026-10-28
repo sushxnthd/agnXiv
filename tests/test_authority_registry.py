@@ -699,6 +699,23 @@ def test_two_domain_checkpoint_quorum_preserves_decisive_verdict():
     assert _quorum_gate(checkpoints, keys).record.verdict == Verdict.VERIFIED
 
 
+def test_singular_authenticated_checkpoint_cannot_satisfy_quorum_mode():
+    item, registry, checkpoint, keys = _authenticated_checkpoint_case()
+    keys[0] = keys[0].model_copy(update={"trust_domain": "operator-a"})
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoint=checkpoint,
+        trusted_registry_checkpoint_keys=keys,
+        require_registry_checkpoint_quorum=True,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("quorum is not configured" in reason for reason in gated.verdict_gate_reasons)
+
+
 def test_duplicate_checkpoint_identity_does_not_form_quorum():
     checkpoints, keys = _quorum_material()
     gated = _quorum_gate([checkpoints[0], checkpoints[0]], keys)
