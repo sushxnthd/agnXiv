@@ -64,3 +64,8 @@ require freshness or supplies a stale floor, the old snapshot remains
 acceptable. The mechanism does not establish governance legitimacy,
 independent key custody, reviewer competence, unbiased reviewer selection,
 scientific correctness, or a live production deployment.
+
+Subsequent adversarial testing showed that a bare integer floor is also
+unscoped across multiple registries. The typed namespace-bound correction is
+reported in `AUTHORITY_REGISTRY_CHECKPOINT_SCOPE_RESULT.md`; the integer-only
+API remains an explicitly unscoped compatibility path.

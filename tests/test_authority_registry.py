@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from agnxiv.authority import (
     TrustedAuthorityKey,
     TrustedAuthorityRegistry,
+    TrustedRegistryCheckpoint,
     authority_registry_sha256,
     authority_scope_for_bundle,
     sign_authority_scope,
@@ -326,6 +327,8 @@ def test_registry_digest_is_deterministic_and_policy_complete():
     assert authority_registry_sha256(registry) != authority_registry_sha256(revoked)
     advanced = registry.model_copy(update={"registry_epoch": 1})
     assert authority_registry_sha256(registry) != authority_registry_sha256(advanced)
+    namespaced = registry.model_copy(update={"registry_namespace": "production"})
+    assert authority_registry_sha256(registry) != authority_registry_sha256(namespaced)
 
 
 def test_exact_old_snapshot_requires_independent_freshness_floor():
@@ -408,6 +411,110 @@ def test_required_registry_freshness_without_floor_fails_closed():
     )
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
     assert any("freshness floor is not configured" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_scoped_checkpoint_rejects_foreign_registry_namespace():
+    item = _bundle()
+    private, public = _keys()
+    registry = TrustedAuthorityRegistry(
+        registry_namespace="production-release",
+        registry_epoch=41,
+        keys=[TrustedAuthorityKey(issuer="board", key_id="key", public_key_pem=public)],
+    )
+    scope = authority_scope_for_bundle(
+        item,
+        registry=registry,
+        issuer="board",
+        key_id="key",
+        issued_at=NOW - timedelta(minutes=1),
+        expires_at=NOW + timedelta(hours=1),
+    )
+    item.authority_attestations = [sign_authority_scope(scope, private)]
+
+    unscoped = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        trusted_minimum_registry_epoch=41,
+        require_registry_freshness=True,
+    )
+    scoped = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        trusted_registry_checkpoint=TrustedRegistryCheckpoint(
+            registry_namespace="staging-release",
+            minimum_registry_epoch=41,
+        ),
+        require_registry_checkpoint_scope=True,
+    )
+
+    assert unscoped.record.verdict == Verdict.VERIFIED
+    assert scoped.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("namespace does not match" in reason for reason in scoped.verdict_gate_reasons)
+
+
+def test_matching_scoped_checkpoint_preserves_decisive_verdict():
+    item = _bundle()
+    registry = _trusted(item).model_copy(
+        update={"registry_namespace": "external-audit", "registry_epoch": 9}
+    )
+    # Re-sign because namespace and epoch are part of the canonical registry digest.
+    private, _ = _keys()
+    scope = authority_scope_for_bundle(
+        item,
+        registry=registry,
+        issuer="review-board",
+        key_id="key-1",
+        issued_at=NOW - timedelta(minutes=1),
+        expires_at=NOW + timedelta(hours=1),
+    )
+    item.authority_attestations = [sign_authority_scope(scope, private)]
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        trusted_registry_checkpoint=TrustedRegistryCheckpoint(
+            registry_namespace="external-audit",
+            minimum_registry_epoch=9,
+        ),
+        require_registry_checkpoint_scope=True,
+    )
+
+    assert gated.record.verdict == Verdict.VERIFIED
+
+
+def test_required_scoped_checkpoint_without_checkpoint_fails_closed():
+    item = _bundle()
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=_trusted(item),
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        require_registry_checkpoint_scope=True,
+    )
+
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("scoped trusted registry checkpoint is not configured" in reason for reason in gated.verdict_gate_reasons)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    (
+        {"registry_namespace": "", "minimum_registry_epoch": 1},
+        {"registry_namespace": "production", "minimum_registry_epoch": -1},
+    ),
+)
+def test_malformed_scoped_checkpoint_is_invalid(payload):
+    with pytest.raises(ValidationError):
+        TrustedRegistryCheckpoint(**payload)
 
 
 def test_negative_registry_epoch_is_invalid():

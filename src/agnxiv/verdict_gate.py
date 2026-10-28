@@ -3,7 +3,11 @@ from __future__ import annotations
 import re
 from datetime import datetime
 
-from .authority import TrustedAuthorityRegistry, authority_registry_blockers
+from .authority import (
+    TrustedAuthorityRegistry,
+    TrustedRegistryCheckpoint,
+    authority_registry_blockers,
+)
 from .build import BuildResult
 from .models import Verdict
 from .pipeline import VerificationBundle
@@ -26,6 +30,8 @@ def environment_verdict_blockers(
     authority_validation_time: datetime | None = None,
     trusted_minimum_registry_epoch: int | None = None,
     require_registry_freshness: bool = False,
+    trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
+    require_registry_checkpoint_scope: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -57,6 +63,8 @@ def environment_verdict_blockers(
                 now=authority_validation_time,
                 trusted_minimum_registry_epoch=trusted_minimum_registry_epoch,
                 require_registry_freshness=require_registry_freshness,
+                trusted_registry_checkpoint=trusted_registry_checkpoint,
+                require_registry_checkpoint_scope=require_registry_checkpoint_scope,
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -96,6 +104,8 @@ def gate_hosted_verdict(
     authority_validation_time: datetime | None = None,
     trusted_minimum_registry_epoch: int | None = None,
     require_registry_freshness: bool = False,
+    trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
+    require_registry_checkpoint_scope: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -114,6 +124,8 @@ def gate_hosted_verdict(
         authority_validation_time=authority_validation_time,
         trusted_minimum_registry_epoch=trusted_minimum_registry_epoch,
         require_registry_freshness=require_registry_freshness,
+        trusted_registry_checkpoint=trusted_registry_checkpoint,
+        require_registry_checkpoint_scope=require_registry_checkpoint_scope,
     )
     if not blockers:
         return bundle

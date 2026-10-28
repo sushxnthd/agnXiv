@@ -38,11 +38,20 @@ class TrustedAuthorityKey(BaseModel):
 
 
 class TrustedAuthorityRegistry(BaseModel):
-    schema_version: str = "agnxiv.authority-registry/2"
+    schema_version: str = "agnxiv.authority-registry/3"
+    registry_namespace: str = Field(default="default", min_length=1)
     registry_epoch: int = Field(default=0, ge=0)
     minimum_signatures: int = Field(default=1, ge=1)
     minimum_trust_domains: int = Field(default=1, ge=1)
     keys: list[TrustedAuthorityKey] = Field(default_factory=list)
+
+
+class TrustedRegistryCheckpoint(BaseModel):
+    """External monotonic floor bound to one authority-registry namespace."""
+
+    schema_version: str = "agnxiv.authority-registry-checkpoint/1"
+    registry_namespace: str = Field(min_length=1)
+    minimum_registry_epoch: int = Field(ge=0)
 
 
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
@@ -113,6 +122,8 @@ def authority_registry_blockers(
     now: datetime | None = None,
     trusted_minimum_registry_epoch: int | None = None,
     require_registry_freshness: bool = False,
+    trusted_registry_checkpoint: TrustedRegistryCheckpoint | None = None,
+    require_registry_checkpoint_scope: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -124,6 +135,24 @@ def authority_registry_blockers(
     accepted: set[tuple[str, str]] = set()
     accepted_domains: set[str] = set()
     failures: list[str] = []
+    if trusted_registry_checkpoint is not None:
+        if (
+            trusted_registry_checkpoint.registry_namespace
+            != registry.registry_namespace
+        ):
+            failures.append(
+                "trusted registry checkpoint namespace does not match authority registry: "
+                f"{trusted_registry_checkpoint.registry_namespace}/"
+                f"{registry.registry_namespace}"
+            )
+        elif registry.registry_epoch < trusted_registry_checkpoint.minimum_registry_epoch:
+            failures.append(
+                "authority registry epoch is below scoped trusted checkpoint: "
+                f"{registry.registry_epoch}/"
+                f"{trusted_registry_checkpoint.minimum_registry_epoch}"
+            )
+    elif require_registry_checkpoint_scope:
+        failures.append("scoped trusted registry checkpoint is not configured")
     if trusted_minimum_registry_epoch is not None and trusted_minimum_registry_epoch < 0:
         failures.append("trusted registry freshness floor is invalid")
     elif trusted_minimum_registry_epoch is not None:
@@ -132,7 +161,7 @@ def authority_registry_blockers(
                 "authority registry epoch is below trusted freshness floor: "
                 f"{registry.registry_epoch}/{trusted_minimum_registry_epoch}"
             )
-    elif require_registry_freshness:
+    elif require_registry_freshness and trusted_registry_checkpoint is None:
         failures.append("trusted registry freshness floor is not configured")
     for attestation in bundle.authority_attestations:
         scope = attestation.scope

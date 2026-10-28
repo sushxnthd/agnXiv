@@ -102,6 +102,10 @@ jobs:
             > /tmp/authority-registry-freshness.json
           python research/scripts/audit_authority_registry_freshness.py \
             > /tmp/authority-registry-freshness-audit.json
+          python research/scripts/verify_authority_registry_checkpoint_scope.py \
+            > /tmp/authority-registry-checkpoint-scope.json
+          python research/scripts/audit_authority_registry_checkpoint_scope.py \
+            > /tmp/authority-registry-checkpoint-scope-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -224,6 +228,8 @@ jobs:
             /tmp/authority-registry-snapshot-audit.json
             /tmp/authority-registry-freshness.json
             /tmp/authority-registry-freshness-audit.json
+            /tmp/authority-registry-checkpoint-scope.json
+            /tmp/authority-registry-checkpoint-scope-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90
