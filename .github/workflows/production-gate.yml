@@ -134,6 +134,10 @@ jobs:
             > /tmp/authority-registry-checkpoint-transitive-chain.json
           python research/scripts/audit_authority_registry_checkpoint_transitive_chain.py \
             > /tmp/authority-registry-checkpoint-transitive-chain-audit.json
+          python research/scripts/verify_authority_registry_checkpoint_pinned_root.py \
+            > /tmp/authority-registry-checkpoint-pinned-root.json
+          python research/scripts/audit_authority_registry_checkpoint_pinned_root.py \
+            > /tmp/authority-registry-checkpoint-pinned-root-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -272,6 +276,8 @@ jobs:
             /tmp/authority-registry-checkpoint-chain-audit.json
             /tmp/authority-registry-checkpoint-transitive-chain.json
             /tmp/authority-registry-checkpoint-transitive-chain-audit.json
+            /tmp/authority-registry-checkpoint-pinned-root.json
+            /tmp/authority-registry-checkpoint-pinned-root-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90

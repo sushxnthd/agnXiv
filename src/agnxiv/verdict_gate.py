@@ -46,6 +46,8 @@ def environment_verdict_blockers(
     require_registry_checkpoint_history: bool = False,
     require_registry_checkpoint_chain: bool = False,
     require_registry_checkpoint_transitive_chain: bool = False,
+    trusted_registry_checkpoint_root_statement_sha256: str | None = None,
+    require_registry_checkpoint_root: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -93,6 +95,10 @@ def environment_verdict_blockers(
                 require_registry_checkpoint_transitive_chain=(
                     require_registry_checkpoint_transitive_chain
                 ),
+                trusted_registry_checkpoint_root_statement_sha256=(
+                    trusted_registry_checkpoint_root_statement_sha256
+                ),
+                require_registry_checkpoint_root=require_registry_checkpoint_root,
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -142,6 +148,8 @@ def gate_hosted_verdict(
     require_registry_checkpoint_history: bool = False,
     require_registry_checkpoint_chain: bool = False,
     require_registry_checkpoint_transitive_chain: bool = False,
+    trusted_registry_checkpoint_root_statement_sha256: str | None = None,
+    require_registry_checkpoint_root: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -175,6 +183,10 @@ def gate_hosted_verdict(
         require_registry_checkpoint_transitive_chain=(
             require_registry_checkpoint_transitive_chain
         ),
+        trusted_registry_checkpoint_root_statement_sha256=(
+            trusted_registry_checkpoint_root_statement_sha256
+        ),
+        require_registry_checkpoint_root=require_registry_checkpoint_root,
     )
     if not blockers:
         return bundle

@@ -1,0 +1,22 @@
+{
+  "attack_total": 128,
+  "complete_history_controls_passed": 32,
+  "control_total": 32,
+  "families_blocked": {
+    "key_set": 32,
+    "quorum": 32,
+    "revocation": 32,
+    "trust_domain": 32
+  },
+  "negative_controls": {
+    "malformed_pin_blocked": true,
+    "missing_pin_blocked": true,
+    "wrong_epoch_pin_blocked": true,
+    "wrong_namespace_pin_blocked": true,
+    "wrong_snapshot_pin_blocked": true
+  },
+  "parent_false_passes": 128,
+  "passed": true,
+  "pinned_root_false_passes": 0,
+  "reversed_order_false_passes": 0
+}

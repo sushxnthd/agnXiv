@@ -212,6 +212,8 @@ def authority_registry_blockers(
     require_registry_checkpoint_history: bool = False,
     require_registry_checkpoint_chain: bool = False,
     require_registry_checkpoint_transitive_chain: bool = False,
+    trusted_registry_checkpoint_root_statement_sha256: str | None = None,
+    require_registry_checkpoint_root: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -456,6 +458,47 @@ def authority_registry_blockers(
                             "transitive registry checkpoint history-chain link does not match the adjacent retained quorum"
                         )
                         break
+
+    if require_registry_checkpoint_root:
+        root_pin = trusted_registry_checkpoint_root_statement_sha256 or ""
+        if len(root_pin) != 64 or any(
+            character not in "0123456789abcdef" for character in root_pin
+        ):
+            failures.append(
+                "trusted registry checkpoint root statement digest is not configured or invalid"
+            )
+        elif authenticated_checkpoint is None or not qualifying_observed:
+            failures.append("trusted registry checkpoint root cannot be matched to history")
+        else:
+            namespace = authenticated_checkpoint.registry_namespace
+            historical = [
+                statement
+                for statement in qualifying_observed
+                if statement[0] == namespace
+            ]
+            if not historical:
+                failures.append(
+                    "trusted registry checkpoint root has no history in the current namespace"
+                )
+            else:
+                root_epoch = min(statement[1] for statement in historical)
+                roots = {
+                    statement[:3]
+                    for statement in historical
+                    if statement[1] == root_epoch
+                }
+                if len(roots) != 1:
+                    failures.append(
+                        "trusted registry checkpoint root has an ambiguous oldest statement"
+                    )
+                else:
+                    supplied_root = registry_checkpoint_statement_sha256(
+                        *next(iter(roots))
+                    )
+                    if supplied_root != root_pin:
+                        failures.append(
+                            "oldest supplied registry checkpoint does not match the trusted root statement"
+                        )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:
