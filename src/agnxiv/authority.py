@@ -182,11 +182,13 @@ def authority_registry_blockers(
     require_registry_checkpoint_scope: bool = False,
     signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
     signed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
+    observed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
     trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
     require_authenticated_registry_checkpoint: bool = False,
     registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
     require_registry_checkpoint_quorum: bool = False,
     require_registry_checkpoint_snapshot: bool = False,
+    require_registry_checkpoint_history: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -200,6 +202,7 @@ def authority_registry_blockers(
     failures: list[str] = []
     authenticated_checkpoint = None
     signed_many = list(signed_registry_checkpoints or [])
+    observed_many = list(observed_registry_checkpoints or [])
     if signed_registry_checkpoint is not None and signed_many:
         failures.append("both singular and quorum registry checkpoints are configured")
     signed_candidates = (
@@ -212,52 +215,57 @@ def authority_registry_blockers(
     checkpoint_keys = {
         (key.issuer, key.key_id): key for key in (trusted_registry_checkpoint_keys or [])
     }
-    valid_checkpoints: list[
-        tuple[RegistryCheckpointScope, TrustedRegistryCheckpointKey]
-    ] = []
-    for signed_checkpoint in signed_candidates:
-        checkpoint_scope = signed_checkpoint.scope
-        checkpoint_key = checkpoint_keys.get(
-            (checkpoint_scope.issuer, checkpoint_scope.key_id)
-        )
-        if checkpoint_key is None:
-            failures.append("signed registry checkpoint uses an untrusted issuer or key")
-        elif checkpoint_key.status != "active":
-            failures.append("signed registry checkpoint uses a revoked key")
-        else:
-            try:
-                from cryptography.exceptions import InvalidSignature
-                from cryptography.hazmat.primitives import serialization
-                from cryptography.hazmat.primitives.asymmetric.ed25519 import (
-                    Ed25519PublicKey,
-                )
+    valid_checkpoints: list[tuple[RegistryCheckpointScope, TrustedRegistryCheckpointKey]] = []
+    valid_observed: list[tuple[RegistryCheckpointScope, TrustedRegistryCheckpointKey]] = []
 
-                signature = base64.b64decode(
-                    signed_checkpoint.signature_b64, validate=True
+    def validate_checkpoints(signed_rows, destination, *, observed=False):
+        prefix = "observed " if observed else ""
+        for signed_checkpoint in signed_rows:
+            checkpoint_scope = signed_checkpoint.scope
+            checkpoint_key = checkpoint_keys.get((checkpoint_scope.issuer, checkpoint_scope.key_id))
+            if checkpoint_key is None:
+                failures.append(
+                    f"{prefix}signed registry checkpoint uses an untrusted issuer or key"
                 )
-
-                public_key = serialization.load_pem_public_key(
-                    checkpoint_key.public_key_pem.encode()
-                )
-                if not isinstance(public_key, Ed25519PublicKey):
-                    failures.append("trusted registry checkpoint key is not Ed25519")
-                else:
-                    public_key.verify(
-                        signature,
-                        canonical_registry_checkpoint_payload(checkpoint_scope),
+            elif checkpoint_key.status != "active":
+                failures.append(f"{prefix}signed registry checkpoint uses a revoked key")
+            else:
+                try:
+                    from cryptography.exceptions import InvalidSignature
+                    from cryptography.hazmat.primitives import serialization
+                    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+                        Ed25519PublicKey,
                     )
-                    valid_checkpoints.append((checkpoint_scope, checkpoint_key))
-            except (ValueError, TypeError, binascii.Error):
-                failures.append("registry checkpoint signature encoding or key is invalid")
-            except InvalidSignature:
-                failures.append("registry checkpoint signature is invalid")
-    if signed_many:
-        quorum = registry_checkpoint_quorum or RegistryCheckpointQuorumPolicy()
+
+                    signature = base64.b64decode(signed_checkpoint.signature_b64, validate=True)
+                    public_key = serialization.load_pem_public_key(
+                        checkpoint_key.public_key_pem.encode()
+                    )
+                    if not isinstance(public_key, Ed25519PublicKey):
+                        failures.append(f"{prefix}trusted registry checkpoint key is not Ed25519")
+                    else:
+                        public_key.verify(
+                            signature,
+                            canonical_registry_checkpoint_payload(checkpoint_scope),
+                        )
+                        destination.append((checkpoint_scope, checkpoint_key))
+                except (ValueError, TypeError, binascii.Error):
+                    failures.append(
+                        f"{prefix}registry checkpoint signature encoding or key is invalid"
+                    )
+                except InvalidSignature:
+                    failures.append(f"{prefix}registry checkpoint signature is invalid")
+
+    validate_checkpoints(signed_candidates, valid_checkpoints)
+    validate_checkpoints(observed_many, valid_observed, observed=True)
+    quorum = registry_checkpoint_quorum or RegistryCheckpointQuorumPolicy()
+
+    def qualifying_statements(valid_rows):
         groups: dict[
             tuple[str, int, str],
             tuple[set[tuple[str, str]], set[str]],
         ] = {}
-        for scope, key in valid_checkpoints:
+        for scope, key in valid_rows:
             identities, domains = groups.setdefault(
                 (
                     scope.registry_namespace,
@@ -269,29 +277,30 @@ def authority_registry_blockers(
             identities.add((scope.issuer, scope.key_id))
             if key.trust_domain is not None:
                 domains.add(key.trust_domain)
-        qualifying = [
+        return [
             statement
             for statement, (identities, domains) in groups.items()
             if len(identities) >= quorum.minimum_signatures
             and len(domains) >= quorum.minimum_trust_domains
         ]
+
+    qualifying_observed = qualifying_statements(valid_observed)
+    if signed_many:
+        qualifying = qualifying_statements(valid_checkpoints)
         statement_digests: dict[tuple[str, int], set[str]] = {}
         for namespace, epoch, digest in qualifying:
             statement_digests.setdefault((namespace, epoch), set()).add(digest)
-        equivocating = any(
-            len(digests) > 1 for digests in statement_digests.values()
-        )
+        equivocating = any(len(digests) > 1 for digests in statement_digests.values())
         namespaces = {namespace for namespace, _, _ in qualifying}
         if equivocating:
-            failures.append(
-                "registry checkpoint quorum equivocates at one namespace and epoch"
-            )
+            failures.append("registry checkpoint quorum equivocates at one namespace and epoch")
         elif len(namespaces) > 1:
             failures.append("registry checkpoint quorum endorses conflicting namespaces")
         elif qualifying:
             namespace = next(iter(namespaces))
             floor = max(
-                epoch for candidate_namespace, epoch, _ in qualifying
+                epoch
+                for candidate_namespace, epoch, _ in qualifying
                 if candidate_namespace == namespace
             )
             authenticated_checkpoint = next(
@@ -314,12 +323,22 @@ def authority_registry_blockers(
         failures.append("authenticated registry checkpoint is not configured")
     if require_registry_checkpoint_quorum and not signed_many:
         failures.append("registry checkpoint quorum is not configured")
+    if require_registry_checkpoint_history and not observed_many:
+        failures.append("persisted registry checkpoint history is not configured")
+    history_digests: dict[tuple[str, int], set[str]] = {}
+    for namespace, epoch, digest in [
+        *qualifying_statements(valid_checkpoints),
+        *qualifying_observed,
+    ]:
+        history_digests.setdefault((namespace, epoch), set()).add(digest)
+    if any(len(digests) > 1 for digests in history_digests.values()):
+        failures.append(
+            "persisted registry checkpoint history equivocates at one namespace and epoch"
+        )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:
-        if (
-            effective_checkpoint.registry_namespace != registry.registry_namespace
-        ):
+        if effective_checkpoint.registry_namespace != registry.registry_namespace:
             failures.append(
                 "trusted registry checkpoint namespace does not match authority registry: "
                 f"{effective_checkpoint.registry_namespace}/"
@@ -332,12 +351,9 @@ def authority_registry_blockers(
                 f"{effective_checkpoint.minimum_registry_epoch}"
             )
         if require_registry_checkpoint_snapshot:
-            checkpoint_digest = getattr(
-                effective_checkpoint, "authority_registry_sha256", ""
-            )
-            if (
-                len(checkpoint_digest) != 64
-                or any(character not in "0123456789abcdef" for character in checkpoint_digest)
+            checkpoint_digest = getattr(effective_checkpoint, "authority_registry_sha256", "")
+            if len(checkpoint_digest) != 64 or any(
+                character not in "0123456789abcdef" for character in checkpoint_digest
             ):
                 failures.append(
                     "registry checkpoint does not bind a valid authority registry digest"

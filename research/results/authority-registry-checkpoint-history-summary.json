@@ -1,0 +1,20 @@
+{
+  "attack_total": 128,
+  "families_blocked": {
+    "key_set": 32,
+    "quorum": 32,
+    "revocation": 32,
+    "trust_domain": 32
+  },
+  "historical_only_quorum_blocked": true,
+  "history_bound_false_passes": 0,
+  "invalid_history_blocked": true,
+  "matching_control_total": 32,
+  "matching_controls_passed": 32,
+  "missing_history_blocked": true,
+  "parent_false_passes": 128,
+  "passed": true,
+  "prior_epoch_control_total": 32,
+  "prior_epoch_controls_passed": 32,
+  "reversed_order_false_passes": 0
+}

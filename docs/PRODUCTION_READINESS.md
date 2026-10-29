@@ -21,6 +21,7 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Hosted auto-planned verdicts fail closed unless an Ed25519 authority attestation passes the configured trusted-registry threshold and exact manuscript, repository, claim, metric, and locator binding.
 - [x] Multi-party authority thresholds distinguish key count from explicitly configured trust-domain count; issuer aliases, missing domain metadata, and revoked-domain keys cannot satisfy independent quorum.
 - [x] Every authority signature binds the exact registry snapshot that supplies public keys, revocation state, trust-domain assignments, and quorum thresholds; substituted registry policy causes abstention.
+- [x] Workflow-supplied signed checkpoint history detects same-epoch registry split views across separate gate invocations; history cannot replace the current quorum, and required history fails closed when omitted.
 - [x] The authority gate supports an independently supplied monotonic registry-epoch floor; exact but obsolete registry snapshots below that floor cause abstention.
 - [ ] A durable external checkpoint advances and serves the trusted minimum registry epoch in production; supporting the gate does not establish that the floor is deployed.
 - [x] The gate can authenticate namespace-and-epoch checkpoint objects against a dedicated Ed25519 trust root; deployment and protection of that trust root remain external requirements.

@@ -193,10 +193,14 @@ def test_two_keys_in_one_trust_domain_do_not_form_independent_quorum():
     item = _bundle()
     private_a, public_a = _keys()
     private_b = Ed25519PrivateKey.from_private_bytes(b"\x08" * 32)
-    public_b = private_b.public_key().public_bytes(
-        serialization.Encoding.PEM,
-        serialization.PublicFormat.SubjectPublicKeyInfo,
-    ).decode()
+    public_b = (
+        private_b.public_key()
+        .public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+        .decode()
+    )
     registry = TrustedAuthorityRegistry(
         minimum_signatures=2,
         minimum_trust_domains=2,
@@ -229,11 +233,15 @@ def test_two_keys_in_one_trust_domain_do_not_form_independent_quorum():
         )
         for issuer, key_id, private in (
             ("board-a", "key-1", private_a),
-            ("board-b", "key-2", private_b.private_bytes(
-                serialization.Encoding.PEM,
-                serialization.PrivateFormat.PKCS8,
-                serialization.NoEncryption(),
-            )),
+            (
+                "board-b",
+                "key-2",
+                private_b.private_bytes(
+                    serialization.Encoding.PEM,
+                    serialization.PrivateFormat.PKCS8,
+                    serialization.NoEncryption(),
+                ),
+            ),
         )
     ]
     gated = gate_hosted_verdict(
@@ -262,10 +270,12 @@ def test_two_explicit_trust_domains_form_independent_quorum():
             TrustedAuthorityKey(
                 issuer=issuer,
                 key_id=f"key-{seed}",
-                public_key_pem=private.public_key().public_bytes(
+                public_key_pem=private.public_key()
+                .public_bytes(
                     serialization.Encoding.PEM,
                     serialization.PublicFormat.SubjectPublicKeyInfo,
-                ).decode(),
+                )
+                .decode(),
                 trust_domain=domain,
             )
         )
@@ -438,7 +448,9 @@ def test_required_registry_freshness_without_floor_fails_closed():
         require_registry_freshness=True,
     )
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
-    assert any("freshness floor is not configured" in reason for reason in gated.verdict_gate_reasons)
+    assert any(
+        "freshness floor is not configured" in reason for reason in gated.verdict_gate_reasons
+    )
 
 
 def test_scoped_checkpoint_rejects_foreign_registry_namespace():
@@ -530,7 +542,10 @@ def test_required_scoped_checkpoint_without_checkpoint_fails_closed():
     )
 
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
-    assert any("scoped trusted registry checkpoint is not configured" in reason for reason in gated.verdict_gate_reasons)
+    assert any(
+        "scoped trusted registry checkpoint is not configured" in reason
+        for reason in gated.verdict_gate_reasons
+    )
 
 
 @pytest.mark.parametrize(
@@ -650,7 +665,10 @@ def test_raw_checkpoint_cannot_satisfy_authenticated_mode():
         require_authenticated_registry_checkpoint=True,
     )
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
-    assert any("authenticated registry checkpoint is not configured" in reason for reason in gated.verdict_gate_reasons)
+    assert any(
+        "authenticated registry checkpoint is not configured" in reason
+        for reason in gated.verdict_gate_reasons
+    )
 
 
 def _quorum_gate(checkpoints, keys):
@@ -796,6 +814,106 @@ def test_snapshot_bound_quorum_rejects_disclosed_same_epoch_equivocation():
     )
     assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
     assert any("equivocates" in reason for reason in gated.verdict_gate_reasons)
+
+
+def _checkpoint_quorum_for_digest(unsigned, digest):
+    return [
+        sign_registry_checkpoint(
+            checkpoint.scope.model_copy(update={"authority_registry_sha256": digest}),
+            _checkpoint_credential(20 + index)[0],
+        )
+        for index, checkpoint in enumerate(unsigned, start=1)
+    ]
+
+
+def test_persisted_checkpoint_history_rejects_withheld_same_epoch_equivocation():
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    fork = registry.model_copy(deep=True)
+    fork.keys[0].trust_domain = "forked-operator"
+    unsigned, keys = _quorum_material()
+    current = _checkpoint_quorum_for_digest(unsigned, authority_registry_sha256(registry))
+    observed = _checkpoint_quorum_for_digest(unsigned, authority_registry_sha256(fork))
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoints=current,
+        observed_registry_checkpoints=observed,
+        trusted_registry_checkpoint_keys=keys,
+        registry_checkpoint_quorum=RegistryCheckpointQuorumPolicy(),
+        require_registry_checkpoint_quorum=True,
+        require_registry_checkpoint_snapshot=True,
+        require_registry_checkpoint_history=True,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("history equivocates" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_persisted_checkpoint_history_accepts_matching_quorum():
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    unsigned, keys = _quorum_material()
+    current = _checkpoint_quorum_for_digest(unsigned, authority_registry_sha256(registry))
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoints=current,
+        observed_registry_checkpoints=current,
+        trusted_registry_checkpoint_keys=keys,
+        registry_checkpoint_quorum=RegistryCheckpointQuorumPolicy(),
+        require_registry_checkpoint_quorum=True,
+        require_registry_checkpoint_snapshot=True,
+        require_registry_checkpoint_history=True,
+    )
+    assert gated.record.verdict == Verdict.VERIFIED
+
+
+def test_required_checkpoint_history_cannot_be_silently_omitted():
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    unsigned, keys = _quorum_material()
+    current = _checkpoint_quorum_for_digest(unsigned, authority_registry_sha256(registry))
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoints=current,
+        observed_registry_checkpoints=[],
+        trusted_registry_checkpoint_keys=keys,
+        registry_checkpoint_quorum=RegistryCheckpointQuorumPolicy(),
+        require_registry_checkpoint_quorum=True,
+        require_registry_checkpoint_snapshot=True,
+        require_registry_checkpoint_history=True,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("history is not configured" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_historical_checkpoint_quorum_cannot_replace_current_quorum():
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    unsigned, keys = _quorum_material()
+    observed = _checkpoint_quorum_for_digest(unsigned, authority_registry_sha256(registry))
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoints=[],
+        observed_registry_checkpoints=observed,
+        trusted_registry_checkpoint_keys=keys,
+        registry_checkpoint_quorum=RegistryCheckpointQuorumPolicy(),
+        require_registry_checkpoint_quorum=True,
+        require_registry_checkpoint_snapshot=True,
+        require_registry_checkpoint_history=True,
+    )
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("quorum is not configured" in reason for reason in gated.verdict_gate_reasons)
 
 
 def test_singular_authenticated_checkpoint_cannot_satisfy_quorum_mode():

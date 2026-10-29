@@ -37,11 +37,13 @@ def environment_verdict_blockers(
     require_registry_checkpoint_scope: bool = False,
     signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
     signed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
+    observed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
     trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
     require_authenticated_registry_checkpoint: bool = False,
     registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
     require_registry_checkpoint_quorum: bool = False,
     require_registry_checkpoint_snapshot: bool = False,
+    require_registry_checkpoint_history: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -62,8 +64,7 @@ def environment_verdict_blockers(
         or _SHA256_RE.fullmatch(bundle.authority_evidence_sha256) is None
     ):
         blockers.append(
-            "auto-planned verification authority is not bound to canonical "
-            "frozen-locator evidence"
+            "auto-planned verification authority is not bound to canonical frozen-locator evidence"
         )
     elif require_registry_authority:
         blockers.extend(
@@ -77,23 +78,22 @@ def environment_verdict_blockers(
                 require_registry_checkpoint_scope=require_registry_checkpoint_scope,
                 signed_registry_checkpoint=signed_registry_checkpoint,
                 signed_registry_checkpoints=signed_registry_checkpoints,
+                observed_registry_checkpoints=observed_registry_checkpoints,
                 trusted_registry_checkpoint_keys=trusted_registry_checkpoint_keys,
                 require_authenticated_registry_checkpoint=(
                     require_authenticated_registry_checkpoint
                 ),
                 registry_checkpoint_quorum=registry_checkpoint_quorum,
                 require_registry_checkpoint_quorum=require_registry_checkpoint_quorum,
-                require_registry_checkpoint_snapshot=(
-                    require_registry_checkpoint_snapshot
-                ),
+                require_registry_checkpoint_snapshot=(require_registry_checkpoint_snapshot),
+                require_registry_checkpoint_history=(require_registry_checkpoint_history),
             )
         )
     if environment.scope_resolution == "ambiguous":
         blockers.append("workflow-scoped dependency environment is ambiguous")
     if environment.historical_fidelity != "constrained":
         blockers.append(
-            "historical dependency fidelity is "
-            f"{environment.historical_fidelity}, not constrained"
+            f"historical dependency fidelity is {environment.historical_fidelity}, not constrained"
         )
     if build.plan.dependency_precision != "hash-pinned":
         blockers.append(
@@ -109,9 +109,7 @@ def environment_verdict_blockers(
     elif not is_immutable_image_id(bundle.execution.image_id):
         blockers.append("execution lacks a canonical immutable SHA-256 image ID")
     elif bundle.execution.image_id != build.image_id:
-        blockers.append(
-            "executed image does not match the audited built environment image ID"
-        )
+        blockers.append("executed image does not match the audited built environment image ID")
 
     return blockers
 
@@ -129,11 +127,13 @@ def gate_hosted_verdict(
     require_registry_checkpoint_scope: bool = False,
     signed_registry_checkpoint: SignedRegistryCheckpoint | None = None,
     signed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
+    observed_registry_checkpoints: list[SignedRegistryCheckpoint] | None = None,
     trusted_registry_checkpoint_keys: list[TrustedRegistryCheckpointKey] | None = None,
     require_authenticated_registry_checkpoint: bool = False,
     registry_checkpoint_quorum: RegistryCheckpointQuorumPolicy | None = None,
     require_registry_checkpoint_quorum: bool = False,
     require_registry_checkpoint_snapshot: bool = False,
+    require_registry_checkpoint_history: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -156,11 +156,13 @@ def gate_hosted_verdict(
         require_registry_checkpoint_scope=require_registry_checkpoint_scope,
         signed_registry_checkpoint=signed_registry_checkpoint,
         signed_registry_checkpoints=signed_registry_checkpoints,
+        observed_registry_checkpoints=observed_registry_checkpoints,
         trusted_registry_checkpoint_keys=trusted_registry_checkpoint_keys,
         require_authenticated_registry_checkpoint=require_authenticated_registry_checkpoint,
         registry_checkpoint_quorum=registry_checkpoint_quorum,
         require_registry_checkpoint_quorum=require_registry_checkpoint_quorum,
         require_registry_checkpoint_snapshot=require_registry_checkpoint_snapshot,
+        require_registry_checkpoint_history=require_registry_checkpoint_history,
     )
     if not blockers:
         return bundle
@@ -172,7 +174,6 @@ def gate_hosted_verdict(
     gated.record.verdict = Verdict.UNABLE_TO_VERIFY
     gated.record.rationale = (
         f"Hosted environment-fidelity gate suppressed provisional "
-        f"{raw_verdict.value}: " + "; ".join(blockers) + ". "
-        + gated.record.rationale
+        f"{raw_verdict.value}: " + "; ".join(blockers) + ". " + gated.record.rationale
     )
     return gated
