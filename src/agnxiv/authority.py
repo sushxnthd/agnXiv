@@ -364,7 +364,11 @@ def authority_registry_blockers(
         failures.append(
             "persisted registry checkpoint history equivocates at one namespace and epoch"
         )
-    if require_registry_checkpoint_chain or require_registry_checkpoint_transitive_chain:
+    if (
+        require_registry_checkpoint_chain
+        or require_registry_checkpoint_transitive_chain
+        or require_registry_checkpoint_root
+    ):
         if not qualifying_current or not qualifying_observed:
             failures.append("registry checkpoint history chain is not configured")
         elif authenticated_checkpoint is not None:
@@ -420,7 +424,9 @@ def authority_registry_blockers(
                                 "registry checkpoint history-chain link does not match the latest retained quorum"
                             )
 
-    if require_registry_checkpoint_transitive_chain and qualifying_observed:
+    if (
+        require_registry_checkpoint_transitive_chain or require_registry_checkpoint_root
+    ) and qualifying_observed:
         if authenticated_checkpoint is None:
             failures.append("transitive registry checkpoint history chain is not configured")
         else:

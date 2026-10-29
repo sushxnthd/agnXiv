@@ -30,8 +30,10 @@ Raw compressed evidence, summary, and audit files reproduce byte-for-byte.
 Trusted workflows can enable `require_registry_checkpoint_root=True` and pass
 `trusted_registry_checkpoint_root_statement_sha256`.  A decisive hosted verdict
 is then suppressed unless the oldest disclosed qualifying checkpoint commits
-to exactly that namespace, epoch, and registry snapshot.  The production gate
-executes and archives the attack matrix and zero-import audit.
+to exactly that namespace, epoch, and registry snapshot.  Root mode also
+enforces latest-link and full transitive-chain validation, preventing a caller
+from accidentally pinning a root without checking the path from it.  The
+production gate executes and archives the attack matrix and zero-import audit.
 
 ## Reproduce
 

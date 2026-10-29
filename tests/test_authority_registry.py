@@ -975,7 +975,9 @@ def test_transitive_chain_accepts_fully_linked_history():
     assert _transitive_chain_case().record.verdict == Verdict.VERIFIED
 
 
-def _pinned_root_case(*, truncate=False, pin_mode="correct"):
+def _pinned_root_case(
+    *, truncate=False, pin_mode="correct", transitive=True, detached=False
+):
     item, registry, _, _ = _authenticated_checkpoint_case()
     unsigned, keys = _quorum_material()
     root = registry.model_copy(deep=True)
@@ -999,7 +1001,7 @@ def _pinned_root_case(*, truncate=False, pin_mode="correct"):
         unsigned,
         epoch=prior.registry_epoch,
         digest=authority_registry_sha256(prior),
-        previous=root_statement,
+        previous=("0" * 64 if detached else root_statement),
     )
     pins = {
         "correct": root_statement,
@@ -1026,7 +1028,7 @@ def _pinned_root_case(*, truncate=False, pin_mode="correct"):
         require_registry_checkpoint_snapshot=True,
         require_registry_checkpoint_history=True,
         require_registry_checkpoint_chain=True,
-        require_registry_checkpoint_transitive_chain=True,
+        require_registry_checkpoint_transitive_chain=transitive,
         trusted_registry_checkpoint_root_statement_sha256=pins[pin_mode],
         require_registry_checkpoint_root=True,
     )
@@ -1040,6 +1042,12 @@ def test_pinned_root_rejects_valid_truncated_suffix():
 
 def test_pinned_root_accepts_complete_history():
     assert _pinned_root_case().record.verdict == Verdict.VERIFIED
+
+
+def test_pinned_root_mode_implies_transitive_chain_validation():
+    gated = _pinned_root_case(transitive=False, detached=True)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("adjacent retained quorum" in reason for reason in gated.verdict_gate_reasons)
 
 
 @pytest.mark.parametrize("pin_mode", ("missing", "malformed", "wrong"))
