@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
+import itertools
 import json
 from datetime import UTC, datetime
 from typing import Any, Literal
@@ -210,6 +211,7 @@ def authority_registry_blockers(
     require_registry_checkpoint_snapshot: bool = False,
     require_registry_checkpoint_history: bool = False,
     require_registry_checkpoint_chain: bool = False,
+    require_registry_checkpoint_transitive_chain: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -360,7 +362,7 @@ def authority_registry_blockers(
         failures.append(
             "persisted registry checkpoint history equivocates at one namespace and epoch"
         )
-    if require_registry_checkpoint_chain:
+    if require_registry_checkpoint_chain or require_registry_checkpoint_transitive_chain:
         if not qualifying_current or not qualifying_observed:
             failures.append("registry checkpoint history chain is not configured")
         elif authenticated_checkpoint is not None:
@@ -415,6 +417,45 @@ def authority_registry_blockers(
                             failures.append(
                                 "registry checkpoint history-chain link does not match the latest retained quorum"
                             )
+
+    if require_registry_checkpoint_transitive_chain and qualifying_observed:
+        if authenticated_checkpoint is None:
+            failures.append("transitive registry checkpoint history chain is not configured")
+        else:
+            namespace = authenticated_checkpoint.registry_namespace
+            historical = sorted(
+                (statement for statement in qualifying_observed if statement[0] == namespace),
+                key=lambda statement: statement[1],
+            )
+            by_epoch: dict[int, set[tuple[str, int, str, str]]] = {}
+            for statement in historical:
+                by_epoch.setdefault(statement[1], set()).add(statement)
+            if any(len(statements) != 1 for statements in by_epoch.values()):
+                failures.append(
+                    "transitive registry checkpoint history chain has an ambiguous retained epoch"
+                )
+            else:
+                ordered = [next(iter(by_epoch[epoch])) for epoch in sorted(by_epoch)]
+                for predecessor, successor in itertools.pairwise(ordered):
+                    if successor[1] <= predecessor[1]:
+                        failures.append(
+                            "transitive registry checkpoint history chain does not advance the epoch"
+                        )
+                        break
+                    link = successor[3]
+                    if len(link) != 64 or any(
+                        character not in "0123456789abcdef" for character in link
+                    ):
+                        failures.append(
+                            "transitive registry checkpoint history-chain link is missing or invalid"
+                        )
+                        break
+                    expected_link = registry_checkpoint_statement_sha256(*predecessor[:3])
+                    if link != expected_link:
+                        failures.append(
+                            "transitive registry checkpoint history-chain link does not match the adjacent retained quorum"
+                        )
+                        break
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:

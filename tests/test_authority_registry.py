@@ -911,6 +911,70 @@ def test_checkpoint_history_chain_requires_strict_epoch_advance():
     assert any("does not advance" in reason for reason in gated.verdict_gate_reasons)
 
 
+def _transitive_chain_case(*, detached=False, transitive=True):
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    unsigned, keys = _quorum_material()
+    root = registry.model_copy(deep=True)
+    root.registry_epoch = registry.registry_epoch - 2
+    prior = registry.model_copy(deep=True)
+    prior.registry_epoch = registry.registry_epoch - 1
+    root_digest = authority_registry_sha256(root)
+    prior_digest = authority_registry_sha256(prior)
+    root_statement = registry_checkpoint_statement_sha256(
+        root.registry_namespace, root.registry_epoch, root_digest
+    )
+    prior_statement = registry_checkpoint_statement_sha256(
+        prior.registry_namespace, prior.registry_epoch, prior_digest
+    )
+    observed = [
+        *_checkpoint_quorum_for_statement(
+            unsigned, epoch=root.registry_epoch, digest=root_digest
+        ),
+        *_checkpoint_quorum_for_statement(
+            unsigned,
+            epoch=prior.registry_epoch,
+            digest=prior_digest,
+            previous=("0" * 64 if detached else root_statement),
+        ),
+    ]
+    current = _checkpoint_quorum_for_statement(
+        unsigned,
+        epoch=registry.registry_epoch,
+        digest=authority_registry_sha256(registry),
+        previous=prior_statement,
+    )
+    return gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoints=current,
+        observed_registry_checkpoints=observed,
+        trusted_registry_checkpoint_keys=keys,
+        registry_checkpoint_quorum=RegistryCheckpointQuorumPolicy(),
+        require_registry_checkpoint_quorum=True,
+        require_registry_checkpoint_snapshot=True,
+        require_registry_checkpoint_history=True,
+        require_registry_checkpoint_chain=True,
+        require_registry_checkpoint_transitive_chain=transitive,
+    )
+
+
+def test_latest_link_chain_accepts_detached_older_prefix():
+    assert _transitive_chain_case(detached=True, transitive=False).record.verdict == Verdict.VERIFIED
+
+
+def test_transitive_chain_rejects_detached_older_prefix():
+    gated = _transitive_chain_case(detached=True)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("adjacent retained quorum" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_transitive_chain_accepts_fully_linked_history():
+    assert _transitive_chain_case().record.verdict == Verdict.VERIFIED
+
+
 def test_persisted_checkpoint_history_rejects_withheld_same_epoch_equivocation():
     item, registry, _, _ = _authenticated_checkpoint_case()
     fork = registry.model_copy(deep=True)

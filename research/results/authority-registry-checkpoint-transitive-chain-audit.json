@@ -1,0 +1,12 @@
+{
+  "attack_total": 128,
+  "control_total": 32,
+  "linked_controls_passed": 32,
+  "parent_false_passes": 128,
+  "passed": true,
+  "production_module_imports": 0,
+  "reconstructed_registry_digests": 480,
+  "reconstructed_statement_links": 320,
+  "transitive_false_passes": 0,
+  "verified_signatures": 960
+}

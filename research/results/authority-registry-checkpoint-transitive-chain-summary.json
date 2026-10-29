@@ -1,0 +1,22 @@
+{
+  "attack_total": 128,
+  "control_total": 32,
+  "families_blocked": {
+    "key_set": 32,
+    "quorum": 32,
+    "revocation": 32,
+    "trust_domain": 32
+  },
+  "linked_controls_passed": 32,
+  "negative_controls": {
+    "backward_unknown_link_blocked": true,
+    "malformed_historical_link_blocked": true,
+    "missing_historical_link_blocked": true,
+    "mixed_historical_links_blocked": true,
+    "skipped_historical_link_blocked": true
+  },
+  "parent_false_passes": 128,
+  "passed": true,
+  "reversed_order_false_passes": 0,
+  "transitive_false_passes": 0
+}
