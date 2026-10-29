@@ -14,6 +14,7 @@ from agnxiv.authority import (
     TrustedRegistryCheckpointKey,
     authority_registry_sha256,
     authority_scope_for_bundle,
+    registry_checkpoint_statement_sha256,
     sign_authority_scope,
     sign_registry_checkpoint,
 )
@@ -824,6 +825,90 @@ def _checkpoint_quorum_for_digest(unsigned, digest):
         )
         for index, checkpoint in enumerate(unsigned, start=1)
     ]
+
+
+def _checkpoint_quorum_for_statement(unsigned, *, epoch, digest, previous=""):
+    return [
+        sign_registry_checkpoint(
+            checkpoint.scope.model_copy(
+                update={
+                    "minimum_registry_epoch": epoch,
+                    "authority_registry_sha256": digest,
+                    "previous_statement_sha256": previous,
+                }
+            ),
+            _checkpoint_credential(20 + index)[0],
+        )
+        for index, checkpoint in enumerate(unsigned, start=1)
+    ]
+
+
+def _chain_case(*, link_mode="correct", historical_epoch=40):
+    item, registry, _, _ = _authenticated_checkpoint_case()
+    prior = registry.model_copy(deep=True)
+    prior.registry_epoch = historical_epoch
+    unsigned, keys = _quorum_material()
+    prior_digest = authority_registry_sha256(prior)
+    observed = _checkpoint_quorum_for_statement(
+        unsigned, epoch=historical_epoch, digest=prior_digest
+    )
+    expected = registry_checkpoint_statement_sha256(
+        prior.registry_namespace, historical_epoch, prior_digest
+    )
+    if link_mode == "correct":
+        links = (expected, expected)
+    elif link_mode == "missing":
+        links = ("", "")
+    elif link_mode == "mixed":
+        links = (expected, "0" * 64)
+    else:
+        links = ("0" * 64, "0" * 64)
+    current = [
+        sign_registry_checkpoint(
+            checkpoint.scope.model_copy(
+                update={
+                    "minimum_registry_epoch": registry.registry_epoch,
+                    "authority_registry_sha256": authority_registry_sha256(registry),
+                    "previous_statement_sha256": links[index - 1],
+                }
+            ),
+            _checkpoint_credential(20 + index)[0],
+        )
+        for index, checkpoint in enumerate(unsigned, start=1)
+    ]
+    gated = gate_hosted_verdict(
+        item,
+        _build(),
+        trusted_authority_registry=registry,
+        require_registry_authority=True,
+        authority_validation_time=NOW,
+        signed_registry_checkpoints=current,
+        observed_registry_checkpoints=observed,
+        trusted_registry_checkpoint_keys=keys,
+        registry_checkpoint_quorum=RegistryCheckpointQuorumPolicy(),
+        require_registry_checkpoint_quorum=True,
+        require_registry_checkpoint_snapshot=True,
+        require_registry_checkpoint_history=True,
+        require_registry_checkpoint_chain=True,
+    )
+    return gated
+
+
+def test_checkpoint_history_chain_accepts_correct_epoch_advance():
+    assert _chain_case().record.verdict == Verdict.VERIFIED
+
+
+@pytest.mark.parametrize("link_mode", ("missing", "mixed", "detached"))
+def test_checkpoint_history_chain_rejects_detached_or_mixed_link(link_mode):
+    gated = _chain_case(link_mode=link_mode)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("history-chain" in reason or "history chain" in reason for reason in gated.verdict_gate_reasons)
+
+
+def test_checkpoint_history_chain_requires_strict_epoch_advance():
+    gated = _chain_case(historical_epoch=41)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("does not advance" in reason for reason in gated.verdict_gate_reasons)
 
 
 def test_persisted_checkpoint_history_rejects_withheld_same_epoch_equivocation():

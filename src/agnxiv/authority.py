@@ -57,12 +57,13 @@ class TrustedRegistryCheckpoint(BaseModel):
 class RegistryCheckpointScope(BaseModel):
     """Canonical freshness statement issued outside the protected registry."""
 
-    schema_version: str = "agnxiv.authority-registry-checkpoint-scope/1"
+    schema_version: str = "agnxiv.authority-registry-checkpoint-scope/2"
     issuer: str = Field(min_length=1)
     key_id: str = Field(min_length=1)
     registry_namespace: str = Field(min_length=1)
     minimum_registry_epoch: int = Field(ge=0)
     authority_registry_sha256: str = Field(default="", min_length=0, max_length=64)
+    previous_statement_sha256: str = Field(default="", min_length=0, max_length=64)
 
 
 class SignedRegistryCheckpoint(BaseModel):
@@ -104,6 +105,25 @@ def canonical_registry_checkpoint_payload(scope: RegistryCheckpointScope) -> byt
         separators=(",", ":"),
         ensure_ascii=False,
     ).encode("utf-8")
+
+
+def registry_checkpoint_statement_sha256(
+    registry_namespace: str,
+    minimum_registry_epoch: int,
+    authority_registry_sha256: str,
+) -> str:
+    """Digest one quorum statement independently of its signer set."""
+    payload = json.dumps(
+        {
+            "authority_registry_sha256": authority_registry_sha256,
+            "minimum_registry_epoch": minimum_registry_epoch,
+            "registry_namespace": registry_namespace,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def sign_registry_checkpoint(
@@ -189,6 +209,7 @@ def authority_registry_blockers(
     require_registry_checkpoint_quorum: bool = False,
     require_registry_checkpoint_snapshot: bool = False,
     require_registry_checkpoint_history: bool = False,
+    require_registry_checkpoint_chain: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -262,7 +283,7 @@ def authority_registry_blockers(
 
     def qualifying_statements(valid_rows):
         groups: dict[
-            tuple[str, int, str],
+            tuple[str, int, str, str],
             tuple[set[tuple[str, str]], set[str]],
         ] = {}
         for scope, key in valid_rows:
@@ -271,6 +292,7 @@ def authority_registry_blockers(
                     scope.registry_namespace,
                     scope.minimum_registry_epoch,
                     scope.authority_registry_sha256,
+                    scope.previous_statement_sha256,
                 ),
                 (set(), set()),
             )
@@ -285,13 +307,15 @@ def authority_registry_blockers(
         ]
 
     qualifying_observed = qualifying_statements(valid_observed)
+    qualifying_current = []
     if signed_many:
         qualifying = qualifying_statements(valid_checkpoints)
+        qualifying_current = qualifying
         statement_digests: dict[tuple[str, int], set[str]] = {}
-        for namespace, epoch, digest in qualifying:
+        for namespace, epoch, digest, _ in qualifying:
             statement_digests.setdefault((namespace, epoch), set()).add(digest)
         equivocating = any(len(digests) > 1 for digests in statement_digests.values())
-        namespaces = {namespace for namespace, _, _ in qualifying}
+        namespaces = {namespace for namespace, _, _, _ in qualifying}
         if equivocating:
             failures.append("registry checkpoint quorum equivocates at one namespace and epoch")
         elif len(namespaces) > 1:
@@ -300,7 +324,7 @@ def authority_registry_blockers(
             namespace = next(iter(namespaces))
             floor = max(
                 epoch
-                for candidate_namespace, epoch, _ in qualifying
+                for candidate_namespace, epoch, _, _ in qualifying
                 if candidate_namespace == namespace
             )
             authenticated_checkpoint = next(
@@ -312,6 +336,7 @@ def authority_registry_blockers(
                     scope.registry_namespace,
                     scope.minimum_registry_epoch,
                     scope.authority_registry_sha256,
+                    scope.previous_statement_sha256,
                 )
                 in qualifying
             )
@@ -326,7 +351,7 @@ def authority_registry_blockers(
     if require_registry_checkpoint_history and not observed_many:
         failures.append("persisted registry checkpoint history is not configured")
     history_digests: dict[tuple[str, int], set[str]] = {}
-    for namespace, epoch, digest in [
+    for namespace, epoch, digest, _ in [
         *qualifying_statements(valid_checkpoints),
         *qualifying_observed,
     ]:
@@ -335,6 +360,61 @@ def authority_registry_blockers(
         failures.append(
             "persisted registry checkpoint history equivocates at one namespace and epoch"
         )
+    if require_registry_checkpoint_chain:
+        if not qualifying_current or not qualifying_observed:
+            failures.append("registry checkpoint history chain is not configured")
+        elif authenticated_checkpoint is not None:
+            namespace = authenticated_checkpoint.registry_namespace
+            current_epoch = authenticated_checkpoint.minimum_registry_epoch
+            current_digest = authenticated_checkpoint.authority_registry_sha256
+            historical = [
+                statement
+                for statement in qualifying_observed
+                if statement[0] == namespace
+            ]
+            if not historical:
+                failures.append(
+                    "registry checkpoint history chain has no prior quorum in the current namespace"
+                )
+            else:
+                latest_epoch = max(statement[1] for statement in historical)
+                latest = {
+                    statement[:3]
+                    for statement in historical
+                    if statement[1] == latest_epoch
+                }
+                if len(latest) != 1:
+                    failures.append(
+                        "registry checkpoint history chain has an ambiguous latest statement"
+                    )
+                elif current_epoch <= latest_epoch:
+                    failures.append(
+                        "registry checkpoint history chain does not advance the epoch"
+                    )
+                else:
+                    latest_statement = next(iter(latest))
+                    expected_link = registry_checkpoint_statement_sha256(*latest_statement)
+                    links = {
+                        statement[3]
+                        for statement in qualifying_current
+                        if statement[:3] == (namespace, current_epoch, current_digest)
+                    }
+                    if len(links) != 1:
+                        failures.append(
+                            "registry checkpoint quorum disagrees on its history-chain link"
+                        )
+                    else:
+                        link = next(iter(links))
+                        if len(link) != 64 or any(
+                            character not in "0123456789abcdef" for character in link
+                        ):
+                            failures.append(
+                                "registry checkpoint history-chain link is missing or invalid"
+                            )
+                        elif link != expected_link:
+                            failures.append(
+                                "registry checkpoint history-chain link does not match the latest retained quorum"
+                            )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:
