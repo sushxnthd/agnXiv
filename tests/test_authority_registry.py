@@ -14,6 +14,7 @@ from agnxiv.authority import (
     TrustedRegistryCheckpointKey,
     authority_registry_sha256,
     authority_scope_for_bundle,
+    registry_checkpoint_linked_statement_sha256,
     registry_checkpoint_statement_sha256,
     sign_authority_scope,
     sign_registry_checkpoint,
@@ -27,6 +28,20 @@ from agnxiv.verdict_gate import gate_hosted_verdict
 from agnxiv.verify import verify_numeric_claim
 
 NOW = datetime(2026, 10, 27, tzinfo=UTC)
+
+
+def test_linked_checkpoint_digest_commits_to_predecessor_without_signer_identity():
+    first = registry_checkpoint_linked_statement_sha256(
+        "reviewers", 7, "a" * 64, "b" * 64
+    )
+    repeated = registry_checkpoint_linked_statement_sha256(
+        "reviewers", 7, "a" * 64, "b" * 64
+    )
+    alternate_path = registry_checkpoint_linked_statement_sha256(
+        "reviewers", 7, "a" * 64, "c" * 64
+    )
+    assert first == repeated
+    assert first != alternate_path
 
 
 def _keys():

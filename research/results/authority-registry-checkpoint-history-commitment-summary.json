@@ -1,0 +1,23 @@
+{
+  "attack_total": 128,
+  "control_total": 32,
+  "families_blocked": {
+    "key_set": 32,
+    "quorum": 32,
+    "revocation": 32,
+    "trust_domain": 32
+  },
+  "negative_controls": {
+    "malformed_commitment_blocked": true,
+    "missing_commitment_blocked": true,
+    "stale_commitment_blocked": true,
+    "without_root_mode_blocked": true,
+    "without_tip_mode_blocked": true,
+    "without_transitive_mode_blocked": true,
+    "wrong_path_commitment_blocked": true
+  },
+  "parent_endpoint_pinning_false_passes": 128,
+  "passed": true,
+  "recursive_commitment_controls_passed": 32,
+  "recursive_commitment_false_passes": 0
+}

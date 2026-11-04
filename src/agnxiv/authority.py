@@ -127,6 +127,27 @@ def registry_checkpoint_statement_sha256(
     return hashlib.sha256(payload).hexdigest()
 
 
+def registry_checkpoint_linked_statement_sha256(
+    registry_namespace: str,
+    minimum_registry_epoch: int,
+    authority_registry_sha256: str,
+    previous_statement_sha256: str,
+) -> str:
+    """Digest one statement and its predecessor commitment, excluding signers."""
+    payload = json.dumps(
+        {
+            "authority_registry_sha256": authority_registry_sha256,
+            "minimum_registry_epoch": minimum_registry_epoch,
+            "previous_statement_sha256": previous_statement_sha256,
+            "registry_namespace": registry_namespace,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
 def sign_registry_checkpoint(
     scope: RegistryCheckpointScope,
     private_key_pem: bytes,
@@ -216,6 +237,8 @@ def authority_registry_blockers(
     require_registry_checkpoint_root: bool = False,
     trusted_registry_checkpoint_tip_statement_sha256: str | None = None,
     require_registry_checkpoint_tip: bool = False,
+    trusted_registry_checkpoint_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_history_commitment: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -371,6 +394,7 @@ def authority_registry_blockers(
         or require_registry_checkpoint_transitive_chain
         or require_registry_checkpoint_root
         or require_registry_checkpoint_tip
+        or require_registry_checkpoint_history_commitment
     ):
         if not qualifying_current or not qualifying_observed:
             failures.append("registry checkpoint history chain is not configured")
@@ -404,7 +428,17 @@ def authority_registry_blockers(
                     )
                 else:
                     latest_statement = next(iter(latest))
-                    expected_link = registry_checkpoint_statement_sha256(*latest_statement)
+                    expected_link = (
+                        registry_checkpoint_linked_statement_sha256(
+                            *next(
+                                statement
+                                for statement in historical
+                                if statement[:3] == latest_statement
+                            )
+                        )
+                        if require_registry_checkpoint_history_commitment
+                        else registry_checkpoint_statement_sha256(*latest_statement)
+                    )
                     links = {
                         statement[3]
                         for statement in qualifying_current
@@ -431,6 +465,7 @@ def authority_registry_blockers(
         require_registry_checkpoint_transitive_chain
         or require_registry_checkpoint_root
         or require_registry_checkpoint_tip
+        or require_registry_checkpoint_history_commitment
     ) and qualifying_observed:
         if authenticated_checkpoint is None:
             failures.append("transitive registry checkpoint history chain is not configured")
@@ -463,7 +498,11 @@ def authority_registry_blockers(
                             "transitive registry checkpoint history-chain link is missing or invalid"
                         )
                         break
-                    expected_link = registry_checkpoint_statement_sha256(*predecessor[:3])
+                    expected_link = (
+                        registry_checkpoint_linked_statement_sha256(*predecessor)
+                        if require_registry_checkpoint_history_commitment
+                        else registry_checkpoint_statement_sha256(*predecessor[:3])
+                    )
                     if link != expected_link:
                         failures.append(
                             "transitive registry checkpoint history-chain link does not match the adjacent retained quorum"
@@ -535,6 +574,71 @@ def authority_registry_blockers(
                 failures.append(
                     "current registry checkpoint does not match the trusted tip statement"
                 )
+
+    if require_registry_checkpoint_history_commitment:
+        if not (
+            require_registry_checkpoint_transitive_chain
+            and require_registry_checkpoint_root
+            and require_registry_checkpoint_tip
+        ):
+            failures.append(
+                "trusted registry checkpoint history commitment requires transitive root-and-tip mode"
+            )
+        commitment = trusted_registry_checkpoint_history_commitment_sha256 or ""
+        if len(commitment) != 64 or any(
+            character not in "0123456789abcdef" for character in commitment
+        ):
+            failures.append(
+                "trusted registry checkpoint history commitment is not configured or invalid"
+            )
+        elif authenticated_checkpoint is None or not qualifying_observed:
+            failures.append(
+                "trusted registry checkpoint history commitment cannot be matched to history"
+            )
+        else:
+            namespace = authenticated_checkpoint.registry_namespace
+            historical = sorted(
+                (statement for statement in qualifying_observed if statement[0] == namespace),
+                key=lambda statement: statement[1],
+            )
+            by_epoch: dict[int, set[tuple[str, int, str, str]]] = {}
+            for statement in historical:
+                by_epoch.setdefault(statement[1], set()).add(statement)
+            current_statements = {
+                statement
+                for statement in qualifying_current
+                if statement[:3]
+                == (
+                    namespace,
+                    authenticated_checkpoint.minimum_registry_epoch,
+                    authenticated_checkpoint.authority_registry_sha256,
+                )
+            }
+            if any(len(statements) != 1 for statements in by_epoch.values()) or len(
+                current_statements
+            ) != 1:
+                failures.append(
+                    "recursive registry checkpoint history commitment is ambiguous"
+                )
+            else:
+                ordered = [next(iter(by_epoch[epoch])) for epoch in sorted(by_epoch)]
+                ordered.append(next(iter(current_statements)))
+                for predecessor, successor in itertools.pairwise(ordered):
+                    expected_link = registry_checkpoint_linked_statement_sha256(
+                        *predecessor
+                    )
+                    if successor[3] != expected_link:
+                        failures.append(
+                            "recursive registry checkpoint history link does not match the adjacent committed quorum"
+                        )
+                        break
+                supplied_commitment = registry_checkpoint_linked_statement_sha256(
+                    *ordered[-1]
+                )
+                if supplied_commitment != commitment:
+                    failures.append(
+                        "current registry checkpoint history does not match the trusted recursive commitment"
+                    )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:

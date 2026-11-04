@@ -1,0 +1,16 @@
+{
+  "attack_total": 128,
+  "control_total": 32,
+  "legacy_statement_links": 320,
+  "parent_endpoint_pinning_false_passes": 128,
+  "passed": true,
+  "production_module_imports": 0,
+  "reconstructed_registry_digests": 640,
+  "recursive_commitment_checks": 320,
+  "recursive_commitment_controls_passed": 32,
+  "recursive_commitment_false_passes": 0,
+  "recursive_statement_links": 640,
+  "trusted_root_pin_checks": 160,
+  "trusted_tip_pin_checks": 160,
+  "verified_signatures": 2880
+}
