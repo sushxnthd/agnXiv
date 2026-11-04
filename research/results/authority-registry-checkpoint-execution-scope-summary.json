@@ -1,0 +1,23 @@
+{
+  "attack_total": 128,
+  "consumer_scoped_false_passes": 128,
+  "control_total": 32,
+  "execution_scoped_controls_passed": 32,
+  "execution_scoped_false_passes": 0,
+  "families_blocked": {
+    "attempt_to_retry": 32,
+    "job_to_job": 32,
+    "matrix_shard_to_shard": 32,
+    "run_to_run": 32
+  },
+  "negative_controls": {
+    "malformed_execution_envelope_blocked": true,
+    "missing_execution_envelope_blocked": true,
+    "missing_execution_scope_blocked": true,
+    "without_consumer_mode_blocked": true,
+    "wrong_attempt_blocked": true,
+    "wrong_job_blocked": true,
+    "wrong_run_blocked": true
+  },
+  "passed": true
+}

@@ -5,6 +5,7 @@ from datetime import datetime
 
 from .authority import (
     RegistryCheckpointConsumerScope,
+    RegistryCheckpointExecutionScope,
     RegistryCheckpointQuorumPolicy,
     SignedRegistryCheckpoint,
     TrustedAuthorityRegistry,
@@ -56,6 +57,9 @@ def environment_verdict_blockers(
     registry_checkpoint_consumer_scope: RegistryCheckpointConsumerScope | None = None,
     trusted_registry_checkpoint_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_consumer_scope: bool = False,
+    registry_checkpoint_execution_scope: RegistryCheckpointExecutionScope | None = None,
+    trusted_registry_checkpoint_execution_scoped_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_execution_scope: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -124,6 +128,13 @@ def environment_verdict_blockers(
                 require_registry_checkpoint_consumer_scope=(
                     require_registry_checkpoint_consumer_scope
                 ),
+                registry_checkpoint_execution_scope=registry_checkpoint_execution_scope,
+                trusted_registry_checkpoint_execution_scoped_history_commitment_sha256=(
+                    trusted_registry_checkpoint_execution_scoped_history_commitment_sha256
+                ),
+                require_registry_checkpoint_execution_scope=(
+                    require_registry_checkpoint_execution_scope
+                ),
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -182,6 +193,9 @@ def gate_hosted_verdict(
     registry_checkpoint_consumer_scope: RegistryCheckpointConsumerScope | None = None,
     trusted_registry_checkpoint_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_consumer_scope: bool = False,
+    registry_checkpoint_execution_scope: RegistryCheckpointExecutionScope | None = None,
+    trusted_registry_checkpoint_execution_scoped_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_execution_scope: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -235,6 +249,13 @@ def gate_hosted_verdict(
         ),
         require_registry_checkpoint_consumer_scope=(
             require_registry_checkpoint_consumer_scope
+        ),
+        registry_checkpoint_execution_scope=registry_checkpoint_execution_scope,
+        trusted_registry_checkpoint_execution_scoped_history_commitment_sha256=(
+            trusted_registry_checkpoint_execution_scoped_history_commitment_sha256
+        ),
+        require_registry_checkpoint_execution_scope=(
+            require_registry_checkpoint_execution_scope
         ),
     )
     if not blockers:

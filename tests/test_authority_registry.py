@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from agnxiv.authority import (
     RegistryCheckpointConsumerScope,
+    RegistryCheckpointExecutionScope,
     RegistryCheckpointQuorumPolicy,
     RegistryCheckpointScope,
     TrustedAuthorityKey,
@@ -15,6 +16,7 @@ from agnxiv.authority import (
     TrustedRegistryCheckpointKey,
     authority_registry_sha256,
     authority_scope_for_bundle,
+    registry_checkpoint_execution_scoped_history_commitment_sha256,
     registry_checkpoint_linked_statement_sha256,
     registry_checkpoint_scoped_history_commitment_sha256,
     registry_checkpoint_statement_sha256,
@@ -77,6 +79,43 @@ def test_consumer_scope_rejects_empty_identity_fields(field):
     values[field] = ""
     with pytest.raises(ValidationError):
         RegistryCheckpointConsumerScope(**values)
+
+
+def test_execution_scoped_commitment_binds_every_execution_dimension():
+    scope = RegistryCheckpointExecutionScope(
+        workflow_run_id="12345", workflow_run_attempt=1, workflow_job_id="verify-311"
+    )
+    original = registry_checkpoint_execution_scoped_history_commitment_sha256(
+        "a" * 64, scope
+    )
+    for field, value in (
+        ("workflow_run_id", "12346"),
+        ("workflow_run_attempt", 2),
+        ("workflow_job_id", "verify-312"),
+    ):
+        changed = scope.model_copy(update={field: value})
+        assert original != registry_checkpoint_execution_scoped_history_commitment_sha256(
+            "a" * 64, changed
+        )
+
+
+@pytest.mark.parametrize("field", ("workflow_run_id", "workflow_job_id"))
+def test_execution_scope_rejects_empty_identity_fields(field):
+    values = {
+        "workflow_run_id": "12345",
+        "workflow_run_attempt": 1,
+        "workflow_job_id": "verify",
+    }
+    values[field] = ""
+    with pytest.raises(ValidationError):
+        RegistryCheckpointExecutionScope(**values)
+
+
+def test_execution_scope_rejects_nonpositive_attempt():
+    with pytest.raises(ValidationError):
+        RegistryCheckpointExecutionScope(
+            workflow_run_id="12345", workflow_run_attempt=0, workflow_job_id="verify"
+        )
 
 
 def _keys():

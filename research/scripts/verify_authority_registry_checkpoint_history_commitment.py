@@ -20,6 +20,7 @@ from verify_authority_registry_checkpoint_snapshot import FAMILIES, attest, regi
 
 from agnxiv.authority import (
     RegistryCheckpointConsumerScope,
+    RegistryCheckpointExecutionScope,
     RegistryCheckpointScope,
     authority_registry_sha256,
     registry_checkpoint_linked_statement_sha256,
@@ -118,6 +119,9 @@ def gate(
     consumer_scope: RegistryCheckpointConsumerScope | None = None,
     scoped_commitment=None,
     require_consumer_scope=False,
+    execution_scope: RegistryCheckpointExecutionScope | None = None,
+    execution_scoped_commitment=None,
+    require_execution_scope=False,
     **requirements,
 ):
     return gate_hosted_verdict(
@@ -146,6 +150,11 @@ def gate(
         registry_checkpoint_consumer_scope=consumer_scope,
         trusted_registry_checkpoint_scoped_history_commitment_sha256=scoped_commitment,
         require_registry_checkpoint_consumer_scope=require_consumer_scope,
+        registry_checkpoint_execution_scope=execution_scope,
+        trusted_registry_checkpoint_execution_scoped_history_commitment_sha256=(
+            execution_scoped_commitment
+        ),
+        require_registry_checkpoint_execution_scope=require_execution_scope,
     )
 
 
