@@ -976,7 +976,14 @@ def test_transitive_chain_accepts_fully_linked_history():
 
 
 def _pinned_root_case(
-    *, truncate=False, pin_mode="correct", transitive=True, detached=False
+    *,
+    truncate=False,
+    pin_mode="correct",
+    transitive=True,
+    detached=False,
+    tip_mode="correct",
+    require_tip=False,
+    require_root=True,
 ):
     item, registry, _, _ = _authenticated_checkpoint_case()
     unsigned, keys = _quorum_material()
@@ -1009,6 +1016,17 @@ def _pinned_root_case(
         "malformed": "abcd",
         "wrong": prior_statement,
     }
+    current_statement = registry_checkpoint_statement_sha256(
+        registry.registry_namespace,
+        registry.registry_epoch,
+        authority_registry_sha256(registry),
+    )
+    tip_pins = {
+        "correct": current_statement,
+        "missing": None,
+        "malformed": "abcd",
+        "stale": prior_statement,
+    }
     return gate_hosted_verdict(
         item,
         _build(),
@@ -1030,7 +1048,9 @@ def _pinned_root_case(
         require_registry_checkpoint_chain=True,
         require_registry_checkpoint_transitive_chain=transitive,
         trusted_registry_checkpoint_root_statement_sha256=pins[pin_mode],
-        require_registry_checkpoint_root=True,
+        require_registry_checkpoint_root=require_root,
+        trusted_registry_checkpoint_tip_statement_sha256=tip_pins[tip_mode],
+        require_registry_checkpoint_tip=require_tip,
     )
 
 
@@ -1053,6 +1073,26 @@ def test_pinned_root_mode_implies_transitive_chain_validation():
 @pytest.mark.parametrize("pin_mode", ("missing", "malformed", "wrong"))
 def test_pinned_root_fails_closed_for_invalid_pin(pin_mode):
     assert _pinned_root_case(pin_mode=pin_mode).record.verdict == Verdict.UNABLE_TO_VERIFY
+
+
+def test_pinned_tip_accepts_current_statement_with_rooted_history():
+    assert _pinned_root_case(require_tip=True).record.verdict == Verdict.VERIFIED
+
+
+@pytest.mark.parametrize("tip_mode", ("missing", "malformed", "stale"))
+def test_pinned_tip_fails_closed_for_invalid_tip(tip_mode):
+    gated = _pinned_root_case(require_tip=True, tip_mode=tip_mode)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any(
+        "tip" in reason and "statement" in reason
+        for reason in gated.verdict_gate_reasons
+    )
+
+
+def test_pinned_tip_requires_root_mode():
+    gated = _pinned_root_case(require_tip=True, require_root=False)
+    assert gated.record.verdict == Verdict.UNABLE_TO_VERIFY
+    assert any("requires trusted root mode" in reason for reason in gated.verdict_gate_reasons)
 
 
 def test_persisted_checkpoint_history_rejects_withheld_same_epoch_equivocation():

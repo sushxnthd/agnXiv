@@ -1,0 +1,24 @@
+{
+  "attack_total": 128,
+  "complete_chain_controls_passed": 32,
+  "control_total": 32,
+  "families_blocked": {
+    "key_set": 32,
+    "quorum": 32,
+    "revocation": 32,
+    "trust_domain": 32
+  },
+  "negative_controls": {
+    "malformed_tip_blocked": true,
+    "missing_tip_blocked": true,
+    "stale_tip_blocked": true,
+    "tip_without_root_blocked": true,
+    "wrong_epoch_tip_blocked": true,
+    "wrong_namespace_tip_blocked": true,
+    "wrong_snapshot_tip_blocked": true
+  },
+  "parent_rooted_false_passes": 128,
+  "passed": true,
+  "pinned_tip_false_passes": 0,
+  "reversed_order_false_passes": 0
+}

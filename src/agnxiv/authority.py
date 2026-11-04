@@ -214,6 +214,8 @@ def authority_registry_blockers(
     require_registry_checkpoint_transitive_chain: bool = False,
     trusted_registry_checkpoint_root_statement_sha256: str | None = None,
     require_registry_checkpoint_root: bool = False,
+    trusted_registry_checkpoint_tip_statement_sha256: str | None = None,
+    require_registry_checkpoint_tip: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -368,6 +370,7 @@ def authority_registry_blockers(
         require_registry_checkpoint_chain
         or require_registry_checkpoint_transitive_chain
         or require_registry_checkpoint_root
+        or require_registry_checkpoint_tip
     ):
         if not qualifying_current or not qualifying_observed:
             failures.append("registry checkpoint history chain is not configured")
@@ -425,7 +428,9 @@ def authority_registry_blockers(
                             )
 
     if (
-        require_registry_checkpoint_transitive_chain or require_registry_checkpoint_root
+        require_registry_checkpoint_transitive_chain
+        or require_registry_checkpoint_root
+        or require_registry_checkpoint_tip
     ) and qualifying_observed:
         if authenticated_checkpoint is None:
             failures.append("transitive registry checkpoint history chain is not configured")
@@ -505,6 +510,31 @@ def authority_registry_blockers(
                         failures.append(
                             "oldest supplied registry checkpoint does not match the trusted root statement"
                         )
+
+    if require_registry_checkpoint_tip:
+        if not require_registry_checkpoint_root:
+            failures.append(
+                "trusted registry checkpoint tip requires trusted root mode"
+            )
+        tip_pin = trusted_registry_checkpoint_tip_statement_sha256 or ""
+        if len(tip_pin) != 64 or any(
+            character not in "0123456789abcdef" for character in tip_pin
+        ):
+            failures.append(
+                "trusted registry checkpoint tip statement digest is not configured or invalid"
+            )
+        elif authenticated_checkpoint is None:
+            failures.append("trusted registry checkpoint tip cannot be matched to current quorum")
+        else:
+            supplied_tip = registry_checkpoint_statement_sha256(
+                authenticated_checkpoint.registry_namespace,
+                authenticated_checkpoint.minimum_registry_epoch,
+                authenticated_checkpoint.authority_registry_sha256,
+            )
+            if supplied_tip != tip_pin:
+                failures.append(
+                    "current registry checkpoint does not match the trusted tip statement"
+                )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:
