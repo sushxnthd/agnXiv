@@ -1,0 +1,15 @@
+{
+  "attack_total": 128,
+  "consumer_scope_payload_checks": 320,
+  "consumer_scoped_controls_passed": 32,
+  "consumer_scoped_false_passes": 0,
+  "control_total": 32,
+  "history_commitment_checks": 160,
+  "matched_consumer_envelopes": 32,
+  "parent_recursive_commitment_false_passes": 128,
+  "passed": true,
+  "production_module_imports": 0,
+  "reconstructed_registry_digests": 480,
+  "recursive_statement_links": 320,
+  "verified_signatures": 960
+}

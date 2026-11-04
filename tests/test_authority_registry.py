@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
 from agnxiv.authority import (
+    RegistryCheckpointConsumerScope,
     RegistryCheckpointQuorumPolicy,
     RegistryCheckpointScope,
     TrustedAuthorityKey,
@@ -15,6 +16,7 @@ from agnxiv.authority import (
     authority_registry_sha256,
     authority_scope_for_bundle,
     registry_checkpoint_linked_statement_sha256,
+    registry_checkpoint_scoped_history_commitment_sha256,
     registry_checkpoint_statement_sha256,
     sign_authority_scope,
     sign_registry_checkpoint,
@@ -42,6 +44,39 @@ def test_linked_checkpoint_digest_commits_to_predecessor_without_signer_identity
     )
     assert first == repeated
     assert first != alternate_path
+
+
+def test_scoped_history_commitment_binds_every_consumer_dimension():
+    scope = RegistryCheckpointConsumerScope(
+        repository="sushxnthd/agnXiv",
+        workflow_ref="verify.yml@refs/heads/main",
+        environment="production",
+    )
+    original = registry_checkpoint_scoped_history_commitment_sha256("a" * 64, scope)
+    assert original == registry_checkpoint_scoped_history_commitment_sha256(
+        "a" * 64, scope
+    )
+    for field, value in (
+        ("repository", "other/repo"),
+        ("workflow_ref", "other.yml@refs/heads/main"),
+        ("environment", "staging"),
+    ):
+        changed = scope.model_copy(update={field: value})
+        assert original != registry_checkpoint_scoped_history_commitment_sha256(
+            "a" * 64, changed
+        )
+
+
+@pytest.mark.parametrize("field", ("repository", "workflow_ref", "environment"))
+def test_consumer_scope_rejects_empty_identity_fields(field):
+    values = {
+        "repository": "sushxnthd/agnXiv",
+        "workflow_ref": "verify.yml@refs/heads/main",
+        "environment": "production",
+    }
+    values[field] = ""
+    with pytest.raises(ValidationError):
+        RegistryCheckpointConsumerScope(**values)
 
 
 def _keys():

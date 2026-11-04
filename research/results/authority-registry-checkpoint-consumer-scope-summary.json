@@ -1,0 +1,23 @@
+{
+  "attack_total": 128,
+  "consumer_scoped_controls_passed": 32,
+  "consumer_scoped_false_passes": 0,
+  "control_total": 32,
+  "families_blocked": {
+    "benchmark_to_external_audit": 32,
+    "paper_review_to_release": 32,
+    "staging_to_production": 32,
+    "tenant_to_tenant": 32
+  },
+  "negative_controls": {
+    "malformed_envelope_blocked": true,
+    "missing_envelope_blocked": true,
+    "missing_scope_blocked": true,
+    "without_history_mode_blocked": true,
+    "wrong_environment_blocked": true,
+    "wrong_repository_blocked": true,
+    "wrong_workflow_blocked": true
+  },
+  "parent_recursive_commitment_false_passes": 128,
+  "passed": true
+}

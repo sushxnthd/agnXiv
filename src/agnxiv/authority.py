@@ -85,6 +85,15 @@ class RegistryCheckpointQuorumPolicy(BaseModel):
     minimum_trust_domains: int = Field(default=2, ge=1)
 
 
+class RegistryCheckpointConsumerScope(BaseModel):
+    """Trusted local identity consuming a committed checkpoint history."""
+
+    schema_version: str = "agnxiv.registry-checkpoint-consumer-scope/1"
+    repository: str = Field(min_length=1)
+    workflow_ref: str = Field(min_length=1)
+    environment: str = Field(min_length=1)
+
+
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
     """Return the exact deterministic policy payload interpreted by the gate."""
     return json.dumps(
@@ -140,6 +149,23 @@ def registry_checkpoint_linked_statement_sha256(
             "minimum_registry_epoch": minimum_registry_epoch,
             "previous_statement_sha256": previous_statement_sha256,
             "registry_namespace": registry_namespace,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def registry_checkpoint_scoped_history_commitment_sha256(
+    history_commitment_sha256: str,
+    consumer_scope: RegistryCheckpointConsumerScope,
+) -> str:
+    """Bind one verified recursive history to its trusted local consumer."""
+    payload = json.dumps(
+        {
+            "consumer_scope": consumer_scope.model_dump(mode="json"),
+            "history_commitment_sha256": history_commitment_sha256,
         },
         sort_keys=True,
         separators=(",", ":"),
@@ -239,6 +265,9 @@ def authority_registry_blockers(
     require_registry_checkpoint_tip: bool = False,
     trusted_registry_checkpoint_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_history_commitment: bool = False,
+    registry_checkpoint_consumer_scope: RegistryCheckpointConsumerScope | None = None,
+    trusted_registry_checkpoint_scoped_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_consumer_scope: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -395,6 +424,7 @@ def authority_registry_blockers(
         or require_registry_checkpoint_root
         or require_registry_checkpoint_tip
         or require_registry_checkpoint_history_commitment
+        or require_registry_checkpoint_consumer_scope
     ):
         if not qualifying_current or not qualifying_observed:
             failures.append("registry checkpoint history chain is not configured")
@@ -466,6 +496,7 @@ def authority_registry_blockers(
         or require_registry_checkpoint_root
         or require_registry_checkpoint_tip
         or require_registry_checkpoint_history_commitment
+        or require_registry_checkpoint_consumer_scope
     ) and qualifying_observed:
         if authenticated_checkpoint is None:
             failures.append("transitive registry checkpoint history chain is not configured")
@@ -639,6 +670,35 @@ def authority_registry_blockers(
                     failures.append(
                         "current registry checkpoint history does not match the trusted recursive commitment"
                     )
+
+    if require_registry_checkpoint_consumer_scope:
+        if not require_registry_checkpoint_history_commitment:
+            failures.append(
+                "consumer-scoped registry checkpoint commitment requires recursive history-commitment mode"
+            )
+        if registry_checkpoint_consumer_scope is None:
+            failures.append("registry checkpoint consumer scope is not configured")
+        scoped_commitment = (
+            trusted_registry_checkpoint_scoped_history_commitment_sha256 or ""
+        )
+        if len(scoped_commitment) != 64 or any(
+            character not in "0123456789abcdef" for character in scoped_commitment
+        ):
+            failures.append(
+                "trusted consumer-scoped registry checkpoint commitment is not configured or invalid"
+            )
+        elif registry_checkpoint_consumer_scope is not None:
+            history_commitment = (
+                trusted_registry_checkpoint_history_commitment_sha256 or ""
+            )
+            supplied_scoped = registry_checkpoint_scoped_history_commitment_sha256(
+                history_commitment,
+                registry_checkpoint_consumer_scope,
+            )
+            if supplied_scoped != scoped_commitment:
+                failures.append(
+                    "registry checkpoint history commitment is bound to a different consumer scope"
+                )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:

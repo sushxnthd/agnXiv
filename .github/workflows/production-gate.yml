@@ -146,6 +146,10 @@ jobs:
             > /tmp/authority-registry-checkpoint-history-commitment.json
           python research/scripts/audit_authority_registry_checkpoint_history_commitment.py \
             > /tmp/authority-registry-checkpoint-history-commitment-audit.json
+          python research/scripts/verify_authority_registry_checkpoint_consumer_scope.py \
+            > /tmp/authority-registry-checkpoint-consumer-scope.json
+          python research/scripts/audit_authority_registry_checkpoint_consumer_scope.py \
+            > /tmp/authority-registry-checkpoint-consumer-scope-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
