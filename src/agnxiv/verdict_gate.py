@@ -12,6 +12,7 @@ from .authority import (
     RegistryCheckpointExecutionScope,
     RegistryCheckpointQuorumPolicy,
     SignedRegistryCheckpoint,
+    SignedRegistryCheckpointDigestAttestation,
     TrustedAuthorityRegistry,
     TrustedRegistryCheckpoint,
     TrustedRegistryCheckpointKey,
@@ -76,6 +77,9 @@ def environment_verdict_blockers(
     registry_checkpoint_digest_attestation_scope: RegistryCheckpointDigestAttestationScope | None = None,
     trusted_registry_checkpoint_digest_attestation_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_digest_attestation_scope: bool = False,
+    signed_registry_checkpoint_digest_attestation: SignedRegistryCheckpointDigestAttestation | None = None,
+    trusted_registry_checkpoint_digest_attestation_public_key_pem: str | None = None,
+    require_registry_checkpoint_digest_attestation_authentication: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -185,6 +189,15 @@ def environment_verdict_blockers(
                 require_registry_checkpoint_digest_attestation_scope=(
                     require_registry_checkpoint_digest_attestation_scope
                 ),
+                signed_registry_checkpoint_digest_attestation=(
+                    signed_registry_checkpoint_digest_attestation
+                ),
+                trusted_registry_checkpoint_digest_attestation_public_key_pem=(
+                    trusted_registry_checkpoint_digest_attestation_public_key_pem
+                ),
+                require_registry_checkpoint_digest_attestation_authentication=(
+                    require_registry_checkpoint_digest_attestation_authentication
+                ),
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -258,6 +271,9 @@ def gate_hosted_verdict(
     registry_checkpoint_digest_attestation_scope: RegistryCheckpointDigestAttestationScope | None = None,
     trusted_registry_checkpoint_digest_attestation_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_digest_attestation_scope: bool = False,
+    signed_registry_checkpoint_digest_attestation: SignedRegistryCheckpointDigestAttestation | None = None,
+    trusted_registry_checkpoint_digest_attestation_public_key_pem: str | None = None,
+    require_registry_checkpoint_digest_attestation_authentication: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -352,6 +368,15 @@ def gate_hosted_verdict(
         ),
         require_registry_checkpoint_digest_attestation_scope=(
             require_registry_checkpoint_digest_attestation_scope
+        ),
+        signed_registry_checkpoint_digest_attestation=(
+            signed_registry_checkpoint_digest_attestation
+        ),
+        trusted_registry_checkpoint_digest_attestation_public_key_pem=(
+            trusted_registry_checkpoint_digest_attestation_public_key_pem
+        ),
+        require_registry_checkpoint_digest_attestation_authentication=(
+            require_registry_checkpoint_digest_attestation_authentication
         ),
     )
     if not blockers:

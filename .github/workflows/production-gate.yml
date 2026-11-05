@@ -170,6 +170,10 @@ jobs:
             > /tmp/authority-registry-checkpoint-digest-attestation.json
           python research/scripts/audit_authority_registry_checkpoint_digest_attestation.py \
             > /tmp/authority-registry-checkpoint-digest-attestation-audit.json
+          python research/scripts/verify_authority_registry_checkpoint_digest_attestation_auth.py \
+            > /tmp/authority-registry-checkpoint-digest-attestation-auth.json
+          python research/scripts/audit_authority_registry_checkpoint_digest_attestation_auth.py \
+            > /tmp/authority-registry-checkpoint-digest-attestation-auth-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -318,6 +322,8 @@ jobs:
             /tmp/authority-registry-checkpoint-digest-producer-audit.json
             /tmp/authority-registry-checkpoint-digest-attestation.json
             /tmp/authority-registry-checkpoint-digest-attestation-audit.json
+            /tmp/authority-registry-checkpoint-digest-attestation-auth.json
+            /tmp/authority-registry-checkpoint-digest-attestation-auth-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90

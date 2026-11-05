@@ -1,0 +1,20 @@
+{
+  "attack_total": 128,
+  "attestation_scoped_false_passes": 128,
+  "authenticated_controls_passed": 32,
+  "authenticated_false_passes": 0,
+  "control_total": 32,
+  "families_blocked": {
+    "malformed_signature": 32,
+    "missing_signature": 32,
+    "replayed_scope": 32,
+    "untrusted_signer": 32
+  },
+  "negative_controls": {
+    "missing_key_blocked": true,
+    "missing_signature_blocked": true,
+    "without_scope_mode_blocked": true,
+    "wrong_trusted_key_blocked": true
+  },
+  "passed": true
+}

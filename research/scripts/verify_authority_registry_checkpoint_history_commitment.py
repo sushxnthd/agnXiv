@@ -26,6 +26,7 @@ from agnxiv.authority import (
     RegistryCheckpointDigestProducerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointScope,
+    SignedRegistryCheckpointDigestAttestation,
     authority_registry_sha256,
     registry_checkpoint_linked_statement_sha256,
     registry_checkpoint_statement_sha256,
@@ -138,6 +139,9 @@ def gate(
     attestation_scope: RegistryCheckpointDigestAttestationScope | None = None,
     attestation_scoped_commitment=None,
     require_attestation_scope=False,
+    signed_attestation: SignedRegistryCheckpointDigestAttestation | None = None,
+    trusted_attestation_public_key_pem=None,
+    require_attestation_authentication=False,
     **requirements,
 ):
     return gate_hosted_verdict(
@@ -192,6 +196,13 @@ def gate(
         ),
         require_registry_checkpoint_digest_attestation_scope=(
             require_attestation_scope
+        ),
+        signed_registry_checkpoint_digest_attestation=signed_attestation,
+        trusted_registry_checkpoint_digest_attestation_public_key_pem=(
+            trusted_attestation_public_key_pem
+        ),
+        require_registry_checkpoint_digest_attestation_authentication=(
+            require_attestation_authentication
         ),
     )
 

@@ -143,6 +143,13 @@ class RegistryCheckpointDigestAttestationScope(BaseModel):
     transparency_inclusion_witness_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
+class SignedRegistryCheckpointDigestAttestation(BaseModel):
+    """Ed25519-authenticated digest-producer provenance evidence."""
+
+    scope: RegistryCheckpointDigestAttestationScope
+    signature_b64: str
+
+
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
     """Return the exact deterministic policy payload interpreted by the gate."""
     return json.dumps(
@@ -316,6 +323,52 @@ def registry_checkpoint_digest_attestation_scoped_history_commitment_sha256(
     return hashlib.sha256(payload).hexdigest()
 
 
+def canonical_registry_checkpoint_digest_attestation_payload(
+    scope: RegistryCheckpointDigestAttestationScope,
+) -> bytes:
+    return json.dumps(
+        scope.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
+def registry_checkpoint_digest_attestation_key_sha256(
+    public_key_pem: str | bytes,
+) -> str:
+    """Return a canonical SubjectPublicKeyInfo fingerprint for an Ed25519 key."""
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
+    encoded = public_key_pem.encode() if isinstance(public_key_pem, str) else public_key_pem
+    key = serialization.load_pem_public_key(encoded)
+    if not isinstance(key, Ed25519PublicKey):
+        raise TypeError("digest attestation public key is not Ed25519")
+    der = key.public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return hashlib.sha256(der).hexdigest()
+
+
+def sign_registry_checkpoint_digest_attestation(
+    scope: RegistryCheckpointDigestAttestationScope,
+    private_key_pem: bytes,
+) -> SignedRegistryCheckpointDigestAttestation:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    key = serialization.load_pem_private_key(private_key_pem, password=None)
+    if not isinstance(key, Ed25519PrivateKey):
+        raise TypeError("digest attestation private key is not Ed25519")
+    signature = key.sign(canonical_registry_checkpoint_digest_attestation_payload(scope))
+    return SignedRegistryCheckpointDigestAttestation(
+        scope=scope,
+        signature_b64=base64.b64encode(signature).decode("ascii"),
+    )
+
+
 def sign_registry_checkpoint(
     scope: RegistryCheckpointScope,
     private_key_pem: bytes,
@@ -425,6 +478,9 @@ def authority_registry_blockers(
     registry_checkpoint_digest_attestation_scope: RegistryCheckpointDigestAttestationScope | None = None,
     trusted_registry_checkpoint_digest_attestation_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_digest_attestation_scope: bool = False,
+    signed_registry_checkpoint_digest_attestation: SignedRegistryCheckpointDigestAttestation | None = None,
+    trusted_registry_checkpoint_digest_attestation_public_key_pem: str | None = None,
+    require_registry_checkpoint_digest_attestation_authentication: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -1024,6 +1080,59 @@ def authority_registry_blockers(
                 failures.append(
                     "registry checkpoint history commitment is bound to different digest-producer attestation evidence"
                 )
+
+    if require_registry_checkpoint_digest_attestation_authentication:
+        if not require_registry_checkpoint_digest_attestation_scope:
+            failures.append(
+                "digest-attestation authentication requires digest-attestation scope mode"
+            )
+        if signed_registry_checkpoint_digest_attestation is None:
+            failures.append("signed registry checkpoint digest attestation is not configured")
+        if not trusted_registry_checkpoint_digest_attestation_public_key_pem:
+            failures.append("trusted registry checkpoint digest attestation key is not configured")
+        elif signed_registry_checkpoint_digest_attestation is not None:
+            signed_attestation = signed_registry_checkpoint_digest_attestation
+            if signed_attestation.scope != registry_checkpoint_digest_attestation_scope:
+                failures.append(
+                    "signed registry checkpoint digest attestation scope does not match configured scope"
+                )
+            try:
+                from cryptography.exceptions import InvalidSignature
+                from cryptography.hazmat.primitives import serialization
+                from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+                    Ed25519PublicKey,
+                )
+
+                public_key = serialization.load_pem_public_key(
+                    trusted_registry_checkpoint_digest_attestation_public_key_pem.encode()
+                )
+                if not isinstance(public_key, Ed25519PublicKey):
+                    failures.append(
+                        "trusted registry checkpoint digest attestation key is not Ed25519"
+                    )
+                else:
+                    configured_scope = registry_checkpoint_digest_attestation_scope
+                    fingerprint = registry_checkpoint_digest_attestation_key_sha256(
+                        trusted_registry_checkpoint_digest_attestation_public_key_pem
+                    )
+                    if (
+                        configured_scope is None
+                        or fingerprint != configured_scope.attestation_signer_key_sha256
+                    ):
+                        failures.append(
+                            "trusted registry checkpoint digest attestation key fingerprint does not match scope"
+                        )
+                    signature = base64.b64decode(
+                        signed_attestation.signature_b64, validate=True
+                    )
+                    public_key.verify(
+                        signature,
+                        canonical_registry_checkpoint_digest_attestation_payload(
+                            signed_attestation.scope
+                        ),
+                    )
+            except (binascii.Error, ValueError, TypeError, InvalidSignature):
+                failures.append("registry checkpoint digest attestation signature is invalid")
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:

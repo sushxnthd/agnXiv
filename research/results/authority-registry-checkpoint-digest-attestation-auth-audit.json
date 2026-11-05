@@ -1,0 +1,13 @@
+{
+  "attestation_scoped_false_passes": 128,
+  "authenticated_attacks": 0,
+  "authenticated_controls": 32,
+  "authenticated_controls_passed": 32,
+  "authenticated_false_passes": 0,
+  "canonical_payload_checks": 160,
+  "independently_authenticated_envelopes": 32,
+  "key_fingerprint_checks": 160,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.authority-registry-checkpoint-digest-attestation-auth-audit/1"
+}

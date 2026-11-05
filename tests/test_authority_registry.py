@@ -21,6 +21,7 @@ from agnxiv.authority import (
     authority_registry_sha256,
     authority_scope_for_bundle,
     registry_checkpoint_artifact_scoped_history_commitment_sha256,
+    registry_checkpoint_digest_attestation_key_sha256,
     registry_checkpoint_digest_attestation_scoped_history_commitment_sha256,
     registry_checkpoint_digest_producer_scoped_history_commitment_sha256,
     registry_checkpoint_digest_profile_scoped_history_commitment_sha256,
@@ -30,6 +31,7 @@ from agnxiv.authority import (
     registry_checkpoint_statement_sha256,
     sign_authority_scope,
     sign_registry_checkpoint,
+    sign_registry_checkpoint_digest_attestation,
 )
 from agnxiv.build import BuildPlan, BuildResult
 from agnxiv.environment import EnvironmentSpec
@@ -272,6 +274,30 @@ def test_digest_attestation_scope_rejects_noncanonical_evidence(field, value):
     values[field] = value
     with pytest.raises(ValidationError):
         RegistryCheckpointDigestAttestationScope(**values)
+
+
+def test_digest_attestation_signature_uses_canonical_scope_and_key_fingerprint():
+    private = Ed25519PrivateKey.from_private_bytes(b"\x0b" * 32)
+    private_pem = private.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    )
+    public_pem = private.public_key().public_bytes(
+        serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    scope = RegistryCheckpointDigestAttestationScope(
+        predicate_type="https://slsa.dev/provenance/v1",
+        provenance_statement_sha256="1" * 64,
+        attestation_signer_key_sha256=(
+            registry_checkpoint_digest_attestation_key_sha256(public_pem)
+        ),
+        transparency_inclusion_witness_sha256="3" * 64,
+    )
+    signed = sign_registry_checkpoint_digest_attestation(scope, private_pem)
+    assert signed.scope == scope
+    assert signed.signature_b64
 
 
 @pytest.mark.parametrize(
