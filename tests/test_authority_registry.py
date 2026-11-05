@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
 from agnxiv.authority import (
+    RegistryCheckpointArtifactScope,
     RegistryCheckpointConsumerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointQuorumPolicy,
@@ -16,6 +17,7 @@ from agnxiv.authority import (
     TrustedRegistryCheckpointKey,
     authority_registry_sha256,
     authority_scope_for_bundle,
+    registry_checkpoint_artifact_scoped_history_commitment_sha256,
     registry_checkpoint_execution_scoped_history_commitment_sha256,
     registry_checkpoint_linked_statement_sha256,
     registry_checkpoint_scoped_history_commitment_sha256,
@@ -116,6 +118,50 @@ def test_execution_scope_rejects_nonpositive_attempt():
         RegistryCheckpointExecutionScope(
             workflow_run_id="12345", workflow_run_attempt=0, workflow_job_id="verify"
         )
+
+
+def test_artifact_scoped_commitment_binds_every_artifact_dimension():
+    scope = RegistryCheckpointArtifactScope(
+        manuscript_sha256="1" * 64,
+        repository_tree_sha256="2" * 64,
+        claim_manifest_sha256="3" * 64,
+        evidence_bundle_sha256="4" * 64,
+    )
+    original = registry_checkpoint_artifact_scoped_history_commitment_sha256(
+        "a" * 64, scope
+    )
+    for field, value in (
+        ("manuscript_sha256", "5" * 64),
+        ("repository_tree_sha256", "6" * 64),
+        ("claim_manifest_sha256", "7" * 64),
+        ("evidence_bundle_sha256", "8" * 64),
+    ):
+        changed = scope.model_copy(update={field: value})
+        assert original != registry_checkpoint_artifact_scoped_history_commitment_sha256(
+            "a" * 64, changed
+        )
+
+
+@pytest.mark.parametrize(
+    "field",
+    (
+        "manuscript_sha256",
+        "repository_tree_sha256",
+        "claim_manifest_sha256",
+        "evidence_bundle_sha256",
+    ),
+)
+@pytest.mark.parametrize("value", ("", "a" * 63, "A" * 64, "g" * 64))
+def test_artifact_scope_rejects_noncanonical_digests(field, value):
+    values = {
+        "manuscript_sha256": "1" * 64,
+        "repository_tree_sha256": "2" * 64,
+        "claim_manifest_sha256": "3" * 64,
+        "evidence_bundle_sha256": "4" * 64,
+    }
+    values[field] = value
+    with pytest.raises(ValidationError):
+        RegistryCheckpointArtifactScope(**values)
 
 
 def _keys():

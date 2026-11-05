@@ -19,6 +19,7 @@ from verify_authority_registry_checkpoint_quorum import (
 from verify_authority_registry_checkpoint_snapshot import FAMILIES, attest, registry_pair
 
 from agnxiv.authority import (
+    RegistryCheckpointArtifactScope,
     RegistryCheckpointConsumerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointScope,
@@ -122,6 +123,9 @@ def gate(
     execution_scope: RegistryCheckpointExecutionScope | None = None,
     execution_scoped_commitment=None,
     require_execution_scope=False,
+    artifact_scope: RegistryCheckpointArtifactScope | None = None,
+    artifact_scoped_commitment=None,
+    require_artifact_scope=False,
     **requirements,
 ):
     return gate_hosted_verdict(
@@ -155,6 +159,11 @@ def gate(
             execution_scoped_commitment
         ),
         require_registry_checkpoint_execution_scope=require_execution_scope,
+        registry_checkpoint_artifact_scope=artifact_scope,
+        trusted_registry_checkpoint_artifact_scoped_history_commitment_sha256=(
+            artifact_scoped_commitment
+        ),
+        require_registry_checkpoint_artifact_scope=require_artifact_scope,
     )
 
 

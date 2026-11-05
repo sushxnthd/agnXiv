@@ -1,0 +1,24 @@
+{
+  "artifact_scoped_controls_passed": 32,
+  "artifact_scoped_false_passes": 0,
+  "attack_total": 128,
+  "control_total": 32,
+  "execution_scoped_false_passes": 128,
+  "families_blocked": {
+    "claim_manifest_substitution": 32,
+    "evidence_bundle_substitution": 32,
+    "manuscript_substitution": 32,
+    "repository_tree_substitution": 32
+  },
+  "negative_controls": {
+    "malformed_artifact_commitment_blocked": true,
+    "missing_artifact_commitment_blocked": true,
+    "missing_artifact_scope_blocked": true,
+    "without_execution_mode_blocked": true,
+    "wrong_claim_manifest_blocked": true,
+    "wrong_evidence_bundle_blocked": true,
+    "wrong_manuscript_blocked": true,
+    "wrong_tree_blocked": true
+  },
+  "passed": true
+}

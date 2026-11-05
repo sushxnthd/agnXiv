@@ -103,6 +103,16 @@ class RegistryCheckpointExecutionScope(BaseModel):
     workflow_job_id: str = Field(min_length=1)
 
 
+class RegistryCheckpointArtifactScope(BaseModel):
+    """Canonical scientific object consumed by one workflow execution."""
+
+    schema_version: str = "agnxiv.registry-checkpoint-artifact-scope/1"
+    manuscript_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    repository_tree_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    claim_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    evidence_bundle_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
     """Return the exact deterministic policy payload interpreted by the gate."""
     return json.dumps(
@@ -192,6 +202,25 @@ def registry_checkpoint_execution_scoped_history_commitment_sha256(
         {
             "execution_scope": execution_scope.model_dump(mode="json"),
             "scoped_history_commitment_sha256": scoped_history_commitment_sha256,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def registry_checkpoint_artifact_scoped_history_commitment_sha256(
+    execution_scoped_history_commitment_sha256: str,
+    artifact_scope: RegistryCheckpointArtifactScope,
+) -> str:
+    """Bind one execution-scoped history commitment to one scientific artifact."""
+    payload = json.dumps(
+        {
+            "artifact_scope": artifact_scope.model_dump(mode="json"),
+            "execution_scoped_history_commitment_sha256": (
+                execution_scoped_history_commitment_sha256
+            ),
         },
         sort_keys=True,
         separators=(",", ":"),
@@ -297,6 +326,9 @@ def authority_registry_blockers(
     registry_checkpoint_execution_scope: RegistryCheckpointExecutionScope | None = None,
     trusted_registry_checkpoint_execution_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_execution_scope: bool = False,
+    registry_checkpoint_artifact_scope: RegistryCheckpointArtifactScope | None = None,
+    trusted_registry_checkpoint_artifact_scoped_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_artifact_scope: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -455,6 +487,7 @@ def authority_registry_blockers(
         or require_registry_checkpoint_history_commitment
         or require_registry_checkpoint_consumer_scope
         or require_registry_checkpoint_execution_scope
+        or require_registry_checkpoint_artifact_scope
     ):
         if not qualifying_current or not qualifying_observed:
             failures.append("registry checkpoint history chain is not configured")
@@ -528,6 +561,7 @@ def authority_registry_blockers(
         or require_registry_checkpoint_history_commitment
         or require_registry_checkpoint_consumer_scope
         or require_registry_checkpoint_execution_scope
+        or require_registry_checkpoint_artifact_scope
     ) and qualifying_observed:
         if authenticated_checkpoint is None:
             failures.append("transitive registry checkpoint history chain is not configured")
@@ -760,6 +794,38 @@ def authority_registry_blockers(
             if supplied_execution != execution_commitment:
                 failures.append(
                     "registry checkpoint history commitment is bound to a different execution scope"
+                )
+
+    if require_registry_checkpoint_artifact_scope:
+        if not require_registry_checkpoint_execution_scope:
+            failures.append(
+                "artifact-scoped registry checkpoint commitment requires execution-scope mode"
+            )
+        if registry_checkpoint_artifact_scope is None:
+            failures.append("registry checkpoint artifact scope is not configured")
+        artifact_commitment = (
+            trusted_registry_checkpoint_artifact_scoped_history_commitment_sha256 or ""
+        )
+        if len(artifact_commitment) != 64 or any(
+            character not in "0123456789abcdef" for character in artifact_commitment
+        ):
+            failures.append(
+                "trusted artifact-scoped registry checkpoint commitment is not configured or invalid"
+            )
+        elif registry_checkpoint_artifact_scope is not None:
+            execution_commitment = (
+                trusted_registry_checkpoint_execution_scoped_history_commitment_sha256
+                or ""
+            )
+            supplied_artifact = (
+                registry_checkpoint_artifact_scoped_history_commitment_sha256(
+                    execution_commitment,
+                    registry_checkpoint_artifact_scope,
+                )
+            )
+            if supplied_artifact != artifact_commitment:
+                failures.append(
+                    "registry checkpoint history commitment is bound to a different artifact scope"
                 )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
