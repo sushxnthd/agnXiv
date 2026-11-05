@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 
 from .authority import (
+    RegistryCheckpointArtifactDigestProfile,
     RegistryCheckpointArtifactScope,
     RegistryCheckpointConsumerScope,
     RegistryCheckpointExecutionScope,
@@ -64,6 +65,9 @@ def environment_verdict_blockers(
     registry_checkpoint_artifact_scope: RegistryCheckpointArtifactScope | None = None,
     trusted_registry_checkpoint_artifact_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_artifact_scope: bool = False,
+    registry_checkpoint_artifact_digest_profile: RegistryCheckpointArtifactDigestProfile | None = None,
+    trusted_registry_checkpoint_digest_profile_scoped_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_artifact_digest_profile: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -146,6 +150,15 @@ def environment_verdict_blockers(
                 require_registry_checkpoint_artifact_scope=(
                     require_registry_checkpoint_artifact_scope
                 ),
+                registry_checkpoint_artifact_digest_profile=(
+                    registry_checkpoint_artifact_digest_profile
+                ),
+                trusted_registry_checkpoint_digest_profile_scoped_history_commitment_sha256=(
+                    trusted_registry_checkpoint_digest_profile_scoped_history_commitment_sha256
+                ),
+                require_registry_checkpoint_artifact_digest_profile=(
+                    require_registry_checkpoint_artifact_digest_profile
+                ),
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -210,6 +223,9 @@ def gate_hosted_verdict(
     registry_checkpoint_artifact_scope: RegistryCheckpointArtifactScope | None = None,
     trusted_registry_checkpoint_artifact_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_artifact_scope: bool = False,
+    registry_checkpoint_artifact_digest_profile: RegistryCheckpointArtifactDigestProfile | None = None,
+    trusted_registry_checkpoint_digest_profile_scoped_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_artifact_digest_profile: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -277,6 +293,15 @@ def gate_hosted_verdict(
         ),
         require_registry_checkpoint_artifact_scope=(
             require_registry_checkpoint_artifact_scope
+        ),
+        registry_checkpoint_artifact_digest_profile=(
+            registry_checkpoint_artifact_digest_profile
+        ),
+        trusted_registry_checkpoint_digest_profile_scoped_history_commitment_sha256=(
+            trusted_registry_checkpoint_digest_profile_scoped_history_commitment_sha256
+        ),
+        require_registry_checkpoint_artifact_digest_profile=(
+            require_registry_checkpoint_artifact_digest_profile
         ),
     )
     if not blockers:

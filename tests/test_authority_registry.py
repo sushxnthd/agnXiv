@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
 from agnxiv.authority import (
+    RegistryCheckpointArtifactDigestProfile,
     RegistryCheckpointArtifactScope,
     RegistryCheckpointConsumerScope,
     RegistryCheckpointExecutionScope,
@@ -18,6 +19,7 @@ from agnxiv.authority import (
     authority_registry_sha256,
     authority_scope_for_bundle,
     registry_checkpoint_artifact_scoped_history_commitment_sha256,
+    registry_checkpoint_digest_profile_scoped_history_commitment_sha256,
     registry_checkpoint_execution_scoped_history_commitment_sha256,
     registry_checkpoint_linked_statement_sha256,
     registry_checkpoint_scoped_history_commitment_sha256,
@@ -140,6 +142,44 @@ def test_artifact_scoped_commitment_binds_every_artifact_dimension():
         assert original != registry_checkpoint_artifact_scoped_history_commitment_sha256(
             "a" * 64, changed
         )
+
+
+def test_digest_profile_commitment_binds_every_derivation_dimension():
+    profile = RegistryCheckpointArtifactDigestProfile(
+        manuscript="raw-bytes-v1",
+        repository_tree="git-tree-v1",
+        claim_manifest="jcs-json-v1",
+        evidence_bundle="merkle-manifest-v1",
+    )
+    original = registry_checkpoint_digest_profile_scoped_history_commitment_sha256(
+        "a" * 64, profile
+    )
+    for field, value in (
+        ("manuscript", "normalized-text-v1"),
+        ("repository_tree", "archive-bytes-v1"),
+        ("claim_manifest", "raw-json-v1"),
+        ("evidence_bundle", "archive-bytes-v1"),
+    ):
+        changed = profile.model_copy(update={field: value})
+        assert original != registry_checkpoint_digest_profile_scoped_history_commitment_sha256(
+            "a" * 64, changed
+        )
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("manuscript", "repository_tree", "claim_manifest", "evidence_bundle"),
+)
+def test_digest_profile_rejects_unknown_derivation(field):
+    values = {
+        "manuscript": "raw-bytes-v1",
+        "repository_tree": "git-tree-v1",
+        "claim_manifest": "jcs-json-v1",
+        "evidence_bundle": "merkle-manifest-v1",
+    }
+    values[field] = "unspecified"
+    with pytest.raises(ValidationError):
+        RegistryCheckpointArtifactDigestProfile(**values)
 
 
 @pytest.mark.parametrize(

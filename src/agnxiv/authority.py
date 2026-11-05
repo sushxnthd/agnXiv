@@ -113,6 +113,16 @@ class RegistryCheckpointArtifactScope(BaseModel):
     evidence_bundle_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
+class RegistryCheckpointArtifactDigestProfile(BaseModel):
+    """Versioned derivation semantics for every committed artifact digest."""
+
+    schema_version: str = "agnxiv.registry-checkpoint-artifact-digest-profile/1"
+    manuscript: Literal["raw-bytes-v1", "normalized-text-v1"]
+    repository_tree: Literal["git-tree-v1", "archive-bytes-v1"]
+    claim_manifest: Literal["jcs-json-v1", "raw-json-v1"]
+    evidence_bundle: Literal["merkle-manifest-v1", "archive-bytes-v1"]
+
+
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
     """Return the exact deterministic policy payload interpreted by the gate."""
     return json.dumps(
@@ -229,6 +239,25 @@ def registry_checkpoint_artifact_scoped_history_commitment_sha256(
     return hashlib.sha256(payload).hexdigest()
 
 
+def registry_checkpoint_digest_profile_scoped_history_commitment_sha256(
+    artifact_scoped_history_commitment_sha256: str,
+    digest_profile: RegistryCheckpointArtifactDigestProfile,
+) -> str:
+    """Bind an artifact commitment to explicit digest derivation semantics."""
+    payload = json.dumps(
+        {
+            "artifact_scoped_history_commitment_sha256": (
+                artifact_scoped_history_commitment_sha256
+            ),
+            "digest_profile": digest_profile.model_dump(mode="json"),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
 def sign_registry_checkpoint(
     scope: RegistryCheckpointScope,
     private_key_pem: bytes,
@@ -329,6 +358,9 @@ def authority_registry_blockers(
     registry_checkpoint_artifact_scope: RegistryCheckpointArtifactScope | None = None,
     trusted_registry_checkpoint_artifact_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_artifact_scope: bool = False,
+    registry_checkpoint_artifact_digest_profile: RegistryCheckpointArtifactDigestProfile | None = None,
+    trusted_registry_checkpoint_digest_profile_scoped_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_artifact_digest_profile: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -488,6 +520,7 @@ def authority_registry_blockers(
         or require_registry_checkpoint_consumer_scope
         or require_registry_checkpoint_execution_scope
         or require_registry_checkpoint_artifact_scope
+        or require_registry_checkpoint_artifact_digest_profile
     ):
         if not qualifying_current or not qualifying_observed:
             failures.append("registry checkpoint history chain is not configured")
@@ -562,6 +595,7 @@ def authority_registry_blockers(
         or require_registry_checkpoint_consumer_scope
         or require_registry_checkpoint_execution_scope
         or require_registry_checkpoint_artifact_scope
+        or require_registry_checkpoint_artifact_digest_profile
     ) and qualifying_observed:
         if authenticated_checkpoint is None:
             failures.append("transitive registry checkpoint history chain is not configured")
@@ -826,6 +860,39 @@ def authority_registry_blockers(
             if supplied_artifact != artifact_commitment:
                 failures.append(
                     "registry checkpoint history commitment is bound to a different artifact scope"
+                )
+
+    if require_registry_checkpoint_artifact_digest_profile:
+        if not require_registry_checkpoint_artifact_scope:
+            failures.append(
+                "artifact digest-profile commitment requires artifact-scope mode"
+            )
+        if registry_checkpoint_artifact_digest_profile is None:
+            failures.append("registry checkpoint artifact digest profile is not configured")
+        profile_commitment = (
+            trusted_registry_checkpoint_digest_profile_scoped_history_commitment_sha256
+            or ""
+        )
+        if len(profile_commitment) != 64 or any(
+            character not in "0123456789abcdef" for character in profile_commitment
+        ):
+            failures.append(
+                "trusted digest-profile-scoped registry checkpoint commitment is not configured or invalid"
+            )
+        elif registry_checkpoint_artifact_digest_profile is not None:
+            artifact_commitment = (
+                trusted_registry_checkpoint_artifact_scoped_history_commitment_sha256
+                or ""
+            )
+            supplied_profile = (
+                registry_checkpoint_digest_profile_scoped_history_commitment_sha256(
+                    artifact_commitment,
+                    registry_checkpoint_artifact_digest_profile,
+                )
+            )
+            if supplied_profile != profile_commitment:
+                failures.append(
+                    "registry checkpoint history commitment is bound to a different artifact digest profile"
                 )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
