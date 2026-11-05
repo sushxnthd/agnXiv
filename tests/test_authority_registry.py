@@ -9,6 +9,7 @@ from agnxiv.authority import (
     RegistryCheckpointArtifactDigestProfile,
     RegistryCheckpointArtifactScope,
     RegistryCheckpointConsumerScope,
+    RegistryCheckpointDigestAttestationScope,
     RegistryCheckpointDigestProducerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointQuorumPolicy,
@@ -20,6 +21,7 @@ from agnxiv.authority import (
     authority_registry_sha256,
     authority_scope_for_bundle,
     registry_checkpoint_artifact_scoped_history_commitment_sha256,
+    registry_checkpoint_digest_attestation_scoped_history_commitment_sha256,
     registry_checkpoint_digest_producer_scoped_history_commitment_sha256,
     registry_checkpoint_digest_profile_scoped_history_commitment_sha256,
     registry_checkpoint_execution_scoped_history_commitment_sha256,
@@ -225,6 +227,51 @@ def test_digest_producer_scope_rejects_noncanonical_measurements(field, value):
     values[field] = value
     with pytest.raises(ValidationError):
         RegistryCheckpointDigestProducerScope(**values)
+
+
+def test_digest_attestation_commitment_binds_every_evidence_dimension():
+    scope = RegistryCheckpointDigestAttestationScope(
+        predicate_type="https://slsa.dev/provenance/v1",
+        provenance_statement_sha256="1" * 64,
+        attestation_signer_key_sha256="2" * 64,
+        transparency_inclusion_witness_sha256="3" * 64,
+    )
+    original = registry_checkpoint_digest_attestation_scoped_history_commitment_sha256(
+        "a" * 64, scope
+    )
+    for field, value in (
+        ("predicate_type", "https://example.invalid/provenance/v2"),
+        ("provenance_statement_sha256", "4" * 64),
+        ("attestation_signer_key_sha256", "5" * 64),
+        ("transparency_inclusion_witness_sha256", "6" * 64),
+    ):
+        changed = scope.model_copy(update={field: value})
+        assert original != (
+            registry_checkpoint_digest_attestation_scoped_history_commitment_sha256(
+                "a" * 64, changed
+            )
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("predicate_type", ""),
+        ("provenance_statement_sha256", "a" * 63),
+        ("attestation_signer_key_sha256", "A" * 64),
+        ("transparency_inclusion_witness_sha256", "g" * 64),
+    ),
+)
+def test_digest_attestation_scope_rejects_noncanonical_evidence(field, value):
+    values = {
+        "predicate_type": "https://slsa.dev/provenance/v1",
+        "provenance_statement_sha256": "1" * 64,
+        "attestation_signer_key_sha256": "2" * 64,
+        "transparency_inclusion_witness_sha256": "3" * 64,
+    }
+    values[field] = value
+    with pytest.raises(ValidationError):
+        RegistryCheckpointDigestAttestationScope(**values)
 
 
 @pytest.mark.parametrize(

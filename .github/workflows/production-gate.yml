@@ -162,6 +162,14 @@ jobs:
             > /tmp/authority-registry-checkpoint-digest-profile.json
           python research/scripts/audit_authority_registry_checkpoint_digest_profile.py \
             > /tmp/authority-registry-checkpoint-digest-profile-audit.json
+          python research/scripts/verify_authority_registry_checkpoint_digest_producer.py \
+            > /tmp/authority-registry-checkpoint-digest-producer.json
+          python research/scripts/audit_authority_registry_checkpoint_digest_producer.py \
+            > /tmp/authority-registry-checkpoint-digest-producer-audit.json
+          python research/scripts/verify_authority_registry_checkpoint_digest_attestation.py \
+            > /tmp/authority-registry-checkpoint-digest-attestation.json
+          python research/scripts/audit_authority_registry_checkpoint_digest_attestation.py \
+            > /tmp/authority-registry-checkpoint-digest-attestation-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -304,6 +312,12 @@ jobs:
             /tmp/authority-registry-checkpoint-pinned-root-audit.json
             /tmp/authority-registry-checkpoint-pinned-tip.json
             /tmp/authority-registry-checkpoint-pinned-tip-audit.json
+            /tmp/authority-registry-checkpoint-digest-profile.json
+            /tmp/authority-registry-checkpoint-digest-profile-audit.json
+            /tmp/authority-registry-checkpoint-digest-producer.json
+            /tmp/authority-registry-checkpoint-digest-producer-audit.json
+            /tmp/authority-registry-checkpoint-digest-attestation.json
+            /tmp/authority-registry-checkpoint-digest-attestation-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90

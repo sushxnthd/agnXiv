@@ -133,6 +133,16 @@ class RegistryCheckpointDigestProducerScope(BaseModel):
     toolchain_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
+class RegistryCheckpointDigestAttestationScope(BaseModel):
+    """Canonical provenance evidence for one measured digest producer."""
+
+    schema_version: str = "agnxiv.registry-checkpoint-digest-attestation-scope/1"
+    predicate_type: str = Field(min_length=1)
+    provenance_statement_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    attestation_signer_key_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    transparency_inclusion_witness_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
     """Return the exact deterministic policy payload interpreted by the gate."""
     return json.dumps(
@@ -287,6 +297,25 @@ def registry_checkpoint_digest_producer_scoped_history_commitment_sha256(
     return hashlib.sha256(payload).hexdigest()
 
 
+def registry_checkpoint_digest_attestation_scoped_history_commitment_sha256(
+    digest_producer_scoped_history_commitment_sha256: str,
+    attestation_scope: RegistryCheckpointDigestAttestationScope,
+) -> str:
+    """Bind measured producer identity to its exact provenance evidence."""
+    payload = json.dumps(
+        {
+            "attestation_scope": attestation_scope.model_dump(mode="json"),
+            "digest_producer_scoped_history_commitment_sha256": (
+                digest_producer_scoped_history_commitment_sha256
+            ),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
 def sign_registry_checkpoint(
     scope: RegistryCheckpointScope,
     private_key_pem: bytes,
@@ -393,6 +422,9 @@ def authority_registry_blockers(
     registry_checkpoint_digest_producer_scope: RegistryCheckpointDigestProducerScope | None = None,
     trusted_registry_checkpoint_digest_producer_scoped_history_commitment_sha256: str | None = None,
     require_registry_checkpoint_digest_producer_scope: bool = False,
+    registry_checkpoint_digest_attestation_scope: RegistryCheckpointDigestAttestationScope | None = None,
+    trusted_registry_checkpoint_digest_attestation_scoped_history_commitment_sha256: str | None = None,
+    require_registry_checkpoint_digest_attestation_scope: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -958,6 +990,39 @@ def authority_registry_blockers(
             if supplied_producer != producer_commitment:
                 failures.append(
                     "registry checkpoint history commitment is bound to a different digest producer"
+                )
+
+    if require_registry_checkpoint_digest_attestation_scope:
+        if not require_registry_checkpoint_digest_producer_scope:
+            failures.append(
+                "digest-attestation commitment requires digest-producer mode"
+            )
+        if registry_checkpoint_digest_attestation_scope is None:
+            failures.append("registry checkpoint digest attestation scope is not configured")
+        attestation_commitment = (
+            trusted_registry_checkpoint_digest_attestation_scoped_history_commitment_sha256
+            or ""
+        )
+        if len(attestation_commitment) != 64 or any(
+            character not in "0123456789abcdef" for character in attestation_commitment
+        ):
+            failures.append(
+                "trusted digest-attestation-scoped registry checkpoint commitment is not configured or invalid"
+            )
+        elif registry_checkpoint_digest_attestation_scope is not None:
+            producer_commitment = (
+                trusted_registry_checkpoint_digest_producer_scoped_history_commitment_sha256
+                or ""
+            )
+            supplied_attestation = (
+                registry_checkpoint_digest_attestation_scoped_history_commitment_sha256(
+                    producer_commitment,
+                    registry_checkpoint_digest_attestation_scope,
+                )
+            )
+            if supplied_attestation != attestation_commitment:
+                failures.append(
+                    "registry checkpoint history commitment is bound to different digest-producer attestation evidence"
                 )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint

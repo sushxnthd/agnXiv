@@ -22,6 +22,7 @@ from agnxiv.authority import (
     RegistryCheckpointArtifactDigestProfile,
     RegistryCheckpointArtifactScope,
     RegistryCheckpointConsumerScope,
+    RegistryCheckpointDigestAttestationScope,
     RegistryCheckpointDigestProducerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointScope,
@@ -134,6 +135,9 @@ def gate(
     producer_scope: RegistryCheckpointDigestProducerScope | None = None,
     producer_scoped_commitment=None,
     require_producer_scope=False,
+    attestation_scope: RegistryCheckpointDigestAttestationScope | None = None,
+    attestation_scoped_commitment=None,
+    require_attestation_scope=False,
     **requirements,
 ):
     return gate_hosted_verdict(
@@ -182,6 +186,13 @@ def gate(
             producer_scoped_commitment
         ),
         require_registry_checkpoint_digest_producer_scope=require_producer_scope,
+        registry_checkpoint_digest_attestation_scope=attestation_scope,
+        trusted_registry_checkpoint_digest_attestation_scoped_history_commitment_sha256=(
+            attestation_scoped_commitment
+        ),
+        require_registry_checkpoint_digest_attestation_scope=(
+            require_attestation_scope
+        ),
     )
 
 
