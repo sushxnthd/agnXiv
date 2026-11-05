@@ -11,6 +11,7 @@ from .authority import (
     RegistryCheckpointDigestProducerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointQuorumPolicy,
+    RegistryCheckpointTransparencyInclusionWitness,
     SignedRegistryCheckpoint,
     SignedRegistryCheckpointDigestAttestation,
     TrustedAuthorityRegistry,
@@ -80,6 +81,8 @@ def environment_verdict_blockers(
     signed_registry_checkpoint_digest_attestation: SignedRegistryCheckpointDigestAttestation | None = None,
     trusted_registry_checkpoint_digest_attestation_public_key_pem: str | None = None,
     require_registry_checkpoint_digest_attestation_authentication: bool = False,
+    registry_checkpoint_transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
+    require_registry_checkpoint_transparency_inclusion: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -198,6 +201,12 @@ def environment_verdict_blockers(
                 require_registry_checkpoint_digest_attestation_authentication=(
                     require_registry_checkpoint_digest_attestation_authentication
                 ),
+                registry_checkpoint_transparency_inclusion_witness=(
+                    registry_checkpoint_transparency_inclusion_witness
+                ),
+                require_registry_checkpoint_transparency_inclusion=(
+                    require_registry_checkpoint_transparency_inclusion
+                ),
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -274,6 +283,8 @@ def gate_hosted_verdict(
     signed_registry_checkpoint_digest_attestation: SignedRegistryCheckpointDigestAttestation | None = None,
     trusted_registry_checkpoint_digest_attestation_public_key_pem: str | None = None,
     require_registry_checkpoint_digest_attestation_authentication: bool = False,
+    registry_checkpoint_transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
+    require_registry_checkpoint_transparency_inclusion: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -377,6 +388,12 @@ def gate_hosted_verdict(
         ),
         require_registry_checkpoint_digest_attestation_authentication=(
             require_registry_checkpoint_digest_attestation_authentication
+        ),
+        registry_checkpoint_transparency_inclusion_witness=(
+            registry_checkpoint_transparency_inclusion_witness
+        ),
+        require_registry_checkpoint_transparency_inclusion=(
+            require_registry_checkpoint_transparency_inclusion
         ),
     )
     if not blockers:

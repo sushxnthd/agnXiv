@@ -150,6 +150,17 @@ class SignedRegistryCheckpointDigestAttestation(BaseModel):
     signature_b64: str
 
 
+class RegistryCheckpointTransparencyInclusionWitness(BaseModel):
+    """Canonical RFC 6962-style inclusion witness for a provenance statement."""
+
+    schema_version: str = "agnxiv.registry-checkpoint-transparency-inclusion/1"
+    log_id: str = Field(min_length=1)
+    tree_size: int = Field(ge=1)
+    leaf_index: int = Field(ge=0)
+    root_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    audit_path_sha256: list[str] = Field(max_length=64)
+
+
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
     """Return the exact deterministic policy payload interpreted by the gate."""
     return json.dumps(
@@ -334,6 +345,57 @@ def canonical_registry_checkpoint_digest_attestation_payload(
     ).encode("utf-8")
 
 
+def canonical_registry_checkpoint_transparency_inclusion_payload(
+    witness: RegistryCheckpointTransparencyInclusionWitness,
+) -> bytes:
+    return json.dumps(
+        witness.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
+def registry_checkpoint_transparency_inclusion_witness_sha256(
+    witness: RegistryCheckpointTransparencyInclusionWitness,
+) -> str:
+    return hashlib.sha256(
+        canonical_registry_checkpoint_transparency_inclusion_payload(witness)
+    ).hexdigest()
+
+
+def verify_registry_checkpoint_transparency_inclusion(
+    provenance_statement_sha256: str,
+    witness: RegistryCheckpointTransparencyInclusionWitness,
+) -> bool:
+    """Verify an RFC 6962-style proof against the witness's committed root."""
+    if witness.leaf_index >= witness.tree_size:
+        return False
+    try:
+        value = hashlib.sha256(
+            b"\x00" + bytes.fromhex(provenance_statement_sha256)
+        ).digest()
+        node_index = witness.leaf_index
+        last_node = witness.tree_size - 1
+        for encoded_sibling in witness.audit_path_sha256:
+            if len(encoded_sibling) != 64:
+                return False
+            sibling = bytes.fromhex(encoded_sibling)
+            if node_index & 1 or node_index == last_node:
+                if node_index == last_node and not (node_index & 1):
+                    while node_index and not (node_index & 1):
+                        node_index >>= 1
+                        last_node >>= 1
+                value = hashlib.sha256(b"\x01" + sibling + value).digest()
+            else:
+                value = hashlib.sha256(b"\x01" + value + sibling).digest()
+            node_index >>= 1
+            last_node >>= 1
+    except ValueError:
+        return False
+    return last_node == 0 and value.hex() == witness.root_sha256
+
+
 def registry_checkpoint_digest_attestation_key_sha256(
     public_key_pem: str | bytes,
 ) -> str:
@@ -481,6 +543,8 @@ def authority_registry_blockers(
     signed_registry_checkpoint_digest_attestation: SignedRegistryCheckpointDigestAttestation | None = None,
     trusted_registry_checkpoint_digest_attestation_public_key_pem: str | None = None,
     require_registry_checkpoint_digest_attestation_authentication: bool = False,
+    registry_checkpoint_transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
+    require_registry_checkpoint_transparency_inclusion: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -1133,6 +1197,37 @@ def authority_registry_blockers(
                     )
             except (binascii.Error, ValueError, TypeError, InvalidSignature):
                 failures.append("registry checkpoint digest attestation signature is invalid")
+
+    if require_registry_checkpoint_transparency_inclusion:
+        if not require_registry_checkpoint_digest_attestation_authentication:
+            failures.append(
+                "transparency inclusion requires digest-attestation authentication mode"
+            )
+        witness = registry_checkpoint_transparency_inclusion_witness
+        if witness is None:
+            failures.append("registry checkpoint transparency inclusion witness is not configured")
+        elif registry_checkpoint_digest_attestation_scope is None:
+            failures.append(
+                "transparency inclusion requires a configured digest-attestation scope"
+            )
+        else:
+            witness_digest = registry_checkpoint_transparency_inclusion_witness_sha256(
+                witness
+            )
+            if (
+                witness_digest
+                != registry_checkpoint_digest_attestation_scope.transparency_inclusion_witness_sha256
+            ):
+                failures.append(
+                    "transparency inclusion witness does not match digest-attestation scope"
+                )
+            elif not verify_registry_checkpoint_transparency_inclusion(
+                registry_checkpoint_digest_attestation_scope.provenance_statement_sha256,
+                witness,
+            ):
+                failures.append(
+                    "registry checkpoint transparency inclusion proof is invalid"
+                )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:

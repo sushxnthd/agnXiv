@@ -1,0 +1,12 @@
+{
+  "canonical_witness_checks": 160,
+  "inclusion_verified_false_passes": 0,
+  "independently_verified_attacks": 0,
+  "independently_verified_controls": 32,
+  "merkle_proof_checks": 160,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.authority-registry-checkpoint-transparency-inclusion-audit/1",
+  "signature_authenticated_false_passes": 128,
+  "signature_checks": 160
+}

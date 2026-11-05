@@ -1,0 +1,20 @@
+{
+  "attack_total": 128,
+  "control_total": 32,
+  "families_blocked": {
+    "missing_witness": 32,
+    "tampered_audit_path": 32,
+    "wrong_leaf_index": 32,
+    "wrong_tree_root": 32
+  },
+  "inclusion_verified_controls_passed": 32,
+  "inclusion_verified_false_passes": 0,
+  "negative_controls": {
+    "invalid_leaf_index_blocked": true,
+    "missing_witness_blocked": true,
+    "without_authentication_mode_blocked": true,
+    "witness_commitment_mismatch_blocked": true
+  },
+  "passed": true,
+  "signature_authenticated_false_passes": 128
+}
