@@ -1,0 +1,24 @@
+{
+  "attack_total": 128,
+  "control_total": 32,
+  "families_blocked": {
+    "producer_identity": 32,
+    "producer_implementation": 32,
+    "producer_runtime_image": 32,
+    "producer_toolchain": 32
+  },
+  "negative_controls": {
+    "malformed_commitment_blocked": true,
+    "missing_commitment_blocked": true,
+    "missing_scope_blocked": true,
+    "without_profile_mode_blocked": true,
+    "wrong_implementation_sha256_blocked": true,
+    "wrong_producer_id_blocked": true,
+    "wrong_runtime_image_digest_blocked": true,
+    "wrong_toolchain_manifest_sha256_blocked": true
+  },
+  "passed": true,
+  "producer_scoped_controls_passed": 32,
+  "producer_scoped_false_passes": 0,
+  "profile_scoped_false_passes": 128
+}

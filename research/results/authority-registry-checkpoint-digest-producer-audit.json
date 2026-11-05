@@ -1,0 +1,11 @@
+{
+  "effective_commitments_matching": 32,
+  "passed": true,
+  "producer_payload_checks": 320,
+  "producer_scoped_controls_passed": 32,
+  "producer_scoped_false_passes": 0,
+  "production_imports": 0,
+  "profile_scoped_false_passes": 128,
+  "schema": "agnxiv.authority-registry-checkpoint-digest-producer-audit/1",
+  "source_commitments_reconstructed": 160
+}

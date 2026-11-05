@@ -9,6 +9,7 @@ from agnxiv.authority import (
     RegistryCheckpointArtifactDigestProfile,
     RegistryCheckpointArtifactScope,
     RegistryCheckpointConsumerScope,
+    RegistryCheckpointDigestProducerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointQuorumPolicy,
     RegistryCheckpointScope,
@@ -19,6 +20,7 @@ from agnxiv.authority import (
     authority_registry_sha256,
     authority_scope_for_bundle,
     registry_checkpoint_artifact_scoped_history_commitment_sha256,
+    registry_checkpoint_digest_producer_scoped_history_commitment_sha256,
     registry_checkpoint_digest_profile_scoped_history_commitment_sha256,
     registry_checkpoint_execution_scoped_history_commitment_sha256,
     registry_checkpoint_linked_statement_sha256,
@@ -180,6 +182,49 @@ def test_digest_profile_rejects_unknown_derivation(field):
     values[field] = "unspecified"
     with pytest.raises(ValidationError):
         RegistryCheckpointArtifactDigestProfile(**values)
+
+
+def test_digest_producer_commitment_binds_every_measurement_dimension():
+    scope = RegistryCheckpointDigestProducerScope(
+        producer_id="agnxiv-digest-producer",
+        implementation_sha256="1" * 64,
+        runtime_image_digest="sha256:" + "2" * 64,
+        toolchain_manifest_sha256="3" * 64,
+    )
+    original = registry_checkpoint_digest_producer_scoped_history_commitment_sha256(
+        "a" * 64, scope
+    )
+    for field, value in (
+        ("producer_id", "alternate-producer"),
+        ("implementation_sha256", "4" * 64),
+        ("runtime_image_digest", "sha256:" + "5" * 64),
+        ("toolchain_manifest_sha256", "6" * 64),
+    ):
+        changed = scope.model_copy(update={field: value})
+        assert original != registry_checkpoint_digest_producer_scoped_history_commitment_sha256(
+            "a" * 64, changed
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("producer_id", ""),
+        ("implementation_sha256", "a" * 63),
+        ("runtime_image_digest", "a" * 64),
+        ("toolchain_manifest_sha256", "A" * 64),
+    ),
+)
+def test_digest_producer_scope_rejects_noncanonical_measurements(field, value):
+    values = {
+        "producer_id": "agnxiv-digest-producer",
+        "implementation_sha256": "1" * 64,
+        "runtime_image_digest": "sha256:" + "2" * 64,
+        "toolchain_manifest_sha256": "3" * 64,
+    }
+    values[field] = value
+    with pytest.raises(ValidationError):
+        RegistryCheckpointDigestProducerScope(**values)
 
 
 @pytest.mark.parametrize(
