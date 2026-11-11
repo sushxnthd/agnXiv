@@ -29,8 +29,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] A recursively linked final checkpoint commitment binds every disclosed predecessor path; endpoint-preserving intermediate policy substitutions cause abstention.
 - [x] Transparency inclusion can require an Ed25519-authenticated root whose log identity, tree size, root digest, and issuance time match the witness and satisfy explicit age and future-skew bounds.
 - [x] A fresh signed transparency root must prove RFC 6962-style append-only consistency with an authenticated prior checkpoint; rewritten prefixes, non-advancing trees, missing proofs, and endpoint mismatches fail closed.
-- [ ] Cross-client gossip detects independently signed split views; local consistency under one configured key does not establish global canonicity.
-- [ ] Transparency checkpoints carry and verify append-only consistency proofs from a previously trusted root; fresh signed roots alone do not establish append-only history.
+- [x] Authenticated cross-client gossip detects equal-size split views and requires valid pairwise consistency proofs for unequal-size views; missing cross-view evidence causes abstention.
+- [ ] Independent gossip observers and their protected signing keys are deployed across separate administrative domains; the implemented gate alone does not establish global monitor coverage.
 - [ ] A real reviewer registry, independent key custody and revocation, reviewer-selection policy, and multi-party governance are deployed and externally audited; cryptographic registration does not establish scientific correctness.
 - [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.
 - [ ] Central-claim selection is validated beyond the small v0 diagnostic set. The known 3-case non-blind regression now reaches 3/3 R@1, but held-out scale validation is still required.

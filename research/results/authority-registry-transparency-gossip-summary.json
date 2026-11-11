@@ -1,0 +1,16 @@
+{
+  "attack_cases": 128,
+  "baseline_false_passes": 128,
+  "control_cases": 32,
+  "direct_split_views_detected": 64,
+  "families_blocked": {
+    "missing_cross_view_proof": 32,
+    "parallel_append_only_forks": 32,
+    "same_size_fork": 32,
+    "tampered_cross_view_proof": 32
+  },
+  "gossip_controls_passed": 32,
+  "gossip_false_passes": 0,
+  "passed": true,
+  "schema_version": "agnxiv.transparency-gossip-summary/1"
+}

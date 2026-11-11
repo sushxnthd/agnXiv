@@ -16,9 +16,11 @@ from .authority import (
     SignedRegistryCheckpoint,
     SignedRegistryCheckpointDigestAttestation,
     SignedRegistryCheckpointTransparencyCheckpoint,
+    SignedRegistryCheckpointTransparencyGossipObservation,
     TrustedAuthorityRegistry,
     TrustedRegistryCheckpoint,
     TrustedRegistryCheckpointKey,
+    TrustedRegistryCheckpointTransparencyGossipObserver,
     authority_registry_blockers,
 )
 from .build import BuildResult
@@ -93,6 +95,13 @@ def environment_verdict_blockers(
     registry_checkpoint_transparency_future_skew_seconds: int = 0,
     require_registry_checkpoint_transparency_checkpoint: bool = False,
     require_registry_checkpoint_transparency_consistency: bool = False,
+    registry_checkpoint_transparency_gossip_observations: list[SignedRegistryCheckpointTransparencyGossipObservation] | None = None,
+    trusted_registry_checkpoint_transparency_gossip_observers: list[TrustedRegistryCheckpointTransparencyGossipObserver] | None = None,
+    registry_checkpoint_transparency_gossip_consistency_witnesses: list[RegistryCheckpointTransparencyConsistencyWitness] | None = None,
+    registry_checkpoint_transparency_gossip_max_age_seconds: int = 0,
+    registry_checkpoint_transparency_gossip_future_skew_seconds: int = 0,
+    registry_checkpoint_transparency_gossip_minimum_observers: int = 2,
+    require_registry_checkpoint_transparency_gossip: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -241,6 +250,27 @@ def environment_verdict_blockers(
                 require_registry_checkpoint_transparency_consistency=(
                     require_registry_checkpoint_transparency_consistency
                 ),
+                registry_checkpoint_transparency_gossip_observations=(
+                    registry_checkpoint_transparency_gossip_observations
+                ),
+                trusted_registry_checkpoint_transparency_gossip_observers=(
+                    trusted_registry_checkpoint_transparency_gossip_observers
+                ),
+                registry_checkpoint_transparency_gossip_consistency_witnesses=(
+                    registry_checkpoint_transparency_gossip_consistency_witnesses
+                ),
+                registry_checkpoint_transparency_gossip_max_age_seconds=(
+                    registry_checkpoint_transparency_gossip_max_age_seconds
+                ),
+                registry_checkpoint_transparency_gossip_future_skew_seconds=(
+                    registry_checkpoint_transparency_gossip_future_skew_seconds
+                ),
+                registry_checkpoint_transparency_gossip_minimum_observers=(
+                    registry_checkpoint_transparency_gossip_minimum_observers
+                ),
+                require_registry_checkpoint_transparency_gossip=(
+                    require_registry_checkpoint_transparency_gossip
+                ),
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -327,6 +357,13 @@ def gate_hosted_verdict(
     registry_checkpoint_transparency_future_skew_seconds: int = 0,
     require_registry_checkpoint_transparency_checkpoint: bool = False,
     require_registry_checkpoint_transparency_consistency: bool = False,
+    registry_checkpoint_transparency_gossip_observations: list[SignedRegistryCheckpointTransparencyGossipObservation] | None = None,
+    trusted_registry_checkpoint_transparency_gossip_observers: list[TrustedRegistryCheckpointTransparencyGossipObserver] | None = None,
+    registry_checkpoint_transparency_gossip_consistency_witnesses: list[RegistryCheckpointTransparencyConsistencyWitness] | None = None,
+    registry_checkpoint_transparency_gossip_max_age_seconds: int = 0,
+    registry_checkpoint_transparency_gossip_future_skew_seconds: int = 0,
+    registry_checkpoint_transparency_gossip_minimum_observers: int = 2,
+    require_registry_checkpoint_transparency_gossip: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -460,6 +497,27 @@ def gate_hosted_verdict(
         ),
         require_registry_checkpoint_transparency_consistency=(
             require_registry_checkpoint_transparency_consistency
+        ),
+        registry_checkpoint_transparency_gossip_observations=(
+            registry_checkpoint_transparency_gossip_observations
+        ),
+        trusted_registry_checkpoint_transparency_gossip_observers=(
+            trusted_registry_checkpoint_transparency_gossip_observers
+        ),
+        registry_checkpoint_transparency_gossip_consistency_witnesses=(
+            registry_checkpoint_transparency_gossip_consistency_witnesses
+        ),
+        registry_checkpoint_transparency_gossip_max_age_seconds=(
+            registry_checkpoint_transparency_gossip_max_age_seconds
+        ),
+        registry_checkpoint_transparency_gossip_future_skew_seconds=(
+            registry_checkpoint_transparency_gossip_future_skew_seconds
+        ),
+        registry_checkpoint_transparency_gossip_minimum_observers=(
+            registry_checkpoint_transparency_gossip_minimum_observers
+        ),
+        require_registry_checkpoint_transparency_gossip=(
+            require_registry_checkpoint_transparency_gossip
         ),
     )
     if not blockers:

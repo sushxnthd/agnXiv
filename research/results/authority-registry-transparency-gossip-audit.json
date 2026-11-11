@@ -1,0 +1,11 @@
+{
+  "direct_split_views_detected": 64,
+  "independently_verified_attacks": 0,
+  "independently_verified_controls": 32,
+  "passed": true,
+  "production_imports": 0,
+  "root_checks": 480,
+  "rows": 160,
+  "schema_version": "agnxiv.transparency-gossip-audit/1",
+  "signature_checks": 640
+}

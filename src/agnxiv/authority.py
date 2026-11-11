@@ -191,6 +191,29 @@ class SignedRegistryCheckpointTransparencyCheckpoint(BaseModel):
     signature_b64: str
 
 
+class RegistryCheckpointTransparencyGossipObservation(BaseModel):
+    """One observer's authenticated statement about a log checkpoint."""
+
+    schema_version: str = "agnxiv.registry-checkpoint-transparency-gossip/1"
+    observer_id: str = Field(min_length=1)
+    observed_at: datetime
+    checkpoint_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class SignedRegistryCheckpointTransparencyGossipObservation(BaseModel):
+    observation: RegistryCheckpointTransparencyGossipObservation
+    checkpoint: SignedRegistryCheckpointTransparencyCheckpoint
+    key_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    signature_b64: str
+
+
+class TrustedRegistryCheckpointTransparencyGossipObserver(BaseModel):
+    observer_id: str = Field(min_length=1)
+    key_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    public_key_pem: str = Field(min_length=1)
+    status: Literal["active", "revoked"] = "active"
+
+
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
     """Return the exact deterministic policy payload interpreted by the gate."""
     return json.dumps(
@@ -405,6 +428,29 @@ def canonical_registry_checkpoint_transparency_checkpoint_payload(
     ).encode("utf-8")
 
 
+def registry_checkpoint_transparency_checkpoint_sha256(
+    checkpoint: SignedRegistryCheckpointTransparencyCheckpoint,
+) -> str:
+    payload = json.dumps(
+        checkpoint.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def canonical_registry_checkpoint_transparency_gossip_payload(
+    observation: RegistryCheckpointTransparencyGossipObservation,
+) -> bytes:
+    return json.dumps(
+        observation.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
 def registry_checkpoint_transparency_key_sha256(
     public_key_pem: str | bytes,
 ) -> str:
@@ -439,6 +485,35 @@ def sign_registry_checkpoint_transparency_checkpoint(
     )
 
 
+def sign_registry_checkpoint_transparency_gossip_observation(
+    observation: RegistryCheckpointTransparencyGossipObservation,
+    checkpoint: SignedRegistryCheckpointTransparencyCheckpoint,
+    private_key_pem: bytes,
+) -> SignedRegistryCheckpointTransparencyGossipObservation:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    if observation.checkpoint_sha256 != registry_checkpoint_transparency_checkpoint_sha256(
+        checkpoint
+    ):
+        raise ValueError("gossip observation does not bind supplied checkpoint")
+    private_key = serialization.load_pem_private_key(private_key_pem, password=None)
+    if not isinstance(private_key, Ed25519PrivateKey):
+        raise TypeError("gossip observer private key is not Ed25519")
+    public_pem = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return SignedRegistryCheckpointTransparencyGossipObservation(
+        observation=observation,
+        checkpoint=checkpoint,
+        key_id=registry_checkpoint_transparency_key_sha256(public_pem),
+        signature_b64=base64.b64encode(
+            private_key.sign(
+                canonical_registry_checkpoint_transparency_gossip_payload(observation)
+            )
+        ).decode("ascii"),
+    )
 def verify_registry_checkpoint_transparency_inclusion(
     provenance_statement_sha256: str,
     witness: RegistryCheckpointTransparencyInclusionWitness,
@@ -521,6 +596,137 @@ def verify_registry_checkpoint_transparency_consistency(
         sn >>= 1
         index += 1
     return sn == 0 and old_hash == old_root and new_hash == new_root
+
+
+def registry_checkpoint_transparency_gossip_blockers(
+    observations: list[SignedRegistryCheckpointTransparencyGossipObservation],
+    trusted_observers: list[TrustedRegistryCheckpointTransparencyGossipObserver],
+    trusted_log_public_key_pem: str,
+    consistency_witnesses: list[RegistryCheckpointTransparencyConsistencyWitness],
+    *,
+    now: datetime,
+    max_age_seconds: int,
+    future_skew_seconds: int = 0,
+    minimum_observers: int = 2,
+) -> list[str]:
+    """Return blockers for authenticated pairwise agreement between log views."""
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
+    failures: list[str] = []
+    if minimum_observers < 2:
+        failures.append("transparency gossip minimum observers is invalid")
+    if max_age_seconds < 0 or future_skew_seconds < 0:
+        failures.append("transparency gossip freshness policy is invalid")
+        return failures
+    current = now if now.tzinfo is not None else now.replace(tzinfo=UTC)
+    observer_map = {
+        (observer.observer_id, observer.key_id): observer
+        for observer in trusted_observers
+    }
+    try:
+        log_key = serialization.load_pem_public_key(trusted_log_public_key_pem.encode())
+        if not isinstance(log_key, Ed25519PublicKey):
+            raise TypeError("transparency log key is not Ed25519")
+        log_key_id = registry_checkpoint_transparency_key_sha256(
+            trusted_log_public_key_pem
+        )
+    except (ValueError, TypeError):
+        return ["trusted transparency gossip log key is invalid"]
+
+    valid: dict[str, RegistryCheckpointTransparencyCheckpoint] = {}
+    for signed in observations:
+        scope = signed.observation
+        trusted = observer_map.get((scope.observer_id, signed.key_id))
+        if trusted is None:
+            failures.append("transparency gossip observation uses an untrusted observer")
+            continue
+        if trusted.status != "active":
+            failures.append("transparency gossip observation uses a revoked observer")
+            continue
+        if scope.observer_id in valid:
+            failures.append("transparency gossip observer is duplicated")
+            continue
+        if scope.checkpoint_sha256 != registry_checkpoint_transparency_checkpoint_sha256(
+            signed.checkpoint
+        ):
+            failures.append("transparency gossip observation checkpoint digest does not match")
+            continue
+        try:
+            observer_key = serialization.load_pem_public_key(trusted.public_key_pem.encode())
+            if not isinstance(observer_key, Ed25519PublicKey):
+                raise TypeError("gossip observer key is not Ed25519")
+            if signed.key_id != registry_checkpoint_transparency_key_sha256(
+                trusted.public_key_pem
+            ):
+                failures.append("transparency gossip observer key fingerprint does not match")
+                continue
+            observer_key.verify(
+                base64.b64decode(signed.signature_b64, validate=True),
+                canonical_registry_checkpoint_transparency_gossip_payload(scope),
+            )
+            checkpoint = signed.checkpoint
+            if checkpoint.key_id != log_key_id:
+                failures.append("transparency gossip log key fingerprint does not match")
+                continue
+            log_key.verify(
+                base64.b64decode(checkpoint.signature_b64, validate=True),
+                canonical_registry_checkpoint_transparency_checkpoint_payload(
+                    checkpoint.checkpoint
+                ),
+            )
+        except (binascii.Error, ValueError, TypeError, InvalidSignature):
+            failures.append("transparency gossip signature is invalid")
+            continue
+        if scope.observed_at.tzinfo is None:
+            failures.append("transparency gossip observation time lacks timezone")
+            continue
+        if scope.observed_at > current + timedelta(seconds=future_skew_seconds):
+            failures.append("transparency gossip observation is from the future")
+            continue
+        if current - scope.observed_at > timedelta(seconds=max_age_seconds):
+            failures.append("transparency gossip observation is stale")
+            continue
+        if checkpoint.checkpoint.issued_at.tzinfo is None:
+            failures.append("transparency gossip checkpoint time lacks timezone")
+            continue
+        if checkpoint.checkpoint.issued_at > scope.observed_at:
+            failures.append("transparency gossip checkpoint postdates observation")
+            continue
+        valid[scope.observer_id] = checkpoint.checkpoint
+
+    if len(valid) < minimum_observers:
+        failures.append("transparency gossip has insufficient authenticated observers")
+        return failures
+    checkpoints = list(valid.values())
+    if len({checkpoint.log_id for checkpoint in checkpoints}) != 1:
+        failures.append("transparency gossip observations use different log identifiers")
+        return failures
+
+    for left, right in itertools.combinations(checkpoints, 2):
+        if left.tree_size == right.tree_size:
+            if left.root_sha256 != right.root_sha256:
+                failures.append("transparency gossip split view detected at equal tree size")
+            continue
+        old, new = (left, right) if left.tree_size < right.tree_size else (right, left)
+        witness = next(
+            (
+                candidate
+                for candidate in consistency_witnesses
+                if candidate.log_id == old.log_id == new.log_id
+                and candidate.old_tree_size == old.tree_size
+                and candidate.old_root_sha256 == old.root_sha256
+                and candidate.new_tree_size == new.tree_size
+                and candidate.new_root_sha256 == new.root_sha256
+            ),
+            None,
+        )
+        if witness is None:
+            failures.append("transparency gossip cross-view consistency proof is missing")
+        elif not verify_registry_checkpoint_transparency_consistency(witness):
+            failures.append("transparency gossip cross-view consistency proof is invalid")
+    return failures
 
 
 def registry_checkpoint_digest_attestation_key_sha256(
@@ -680,6 +886,13 @@ def authority_registry_blockers(
     registry_checkpoint_transparency_future_skew_seconds: int = 0,
     require_registry_checkpoint_transparency_checkpoint: bool = False,
     require_registry_checkpoint_transparency_consistency: bool = False,
+    registry_checkpoint_transparency_gossip_observations: list[SignedRegistryCheckpointTransparencyGossipObservation] | None = None,
+    trusted_registry_checkpoint_transparency_gossip_observers: list[TrustedRegistryCheckpointTransparencyGossipObserver] | None = None,
+    registry_checkpoint_transparency_gossip_consistency_witnesses: list[RegistryCheckpointTransparencyConsistencyWitness] | None = None,
+    registry_checkpoint_transparency_gossip_max_age_seconds: int = 0,
+    registry_checkpoint_transparency_gossip_future_skew_seconds: int = 0,
+    registry_checkpoint_transparency_gossip_minimum_observers: int = 2,
+    require_registry_checkpoint_transparency_gossip: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -1492,6 +1705,35 @@ def authority_registry_blockers(
                 consistency
             ):
                 failures.append("transparency consistency proof is invalid")
+
+    if require_registry_checkpoint_transparency_gossip:
+        if not require_registry_checkpoint_transparency_consistency:
+            failures.append("transparency gossip requires append-only consistency mode")
+        trusted_pem = trusted_registry_checkpoint_transparency_public_key_pem
+        if trusted_pem is None:
+            failures.append("trusted transparency gossip log key is not configured")
+        else:
+            failures.extend(
+                registry_checkpoint_transparency_gossip_blockers(
+                    list(registry_checkpoint_transparency_gossip_observations or []),
+                    list(trusted_registry_checkpoint_transparency_gossip_observers or []),
+                    trusted_pem,
+                    list(
+                        registry_checkpoint_transparency_gossip_consistency_witnesses
+                        or []
+                    ),
+                    now=current,
+                    max_age_seconds=(
+                        registry_checkpoint_transparency_gossip_max_age_seconds
+                    ),
+                    future_skew_seconds=(
+                        registry_checkpoint_transparency_gossip_future_skew_seconds
+                    ),
+                    minimum_observers=(
+                        registry_checkpoint_transparency_gossip_minimum_observers
+                    ),
+                )
+            )
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:
