@@ -1,0 +1,9 @@
+{
+  "independently_verified_attacks": 0,
+  "independently_verified_controls": 32,
+  "passed": true,
+  "production_imports": 0,
+  "roots_checked": 320,
+  "schema": "agnxiv.transparency-consistency-audit/1",
+  "signatures_checked": 288
+}

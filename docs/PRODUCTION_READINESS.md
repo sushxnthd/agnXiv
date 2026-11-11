@@ -28,6 +28,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Quorum checkpoints can bind the exact canonical authority-registry snapshot digest, preventing same-epoch policy forks from reusing a legitimate floor statement.
 - [x] A recursively linked final checkpoint commitment binds every disclosed predecessor path; endpoint-preserving intermediate policy substitutions cause abstention.
 - [x] Transparency inclusion can require an Ed25519-authenticated root whose log identity, tree size, root digest, and issuance time match the witness and satisfy explicit age and future-skew bounds.
+- [x] A fresh signed transparency root must prove RFC 6962-style append-only consistency with an authenticated prior checkpoint; rewritten prefixes, non-advancing trees, missing proofs, and endpoint mismatches fail closed.
+- [ ] Cross-client gossip detects independently signed split views; local consistency under one configured key does not establish global canonicity.
 - [ ] Transparency checkpoints carry and verify append-only consistency proofs from a previously trusted root; fresh signed roots alone do not establish append-only history.
 - [ ] A real reviewer registry, independent key custody and revocation, reviewer-selection policy, and multi-party governance are deployed and externally audited; cryptographic registration does not establish scientific correctness.
 - [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.

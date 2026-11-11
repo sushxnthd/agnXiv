@@ -26,6 +26,7 @@ from agnxiv.authority import (
     RegistryCheckpointDigestProducerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointScope,
+    RegistryCheckpointTransparencyConsistencyWitness,
     RegistryCheckpointTransparencyInclusionWitness,
     SignedRegistryCheckpointDigestAttestation,
     SignedRegistryCheckpointTransparencyCheckpoint,
@@ -147,10 +148,13 @@ def gate(
     transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
     require_transparency_inclusion=False,
     signed_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    previous_signed_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    transparency_consistency_witness: RegistryCheckpointTransparencyConsistencyWitness | None = None,
     trusted_transparency_public_key_pem=None,
     transparency_max_age_seconds=None,
     transparency_future_skew_seconds=0,
     require_transparency_checkpoint=False,
+    require_transparency_consistency=False,
     **requirements,
 ):
     return gate_hosted_verdict(
@@ -222,6 +226,12 @@ def gate(
         signed_registry_checkpoint_transparency_checkpoint=(
             signed_transparency_checkpoint
         ),
+        previous_signed_registry_checkpoint_transparency_checkpoint=(
+            previous_signed_transparency_checkpoint
+        ),
+        registry_checkpoint_transparency_consistency_witness=(
+            transparency_consistency_witness
+        ),
         trusted_registry_checkpoint_transparency_public_key_pem=(
             trusted_transparency_public_key_pem
         ),
@@ -233,6 +243,9 @@ def gate(
         ),
         require_registry_checkpoint_transparency_checkpoint=(
             require_transparency_checkpoint
+        ),
+        require_registry_checkpoint_transparency_consistency=(
+            require_transparency_consistency
         ),
     )
 

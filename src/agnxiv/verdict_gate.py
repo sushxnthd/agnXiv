@@ -11,6 +11,7 @@ from .authority import (
     RegistryCheckpointDigestProducerScope,
     RegistryCheckpointExecutionScope,
     RegistryCheckpointQuorumPolicy,
+    RegistryCheckpointTransparencyConsistencyWitness,
     RegistryCheckpointTransparencyInclusionWitness,
     SignedRegistryCheckpoint,
     SignedRegistryCheckpointDigestAttestation,
@@ -85,10 +86,13 @@ def environment_verdict_blockers(
     registry_checkpoint_transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
     require_registry_checkpoint_transparency_inclusion: bool = False,
     signed_registry_checkpoint_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    previous_signed_registry_checkpoint_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    registry_checkpoint_transparency_consistency_witness: RegistryCheckpointTransparencyConsistencyWitness | None = None,
     trusted_registry_checkpoint_transparency_public_key_pem: str | None = None,
     registry_checkpoint_transparency_max_age_seconds: int | None = None,
     registry_checkpoint_transparency_future_skew_seconds: int = 0,
     require_registry_checkpoint_transparency_checkpoint: bool = False,
+    require_registry_checkpoint_transparency_consistency: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -216,6 +220,12 @@ def environment_verdict_blockers(
                 signed_registry_checkpoint_transparency_checkpoint=(
                     signed_registry_checkpoint_transparency_checkpoint
                 ),
+                previous_signed_registry_checkpoint_transparency_checkpoint=(
+                    previous_signed_registry_checkpoint_transparency_checkpoint
+                ),
+                registry_checkpoint_transparency_consistency_witness=(
+                    registry_checkpoint_transparency_consistency_witness
+                ),
                 trusted_registry_checkpoint_transparency_public_key_pem=(
                     trusted_registry_checkpoint_transparency_public_key_pem
                 ),
@@ -227,6 +237,9 @@ def environment_verdict_blockers(
                 ),
                 require_registry_checkpoint_transparency_checkpoint=(
                     require_registry_checkpoint_transparency_checkpoint
+                ),
+                require_registry_checkpoint_transparency_consistency=(
+                    require_registry_checkpoint_transparency_consistency
                 ),
             )
         )
@@ -307,10 +320,13 @@ def gate_hosted_verdict(
     registry_checkpoint_transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
     require_registry_checkpoint_transparency_inclusion: bool = False,
     signed_registry_checkpoint_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    previous_signed_registry_checkpoint_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    registry_checkpoint_transparency_consistency_witness: RegistryCheckpointTransparencyConsistencyWitness | None = None,
     trusted_registry_checkpoint_transparency_public_key_pem: str | None = None,
     registry_checkpoint_transparency_max_age_seconds: int | None = None,
     registry_checkpoint_transparency_future_skew_seconds: int = 0,
     require_registry_checkpoint_transparency_checkpoint: bool = False,
+    require_registry_checkpoint_transparency_consistency: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -424,6 +440,12 @@ def gate_hosted_verdict(
         signed_registry_checkpoint_transparency_checkpoint=(
             signed_registry_checkpoint_transparency_checkpoint
         ),
+        previous_signed_registry_checkpoint_transparency_checkpoint=(
+            previous_signed_registry_checkpoint_transparency_checkpoint
+        ),
+        registry_checkpoint_transparency_consistency_witness=(
+            registry_checkpoint_transparency_consistency_witness
+        ),
         trusted_registry_checkpoint_transparency_public_key_pem=(
             trusted_registry_checkpoint_transparency_public_key_pem
         ),
@@ -435,6 +457,9 @@ def gate_hosted_verdict(
         ),
         require_registry_checkpoint_transparency_checkpoint=(
             require_registry_checkpoint_transparency_checkpoint
+        ),
+        require_registry_checkpoint_transparency_consistency=(
+            require_registry_checkpoint_transparency_consistency
         ),
     )
     if not blockers:

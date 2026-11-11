@@ -1,0 +1,18 @@
+{
+  "attack_total": 128,
+  "checkpoint_only_false_passes": 128,
+  "consistency_verified_controls_passed": 32,
+  "consistency_verified_false_passes": 0,
+  "families_blocked": {
+    "missing_prior_checkpoint": 32,
+    "non_advancing_tree": 32,
+    "rewritten_historical_prefix": 32,
+    "tampered_consistency_path": 32
+  },
+  "negative_controls": {
+    "endpoint_mismatch": true,
+    "inconsistent_timestamp": true,
+    "invalid_prior_signature": true,
+    "missing_consistency_proof": true
+  }
+}
