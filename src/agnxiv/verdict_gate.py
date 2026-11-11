@@ -14,6 +14,7 @@ from .authority import (
     RegistryCheckpointTransparencyInclusionWitness,
     SignedRegistryCheckpoint,
     SignedRegistryCheckpointDigestAttestation,
+    SignedRegistryCheckpointTransparencyCheckpoint,
     TrustedAuthorityRegistry,
     TrustedRegistryCheckpoint,
     TrustedRegistryCheckpointKey,
@@ -83,6 +84,11 @@ def environment_verdict_blockers(
     require_registry_checkpoint_digest_attestation_authentication: bool = False,
     registry_checkpoint_transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
     require_registry_checkpoint_transparency_inclusion: bool = False,
+    signed_registry_checkpoint_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    trusted_registry_checkpoint_transparency_public_key_pem: str | None = None,
+    registry_checkpoint_transparency_max_age_seconds: int | None = None,
+    registry_checkpoint_transparency_future_skew_seconds: int = 0,
+    require_registry_checkpoint_transparency_checkpoint: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
     blockers: list[str] = []
@@ -207,6 +213,21 @@ def environment_verdict_blockers(
                 require_registry_checkpoint_transparency_inclusion=(
                     require_registry_checkpoint_transparency_inclusion
                 ),
+                signed_registry_checkpoint_transparency_checkpoint=(
+                    signed_registry_checkpoint_transparency_checkpoint
+                ),
+                trusted_registry_checkpoint_transparency_public_key_pem=(
+                    trusted_registry_checkpoint_transparency_public_key_pem
+                ),
+                registry_checkpoint_transparency_max_age_seconds=(
+                    registry_checkpoint_transparency_max_age_seconds
+                ),
+                registry_checkpoint_transparency_future_skew_seconds=(
+                    registry_checkpoint_transparency_future_skew_seconds
+                ),
+                require_registry_checkpoint_transparency_checkpoint=(
+                    require_registry_checkpoint_transparency_checkpoint
+                ),
             )
         )
     if environment.scope_resolution == "ambiguous":
@@ -285,6 +306,11 @@ def gate_hosted_verdict(
     require_registry_checkpoint_digest_attestation_authentication: bool = False,
     registry_checkpoint_transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
     require_registry_checkpoint_transparency_inclusion: bool = False,
+    signed_registry_checkpoint_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    trusted_registry_checkpoint_transparency_public_key_pem: str | None = None,
+    registry_checkpoint_transparency_max_age_seconds: int | None = None,
+    registry_checkpoint_transparency_future_skew_seconds: int = 0,
+    require_registry_checkpoint_transparency_checkpoint: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
 
@@ -394,6 +420,21 @@ def gate_hosted_verdict(
         ),
         require_registry_checkpoint_transparency_inclusion=(
             require_registry_checkpoint_transparency_inclusion
+        ),
+        signed_registry_checkpoint_transparency_checkpoint=(
+            signed_registry_checkpoint_transparency_checkpoint
+        ),
+        trusted_registry_checkpoint_transparency_public_key_pem=(
+            trusted_registry_checkpoint_transparency_public_key_pem
+        ),
+        registry_checkpoint_transparency_max_age_seconds=(
+            registry_checkpoint_transparency_max_age_seconds
+        ),
+        registry_checkpoint_transparency_future_skew_seconds=(
+            registry_checkpoint_transparency_future_skew_seconds
+        ),
+        require_registry_checkpoint_transparency_checkpoint=(
+            require_registry_checkpoint_transparency_checkpoint
         ),
     )
     if not blockers:

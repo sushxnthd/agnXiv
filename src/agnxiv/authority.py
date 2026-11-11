@@ -5,7 +5,7 @@ import binascii
 import hashlib
 import itertools
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -159,6 +159,24 @@ class RegistryCheckpointTransparencyInclusionWitness(BaseModel):
     leaf_index: int = Field(ge=0)
     root_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     audit_path_sha256: list[str] = Field(max_length=64)
+
+
+class RegistryCheckpointTransparencyCheckpoint(BaseModel):
+    """Canonical signed root statement for one transparency-log tree."""
+
+    schema_version: str = "agnxiv.registry-checkpoint-transparency-checkpoint/1"
+    log_id: str = Field(min_length=1)
+    tree_size: int = Field(ge=1)
+    root_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    issued_at: datetime
+
+
+class SignedRegistryCheckpointTransparencyCheckpoint(BaseModel):
+    """Ed25519-authenticated transparency checkpoint."""
+
+    checkpoint: RegistryCheckpointTransparencyCheckpoint
+    key_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    signature_b64: str
 
 
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
@@ -364,6 +382,51 @@ def registry_checkpoint_transparency_inclusion_witness_sha256(
     ).hexdigest()
 
 
+def canonical_registry_checkpoint_transparency_checkpoint_payload(
+    checkpoint: RegistryCheckpointTransparencyCheckpoint,
+) -> bytes:
+    return json.dumps(
+        checkpoint.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
+def registry_checkpoint_transparency_key_sha256(
+    public_key_pem: str | bytes,
+) -> str:
+    """Return the canonical fingerprint of a transparency Ed25519 key."""
+    return registry_checkpoint_digest_attestation_key_sha256(public_key_pem)
+
+
+def sign_registry_checkpoint_transparency_checkpoint(
+    checkpoint: RegistryCheckpointTransparencyCheckpoint,
+    private_key_pem: bytes,
+) -> SignedRegistryCheckpointTransparencyCheckpoint:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    private_key = serialization.load_pem_private_key(private_key_pem, password=None)
+    if not isinstance(private_key, Ed25519PrivateKey):
+        raise TypeError("transparency checkpoint private key is not Ed25519")
+    public_pem = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return SignedRegistryCheckpointTransparencyCheckpoint(
+        checkpoint=checkpoint,
+        key_id=registry_checkpoint_transparency_key_sha256(public_pem),
+        signature_b64=base64.b64encode(
+            private_key.sign(
+                canonical_registry_checkpoint_transparency_checkpoint_payload(
+                    checkpoint
+                )
+            )
+        ).decode("ascii"),
+    )
+
+
 def verify_registry_checkpoint_transparency_inclusion(
     provenance_statement_sha256: str,
     witness: RegistryCheckpointTransparencyInclusionWitness,
@@ -545,6 +608,11 @@ def authority_registry_blockers(
     require_registry_checkpoint_digest_attestation_authentication: bool = False,
     registry_checkpoint_transparency_inclusion_witness: RegistryCheckpointTransparencyInclusionWitness | None = None,
     require_registry_checkpoint_transparency_inclusion: bool = False,
+    signed_registry_checkpoint_transparency_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    trusted_registry_checkpoint_transparency_public_key_pem: str | None = None,
+    registry_checkpoint_transparency_max_age_seconds: int | None = None,
+    registry_checkpoint_transparency_future_skew_seconds: int = 0,
+    require_registry_checkpoint_transparency_checkpoint: bool = False,
 ) -> list[str]:
     if registry is None:
         return ["trusted authority registry is not configured"]
@@ -1228,6 +1296,76 @@ def authority_registry_blockers(
                 failures.append(
                     "registry checkpoint transparency inclusion proof is invalid"
                 )
+
+    if require_registry_checkpoint_transparency_checkpoint:
+        if not require_registry_checkpoint_transparency_inclusion:
+            failures.append(
+                "transparency checkpoint authentication requires inclusion mode"
+            )
+        signed_checkpoint = signed_registry_checkpoint_transparency_checkpoint
+        trusted_pem = trusted_registry_checkpoint_transparency_public_key_pem
+        max_age = registry_checkpoint_transparency_max_age_seconds
+        future_skew = registry_checkpoint_transparency_future_skew_seconds
+        if signed_checkpoint is None:
+            failures.append("signed transparency checkpoint is not configured")
+        if trusted_pem is None:
+            failures.append("trusted transparency checkpoint key is not configured")
+        if max_age is None or max_age < 0:
+            failures.append("transparency checkpoint maximum age is invalid")
+        if future_skew < 0:
+            failures.append("transparency checkpoint future skew is invalid")
+        if signed_checkpoint is not None and registry_checkpoint_transparency_inclusion_witness is not None:
+            checkpoint = signed_checkpoint.checkpoint
+            witness = registry_checkpoint_transparency_inclusion_witness
+            if (
+                checkpoint.log_id != witness.log_id
+                or checkpoint.tree_size != witness.tree_size
+                or checkpoint.root_sha256 != witness.root_sha256
+            ):
+                failures.append(
+                    "signed transparency checkpoint does not match inclusion witness"
+                )
+            issued_at = checkpoint.issued_at
+            if issued_at.tzinfo is None:
+                failures.append("signed transparency checkpoint issuance time lacks timezone")
+            else:
+                if (
+                    max_age is not None
+                    and max_age >= 0
+                    and current - issued_at > timedelta(seconds=max_age)
+                ):
+                    failures.append("signed transparency checkpoint is stale")
+                if (
+                    future_skew >= 0
+                    and issued_at - current > timedelta(seconds=future_skew)
+                ):
+                    failures.append("signed transparency checkpoint is from the future")
+        if signed_checkpoint is not None and trusted_pem is not None:
+            try:
+                from cryptography.exceptions import InvalidSignature
+                from cryptography.hazmat.primitives import serialization
+                from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
+                public_key = serialization.load_pem_public_key(trusted_pem.encode())
+                if not isinstance(public_key, Ed25519PublicKey):
+                    raise TypeError("transparency checkpoint key is not Ed25519")
+                if signed_checkpoint.key_id != registry_checkpoint_transparency_key_sha256(
+                    trusted_pem
+                ):
+                    failures.append(
+                        "signed transparency checkpoint key fingerprint does not match"
+                    )
+                signature = base64.b64decode(
+                    signed_checkpoint.signature_b64, validate=True
+                )
+                public_key.verify(
+                    signature,
+                    canonical_registry_checkpoint_transparency_checkpoint_payload(
+                        signed_checkpoint.checkpoint
+                    ),
+                )
+            except (binascii.Error, ValueError, TypeError, InvalidSignature):
+                failures.append("signed transparency checkpoint signature is invalid")
 
     effective_checkpoint = authenticated_checkpoint or trusted_registry_checkpoint
     if effective_checkpoint is not None:

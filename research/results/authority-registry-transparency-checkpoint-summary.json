@@ -1,0 +1,21 @@
+{
+  "attack_total": 128,
+  "checkpoint_verified_controls_passed": 32,
+  "checkpoint_verified_false_passes": 0,
+  "control_total": 32,
+  "families_blocked": {
+    "expired_checkpoint": 32,
+    "future_checkpoint": 32,
+    "missing_checkpoint": 32,
+    "wrong_signing_key": 32
+  },
+  "inclusion_verified_false_passes": 128,
+  "negative_controls": {
+    "checkpoint_witness_mismatch_blocked": true,
+    "missing_trusted_key_blocked": true,
+    "negative_future_skew_blocked": true,
+    "negative_max_age_blocked": true,
+    "without_inclusion_mode_blocked": true
+  },
+  "passed": true
+}

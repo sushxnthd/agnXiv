@@ -1,0 +1,13 @@
+{
+  "checkpoint_binding_checks": 160,
+  "checkpoint_verified_false_passes": 0,
+  "freshness_checks": 160,
+  "inclusion_verified_false_passes": 128,
+  "independently_verified_attacks": 0,
+  "independently_verified_controls": 32,
+  "key_fingerprint_checks": 160,
+  "passed": true,
+  "production_imports": 0,
+  "schema": "agnxiv.authority-registry-transparency-checkpoint-audit/1",
+  "signature_checks": 160
+}
