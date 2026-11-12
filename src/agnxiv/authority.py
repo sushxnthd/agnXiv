@@ -493,6 +493,48 @@ def trusted_registry_checkpoint_transparency_gossip_observer_registry_sha256(
     return hashlib.sha256(payload).hexdigest()
 
 
+def canonical_versioned_trusted_registry_checkpoint_transparency_gossip_observer_registry_payload(
+    observers: list[TrustedRegistryCheckpointTransparencyGossipObserver],
+    registry_namespace: str,
+    registry_epoch: int,
+) -> bytes:
+    """Canonicalize one namespace-and-epoch-scoped observer registry."""
+    namespace = registry_namespace.strip().casefold()
+    if not namespace:
+        raise ValueError("observer registry namespace must not be blank")
+    if registry_epoch < 0:
+        raise ValueError("observer registry epoch must be non-negative")
+    entries = sorted(
+        (observer.model_dump(mode="json") for observer in observers),
+        key=lambda entry: (entry["observer_id"], entry["key_id"]),
+    )
+    return json.dumps(
+        {
+            "observers": entries,
+            "registry_epoch": registry_epoch,
+            "registry_namespace": namespace,
+            "schema_version": "agnxiv.transparency-gossip-observer-registry/2",
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
+def versioned_trusted_registry_checkpoint_transparency_gossip_observer_registry_sha256(
+    observers: list[TrustedRegistryCheckpointTransparencyGossipObserver],
+    registry_namespace: str,
+    registry_epoch: int,
+) -> str:
+    """Digest observer policy together with its namespace and monotonic epoch."""
+    payload = canonical_versioned_trusted_registry_checkpoint_transparency_gossip_observer_registry_payload(
+        observers,
+        registry_namespace,
+        registry_epoch,
+    )
+    return hashlib.sha256(payload).hexdigest()
+
+
 def registry_checkpoint_transparency_key_sha256(
     public_key_pem: str | bytes,
 ) -> str:
@@ -656,6 +698,11 @@ def registry_checkpoint_transparency_gossip_blockers(
     minimum_required_checkpoint_administrative_domains: int = 0,
     expected_trusted_observer_registry_sha256: str | None = None,
     require_trusted_observer_registry_commitment: bool = False,
+    trusted_observer_registry_namespace: str | None = None,
+    trusted_observer_registry_epoch: int | None = None,
+    expected_trusted_observer_registry_namespace: str | None = None,
+    minimum_trusted_observer_registry_epoch: int | None = None,
+    require_trusted_observer_registry_freshness: bool = False,
 ) -> list[str]:
     """Return blockers for authenticated pairwise agreement between log views."""
     from cryptography.exceptions import InvalidSignature
@@ -684,12 +731,64 @@ def registry_checkpoint_transparency_gossip_blockers(
         and expected_trusted_observer_registry_sha256 is None
     ):
         failures.append("trusted transparency gossip observer registry is not committed")
-    if expected_trusted_observer_registry_sha256 is not None:
-        actual_observer_registry_sha256 = (
-            trusted_registry_checkpoint_transparency_gossip_observer_registry_sha256(
-                trusted_observers
+    if require_trusted_observer_registry_freshness:
+        if not require_trusted_observer_registry_commitment:
+            failures.append(
+                "observer registry freshness requires protected registry commitment"
             )
-        )
+        if trusted_observer_registry_namespace is None:
+            failures.append("trusted observer registry namespace is not configured")
+        if expected_trusted_observer_registry_namespace is None:
+            failures.append("expected observer registry namespace is not configured")
+        if trusted_observer_registry_epoch is None:
+            failures.append("trusted observer registry epoch is not configured")
+        if minimum_trusted_observer_registry_epoch is None:
+            failures.append("trusted observer registry minimum epoch is not configured")
+        if (
+            trusted_observer_registry_epoch is not None
+            and trusted_observer_registry_epoch < 0
+        ):
+            failures.append("trusted observer registry epoch is invalid")
+        if (
+            minimum_trusted_observer_registry_epoch is not None
+            and minimum_trusted_observer_registry_epoch < 0
+        ):
+            failures.append("trusted observer registry minimum epoch is invalid")
+        if (
+            trusted_observer_registry_namespace is not None
+            and expected_trusted_observer_registry_namespace is not None
+            and trusted_observer_registry_namespace.strip().casefold()
+            != expected_trusted_observer_registry_namespace.strip().casefold()
+        ):
+            failures.append("trusted observer registry namespace does not match")
+        if (
+            trusted_observer_registry_epoch is not None
+            and minimum_trusted_observer_registry_epoch is not None
+            and trusted_observer_registry_epoch
+            < minimum_trusted_observer_registry_epoch
+        ):
+            failures.append("trusted observer registry epoch is below the trusted minimum")
+    if expected_trusted_observer_registry_sha256 is not None:
+        if (
+            require_trusted_observer_registry_freshness
+            and trusted_observer_registry_namespace is not None
+            and trusted_observer_registry_epoch is not None
+            and trusted_observer_registry_epoch >= 0
+        ):
+            try:
+                actual_observer_registry_sha256 = versioned_trusted_registry_checkpoint_transparency_gossip_observer_registry_sha256(
+                    trusted_observers,
+                    trusted_observer_registry_namespace,
+                    trusted_observer_registry_epoch,
+                )
+            except ValueError:
+                actual_observer_registry_sha256 = ""
+        else:
+            actual_observer_registry_sha256 = (
+                trusted_registry_checkpoint_transparency_gossip_observer_registry_sha256(
+                    trusted_observers
+                )
+            )
         if actual_observer_registry_sha256 != expected_trusted_observer_registry_sha256:
             failures.append("trusted transparency gossip observer registry digest does not match")
     current = now if now.tzinfo is not None else now.replace(tzinfo=UTC)

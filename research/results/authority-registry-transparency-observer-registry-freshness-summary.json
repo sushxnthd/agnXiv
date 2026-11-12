@@ -1,0 +1,16 @@
+{
+  "attack_cases": 128,
+  "control_cases": 32,
+  "families_blocked": {
+    "domain_policy_rollback": 32,
+    "missing_minimum_epoch": 32,
+    "namespace_replay": 32,
+    "revoked_key_rollback": 32
+  },
+  "freshness_bound_controls_passed": 32,
+  "freshness_bound_false_passes": 0,
+  "passed": true,
+  "schema_version": "agnxiv.transparency-observer-registry-freshness-summary/1",
+  "versionless_controls_passed": 32,
+  "versionless_false_passes": 128
+}

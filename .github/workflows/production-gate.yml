@@ -202,6 +202,10 @@ jobs:
             > /tmp/authority-registry-transparency-observer-registry-commitment.json
           python research/scripts/audit_authority_registry_transparency_observer_registry_commitment.py \
             > /tmp/authority-registry-transparency-observer-registry-commitment-audit.json
+          python research/scripts/verify_authority_registry_transparency_observer_registry_freshness.py \
+            > /tmp/authority-registry-transparency-observer-registry-freshness.json
+          python research/scripts/audit_authority_registry_transparency_observer_registry_freshness.py \
+            > /tmp/authority-registry-transparency-observer-registry-freshness-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -366,6 +370,8 @@ jobs:
             /tmp/authority-registry-transparency-current-view-quorum-audit.json
             /tmp/authority-registry-transparency-observer-registry-commitment.json
             /tmp/authority-registry-transparency-observer-registry-commitment-audit.json
+            /tmp/authority-registry-transparency-observer-registry-freshness.json
+            /tmp/authority-registry-transparency-observer-registry-freshness-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90
