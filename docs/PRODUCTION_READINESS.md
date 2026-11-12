@@ -32,6 +32,8 @@ All P0 items must be true before calling the hosted service production-grade.
 - [x] Authenticated cross-client gossip detects equal-size split views and requires valid pairwise consistency proofs for unequal-size views; missing cross-view evidence causes abstention.
 - [x] Strict gossip authorization can require distinct authenticated administrative-domain bindings from the trusted observer registry; observer-ID Sybils, canonical domain aliases, and unscoped legacy observers cannot satisfy a two-domain quorum.
 - [x] Strict gossip binds the observer/domain quorum to the exact signed checkpoint being evaluated; fresh agreement on an older checkpoint cannot authorize an unseen current fork during a partition.
+- [x] Strict gossip can bind the complete trusted observer-key, status, and administrative-domain registry to a protected canonical digest; substituted observer registries fail closed before satisfying a quorum.
+- [ ] The expected observer-registry digest is provisioned through protected production configuration with independently governed change control; implementing the comparison does not establish that deployment trust boundary.
 - [ ] Independent gossip observers and their protected signing keys are deployed across separate administrative domains; the implemented gate alone does not establish global monitor coverage.
 - [ ] A real reviewer registry, independent key custody and revocation, reviewer-selection policy, and multi-party governance are deployed and externally audited; cryptographic registration does not establish scientific correctness.
 - [ ] Held-out benchmark includes at least 299 independent SUPPORTS decisions with zero false passes, or otherwise achieves a one-sided 95% false-pass upper bound <=1%.

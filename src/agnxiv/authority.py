@@ -462,6 +462,37 @@ def canonical_registry_checkpoint_transparency_gossip_payload(
     ).encode("utf-8")
 
 
+def canonical_trusted_registry_checkpoint_transparency_gossip_observer_registry_payload(
+    observers: list[TrustedRegistryCheckpointTransparencyGossipObserver],
+) -> bytes:
+    """Canonicalize the full trusted gossip-observer registry."""
+    entries = sorted(
+        (observer.model_dump(mode="json") for observer in observers),
+        key=lambda entry: (entry["observer_id"], entry["key_id"]),
+    )
+    return json.dumps(
+        {
+            "schema_version": "agnxiv.transparency-gossip-observer-registry/1",
+            "observers": entries,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
+def trusted_registry_checkpoint_transparency_gossip_observer_registry_sha256(
+    observers: list[TrustedRegistryCheckpointTransparencyGossipObserver],
+) -> str:
+    """Digest observer keys, status, and normalized domain assignments."""
+    payload = (
+        canonical_trusted_registry_checkpoint_transparency_gossip_observer_registry_payload(
+            observers
+        )
+    )
+    return hashlib.sha256(payload).hexdigest()
+
+
 def registry_checkpoint_transparency_key_sha256(
     public_key_pem: str | bytes,
 ) -> str:
@@ -623,6 +654,8 @@ def registry_checkpoint_transparency_gossip_blockers(
     required_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
     minimum_required_checkpoint_observers: int = 0,
     minimum_required_checkpoint_administrative_domains: int = 0,
+    expected_trusted_observer_registry_sha256: str | None = None,
+    require_trusted_observer_registry_commitment: bool = False,
 ) -> list[str]:
     """Return blockers for authenticated pairwise agreement between log views."""
     from cryptography.exceptions import InvalidSignature
@@ -646,6 +679,19 @@ def registry_checkpoint_transparency_gossip_blockers(
     if max_age_seconds < 0 or future_skew_seconds < 0:
         failures.append("transparency gossip freshness policy is invalid")
         return failures
+    if (
+        require_trusted_observer_registry_commitment
+        and expected_trusted_observer_registry_sha256 is None
+    ):
+        failures.append("trusted transparency gossip observer registry is not committed")
+    if expected_trusted_observer_registry_sha256 is not None:
+        actual_observer_registry_sha256 = (
+            trusted_registry_checkpoint_transparency_gossip_observer_registry_sha256(
+                trusted_observers
+            )
+        )
+        if actual_observer_registry_sha256 != expected_trusted_observer_registry_sha256:
+            failures.append("trusted transparency gossip observer registry digest does not match")
     current = now if now.tzinfo is not None else now.replace(tzinfo=UTC)
     observer_map = {
         (observer.observer_id, observer.key_id): observer

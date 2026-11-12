@@ -194,6 +194,14 @@ jobs:
             > /tmp/authority-registry-transparency-domain-quorum.json
           python research/scripts/audit_authority_registry_transparency_domain_quorum.py \
             > /tmp/authority-registry-transparency-domain-quorum-audit.json
+          python research/scripts/verify_authority_registry_transparency_current_view_quorum.py \
+            > /tmp/authority-registry-transparency-current-view-quorum.json
+          python research/scripts/audit_authority_registry_transparency_current_view_quorum.py \
+            > /tmp/authority-registry-transparency-current-view-quorum-audit.json
+          python research/scripts/verify_authority_registry_transparency_observer_registry_commitment.py \
+            > /tmp/authority-registry-transparency-observer-registry-commitment.json
+          python research/scripts/audit_authority_registry_transparency_observer_registry_commitment.py \
+            > /tmp/authority-registry-transparency-observer-registry-commitment-audit.json
           python research/scripts/verify_callback_scientific_object_binding.py \
             > /tmp/callback-scientific-object-binding.json
           python research/scripts/audit_callback_scientific_object_binding.py \
@@ -354,6 +362,10 @@ jobs:
             /tmp/authority-registry-transparency-gossip-audit.json
             /tmp/authority-registry-transparency-domain-quorum.json
             /tmp/authority-registry-transparency-domain-quorum-audit.json
+            /tmp/authority-registry-transparency-current-view-quorum.json
+            /tmp/authority-registry-transparency-current-view-quorum-audit.json
+            /tmp/authority-registry-transparency-observer-registry-commitment.json
+            /tmp/authority-registry-transparency-observer-registry-commitment-audit.json
             /tmp/callback-scientific-object-binding.json
             /tmp/callback-scientific-object-binding-audit.json
           retention-days: 90

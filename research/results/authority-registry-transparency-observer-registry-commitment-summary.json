@@ -1,0 +1,16 @@
+{
+  "attack_cases": 128,
+  "baseline_controls_passed": 32,
+  "baseline_false_passes": 128,
+  "commitment_bound_controls_passed": 32,
+  "commitment_bound_false_passes": 0,
+  "control_cases": 32,
+  "families_blocked": {
+    "missing_protected_commitment": 32,
+    "new_sybil_identities": 32,
+    "revocation_metadata_rollback": 32,
+    "trusted_id_key_rebinding": 32
+  },
+  "passed": true,
+  "schema_version": "agnxiv.transparency-observer-registry-commitment-summary/1"
+}
