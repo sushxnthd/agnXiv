@@ -1,0 +1,16 @@
+{
+  "attack_cases": 128,
+  "baseline_controls_passed": 32,
+  "baseline_false_passes": 128,
+  "control_cases": 32,
+  "current_view_quorum_controls_passed": 32,
+  "current_view_quorum_false_passes": 0,
+  "families_blocked": {
+    "one_old_one_current": 32,
+    "three_old_observers": 32,
+    "two_old_observers": 32,
+    "two_old_one_current": 32
+  },
+  "passed": true,
+  "schema_version": "agnxiv.transparency-current-view-quorum-summary/1"
+}

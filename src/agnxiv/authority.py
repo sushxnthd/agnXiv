@@ -620,6 +620,9 @@ def registry_checkpoint_transparency_gossip_blockers(
     future_skew_seconds: int = 0,
     minimum_observers: int = 2,
     minimum_administrative_domains: int = 0,
+    required_checkpoint: SignedRegistryCheckpointTransparencyCheckpoint | None = None,
+    minimum_required_checkpoint_observers: int = 0,
+    minimum_required_checkpoint_administrative_domains: int = 0,
 ) -> list[str]:
     """Return blockers for authenticated pairwise agreement between log views."""
     from cryptography.exceptions import InvalidSignature
@@ -631,6 +634,15 @@ def registry_checkpoint_transparency_gossip_blockers(
         failures.append("transparency gossip minimum observers is invalid")
     if minimum_administrative_domains < 0:
         failures.append("transparency gossip minimum administrative domains is invalid")
+    if minimum_required_checkpoint_observers < 0:
+        failures.append("transparency gossip current-checkpoint observer minimum is invalid")
+    if minimum_required_checkpoint_administrative_domains < 0:
+        failures.append("transparency gossip current-checkpoint domain minimum is invalid")
+    if (
+        minimum_required_checkpoint_observers > 0
+        or minimum_required_checkpoint_administrative_domains > 0
+    ) and required_checkpoint is None:
+        failures.append("transparency gossip current checkpoint is not configured")
     if max_age_seconds < 0 or future_skew_seconds < 0:
         failures.append("transparency gossip freshness policy is invalid")
         return failures
@@ -651,6 +663,13 @@ def registry_checkpoint_transparency_gossip_blockers(
 
     valid: dict[str, RegistryCheckpointTransparencyCheckpoint] = {}
     valid_administrative_domains: set[str] = set()
+    required_digest = (
+        registry_checkpoint_transparency_checkpoint_sha256(required_checkpoint)
+        if required_checkpoint is not None
+        else None
+    )
+    required_observers: set[str] = set()
+    required_administrative_domains: set[str] = set()
     for signed in observations:
         scope = signed.observation
         trusted = observer_map.get((scope.observer_id, signed.key_id))
@@ -712,6 +731,10 @@ def registry_checkpoint_transparency_gossip_blockers(
         valid[scope.observer_id] = checkpoint.checkpoint
         if trusted.administrative_domain is not None:
             valid_administrative_domains.add(trusted.administrative_domain)
+        if scope.checkpoint_sha256 == required_digest:
+            required_observers.add(scope.observer_id)
+            if trusted.administrative_domain is not None:
+                required_administrative_domains.add(trusted.administrative_domain)
 
     if len(valid) < minimum_observers:
         failures.append("transparency gossip has insufficient authenticated observers")
@@ -720,6 +743,20 @@ def registry_checkpoint_transparency_gossip_blockers(
         failures.append(
             "transparency gossip has insufficient administrative-domain diversity"
         )
+        return failures
+    if len(required_observers) < minimum_required_checkpoint_observers:
+        failures.append(
+            "transparency gossip has insufficient observers for the current checkpoint"
+        )
+    if (
+        len(required_administrative_domains)
+        < minimum_required_checkpoint_administrative_domains
+    ):
+        failures.append(
+            "transparency gossip has insufficient administrative-domain diversity "
+            "for the current checkpoint"
+        )
+    if failures:
         return failures
     checkpoints = list(valid.values())
     if len({checkpoint.log_id for checkpoint in checkpoints}) != 1:
@@ -1756,6 +1793,15 @@ def authority_registry_blockers(
                         registry_checkpoint_transparency_gossip_minimum_observers
                     ),
                     minimum_administrative_domains=(
+                        registry_checkpoint_transparency_gossip_minimum_administrative_domains
+                    ),
+                    required_checkpoint=(
+                        signed_registry_checkpoint_transparency_checkpoint
+                    ),
+                    minimum_required_checkpoint_observers=(
+                        registry_checkpoint_transparency_gossip_minimum_observers
+                    ),
+                    minimum_required_checkpoint_administrative_domains=(
                         registry_checkpoint_transparency_gossip_minimum_administrative_domains
                     ),
                 )
