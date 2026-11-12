@@ -1,0 +1,16 @@
+{
+  "attack_cases": 128,
+  "baseline_controls_passed": 32,
+  "baseline_false_passes": 128,
+  "control_cases": 32,
+  "domain_quorum_controls_passed": 32,
+  "domain_quorum_false_passes": 0,
+  "families_blocked": {
+    "canonical_domain_alias": 32,
+    "legacy_unscoped_observers": 32,
+    "same_domain_three_identities": 32,
+    "same_domain_two_identities": 32
+  },
+  "passed": true,
+  "schema_version": "agnxiv.transparency-domain-quorum-summary/1"
+}

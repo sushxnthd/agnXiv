@@ -8,7 +8,7 @@ import json
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class AuthorityScope(BaseModel):
@@ -211,7 +211,18 @@ class TrustedRegistryCheckpointTransparencyGossipObserver(BaseModel):
     observer_id: str = Field(min_length=1)
     key_id: str = Field(pattern=r"^[0-9a-f]{64}$")
     public_key_pem: str = Field(min_length=1)
+    administrative_domain: str | None = None
     status: Literal["active", "revoked"] = "active"
+
+    @field_validator("administrative_domain")
+    @classmethod
+    def normalize_administrative_domain(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip().casefold()
+        if not normalized:
+            raise ValueError("administrative domain must not be blank")
+        return normalized
 
 
 def canonical_authority_registry_payload(registry: TrustedAuthorityRegistry) -> bytes:
@@ -608,6 +619,7 @@ def registry_checkpoint_transparency_gossip_blockers(
     max_age_seconds: int,
     future_skew_seconds: int = 0,
     minimum_observers: int = 2,
+    minimum_administrative_domains: int = 0,
 ) -> list[str]:
     """Return blockers for authenticated pairwise agreement between log views."""
     from cryptography.exceptions import InvalidSignature
@@ -617,6 +629,8 @@ def registry_checkpoint_transparency_gossip_blockers(
     failures: list[str] = []
     if minimum_observers < 2:
         failures.append("transparency gossip minimum observers is invalid")
+    if minimum_administrative_domains < 0:
+        failures.append("transparency gossip minimum administrative domains is invalid")
     if max_age_seconds < 0 or future_skew_seconds < 0:
         failures.append("transparency gossip freshness policy is invalid")
         return failures
@@ -636,6 +650,7 @@ def registry_checkpoint_transparency_gossip_blockers(
         return ["trusted transparency gossip log key is invalid"]
 
     valid: dict[str, RegistryCheckpointTransparencyCheckpoint] = {}
+    valid_administrative_domains: set[str] = set()
     for signed in observations:
         scope = signed.observation
         trusted = observer_map.get((scope.observer_id, signed.key_id))
@@ -695,9 +710,16 @@ def registry_checkpoint_transparency_gossip_blockers(
             failures.append("transparency gossip checkpoint postdates observation")
             continue
         valid[scope.observer_id] = checkpoint.checkpoint
+        if trusted.administrative_domain is not None:
+            valid_administrative_domains.add(trusted.administrative_domain)
 
     if len(valid) < minimum_observers:
         failures.append("transparency gossip has insufficient authenticated observers")
+        return failures
+    if len(valid_administrative_domains) < minimum_administrative_domains:
+        failures.append(
+            "transparency gossip has insufficient administrative-domain diversity"
+        )
         return failures
     checkpoints = list(valid.values())
     if len({checkpoint.log_id for checkpoint in checkpoints}) != 1:
@@ -892,6 +914,7 @@ def authority_registry_blockers(
     registry_checkpoint_transparency_gossip_max_age_seconds: int = 0,
     registry_checkpoint_transparency_gossip_future_skew_seconds: int = 0,
     registry_checkpoint_transparency_gossip_minimum_observers: int = 2,
+    registry_checkpoint_transparency_gossip_minimum_administrative_domains: int = 2,
     require_registry_checkpoint_transparency_gossip: bool = False,
 ) -> list[str]:
     if registry is None:
@@ -1731,6 +1754,9 @@ def authority_registry_blockers(
                     ),
                     minimum_observers=(
                         registry_checkpoint_transparency_gossip_minimum_observers
+                    ),
+                    minimum_administrative_domains=(
+                        registry_checkpoint_transparency_gossip_minimum_administrative_domains
                     ),
                 )
             )

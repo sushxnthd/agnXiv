@@ -101,6 +101,7 @@ def environment_verdict_blockers(
     registry_checkpoint_transparency_gossip_max_age_seconds: int = 0,
     registry_checkpoint_transparency_gossip_future_skew_seconds: int = 0,
     registry_checkpoint_transparency_gossip_minimum_observers: int = 2,
+    registry_checkpoint_transparency_gossip_minimum_administrative_domains: int = 2,
     require_registry_checkpoint_transparency_gossip: bool = False,
 ) -> list[str]:
     """Return independently inspectable reasons a hosted verdict must abstain."""
@@ -268,6 +269,9 @@ def environment_verdict_blockers(
                 registry_checkpoint_transparency_gossip_minimum_observers=(
                     registry_checkpoint_transparency_gossip_minimum_observers
                 ),
+                registry_checkpoint_transparency_gossip_minimum_administrative_domains=(
+                    registry_checkpoint_transparency_gossip_minimum_administrative_domains
+                ),
                 require_registry_checkpoint_transparency_gossip=(
                     require_registry_checkpoint_transparency_gossip
                 ),
@@ -363,6 +367,7 @@ def gate_hosted_verdict(
     registry_checkpoint_transparency_gossip_max_age_seconds: int = 0,
     registry_checkpoint_transparency_gossip_future_skew_seconds: int = 0,
     registry_checkpoint_transparency_gossip_minimum_observers: int = 2,
+    registry_checkpoint_transparency_gossip_minimum_administrative_domains: int = 2,
     require_registry_checkpoint_transparency_gossip: bool = False,
 ) -> VerificationBundle:
     """Fail closed when environment drift remains an alternative explanation.
@@ -515,6 +520,9 @@ def gate_hosted_verdict(
         ),
         registry_checkpoint_transparency_gossip_minimum_observers=(
             registry_checkpoint_transparency_gossip_minimum_observers
+        ),
+        registry_checkpoint_transparency_gossip_minimum_administrative_domains=(
+            registry_checkpoint_transparency_gossip_minimum_administrative_domains
         ),
         require_registry_checkpoint_transparency_gossip=(
             require_registry_checkpoint_transparency_gossip

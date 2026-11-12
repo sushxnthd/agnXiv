@@ -1,0 +1,12 @@
+{
+  "attack_false_passes": 0,
+  "controls_passed": 32,
+  "independent_baseline_accepts": 160,
+  "independent_domain_quorum_accepts": 32,
+  "passed": true,
+  "production_imports": 0,
+  "root_checks": 160,
+  "rows": 160,
+  "schema_version": "agnxiv.transparency-domain-quorum-audit/1",
+  "signature_checks": 704
+}
