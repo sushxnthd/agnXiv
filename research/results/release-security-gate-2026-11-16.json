@@ -1,0 +1,71 @@
+{
+  "schema_version": "agnxiv.release-security-gate/1",
+  "observed_at_utc": "2026-11-16T18:30:18Z",
+  "repository": "sushxnthd/agnXiv",
+  "branch": "hardening/scoped-environment-recovery",
+  "head_sha": "fad820bdae0737c0eb3129934c980a739c692123",
+  "release_status": "blocked_pending_exact_head_recheck",
+  "dependency_audit": {
+    "workflow_run_id": 43929438933,
+    "artifact_id": 14258280586,
+    "artifact_digest": "sha256:a640670d5f63d5da155d16ce500b46897dfd214e55da77106ff0b8bef88c5621",
+    "vulnerable_packages": [
+      {
+        "name": "opentelemetry-api",
+        "observed_version": "1.45.1",
+        "required_version": "1.45.2",
+        "vulnerabilities": ["CVE-2026-126360"]
+      },
+      {
+        "name": "pypdf",
+        "observed_version": "6.21.2",
+        "required_version": "6.21.4",
+        "vulnerabilities": [
+          "CVE-2026-119203",
+          "CVE-2026-119204",
+          "CVE-2026-119205",
+          "CVE-2026-119206",
+          "CVE-2026-119207",
+          "CVE-2026-119208",
+          "CVE-2026-119209"
+        ]
+      }
+    ]
+  },
+  "service_image_scan": {
+    "workflow_run_id": 43929438701,
+    "observed_os_packages": [
+      {
+        "name": "apt",
+        "observed_version": "2.6.1",
+        "required_version": "2.6.2",
+        "vulnerability": "CVE-2026-109518"
+      },
+      {
+        "name": "libapt-pkg6.0",
+        "observed_version": "2.6.1",
+        "required_version": "2.6.2",
+        "vulnerability": "CVE-2026-109518"
+      }
+    ],
+    "observed_python_package": "pypdf==6.21.2"
+  },
+  "repair": {
+    "constraints": {
+      "opentelemetry-api": "1.45.2",
+      "pypdf": "6.21.4"
+    },
+    "dockerfile_minimums": {
+      "apt": "2.6.2",
+      "libapt-pkg6.0": "2.6.2"
+    },
+    "verification_required": [
+      "security-audit",
+      "service-image"
+    ]
+  },
+  "limitations": [
+    "This record captures the failing exact-head evidence and the proposed repair; it does not claim the repair passed.",
+    "No public release is authorized until both blocking workflows pass on the repair commit."
+  ]
+}

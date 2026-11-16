@@ -11,9 +11,14 @@ All notable user-facing changes are recorded here. AgnXiv follows semantic versi
 - Setup failures are exported before repository download or scientific execution, while conservative scientific abstentions remain successful completed workflows.
 - A clean-runner GitHub acceptance workflow exercises the CLI against the pinned metacognitive-monitoring battery example and preserves its audit artifact.
 
+### Security
+
+- The frozen service environment now requires `opentelemetry-api==1.45.2` and `pypdf==6.21.4`, closing the eight vulnerabilities reported by the exact-head dependency audit.
+- The digest-pinned service image now upgrades and version-checks `apt` and `libapt-pkg6.0` at build time, in addition to the existing OpenSSL checks.
+
 ### Known release blockers
 
-- The exact-head real-paper CLI acceptance workflow must pass.
+- The exact-head dependency audit and service-image scan must pass after the vulnerability repair.
 - PR #50 remains conflicted, draft, and unmerged.
 - The next public wheel and source archive have not been built, reviewed, or tagged.
 - Docker remains an explicit prerequisite for local sandboxed execution.

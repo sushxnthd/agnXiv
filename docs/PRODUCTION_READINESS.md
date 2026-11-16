@@ -8,7 +8,8 @@ Production grade means the system remains scientifically conservative and operat
 - [x] Local sandbox prerequisites are checked before repository download or scientific execution, with machine-readable remediation.
 - [x] One stable CLI command spans pinned public-paper intake, repository/environment resolution, sandboxed execution, evidence bundling, conservative verdict, and JSON audit export.
 - [x] Setup failures produce nonzero exit status and a durable audit record without creating a scientific false pass.
-- [ ] The exact-head clean-runner acceptance workflow completes the pinned real external paper/repository case and preserves its audit artifact.
+- [x] The exact-head clean-runner acceptance workflow completes the pinned real external paper/repository case and preserves its audit artifact.
+- [ ] The exact-head dependency audit and service-image scan pass with the repaired Python and Debian package floors.
 - [ ] A reviewed public v0.x tag contains the external-verification CLI, release notes, acceptance evidence, and reproducible artifacts.
 
 The existing `v0.1.0` tag is therefore installable but does not yet satisfy the current stronger definition of shipped end-to-end usability. See `docs/CLI_EXTERNAL_VERIFICATION_RELEASE_GATE.md` and `CHANGELOG.md`.
