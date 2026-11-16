@@ -4,6 +4,12 @@ All notable user-facing changes are recorded here. AgnXiv follows semantic versi
 
 ## Unreleased
 
+No changes yet.
+
+## 0.2.0 - release candidate
+
+This section describes the candidate artifacts on the research branch. It is not a claim that v0.2.0 has been tagged or published.
+
 ### Added
 
 - `agnxiv doctor` reports Git, PDF, Docker CLI, and Docker daemon readiness with machine-readable remediation.
@@ -18,9 +24,9 @@ All notable user-facing changes are recorded here. AgnXiv follows semantic versi
 
 ### Known release blockers
 
-- The exact-head dependency audit and service-image scan must pass after the vulnerability repair.
-- PR #50 remains conflicted, draft, and unmerged.
-- The next public wheel and source archive have not been built, reviewed, or tagged.
+- The exact-head release-candidate workflow must build, clean-install, and exercise both distributions.
+- PR #50 remains draft and unmerged; no automatic merge is authorized.
+- Candidate artifacts require independent review before a public tag is created.
 - Docker remains an explicit prerequisite for local sandboxed execution.
 
 ## 0.1.0 - 2026-10-19
