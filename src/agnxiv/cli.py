@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
+import shutil
+import subprocess
 from pathlib import Path
 from typing import Annotated, Literal, cast
 
@@ -95,6 +98,156 @@ def arxiv_id_command(
 ) -> None:
     """Normalize an arXiv identifier while preserving its exact version."""
     typer.echo(parse_arxiv_reference(value).model_dump_json(indent=2))
+
+
+def _external_prerequisites() -> dict:
+    """Return machine-readable readiness for the external-paper CLI path."""
+    git_path = shutil.which("git")
+    docker_path = shutil.which("docker")
+    checks = {
+        "git": {
+            "ready": git_path is not None,
+            "path": git_path,
+            "remediation": None if git_path else "Install Git and ensure `git` is on PATH.",
+        },
+        "docker_cli": {
+            "ready": docker_path is not None,
+            "path": docker_path,
+            "remediation": (
+                None
+                if docker_path
+                else "Install Docker Engine or Docker Desktop and ensure `docker` is on PATH."
+            ),
+        },
+        "pdf_support": {
+            "ready": importlib.util.find_spec("pypdf") is not None,
+            "path": None,
+            "remediation": (
+                None
+                if importlib.util.find_spec("pypdf") is not None
+                else "Install the PDF extra with `python -m pip install 'agnxiv[pdf]'`."
+            ),
+        },
+    }
+    daemon_ready = False
+    daemon_detail = "Docker CLI is unavailable."
+    if docker_path is not None:
+        try:
+            completed = subprocess.run(
+                [docker_path, "version", "--format", "{{.Server.Version}}"],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=False,
+            )
+            daemon_ready = completed.returncode == 0 and bool(completed.stdout.strip())
+            daemon_detail = (
+                completed.stdout.strip()
+                if daemon_ready
+                else (completed.stderr.strip() or completed.stdout.strip() or "Docker daemon unavailable.")
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            daemon_detail = str(exc)
+    checks["docker_daemon"] = {
+        "ready": daemon_ready,
+        "path": None,
+        "detail": daemon_detail,
+        "remediation": None if daemon_ready else "Start the Docker daemon and retry `agnxiv doctor`.",
+    }
+    return {
+        "schema": "agnxiv.readiness/1",
+        "ready": all(item["ready"] for item in checks.values()),
+        "checks": checks,
+    }
+
+
+def _write_export(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
+
+
+@app.command("doctor")
+def doctor_command() -> None:
+    """Check whether this machine can run a sandboxed external-paper verification."""
+    readiness = _external_prerequisites()
+    typer.echo(json.dumps(readiness, indent=2))
+    if not readiness["ready"]:
+        raise typer.Exit(code=2)
+
+
+@app.command("verify-external")
+def verify_external_command(
+    repository: Annotated[
+        str,
+        typer.Option(help="Public GitHub owner/repository slug."),
+    ],
+    repository_ref: Annotated[
+        str,
+        typer.Option(help="Pinned Git commit or immutable Git ref."),
+    ],
+    arxiv_id: Annotated[
+        str,
+        typer.Option(help="Versioned arXiv identifier, for example 2604.15702v2."),
+    ],
+    expected_manuscript_sha256: Annotated[
+        str,
+        typer.Option(help="Expected SHA-256 of the exact downloaded manuscript."),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option(dir_okay=False, help="New JSON audit-record path."),
+    ],
+) -> None:
+    """Run one pinned public paper/repository workflow and export its audit record."""
+    from .hosted_runner import HostedRunnerError, execute_job
+
+    if output.exists():
+        raise typer.BadParameter("refusing to overwrite an existing audit record")
+
+    readiness = _external_prerequisites()
+    payload: dict = {
+        "schema": "agnxiv.external-run/1",
+        "status": "failed",
+        "result": None,
+        "error": None,
+        "readiness": readiness,
+    }
+    if not readiness["ready"]:
+        payload["error"] = "local sandbox prerequisites are not ready; run `agnxiv doctor`"
+        _write_export(output, payload)
+        typer.echo(json.dumps({"status": "failed", "output": str(output), "error": payload["error"]}))
+        raise typer.Exit(code=2)
+
+    try:
+        status, result = execute_job(
+            mode="auto_verify",
+            repository=repository,
+            repository_ref=repository_ref,
+            arxiv_id=arxiv_id,
+            spec_path=None,
+            expected_manuscript_sha256=expected_manuscript_sha256,
+        )
+        payload["status"] = status
+        payload["result"] = result
+    except HostedRunnerError as exc:
+        payload["error"] = str(exc)
+    except Exception as exc:  # noqa: BLE001 - durable top-level CLI failure boundary
+        payload["error"] = f"unexpected verifier failure: {type(exc).__name__}: {exc}"
+
+    _write_export(output, payload)
+    typer.echo(
+        json.dumps(
+            {
+                "status": payload["status"],
+                "output": str(output),
+                "error": payload["error"],
+            }
+        )
+    )
+    if payload["status"] == "failed":
+        raise typer.Exit(code=2)
 
 
 @app.command("keygen")

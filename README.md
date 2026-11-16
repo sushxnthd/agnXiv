@@ -116,6 +116,23 @@ Install:
     python -m pip install -e ".[pdf,sign]"
     agnxiv --help
 
+Before any sandboxed run, verify the local prerequisites explicitly:
+
+    agnxiv doctor
+
+Run one pinned external paper/repository workflow and export its complete audit record:
+
+    agnxiv verify-external \
+      --repository synthiumjp/metacognitive-monitoring-battery \
+      --repository-ref 2f83d0fa506e7af2b72ca191b65ce42e07c9e185 \
+      --arxiv-id 2604.15702v2 \
+      --expected-manuscript-sha256 f60c57f5c39453638b82b8eb1317db6b9e92d440ddf4b06eaab0a6f3a08605a7 \
+      --output agnxiv-real-paper-audit.json
+
+This command requires Git, the `pdf` extra, and a running Docker daemon. A safe
+`needs_review` outcome still represents a completed workflow and preserves its
+measured evidence; setup failures exit nonzero and are also written to the audit record.
+
 Build a dependency-only runtime without exposing the research source to package installers:
 
     docker pull python:3.11-slim

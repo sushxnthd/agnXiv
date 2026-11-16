@@ -1,0 +1,35 @@
+{
+  "schema": "agnxiv.public-release-acceptance/1",
+  "release": {
+    "tag": "v0.1.0",
+    "asset": "agnxiv-0.1.0-py3-none-any.whl",
+    "url": "https://github.com/sushxnthd/agnXiv/releases/download/v0.1.0/agnxiv-0.1.0-py3-none-any.whl",
+    "published_sha256": "f79c98920b114d97b83eb63176f70606951789e9d9c604f354686cc1e6aa3d80",
+    "observed_sha256": "f79c98920b114d97b83eb63176f70606951789e9d9c604f354686cc1e6aa3d80",
+    "version_after_install": "0.1.0",
+    "clean_virtual_environment_install_succeeded": true,
+    "cli_help_succeeded": true
+  },
+  "fixture_workflow": {
+    "command": "agnxiv verify-spec agnxiv-fixture.json",
+    "process_exit_code": 0,
+    "record_verdict": "UNABLE_TO_VERIFY",
+    "execution_present": false,
+    "rationale": "Execution could not be completed: could not inspect container image: [Errno 2] No such file or directory: 'docker'",
+    "audit_record_sha256": "2cd61e97f4cd67fe42ced45910b2013d0ab946fbba61b335568705850626115d"
+  },
+  "release_candidate_preflight": {
+    "doctor_ready": false,
+    "doctor_exit_code": 2,
+    "doctor_record_sha256": "6f339da84dd6a475cc79486019bfa29a5de9d7cf2e16c71cd726bcec25b0ebaf",
+    "git_ready": true,
+    "pdf_support_ready": true,
+    "docker_cli_ready": false,
+    "docker_daemon_ready": false,
+    "verify_external_exit_code": 2,
+    "failure_record_sha256": "5a71690cdf47b8a5fb95f5ddeadf6b831aa24370061c8467c69d0c103046053e",
+    "repository_download_attempted": false,
+    "audit_record_exported": true
+  },
+  "conclusion": "The public wheel is authentic and installable, but v0.1.0 does not satisfy the stronger current shipped-product gate on a machine without an explicitly provisioned Docker sandbox. The release-candidate CLI exposes readiness before scientific work and exports setup failures without false scientific verdicts."
+}

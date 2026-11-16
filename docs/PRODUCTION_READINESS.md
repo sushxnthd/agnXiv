@@ -2,6 +2,17 @@
 
 Production grade means the system remains scientifically conservative and operationally recoverable under failures. A green demo is not enough.
 
+## Public CLI release gate
+
+- [x] The published `v0.1.0` wheel downloads, matches its release SHA-256, installs in a clean virtual environment, and exposes the CLI.
+- [x] Local sandbox prerequisites are checked before repository download or scientific execution, with machine-readable remediation.
+- [x] One stable CLI command spans pinned public-paper intake, repository/environment resolution, sandboxed execution, evidence bundling, conservative verdict, and JSON audit export.
+- [x] Setup failures produce nonzero exit status and a durable audit record without creating a scientific false pass.
+- [ ] The exact-head clean-runner acceptance workflow completes the pinned real external paper/repository case and preserves its audit artifact.
+- [ ] A reviewed public v0.x tag contains the external-verification CLI, release notes, acceptance evidence, and reproducible artifacts.
+
+The existing `v0.1.0` tag is therefore installable but does not yet satisfy the current stronger definition of shipped end-to-end usability. See `docs/CLI_EXTERNAL_VERIFICATION_RELEASE_GATE.md` and `CHANGELOG.md`.
+
 ## P0 launch gates
 
 All P0 items must be true before calling the hosted service production-grade.
