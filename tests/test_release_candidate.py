@@ -21,4 +21,4 @@ def test_v020_candidate_version_and_release_evidence_gate_are_bound():
     assert '"schema": "agnxiv.release-candidate/1"' in workflow
     assert '"published_release": False' in workflow
     assert "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02" in workflow
-    assert "does not authorize" in gate
+    assert "does not authorize" in " ".join(gate.split())
