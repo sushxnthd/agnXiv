@@ -1,0 +1,281 @@
+name: publish v0.2.0 after independent review
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_commit:
+        description: Exact 40-character candidate commit that passed release-candidate CI
+        required: true
+        type: string
+      confirm:
+        description: Type PUBLISH v0.2.0 to authorize the public GitHub release
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-agnxiv-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  publish-reviewed-candidate:
+    environment: agnxiv-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CANDIDATE_COMMIT: ${{ inputs.candidate_commit }}
+      CONFIRM: ${{ inputs.confirm }}
+      RELEASE_TAG: v0.2.0
+      RELEASE_BRANCH: hardening/scoped-environment-recovery
+    steps:
+      - name: Require explicit authorization and exact current candidate
+        run: |
+          python - <<'PY'
+          import os
+          import re
+
+          assert os.environ["CONFIRM"] == "PUBLISH v0.2.0"
+          assert re.fullmatch(r"[0-9a-f]{40}", os.environ["CANDIDATE_COMMIT"])
+          PY
+          current=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/git/ref/heads/${RELEASE_BRANCH}" \
+            --jq .object.sha)
+          test "$current" = "$CANDIDATE_COMMIT"
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            draft=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" \
+              --jq .draft)
+            target=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" \
+              --jq .sha)
+            test "$draft" = "true"
+            test "$target" = "$CANDIDATE_COMMIT"
+          elif gh api \
+            "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" \
+            >/dev/null 2>&1; then
+            target=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" \
+              --jq .sha)
+            test "$target" = "$CANDIDATE_COMMIT"
+          fi
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.candidate_commit }}
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Build exact distributions
+        run: |
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_COMMIT"
+          python -m pip install "build==1.3.0"
+          python -m build --sdist --wheel
+          test -f dist/agnxiv-0.2.0-py3-none-any.whl
+          test -f dist/agnxiv-0.2.0.tar.gz
+
+      - name: Clean-install and exercise the candidate wheel
+        run: |
+          python -m venv /tmp/agnxiv-publish-venv
+          /tmp/agnxiv-publish-venv/bin/python -m pip install \
+            "dist/agnxiv-0.2.0-py3-none-any.whl[pdf]"
+          /tmp/agnxiv-publish-venv/bin/python -m pip check
+          /tmp/agnxiv-publish-venv/bin/agnxiv --help
+          /tmp/agnxiv-publish-venv/bin/agnxiv doctor
+          /tmp/agnxiv-publish-venv/bin/agnxiv verify-external \
+            --repository synthiumjp/metacognitive-monitoring-battery \
+            --repository-ref 2f83d0fa506e7af2b72ca191b65ce42e07c9e185 \
+            --arxiv-id 2604.15702v2 \
+            --expected-manuscript-sha256 \
+              f60c57f5c39453638b82b8eb1317db6b9e92d440ddf4b06eaab0a6f3a08605a7 \
+            --output /tmp/agnxiv-v0.2.0-external-audit.json
+
+      - name: Require conservative acceptance and build release manifest
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          audit_path = Path("/tmp/agnxiv-v0.2.0-external-audit.json")
+          audit = json.loads(audit_path.read_text(encoding="utf-8"))
+          assert audit["schema"] == "agnxiv.external-run/1"
+          assert audit["status"] == "needs_review"
+          assert audit["error"] is None
+          bundle = audit["result"]["bundle"]
+          assert bundle["record"]["verdict"] == "UNABLE_TO_VERIFY"
+          assert bundle["provisional_verdict"] == "CONTRADICTED"
+          assert bundle["record"]["observed_mean"] == 0.504
+          assert bundle["record"]["expected"] == 0.51
+          assert bundle["execution"]["returncode"] == 0
+          assert bundle["observation_method"] == "explicit_regex"
+
+          files = [
+              Path("dist/agnxiv-0.2.0-py3-none-any.whl"),
+              Path("dist/agnxiv-0.2.0.tar.gz"),
+              audit_path,
+          ]
+          manifest = {
+              "schema": "agnxiv.release/1",
+              "version": "0.2.0",
+              "tag": os.environ["RELEASE_TAG"],
+              "commit": os.environ["CANDIDATE_COMMIT"],
+              "publication_state": "draft-until-asset-reverification",
+              "artifacts": [
+                  {
+                      "name": path.name,
+                      "size": path.stat().st_size,
+                      "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                  }
+                  for path in files
+              ],
+              "acceptance": {
+                  "clean_wheel_install": True,
+                  "dependency_check": True,
+                  "doctor_ready": True,
+                  "pinned_external_workflow_completed": True,
+                  "final_verdict": "UNABLE_TO_VERIFY",
+                  "false_pass": False,
+              },
+          }
+          Path("/tmp/agnxiv-v0.2.0-release-manifest.json").write_text(
+              json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(manifest, indent=2, sort_keys=True))
+          PY
+
+      - name: Create or repair a draft release
+        run: |
+          assets=(
+            dist/agnxiv-0.2.0-py3-none-any.whl
+            dist/agnxiv-0.2.0.tar.gz
+            /tmp/agnxiv-v0.2.0-external-audit.json
+            /tmp/agnxiv-v0.2.0-release-manifest.json
+          )
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --draft \
+              --title "agnXiv v0.2.0" \
+              --notes-file docs/RELEASE_NOTES_0_2_0.md
+            gh release upload "$RELEASE_TAG" --clobber "${assets[@]}"
+          else
+            gh release create "$RELEASE_TAG" \
+              --draft \
+              --target "$CANDIDATE_COMMIT" \
+              --title "agnXiv v0.2.0" \
+              --notes-file docs/RELEASE_NOTES_0_2_0.md \
+              "${assets[@]}"
+          fi
+
+      - name: Re-download and verify every draft-release asset
+        run: |
+          mkdir -p /tmp/agnxiv-released-assets
+          release_id=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" \
+            --jq .id)
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets" \
+            > /tmp/agnxiv-v0.2.0-release-assets.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          assets = json.loads(
+              Path("/tmp/agnxiv-v0.2.0-release-assets.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          expected = {
+              "agnxiv-0.2.0-py3-none-any.whl",
+              "agnxiv-0.2.0.tar.gz",
+              "agnxiv-v0.2.0-external-audit.json",
+              "agnxiv-v0.2.0-release-manifest.json",
+          }
+          actual = {asset["name"] for asset in assets}
+          assert actual == expected, (actual, expected)
+          assert all(asset["state"] == "uploaded" for asset in assets)
+          Path("/tmp/agnxiv-v0.2.0-release-asset-ids.json").write_text(
+              json.dumps({asset["name"]: asset["id"] for asset in assets}),
+              encoding="utf-8",
+          )
+          PY
+          while IFS=$'\t' read -r name asset_id; do
+            gh api \
+              -H "Accept: application/octet-stream" \
+              "repos/${GITHUB_REPOSITORY}/releases/assets/${asset_id}" \
+              > "/tmp/agnxiv-released-assets/${name}"
+          done < <(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          assets = json.loads(
+              Path("/tmp/agnxiv-v0.2.0-release-asset-ids.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          for name in sorted(assets):
+              print(f"{name}\t{assets[name]}")
+          PY
+          )
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path("/tmp/agnxiv-released-assets")
+          manifest = json.loads(
+              (root / "agnxiv-v0.2.0-release-manifest.json").read_text(encoding="utf-8")
+          )
+          assert manifest["schema"] == "agnxiv.release/1"
+          assert manifest["publication_state"] == "draft-until-asset-reverification"
+          assert manifest["tag"] == os.environ["RELEASE_TAG"]
+          assert manifest["commit"] == os.environ["CANDIDATE_COMMIT"]
+          assert {item["name"] for item in manifest["artifacts"]} == {
+              "agnxiv-0.2.0-py3-none-any.whl",
+              "agnxiv-0.2.0.tar.gz",
+              "agnxiv-v0.2.0-external-audit.json",
+          }
+          for expected in manifest["artifacts"]:
+              path = root / expected["name"]
+              assert path.stat().st_size == expected["size"]
+              assert hashlib.sha256(path.read_bytes()).hexdigest() == expected["sha256"]
+          PY
+          python -m venv /tmp/agnxiv-release-download-venv
+          /tmp/agnxiv-release-download-venv/bin/python -m pip install \
+            "/tmp/agnxiv-released-assets/agnxiv-0.2.0-py3-none-any.whl[pdf]"
+          /tmp/agnxiv-release-download-venv/bin/python -m pip check
+          /tmp/agnxiv-release-download-venv/bin/agnxiv --help
+
+      - name: Publish only after draft assets pass re-verification
+        run: |
+          gh release edit "$RELEASE_TAG" --draft=false
+          draft=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" \
+            --jq .draft)
+          target=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" \
+            --jq .sha)
+          test "$draft" = "false"
+          test "$target" = "$CANDIDATE_COMMIT"
+
+      - name: Preserve publication evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: agnxiv-v0.2.0-publication-evidence
+          path: |
+            dist/agnxiv-0.2.0-py3-none-any.whl
+            dist/agnxiv-0.2.0.tar.gz
+            /tmp/agnxiv-v0.2.0-external-audit.json
+            /tmp/agnxiv-v0.2.0-release-manifest.json
+          retention-days: 90
+          if-no-files-found: warn
