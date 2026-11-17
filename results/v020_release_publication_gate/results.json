@@ -1,0 +1,18 @@
+{
+  "overall_passed": true,
+  "postdraft_assets": {
+    "accepted_controls": 1,
+    "false_passes": 0,
+    "false_rejects": 0,
+    "rejected_cases": 1023,
+    "total_cases": 1024
+  },
+  "preflight": {
+    "accepted_controls": 3,
+    "false_passes": 0,
+    "false_rejects": 0,
+    "rejected_cases": 61,
+    "total_cases": 64
+  },
+  "schema": "agnxiv.release-publication-gate/1"
+}

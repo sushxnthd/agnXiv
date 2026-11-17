@@ -26,6 +26,10 @@ not a claim that v0.2.0 has been tagged or published.
 - A clean-runner GitHub acceptance workflow exercises the CLI against the
   pinned metacognitive-monitoring battery example and preserves its audit
   artifact.
+- The manual v0.2.0 publication path now uses a checked-in fail-closed policy
+  before draft creation and before publication. Exhaustive adversarial matrices
+  reject all 61 unsafe preflight states and all 1,023 mutated post-draft states
+  with zero false passes, while an independent audit verifies workflow order.
 
 ### Security
 

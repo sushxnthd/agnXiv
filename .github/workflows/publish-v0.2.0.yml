@@ -33,18 +33,11 @@ jobs:
     steps:
       - name: Require explicit authorization and exact current candidate
         run: |
-          python - <<'PY'
-          import os
-          import re
-
-          assert os.environ["CONFIRM"] == "PUBLISH v0.2.0"
-          assert re.fullmatch(r"[0-9a-f]{40}", os.environ["CANDIDATE_COMMIT"])
-          PY
           current=$(gh api \
             "repos/${GITHUB_REPOSITORY}/git/ref/heads/${RELEASE_BRANCH}" \
             --jq .object.sha)
-          test "$current" = "$CANDIDATE_COMMIT"
-
+          release_state=absent
+          target_args=()
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             draft=$(gh api \
               "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" \
@@ -52,16 +45,27 @@ jobs:
             target=$(gh api \
               "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" \
               --jq .sha)
-            test "$draft" = "true"
-            test "$target" = "$CANDIDATE_COMMIT"
+            if [ "$draft" = "true" ]; then
+              release_state=draft
+            else
+              release_state=published
+            fi
+            target_args=(--target-commit "$target")
           elif gh api \
             "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" \
             >/dev/null 2>&1; then
             target=$(gh api \
               "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" \
               --jq .sha)
-            test "$target" = "$CANDIDATE_COMMIT"
+            release_state=tag_only
+            target_args=(--target-commit "$target")
           fi
+          python scripts/verify_v020_release_publication_gate.py preflight \
+            --confirmation "$CONFIRM" \
+            --candidate "$CANDIDATE_COMMIT" \
+            --branch-head "$current" \
+            --release-state "$release_state" \
+            "${target_args[@]}"
 
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -225,30 +229,11 @@ jobs:
               print(f"{name}\t{assets[name]}")
           PY
           )
-          python - <<'PY'
-          import hashlib
-          import json
-          import os
-          from pathlib import Path
-
-          root = Path("/tmp/agnxiv-released-assets")
-          manifest = json.loads(
-              (root / "agnxiv-v0.2.0-release-manifest.json").read_text(encoding="utf-8")
-          )
-          assert manifest["schema"] == "agnxiv.release/1"
-          assert manifest["publication_state"] == "draft-until-asset-reverification"
-          assert manifest["tag"] == os.environ["RELEASE_TAG"]
-          assert manifest["commit"] == os.environ["CANDIDATE_COMMIT"]
-          assert {item["name"] for item in manifest["artifacts"]} == {
-              "agnxiv-0.2.0-py3-none-any.whl",
-              "agnxiv-0.2.0.tar.gz",
-              "agnxiv-v0.2.0-external-audit.json",
-          }
-          for expected in manifest["artifacts"]:
-              path = root / expected["name"]
-              assert path.stat().st_size == expected["size"]
-              assert hashlib.sha256(path.read_bytes()).hexdigest() == expected["sha256"]
-          PY
+          python scripts/verify_v020_release_publication_gate.py assets \
+            --candidate "$CANDIDATE_COMMIT" \
+            --tag "$RELEASE_TAG" \
+            --asset-metadata /tmp/agnxiv-v0.2.0-release-assets.json \
+            --download-dir /tmp/agnxiv-released-assets
           python -m venv /tmp/agnxiv-release-download-venv
           /tmp/agnxiv-release-download-venv/bin/python -m pip install \
             "/tmp/agnxiv-released-assets/agnxiv-0.2.0-py3-none-any.whl[pdf]"
